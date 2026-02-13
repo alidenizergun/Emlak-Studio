@@ -83,7 +83,7 @@ export default function IconTestPage() {
                                 justifyContent: 'center'
                                 // animation: 'pulse 2s infinite' // Optional animation preview
                             }}>
-                                {React.cloneElement(icon as React.ReactElement, { width: 48, height: 48 })}
+                                {React.cloneElement(icon as React.ReactElement<any>, { width: 48, height: 48 })}
                             </div>
                             <span style={{
                                 fontWeight: '700',
