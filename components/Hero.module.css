@@ -239,7 +239,7 @@
 }
 
 .statsContainer {
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
     width: 100%;
     max-width: 1200px;
     margin-left: auto;
@@ -253,7 +253,7 @@
     flex-direction: column;
     align-items: center;
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(79, 70, 229, 0.12));
-    padding: 0.6rem 2.5rem;
+    padding: 0.45rem 2.5rem;
     border-radius: 20px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -293,7 +293,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.15rem;
     line-height: 1;
     text-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
 }
