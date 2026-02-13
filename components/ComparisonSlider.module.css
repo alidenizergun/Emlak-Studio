@@ -1,15 +1,20 @@
 .container {
     position: relative;
     width: 100%;
-    height: 100%;
-    /* Fill parent height */
-    min-height: 300px;
-    /* Fallback min-height */
+    height: auto;
+    aspect-ratio: 4/3;
     border-radius: 12px;
     overflow: hidden;
     cursor: col-resize;
     user-select: none;
     border: 1px solid var(--card-border);
+}
+
+@media (min-width: 1025px) {
+    .container {
+        height: 500px;
+        aspect-ratio: auto;
+    }
 }
 
 .imageWrapper {
@@ -46,8 +51,4 @@
     border: 2px solid white;
 }
 
-@media (max-width: 768px) {
-    .container {
-        min-height: 200px;
-    }
-}
+/* Removed redundant mobile media query as layout is now mobile-first */

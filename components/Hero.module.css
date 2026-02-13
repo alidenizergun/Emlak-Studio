@@ -312,11 +312,17 @@
 
 .visual {
     position: relative;
-    height: 500px;
+    height: auto;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
+}
+
+@media (min-width: 1025px) {
+    .visual {
+        height: 500px;
+    }
 }
 
 .sliderWrapper {
