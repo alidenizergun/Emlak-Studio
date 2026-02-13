@@ -1,6 +1,6 @@
 .hero {
     position: relative;
-    padding: 100px 0 30px;
+    padding: 100px 0 0;
     min-height: 50vh;
     display: flex;
     align-items: center;
@@ -31,16 +31,40 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin-top: 1.5rem;
+    /* Reduced to align perfectly with visual bottom */
 }
 
 .title {
-    font-size: 2.75rem;
-    line-height: 1.1;
+    font-size: 2.25rem;
+    line-height: 1.2;
     font-weight: 700;
     margin-bottom: 1.25rem;
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
     color: #0f172a;
     /* Deep Navy */
+    display: block;
+    /* Reverted flex */
+}
+
+.aiIcon {
+    display: inline-block;
+    /* Inline with text */
+    vertical-align: middle;
+    margin-left: 12px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 .subtitle {
@@ -55,25 +79,38 @@
 .subtitleList {
     list-style: none;
     padding: 0;
-    margin: 0 0 2.5rem 0;
+    margin: 0 0 2rem 0;
     max-width: 95%;
 }
 
 .subtitleList li {
-    font-size: 1.05rem;
-    color: #475569;
-    line-height: 1.6;
-    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #1e293b;
+    line-height: 1.4;
+    margin-bottom: 1rem;
     position: relative;
     padding-left: 1.5rem;
     text-align: left;
+}
+
+.subtitleList li strong {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 700;
+}
+
+.listDesc {
+    display: block;
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 400;
 }
 
 .subtitleList li::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 10px;
+    top: 6px;
     width: 8px;
     height: 8px;
     background-color: #2563EB;
@@ -205,7 +242,7 @@
 }
 
 .statsContainer {
-    margin-top: 4rem;
+    margin-top: 1rem;
     width: 100%;
     max-width: 1200px;
     margin-left: auto;
@@ -329,7 +366,7 @@
     }
 
     .title {
-        font-size: 3rem;
+        font-size: 2.25rem;
     }
 
     .subtitle {
@@ -349,5 +386,28 @@
 
     .stats {
         justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero {
+        padding-top: 80px;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .statValue {
+        font-size: 2.5rem;
+    }
+
+    .stats {
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .statsContainer {
+        padding: 0 1rem;
     }
 }

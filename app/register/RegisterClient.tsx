@@ -20,7 +20,7 @@ export default function RegisterClient() {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTestimonial(Math.floor(Math.random() * TESTIMONIALS.length));
-        }, 5000);
+        }, 4000);
         return () => clearInterval(interval);
     }, []);
 
