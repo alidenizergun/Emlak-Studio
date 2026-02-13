@@ -7,7 +7,7 @@ import styles from './Examples.module.css';
 
 const CATEGORIES = [
     { id: 'all', label: 'Tümü' },
-    { id: 'living', label: 'Salon & Oturma Odası' },
+    { id: 'living', label: 'Salon' },
     { id: 'bedroom', label: 'Yatak Odası' },
     { id: 'kitchen', label: 'Mutfak & Yemek' },
     { id: 'bathroom', label: 'Banyo' },
@@ -51,7 +51,7 @@ const EXAMPLES = [
     {
         id: 5,
         title: "Ev Ofisi",
-        category: "Çalışma Odası",
+        category: "Diğer & Ofis",
         categoryId: "other",
         before: "/images/examples/office-empty.png",
         after: "/images/examples/office-furnished.png"
@@ -59,7 +59,7 @@ const EXAMPLES = [
     {
         id: 6,
         title: "Lüks Arka Bahçe",
-        category: "Bahçe",
+        category: "Bahçe & Dış Mekan",
         categoryId: "outdoor",
         before: "/images/examples/garden-empty.png",
         after: "/images/examples/garden-furnished.png"
@@ -67,7 +67,7 @@ const EXAMPLES = [
     {
         id: 7,
         title: "Çocuk Odası",
-        category: "Çocuk Odası",
+        category: "Yatak Odası",
         categoryId: "bedroom",
         before: "/images/examples/kids-empty.png",
         after: "/images/examples/kids-furnished.png"
@@ -75,7 +75,7 @@ const EXAMPLES = [
     {
         id: 8,
         title: "Yemek Odası",
-        category: "Yemek Odası",
+        category: "Mutfak & Yemek",
         categoryId: "kitchen",
         before: "/images/examples/dining-empty.png",
         after: "/images/examples/dining-furnished.png"
@@ -83,7 +83,7 @@ const EXAMPLES = [
     {
         id: 9,
         title: "Panoramik Balkon",
-        category: "Balkon & Teras",
+        category: "Bahçe & Dış Mekan",
         categoryId: "outdoor",
         before: "/images/examples/balcony-empty.png",
         after: "/images/examples/balcony-furnished.png"
@@ -91,7 +91,7 @@ const EXAMPLES = [
     {
         id: 10,
         title: "Ev Spor Salonu",
-        category: "Spor Odası",
+        category: "Diğer & Ofis",
         categoryId: "other",
         before: "/images/examples/gym-empty.png",
         after: "/images/examples/gym-furnished.png"
@@ -99,7 +99,7 @@ const EXAMPLES = [
     {
         id: 11,
         title: "Giyinme Odası",
-        category: "Giyinme Odası",
+        category: "Yatak Odası",
         categoryId: "bedroom",
         before: "/images/examples/closet-empty.png",
         after: "/images/examples/closet-furnished.png"
@@ -107,7 +107,7 @@ const EXAMPLES = [
     {
         id: 12,
         title: "Çatı Katı Lounge",
-        category: "Çatı Katı",
+        category: "Diğer & Ofis",
         categoryId: "other",
         before: "/images/examples/attic-empty.png",
         after: "/images/examples/attic-furnished.png"
@@ -115,7 +115,7 @@ const EXAMPLES = [
     {
         id: 13,
         title: "Çocuk Oyun Odası",
-        category: "Oyun Odası",
+        category: "Diğer & Ofis",
         categoryId: "other",
         before: "/images/examples/playroom-empty.png",
         after: "/images/examples/playroom-furnished.png"
@@ -123,7 +123,7 @@ const EXAMPLES = [
     {
         id: 14,
         title: "Ev Sineması",
-        category: "Sinema Odası",
+        category: "Salon",
         categoryId: "living",
         before: "/images/examples/cinema-empty.png",
         after: "/images/examples/cinema-furnished.png"
@@ -131,7 +131,7 @@ const EXAMPLES = [
     {
         id: 15,
         title: "Modern Çamaşır Odası",
-        category: "Çamaşır Odası",
+        category: "Diğer & Ofis",
         categoryId: "other",
         before: "/images/examples/laundry-empty.png",
         after: "/images/examples/laundry-furnished.png"
@@ -139,7 +139,7 @@ const EXAMPLES = [
     {
         id: 16,
         title: "Klasik Kütüphane",
-        category: "Kütüphane",
+        category: "Salon",
         categoryId: "living",
         before: "/images/examples/library-empty.png",
         after: "/images/examples/library-furnished.png"
@@ -147,7 +147,7 @@ const EXAMPLES = [
     {
         id: 17,
         title: "Misafir Yatak Odası",
-        category: "Misafir Odası",
+        category: "Yatak Odası",
         categoryId: "bedroom",
         before: "/images/examples/guest-empty.png",
         after: "/images/examples/guest-furnished.png"
@@ -155,7 +155,7 @@ const EXAMPLES = [
     {
         id: 18,
         title: "Eğlence ve Hobi Alanı",
-        category: "Bodrum Kat",
+        category: "Diğer & Ofis",
         categoryId: "other",
         before: "/images/examples/basement-empty.png",
         after: "/images/examples/basement-furnished.png"
@@ -163,7 +163,7 @@ const EXAMPLES = [
     {
         id: 19,
         title: "Lüks Havuz Başı",
-        category: "Havuz & Deck",
+        category: "Bahçe & Dış Mekan",
         categoryId: "outdoor",
         before: "/images/examples/pool-empty.png",
         after: "/images/examples/pool-furnished.png"
@@ -171,7 +171,7 @@ const EXAMPLES = [
     {
         id: 20,
         title: "Kış Bahçesi",
-        category: "Sunroom",
+        category: "Bahçe & Dış Mekan",
         categoryId: "outdoor",
         before: "/images/examples/sunroom-empty.png",
         after: "/images/examples/sunroom-furnished.png"
@@ -181,7 +181,7 @@ const EXAMPLES = [
         title: "Giriş Holü",
         before: "/images/examples/foyer-before.png",
         after: "/images/examples/foyer-after.png",
-        category: "Giriş",
+        category: "Diğer & Ofis",
         categoryId: "other"
     },
     {
@@ -189,7 +189,7 @@ const EXAMPLES = [
         title: "Çamurluk Odası",
         before: "/images/examples/mudroom-before.png",
         after: "/images/examples/mudroom-after.png",
-        category: "Giriş",
+        category: "Diğer & Ofis",
         categoryId: "other"
     },
     {
@@ -197,7 +197,7 @@ const EXAMPLES = [
         title: "Kiler",
         before: "/images/examples/pantry-before.png",
         after: "/images/examples/pantry-after.png",
-        category: "Mutfak",
+        category: "Mutfak & Yemek",
         categoryId: "kitchen"
     },
     {
