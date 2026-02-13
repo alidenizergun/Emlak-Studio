@@ -301,7 +301,7 @@
 .mobileMenuOpen {
     opacity: 1;
     visibility: visible;
-    transform: translateX(0);
+    transform: translateY(0);
 }
 
 .mobileMenuHeader {
