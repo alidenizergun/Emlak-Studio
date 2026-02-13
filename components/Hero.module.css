@@ -127,8 +127,8 @@
     margin-bottom: 0 !important;
     width: 100%;
     max-width: 400px;
-    transform: translateY(-4px);
-    /* Adjusted to achieve exact 7px visual lift */
+    transform: translateY(2px);
+    /* Adjusted to avoid visual lift */
 }
 
 .primaryBtn {
@@ -252,6 +252,7 @@
     align-items: center;
     width: 100%;
     min-height: 0;
+    transform: translateY(-1px);
 }
 
 @media (min-width: 1025px) {

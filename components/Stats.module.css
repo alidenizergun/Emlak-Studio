@@ -1,7 +1,7 @@
 .statsSection {
     padding: 0 0 2rem;
     background: transparent;
-    margin-top: 20px !important;
+    margin-top: 43px !important;
     /* Precise gap from Hero */
 }
 
@@ -92,7 +92,7 @@
 }
 
 .statValue {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #0f172a;
     letter-spacing: -0.02em;
@@ -100,7 +100,7 @@
 }
 
 .statLabel {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     color: #64748b;
     font-weight: 600;
     line-height: 1.4;
@@ -132,11 +132,11 @@
     }
 
     .statValue {
-        font-size: 2rem;
+        font-size: 1.6rem;
     }
 
     .statLabel {
-        font-size: 0.85rem;
+        font-size: 0.7rem;
     }
 
     .iconWrapper {
@@ -172,7 +172,7 @@
     }
 
     .statValue {
-        font-size: 1.75rem;
+        font-size: 1.4rem;
         margin-bottom: 0;
     }
 
