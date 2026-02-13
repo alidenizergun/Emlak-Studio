@@ -2,43 +2,44 @@ export interface Testimonial {
     text: string;
     author: string;
     company: string;
+    rating?: number;
 }
 
 const BASE_TESTIMONIALS: Testimonial[] = [
-    { text: "Görseller gerçekten profesyonel görünüyor. Müşterilerden daha fazla geri dönüş alıyorum.", author: "Mehmet Y.", company: "Yılmaz Emlak" },
-    { text: "AI dekorasyon özelliği ile boş daireleri daha çekici gösterebiliyorum.", author: "Ayşe K.", company: "Emlak Danışmanı" },
-    { text: "Satış sürelerinde dikkat çekici bir iyileşme gözlemliyorum.", author: "Ahmet K.", company: "Prestij Gayrimenkul" },
-    { text: "Müşteriler dekore edilmiş görsellere daha fazla ilgi gösteriyor.", author: "Zeynep A.", company: "Arslan Emlak" },
-    { text: "Profesyonel görseller hazırlamak artık çok daha kolay ve hızlı.", author: "Burak T.", company: "Avcılar Premium Emlak" },
-    { text: "Fotoğrafçı maliyetlerinden önemli tasarruf sağladım.", author: "Elif Ş.", company: "Emlak Danışmanı" },
-    { text: "İlanlarıma olan ilgi arttı, telefon görüşmeleri çoğaldı.", author: "Can D.", company: "Demir Emlak & Gyo" },
-    { text: "AI görseller sayesinde ofis aramalarında artış oldu.", author: "Selin M.", company: "Vip Gayrimenkul" },
-    { text: "Platformu kullanmaya başladıktan sonra satışlarımda olumlu bir değişim var.", author: "Emre K.", company: "Emlak Danışmanı" },
-    { text: "İlanlarım daha profesyonel görünüyor, müşteri güveni artıyor.", author: "Deniz B.", company: "Şişli Premium Emlak" },
-    { text: "Son aylarda satış performansımda belirgin bir iyileşme oldu.", author: "Fatma Ö.", company: "Özkan Gayrimenkul" },
-    { text: "Karanlık fotoğrafları iyileştirme özelliği çok işe yarıyor.", author: "Murat A.", company: "Elite Emlak" },
-    { text: "Boş daireleri mobilyalı göstermek müşteri ilgisini artırıyor.", author: "Gizem Y.", company: "Yıldız Gayrimenkul" },
-    { text: "Görseller sayesinde daha profesyonel bir imaj çiziyorum.", author: "Ömer F.", company: "Emlak Danışmanı" },
-    { text: "Sosyal medya paylaşımlarım daha fazla beğeni alıyor.", author: "Sibel K.", company: "Nişantaşı Lüks Emlak" },
-    { text: "Bu ay satışlarımda güzel bir artış oldu, platformdan memnunum.", author: "Kerem T.", company: "Taş Emlak Ofisi" },
-    { text: "AI görseller müşteri sorularını azaltıyor, zaman kazandırıyor.", author: "Pınar D.", company: "Doğan Gayrimenkul" },
-    { text: "Eski ilanları yeniden yüklediğimde daha fazla ilgi görüyorum.", author: "Volkan S.", company: "Anadolu Emlak" },
-    { text: "Telefon görüşmelerinde artış var, potansiyel müşteriler çoğaldı.", author: "Canan A.", company: "Etiler Prestij Emlak" },
-    { text: "Farklı dekorasyon stilleri denemek müşterilere çok keyifli geliyor.", author: "Berk M.", company: "Mert Konut Danışmanlığı" },
-    { text: "Platformun kullanımı oldukça basit, birkaç dakikada öğrendim.", author: "Hakan D.", company: "Duman Emlak" },
-    { text: "İlanlarımı güncellerken çok daha hızlı ilerliyorum.", author: "Neslihan T.", company: "Beylikdüzü Star Emlak" },
-    { text: "Müşteri randevularımda görselleri gösterince geri dönüşler daha olumlu oluyor.", author: "Serkan G.", company: "Güneş Gayrimenkul" },
-    { text: "Eski tip fotoğraflarımı modernleştirmek iyi bir fikir oldu.", author: "Elif N.", company: "Emlak Danışmanı" },
-    { text: "Portföyümdeki daireleri daha iyi tanıtabiliyorum.", author: "Onur K.", company: "Kurt Emlak & Danışmanlık" },
-    { text: "Görsellerin kalitesi müşterilere güven veriyor.", author: "Cem A.", company: "Acar Gayrimenkul" },
-    { text: "Sosyal medyada paylaştığım içeriklere daha fazla yorum geliyor.", author: "Duygu S.", company: "Sever Konut" },
-    { text: "İlanlarım diğer emlakçıların ilanlarından daha çekici görünüyor.", author: "Barış Y.", company: "Yurt Premium Emlak" },
-    { text: "Platformdaki farklı stil seçenekleri her emlak için uygun bir seçenek sunuyor.", author: "Melike F.", company: "Fındık Gayrimenkul" },
-    { text: "Müşteriler görselleri beğenince hemen iletişime geçiyor.", author: "Tuncay B.", company: "Bay Emlak Ofisi" },
-    { text: "Web siteme yüklediğim görseller trafiği artırdı.", author: "İrem Ç.", company: "Emlak Danışmanı" },
-    { text: "AI ile düzenlenen görseller gerçekten doğal görünüyor.", author: "Kaan M.", company: "Bomonti Emlak" },
-    { text: "Eski emlakları bile cazip gösterebilmek kolaylaştı.", author: "Beyza K.", company: "Kılınç Gayrimenkul" },
-    { text: "Müşteri geri dönüşlerinde artış gördüm, çok memnunum.", author: "Arda T.", company: "Tuna Emlak" },
+    { text: "Görseller gerçekten profesyonel görünüyor. Müşterilerden daha fazla geri dönüş alıyorum.", author: "Mehmet Y.", company: "Yılmaz Emlak", rating: 5 },
+    { text: "AI dekorasyon özelliği ile boş daireleri daha çekici gösterebiliyorum.", author: "Ayşe K.", company: "Emlak Danışmanı", rating: 4.5 },
+    { text: "Satış sürelerinde dikkat çekici bir iyileşme gözlemliyorum.", author: "Ahmet K.", company: "Prestij Gayrimenkul", rating: 5 },
+    { text: "Müşteriler dekore edilmiş görsellere daha fazla ilgi gösteriyor.", author: "Zeynep A.", company: "Arslan Emlak", rating: 4.5 },
+    { text: "Profesyonel görseller hazırlamak artık çok daha kolay ve hızlı.", author: "Burak T.", company: "Avcılar Premium Emlak", rating: 5 },
+    { text: "Fotoğrafçı maliyetlerinden önemli tasarruf sağladım.", author: "Elif Ş.", company: "Emlak Danışmanı", rating: 4.5 },
+    { text: "İlanlarıma olan ilgi arttı, telefon görüşmeleri çoğaldı.", author: "Can D.", company: "Demir Emlak & Gyo", rating: 5 },
+    { text: "AI görseller sayesinde ofis aramalarında artış oldu.", author: "Selin M.", company: "Vip Gayrimenkul", rating: 4.5 },
+    { text: "Platformu kullanmaya başladıktan sonra satışlarımda olumlu bir değişim var.", author: "Emre K.", company: "Emlak Danışmanı", rating: 5 },
+    { text: "İlanlarım daha profesyonel görünüyor, müşteri güveni artıyor.", author: "Deniz B.", company: "Şişli Premium Emlak", rating: 4.5 },
+    { text: "Son aylarda satış performansımda belirgin bir iyileşme oldu.", author: "Fatma Ö.", company: "Özkan Gayrimenkul", rating: 5 },
+    { text: "Karanlık fotoğrafları iyileştirme özelliği çok işe yarıyor.", author: "Murat A.", company: "Elite Emlak", rating: 4.5 },
+    { text: "Boş daireleri mobilyalı göstermek müşteri ilgisini artırıyor.", author: "Gizem Y.", company: "Yıldız Gayrimenkul", rating: 5 },
+    { text: "Görseller sayesinde daha profesyonel bir imaj çiziyorum.", author: "Ömer F.", company: "Emlak Danışmanı", rating: 4.5 },
+    { text: "Sosyal medya paylaşımlarım daha fazla beğeni alıyor.", author: "Sibel K.", company: "Nişantaşı Lüks Emlak", rating: 5 },
+    { text: "Bu ay satışlarımda güzel bir artış oldu, platformdan memnunum.", author: "Kerem T.", company: "Taş Emlak Ofisi", rating: 4.5 },
+    { text: "AI görseller müşteri sorularını azaltıyor, zaman kazandırıyor.", author: "Pınar D.", company: "Doğan Gayrimenkul", rating: 5 },
+    { text: "Eski ilanları yeniden yüklediğimde daha fazla ilgi görüyorum.", author: "Volkan S.", company: "Anadolu Emlak", rating: 4.5 },
+    { text: "Telefon görüşmelerinde artış var, potansiyel müşteriler çoğaldı.", author: "Canan A.", company: "Etiler Prestij Emlak", rating: 5 },
+    { text: "Farklı dekorasyon stilleri denemek müşterilere çok keyifli geliyor.", author: "Berk M.", company: "Mert Konut Danışmanlığı", rating: 4.5 },
+    { text: "Platformun kullanımı oldukça basit, birkaç dakikada öğrendim.", author: "Hakan D.", company: "Duman Emlak", rating: 5 },
+    { text: "İlanlarımı güncellerken çok daha hızlı ilerliyorum.", author: "Neslihan T.", company: "Beylikdüzü Star Emlak", rating: 4.5 },
+    { text: "Müşteri randevularımda görselleri gösterince geri dönüşler daha olumlu oluyor.", author: "Serkan G.", company: "Güneş Gayrimenkul", rating: 5 },
+    { text: "Eski tip fotoğraflarımı modernleştirmek iyi bir fikir oldu.", author: "Elif N.", company: "Emlak Danışmanı", rating: 4.5 },
+    { text: "Portföyümdeki daireleri daha iyi tanıtabiliyorum.", author: "Onur K.", company: "Kurt Emlak & Danışmanlık", rating: 5 },
+    { text: "Görsellerin kalitesi müşterilere güven veriyor.", author: "Cem A.", company: "Acar Gayrimenkul", rating: 4.5 },
+    { text: "Sosyal medyada paylaştığım içeriklere daha fazla yorum geliyor.", author: "Duygu S.", company: "Sever Konut", rating: 5 },
+    { text: "İlanlarım diğer emlakçıların ilanlarından daha çekici görünüyor.", author: "Barış Y.", company: "Yurt Premium Emlak", rating: 4.5 },
+    { text: "Platformdaki farklı stil seçenekleri her emlak için uygun bir seçenek sunuyor.", author: "Melike F.", company: "Fındık Gayrimenkul", rating: 5 },
+    { text: "Müşteriler görselleri beğenince hemen iletişime geçiyor.", author: "Tuncay B.", company: "Bay Emlak Ofisi", rating: 4.5 },
+    { text: "Web siteme yüklediğim görseller trafiği artırdı.", author: "İrem Ç.", company: "Emlak Danışmanı", rating: 5 },
+    { text: "AI ile düzenlenen görseller gerçekten doğal görünüyor.", author: "Kaan M.", company: "Bomonti Emlak", rating: 4.5 },
+    { text: "Eski emlakları bile cazip gösterebilmek kolaylaştı.", author: "Beyza K.", company: "Kılınç Gayrimenkul", rating: 5 },
+    { text: "Müşteri geri dönüşlerinde artış gördüm, çok memnunum.", author: "Arda T.", company: "Tuna Emlak", rating: 4.5 },
     { text: "Platformun hızlı olması benim için büyük bir avantaj.", author: "Seda Y.", company: "Kozyatağı Elit Gayrimenkul" },
     { text: "Görsellerin sanal dekorasyonu çok başarılı, gerçekçi görünüyor.", author: "Emrah S.", company: "Sezer Konut" },
     { text: "İlk kullanımdan itibaren farkı hissettim, tavsiye ederim.", author: "Çağla D.", company: "Deniz Emlak" },
@@ -244,12 +245,14 @@ const BASE_TESTIMONIALS: Testimonial[] = [
 // Generate 500 testimonials based on the base list
 export const TESTIMONIALS: Testimonial[] = (() => {
     const targetCount = 500;
-    const result = [...BASE_TESTIMONIALS];
+    const result: Testimonial[] = [];
 
-    // Fill up to targetCount
-    while (result.length < targetCount) {
-        const randomItem = BASE_TESTIMONIALS[Math.floor(Math.random() * BASE_TESTIMONIALS.length)];
-        result.push({ ...randomItem }); // Clone to avoid reference issues
+    // Fill up to targetCount and assign ratings (400 items at 5.0, 100 items at 4.5)
+    for (let i = 0; i < targetCount; i++) {
+        const baseItem = BASE_TESTIMONIALS[i % BASE_TESTIMONIALS.length];
+        // First 100 get 4.5, rest get 5
+        const rating = i < 100 ? 4.5 : 5;
+        result.push({ ...baseItem, rating });
     }
 
     return result;

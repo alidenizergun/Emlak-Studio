@@ -1,16 +1,15 @@
 .statsSection {
     padding: 0 0 2rem;
     background: transparent;
+    margin-top: 20px !important;
+    /* Precise gap from Hero */
 }
 
 .statsContainer {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-top: -2rem;
-    /* Pull up to reduce gap with Hero */
     position: relative;
-    /* Ensure z-index works if needed */
     z-index: 10;
 }
 
@@ -35,7 +34,7 @@
     width: 100%;
     background: white;
     border-radius: 16px;
-    padding: 2rem 3rem;
+    padding: 0.2rem 3rem;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -45,7 +44,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1rem 2rem;
+    padding: 0.1rem 2rem;
     position: relative;
     max-width: 200px;
     text-align: center;
@@ -62,9 +61,9 @@
 }
 
 .iconWrapper {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 0.75rem;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.05rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,7 +88,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0px;
 }
 
 .statValue {

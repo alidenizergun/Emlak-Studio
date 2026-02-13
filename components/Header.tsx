@@ -97,7 +97,7 @@ const Header = () => {
                             </svg>
                         </div>
                         <span className={styles.logoText}>
-                            <span style={{ color: '#2563EB' }}>Emlak</span><span style={{ color: '#10b981' }}>AIStudio</span>
+                            <span style={{ color: '#2563EB' }}>Emlak</span>{' '}<span style={{ color: '#10b981' }}>AIStudio</span>
                         </span>
                     </Link>
                 </div>
@@ -159,7 +159,7 @@ const Header = () => {
                         <div className={styles.logo}>
                             <Link href="/">
                                 <span className={styles.logoText}>
-                                    <span style={{ color: '#2563EB' }}>Emlak</span><span style={{ color: '#10b981' }}>AIStudio</span>
+                                    <span style={{ color: '#2563EB' }}>Emlak</span>{' '}<span style={{ color: '#10b981' }}>AIStudio</span>
                                 </span>
                             </Link>
                         </div>

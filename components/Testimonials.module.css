@@ -59,10 +59,18 @@
 }
 
 .stars {
-    font-size: 1rem;
+    display: flex;
+    gap: 4px;
     margin-bottom: 0.75rem;
-    color: #FFA500;
+    color: #F59E0B;
+    /* Amber-500 */
 }
+
+.starIcon {
+    display: block;
+}
+
+/* Obsolete classes removed: .halfStar, .emptyStar */
 
 .text {
     font-size: 0.95rem;
