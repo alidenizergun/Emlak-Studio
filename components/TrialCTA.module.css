@@ -1,0 +1,112 @@
+.ctaWrapper {
+    margin-top: 80px;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+}
+
+.ctaContainer {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-10deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(-10deg);
+    }
+}
+
+.ctaTitle {
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.promoText {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #FCD34D;
+    margin-bottom: 24px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+.ctaButton {
+    display: inline-block;
+    background: white;
+    color: #059669;
+    padding: 18px 48px;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ctaButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+    background: #f0fdf4;
+}
+
+.ctaButtonDisabled {
+    background: #9ca3af !important;
+    color: #6b7280 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+}
+
+.ctaButtonDisabled:hover {
+    transform: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.countdown {
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+}
+
+.countdown span {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@media (max-width: 768px) {
+    .ctaTitle {
+        font-size: 1.5rem;
+    }
+
+    .ctaSubtitle {
+        font-size: 1rem;
+    }
+
+    .ctaButton {
+        padding: 16px 36px;
+        font-size: 1.1rem;
+    }
+}
