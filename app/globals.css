@@ -82,20 +82,25 @@ a {
 /* Hero Mobile Fix Overrides */
 @media (max-width: 1024px) {
 
-  [class*="Hero_visual"],
-  [class*="Hero_sliderWrapper"],
-  [class*="ComparisonSlider_container"] {
+  div[class*="Hero-module__"][class*="__visual"],
+  div[class*="Hero-module__"][class*="__sliderWrapper"],
+  div[class*="ComparisonSlider-module__"][class*="__container"] {
     height: auto !important;
     min-height: 0 !important;
     aspect-ratio: 4/3 !important;
+  }
+
+  div[class*="Hero-module__"][class*="__sliderLabel"] {
+    bottom: 12px !important;
+    position: absolute !important;
   }
 }
 
 @media (max-width: 640px) {
 
-  [class*="Hero_visual"],
-  [class*="Hero_sliderWrapper"],
-  [class*="ComparisonSlider_container"] {
+  div[class*="Hero-module__"][class*="__visual"],
+  div[class*="Hero-module__"][class*="__sliderWrapper"],
+  div[class*="ComparisonSlider-module__"][class*="__container"] {
     aspect-ratio: 16/10 !important;
   }
 }
