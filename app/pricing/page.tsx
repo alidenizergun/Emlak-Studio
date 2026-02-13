@@ -130,7 +130,8 @@ export default function PricingPage() {
                         Başarınıza Uygun Planı Seçin
                     </h1>
                     <p className={styles.subtitle}>
-                        Tüm planlar 14 gün para iade garantisi ile gelir. İstediğiniz zaman iptal edebilirsiniz.
+                        Tüm planlar 14 gün para iade garantisi ile gelir.<br />
+                        İstediğiniz zaman iptal edebilirsiniz.
                     </p>
                 </div>
 
