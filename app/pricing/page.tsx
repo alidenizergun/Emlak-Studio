@@ -1,67 +1,125 @@
+"use client";
+
+import { useState } from 'react';
 import styles from '../../components/Pricing.module.css';
 
 const PRICING_TIERS = [
     {
-        name: "Başlangıç",
-        price: "₺299",
+        name: "Danışman",
+        price: "₺349",
         period: "/ay",
-        description: "Küçük portföyler için ideal",
+        description: "",
         features: [
-            "20 kredi/ay",
-            "Temel dekorasyon stilleri",
-            "HD kalite (1080p)",
-            "Email destek",
-            "Basit filigran kaldırma",
-
-
-            "1 kullanıcı hesabı"
+            "60 Kredi (Aylık)",
+            "30 fotoğrafa kadar yetebilir",
+            "Tüm AI Modelleri",
+            "Hızlı İşlem Önceliği",
+            "Ticari Kullanım İzni",
+            "Email destek"
         ],
-        cta: "Başla",
+        cta: "Abone Ol",
         popular: false,
-        discount: null
+        discount: "%50 İNDİRİM"
     },
     {
-        name: "Profesyonel",
+        name: "Ofis",
         price: "₺699",
         period: "/ay",
-        description: "Aktif emlakçılar için en popüler",
+        description: "",
         features: [
-            "100 kredi/ay",
-            "Tüm premium stiller",
-            "4K ultra kalite",
-            "Öncelikli destek",
-            "Filigransız görseller",
-            "5 kullanıcı hesabı",
-            "Toplu yükleme",
-            "Özel marka logosu",
-            "API erişimi"
+            "150 Kredi (Aylık)",
+            "75 fotoğrafa kadar yetebilir",
+            "Tüm AI Modelleri",
+            "Hızlı İşlem Önceliği",
+            "Ticari Kullanım İzni",
+            "Öncelikli destek"
         ],
-        cta: "En Popüler ✨",
+        cta: "Abone Ol",
         popular: true,
-        discount: "%60 İndirim - Normalde ₺1.749"
+        discount: "%50 İNDİRİM"
     },
     {
         name: "Kurumsal",
         price: "₺1.499",
         period: "/ay",
-        description: "Büyük ajanslar için",
+        description: "",
         features: [
-            "Sınırsız kredi",
-            "Tüm özellikler",
-            "8K ultra kalite",
-            "7/24 canlı destek",
-            "Filigransız + özel logo",
-            "Sınırsız kullanıcı",
-            "Toplu işlem",
-            "White-label çözüm",
-            "Kişisel hesap yöneticisi",
-            "Özel model eğitimi"
+            "400 Kredi (Aylık)",
+            "200 fotoğrafa kadar yetebilir",
+            "Tüm AI Modelleri",
+            "Hızlı İşlem Önceliği",
+            "Ticari Kullanım İzni",
+            "7/24 canlı destek"
         ],
-        cta: "İletişime Geç",
+        cta: "Abone Ol",
         popular: false,
-        discount: null
+        discount: "%50 İNDİRİM"
     }
 ];
+
+const FAQ_ITEMS = [
+    {
+        question: "💳 Kredi nedir ve nasıl kullanılır?",
+        answer: "1 kredi, 1 odayı sanal olarak dekore etmek veya düzenlemek anlamına gelir. Kredilerinizi ay boyunca dilediğiniz zaman kullanabilirsiniz. Örneğin bir dairenin salonunu, yatak odasını ve mutfağını düzenlemek 3 kredi harcar."
+    },
+    {
+        question: "🔄 Planımı sonradan değiştirebilir miyim?",
+        answer: "Evet, istediğiniz zaman planınızı yükseltebilir veya düşürebilirsiniz. Yükseltme işlemlerinde aradaki fark anında yansıtılır, düşürme işlemlerinde ise bir sonraki fatura döneminde yeni plan devreye girer."
+    },
+    {
+        question: "💰 Kullanılmayan krediler bir sonraki aya devreder mi?",
+        answer: "Hayır, krediler aylık kullanım içindir ve her fatura döneminde yenilenir. Kullanılmayan krediler bir sonraki aya devretmez, bu yüzden kredilerinizi ay içinde kullanmanızı öneririz."
+    },
+    {
+        question: "📄 Fatura alabilir miyim? Şirketim için gider gösterebilir miyim?",
+        answer: "Kesinlikle. Ödemeniz tamamlandıktan sonra e-faturanız otomatik olarak oluşturulur ve kayıtlı e-posta adresinize gönderilir. Bu faturayı şirket harcamalarınızda gider olarak kullanabilirsiniz."
+    },
+    {
+        question: "❌ İptal ve iade politikanız nedir?",
+        answer: "Hizmetimizden memnun kalmazsanız, ilk 14 gün içinde koşulsuz şartsız para iadesi talep edebilirsiniz. Aboneliğinizi ise dilediğiniz zaman panel üzerinden tek tıkla iptal edebilirsiniz."
+    },
+    {
+        question: "🏢 Kurumsal planın avantajları nelerdir?",
+        answer: "Kurumsal plan, büyük emlak ofisleri ve ajanslar için tasarlanmıştır. Bu planda daha yüksek kredi limitleri, 8K ultra çözünürlük desteği, özel logo ekleme (white-label) ve 7/24 öncelikli canlı destek sunulmaktadır."
+    },
+    {
+        question: "🖼️ Görsellerde filigran (watermark) olacak mı?",
+        answer: "Danışman (Başlangıç) planında görsellerde küçük bir logo bulunabilir. Ofis ve Kurumsal planlarımızda ise görseller tamamen filigransızdır ve kendi logonuzu ekleme seçeneği sunulur."
+    },
+    {
+        question: "⚖️ Oluşturulan görselleri ticari olarak kullanabilir miyim?",
+        answer: "Evet, tüm planlarımız size oluşturduğunuz görseller üzerinde tam ticari kullanım hakkı verir. İlan sitelerinde, sosyal medyada veya basılı materyallerde özgürce kullanabilirsiniz."
+    }
+];
+
+const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className={styles.faqItem}>
+            <button
+                className={styles.faqQuestion}
+                onClick={() => setIsOpen(!isOpen)}
+                aria-expanded={isOpen}
+            >
+                <h4>{question}</h4>
+                <svg
+                    className={`${styles.icon} ${isOpen ? styles.iconOpen : ''}`}
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </button>
+            <div className={`${styles.faqAnswer} ${isOpen ? styles.faqAnswerOpen : ''}`}>
+                <p>{answer}</p>
+            </div>
+        </div>
+    );
+};
 
 export default function PricingPage() {
     return (
@@ -127,23 +185,10 @@ export default function PricingPage() {
 
                 <div className={styles.faq}>
                     <h2>Sıkça Sorulan Sorular</h2>
-                    <div className={styles.faqGrid}>
-                        <div className={styles.faqItem}>
-                            <h4>💳 Kredi nedir?</h4>
-                            <p>1 kredi = 1 oda dekoras yonu. Kullanılmayan krediler bir sonraki aya aktarılmaz.</p>
-                        </div>
-                        <div className={styles.faqItem}>
-                            <h4>🔄 Plan değiştirebilir miyim?</h4>
-                            <p>Evet, istediğiniz zaman yükseltme veya düşürme yapabilirsiniz.</p>
-                        </div>
-                        <div className={styles.faqItem}>
-                            <h4>💰 Ödeme nasıl yapılır?</h4>
-                            <p>Kredi kartı veya banka kartı ile güvenli ödeme. Tüm kartlar kabul edilir.</p>
-                        </div>
-                        <div className={styles.faqItem}>
-                            <h4>📞 Destek var mı?</h4>
-                            <p>Tüm planlarda email destek. Profesyonel ve Kurumsal'da öncelikli destek.</p>
-                        </div>
+                    <div className={styles.faqList}>
+                        {FAQ_ITEMS.map((item, index) => (
+                            <FAQItem key={index} question={item.question} answer={item.answer} />
+                        ))}
                     </div>
                 </div>
             </div>
