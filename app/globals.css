@@ -78,3 +78,24 @@ a {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Hero Mobile Fix Overrides */
+@media (max-width: 1024px) {
+
+  [class*="Hero_visual"],
+  [class*="Hero_sliderWrapper"],
+  [class*="ComparisonSlider_container"] {
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 4/3 !important;
+  }
+}
+
+@media (max-width: 640px) {
+
+  [class*="Hero_visual"],
+  [class*="Hero_sliderWrapper"],
+  [class*="ComparisonSlider_container"] {
+    aspect-ratio: 16/10 !important;
+  }
+}
