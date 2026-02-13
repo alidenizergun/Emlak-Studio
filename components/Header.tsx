@@ -27,6 +27,17 @@ const Icons = {
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
+    ),
+    Close: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    ),
+    Support: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
     )
 };
 
@@ -144,47 +155,75 @@ const Header = () => {
                                 </span>
                             </Link>
                         </div>
+                        <button className={styles.menuCloseBtn} onClick={() => setIsMenuOpen(false)}>
+                            {Icons.Close}
+                        </button>
                     </div>
 
                     <nav className={styles.mobileNav}>
                         <div className={styles.mobileMenuSection} style={{ "--i": 1 } as any}>
-                            <span className={styles.sectionLabel}>HİZMETLER</span>
+                            <div className={styles.sectionHeader}>
+                                <span className={styles.sectionLabel}>HİZMETLER</span>
+                                <div className={styles.sectionLine}></div>
+                            </div>
                             <div className={styles.linkGroup}>
                                 <Link href="/enhance" className={styles.mobileNavLink}>
                                     <div className={styles.mobileIconWrapper}>{Icons.Enhance}</div>
-                                    <span>Fotoğraf Geliştirme</span>
+                                    <div className={styles.mobileLinkContent}>
+                                        <span className={styles.mobileLinkLabel}>Fotoğraf Geliştirme</span>
+                                        <span className={styles.mobileLinkDesc}>Görsellerinizi HD kalitesine yükseltin</span>
+                                    </div>
                                 </Link>
                                 <Link href="/stage" className={styles.mobileNavLink}>
                                     <div className={styles.mobileIconWrapper}>{Icons.Stage}</div>
-                                    <span>Sanal Dekorasyon</span>
+                                    <div className={styles.mobileLinkContent}>
+                                        <span className={styles.mobileLinkLabel}>Sanal Dekorasyon</span>
+                                        <span className={styles.mobileLinkDesc}>Boş odaları yapay zeka ile döşeyin</span>
+                                    </div>
                                 </Link>
                             </div>
                         </div>
 
                         <div className={styles.mobileMenuSection} style={{ "--i": 2 } as any}>
-                            <span className={styles.sectionLabel}>YAPAY ZEKA ARAÇLARI</span>
+                            <div className={styles.sectionHeader}>
+                                <span className={styles.sectionLabel}>YAPAY ZEKA ARAÇLARI</span>
+                                <div className={styles.sectionLine}></div>
+                            </div>
                             <div className={styles.linkGroup}>
                                 <Link href="/tools" className={styles.mobileNavLink}>
                                     <div className={styles.mobileIconWrapper}>{Icons.Tools}</div>
-                                    <span>Tüm Araçlar</span>
+                                    <div className={styles.mobileLinkContent}>
+                                        <span className={styles.mobileLinkLabel}>Tüm Araçlar</span>
+                                        <span className={styles.mobileLinkDesc}>20+ farklı yapay zeka aracı</span>
+                                    </div>
                                 </Link>
                                 <Link href="/pricing" className={styles.mobileNavLink}>
                                     <div className={styles.mobileIconWrapper}>{Icons.Pricing}</div>
-                                    <span>Fiyatlandırma</span>
+                                    <div className={styles.mobileLinkContent}>
+                                        <span className={styles.mobileLinkLabel}>Fiyatlandırma</span>
+                                        <span className={styles.mobileLinkDesc}>Sizin için en uygun planı seçin</span>
+                                    </div>
                                 </Link>
                             </div>
                         </div>
 
                         <div className={styles.mobileMenuSection} style={{ "--i": 3 } as any}>
-                            <div className={styles.mobileCta}>
-                                <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
-                                <Link href="/register" className={styles.mobileRegisterBtn}>Kayıt Ol & Ücretsiz Dene</Link>
+                            <div className={styles.mobileCtaCard}>
+                                <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
+                                <Link href="/login" className={styles.mobileLoginBtn}>Mevcut Hesaba Giriş Yap</Link>
                             </div>
                         </div>
                     </nav>
 
                     <div className={styles.mobileMenuFooter} style={{ "--i": 4 } as any}>
-                        <p>© 2026 Emlak Studio. Premium AI Tools.</p>
+                        <div className={styles.footerLinks}>
+                            <Link href="/help" className={styles.footerLink}>
+                                {Icons.Support} <span>Yardım Merkezi</span>
+                            </Link>
+                        </div>
+                        <div className={styles.footerBrand}>
+                            <p>© 2026 Emlak Studio. Her hakkı saklıdır.</p>
+                        </div>
                     </div>
                 </div>
             </div>
