@@ -15,7 +15,7 @@ const Icons = {
     ),
     Stage: (
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00 text-2 2v16m14 0h-2m-14 0H5m14 0v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h-2m-14 0H5m14 0v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
         </svg>
     ),
     Tools: (
@@ -43,7 +43,13 @@ const Icons = {
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const pathname = usePathname();
+
+    // Set mounted state
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Close menu when route changes
     useEffect(() => {
@@ -138,14 +144,16 @@ const Header = () => {
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     aria-label="Toggle menu"
                 >
-                    <div className={`${styles.hamburger} ${isMenuOpen ? styles.open : ''}`}>
+                    <span className={`${styles.hamburger} ${isMenuOpen ? styles.open : ''}`}>
                         <span></span>
                         <span></span>
                         <span></span>
-                    </div>
+                    </span>
                 </button>
+            </div>
 
-                {/* Mobile Menu Overlay */}
+            {/* Mobile Menu Overlay - Moved outside container but inside header tag */}
+            {isMounted && (
                 <div className={`${styles.mobileMenu} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}>
                     <div className={styles.mobileMenuHeader}>
                         <div className={styles.logo}>
@@ -161,7 +169,7 @@ const Header = () => {
                     </div>
 
                     <nav className={styles.mobileNav}>
-                        <div className={styles.mobileMenuSection} style={{ "--i": 1 } as any}>
+                        <div className={styles.mobileMenuSection} style={{ "--i": "1" } as any}>
                             <div className={styles.sectionHeader}>
                                 <span className={styles.sectionLabel}>HİZMETLER</span>
                                 <div className={styles.sectionLine}></div>
@@ -184,7 +192,7 @@ const Header = () => {
                             </div>
                         </div>
 
-                        <div className={styles.mobileMenuSection} style={{ "--i": 2 } as any}>
+                        <div className={styles.mobileMenuSection} style={{ "--i": "2" } as any}>
                             <div className={styles.sectionHeader}>
                                 <span className={styles.sectionLabel}>YAPAY ZEKA ARAÇLARI</span>
                                 <div className={styles.sectionLine}></div>
@@ -207,7 +215,7 @@ const Header = () => {
                             </div>
                         </div>
 
-                        <div className={styles.mobileMenuSection} style={{ "--i": 3 } as any}>
+                        <div className={styles.mobileMenuSection} style={{ "--i": "3" } as any}>
                             <div className={styles.mobileCtaCard}>
                                 <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
                                 <Link href="/login" className={styles.mobileLoginBtn}>Mevcut Hesaba Giriş Yap</Link>
@@ -215,7 +223,7 @@ const Header = () => {
                         </div>
                     </nav>
 
-                    <div className={styles.mobileMenuFooter} style={{ "--i": 4 } as any}>
+                    <div className={styles.mobileMenuFooter} style={{ "--i": "4" } as any}>
                         <div className={styles.footerLinks}>
                             <Link href="/help" className={styles.footerLink}>
                                 {Icons.Support} <span>Yardım Merkezi</span>
@@ -226,7 +234,7 @@ const Header = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
         </header>
     );
 };
