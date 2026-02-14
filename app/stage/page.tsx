@@ -1,4 +1,4 @@
-import StageClient from "./StageClient";
+import StageClient from "./Stage";
 
 export const metadata = {
     title: "Sanal Dekorasyon - Emlak AIStudio",

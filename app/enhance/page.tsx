@@ -1,4 +1,4 @@
-import EnhanceClient from "./EnhanceClient";
+import EnhanceClient from "./EnhanceEditor";
 
 export const metadata = {
     title: "AI Görsel İyileştirme - Emlak AIStudio | Sanal Mobilyalama",

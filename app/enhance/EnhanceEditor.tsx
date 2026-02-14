@@ -19,11 +19,18 @@ export default function EnhanceClient() {
     };
 
     const toggleOption = (id: string) => {
-        if (selectedOptions['auto']) return; // Prevent selection if auto is active
-        setSelectedOptions(prev => ({
-            ...prev,
-            [id]: !prev[id]
-        }));
+        setSelectedOptions(prev => {
+            const isSelected = !prev[id];
+
+            if (isSelected) {
+                // If selecting, remove 'auto' and set the new option
+                const { auto, ...others } = prev;
+                return { ...others, [id]: true };
+            } else {
+                // If deselecting, just update the value
+                return { ...prev, [id]: false };
+            }
+        });
     };
 
     const handleProcess = async () => {
@@ -121,8 +128,6 @@ export default function EnhanceClient() {
                                             key={option.id}
                                             className={`${styles.optionCard} ${selectedOptions[option.id] ? styles.active : ''}`}
                                             onClick={() => toggleOption(option.id)}
-                                            disabled={selectedOptions['auto']}
-                                            style={{ opacity: selectedOptions['auto'] ? 0.5 : 1, cursor: selectedOptions['auto'] ? 'not-allowed' : 'pointer' }}
                                         >
                                             <div className={styles.optionIcon}>{option.icon}</div>
                                             <span className={styles.optionLabel}>{option.label}</span>
@@ -139,11 +144,20 @@ export default function EnhanceClient() {
                                     {/* Auto Fix Button as Grid Item */}
                                     <button
                                         className={`${styles.optionCard} ${styles.autoOption} ${selectedOptions['auto'] ? styles.active : ''}`}
+                                        /* Force Update */
                                         onClick={handleAutoFix}
                                     >
                                         <div className={styles.optionIcon}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <line x1="4" x2="4" y1="21" y2="14" />
+                                                <line x1="4" x2="4" y1="10" y2="3" />
+                                                <line x1="12" x2="12" y1="21" y2="12" />
+                                                <line x1="12" x2="12" y1="8" y2="3" />
+                                                <line x1="20" x2="20" y1="21" y2="16" />
+                                                <line x1="20" x2="20" y1="12" y2="3" />
+                                                <line x1="2" x2="6" y1="14" y2="14" />
+                                                <line x1="10" x2="14" y1="8" y2="8" />
+                                                <line x1="18" x2="22" y1="16" y2="16" />
                                             </svg>
                                         </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.35rem', flex: 1 }}>
@@ -191,8 +205,15 @@ const OPTIONS = [
         label: 'Işığı Düzelt',
         icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="5" />
-                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2" />
+                <path d="M12 20v2" />
+                <path d="M4.93 4.93l1.41 1.41" />
+                <path d="M17.66 17.66l1.41 1.41" />
+                <path d="M2 12h2" />
+                <path d="M20 12h2" />
+                <path d="M6.34 17.66l-1.41 1.41" />
+                <path d="M19.07 4.93l-1.41 1.41" />
             </svg>
         )
     },
@@ -202,6 +223,7 @@ const OPTIONS = [
         icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2.69l5.74 5.74c3.04 3.04 3.04 7.96 0 11a7.8 7.8 0 0 1-11.48 0c-3.04-3.04-3.04-7.96 0-11L12 2.69z" />
+                <path d="M8.7 8.5c1.6 0 2.9 1.3 2.9 2.9" />
                 <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
             </svg>
         )
@@ -211,7 +233,7 @@ const OPTIONS = [
         label: 'Netleştir',
         icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
             </svg>
         )
@@ -221,9 +243,9 @@ const OPTIONS = [
         label: 'Kirleri Temizle',
         icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 12l-6-6-6 6a3 3 0 0 0 0 4.24l.76.76a3 3 0 0 0 4.24 0L12 16" />
-                <path d="M6 13l6 6" />
-                <path d="M17 22h5" />
+                <path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" />
+                <path d="m5 11 6 6" />
+                <path d="m12 13-4-4" />
             </svg>
         )
     }
