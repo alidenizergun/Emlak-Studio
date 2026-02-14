@@ -30,7 +30,7 @@ const Footer = () => {
                         </div>
                         <p>Emlak pazarlamasında yapay zeka devrimi.</p>
                         <div className={styles.copyrightWrapper}>
-                            <p className="text-secondary">© 2026 Emlak Studio by ADE</p>
+                            <p className="text-secondary">© 2026 Emlak Studio by MCAILabs</p>
                             <p className="text-secondary">Tüm hakları saklıdır.</p>
                         </div>
                     </div>
