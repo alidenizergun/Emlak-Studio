@@ -83,22 +83,24 @@ const Header = () => {
                 <div className={styles.logo}>
                     <Link href="/">
                         <div className={styles.logoIcon}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 9.5L12 2L21 9.5V20.5C21 21.0523 20.5523 21.5 20 21.5H4C3.44772 21.5 3 21.0523 3 20.5V9.5Z" stroke="url(#paint0_linear)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M9 21.5V12.5H15V21.5" stroke="url(#paint0_linear)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <circle cx="18" cy="6" r="3" fill="#2563EB" />
-                                <path d="M18 4.5L19.5 7.5L16.5 7.5L18 4.5Z" fill="white" />
+                            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 20L16 16L20 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M16 16V24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M6 14C6 8.47715 10.4772 4 16 4C21.5228 4 26 8.47715 26 14V22C26 23.1046 25.1046 24 24 24H8C6.89543 24 6 23.1046 6 22V14Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+                                <circle cx="24" cy="8" r="4" fill="url(#logo_gradient)" />
+                                <path d="M24 6.5L25 8L24 9.5L23 8L24 6.5Z" fill="white" />
                                 <defs>
-                                    <linearGradient id="paint0_linear" x1="12" y1="2" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
-                                        <stop stopColor="#2563EB" />
-                                        <stop offset="1" stopColor="#4F46E5" />
+                                    <linearGradient id="logo_gradient" x1="20" y1="4" x2="28" y2="12" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#10b981" />
+                                        <stop offset="1" stopColor="#3b82f6" />
                                     </linearGradient>
                                 </defs>
                             </svg>
                         </div>
-                        <span className={styles.logoText}>
-                            <span style={{ color: '#2563EB' }}>Emlak</span>{' '}<span style={{ color: '#10b981' }}>AIStudio</span>
-                        </span>
+                        <div className={styles.logoTextWrapper}>
+                            <span className={styles.logoBrand}>Emlak</span>
+                            <span className={styles.logoStudio}>AIStudio</span>
+                        </div>
                     </Link>
                 </div>
 
@@ -164,22 +166,24 @@ const Header = () => {
                         <div className={styles.logo}>
                             <Link href="/" onClick={() => setIsMenuOpen(false)}>
                                 <div className={styles.logoIcon}>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M3 9.5L12 2L21 9.5V20.5C21 21.0523 20.5523 21.5 20 21.5H4C3.44772 21.5 3 21.0523 3 20.5V9.5Z" stroke="url(#paint0_linear_mobile)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        <path d="M9 21.5V12.5H15V21.5" stroke="url(#paint0_linear_mobile)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        <circle cx="18" cy="6" r="3" fill="#2563EB" />
-                                        <path d="M18 4.5L19.5 7.5L16.5 7.5L18 4.5Z" fill="white" />
+                                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 20L16 16L20 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M16 16V24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M6 14C6 8.47715 10.4772 4 16 4C21.5228 4 26 8.47715 26 14V22C26 23.1046 25.1046 24 24 24H8C6.89543 24 6 23.1046 6 22V14Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+                                        <circle cx="24" cy="8" r="4" fill="url(#logo_gradient_mobile)" />
+                                        <path d="M24 6.5L25 8L24 9.5L23 8L24 6.5Z" fill="white" />
                                         <defs>
-                                            <linearGradient id="paint0_linear_mobile" x1="12" y1="2" x2="12" y2="21.5" gradientUnits="userSpaceOnUse">
-                                                <stop stopColor="#2563EB" />
-                                                <stop offset="1" stopColor="#4F46E5" />
+                                            <linearGradient id="logo_gradient_mobile" x1="20" y1="4" x2="28" y2="12" gradientUnits="userSpaceOnUse">
+                                                <stop stopColor="#10b981" />
+                                                <stop offset="1" stopColor="#3b82f6" />
                                             </linearGradient>
                                         </defs>
                                     </svg>
                                 </div>
-                                <span className={styles.logoText}>
-                                    <span style={{ color: '#2563EB' }}>Emlak</span>{' '}<span style={{ color: '#10b981' }}>AIStudio</span>
-                                </span>
+                                <div className={styles.logoTextWrapper}>
+                                    <span className={styles.logoBrand}>Emlak</span>
+                                    <span className={styles.logoStudio}>AIStudio</span>
+                                </div>
                             </Link>
                         </div>
                         <button className={styles.menuCloseBtn} onClick={() => setIsMenuOpen(false)}>

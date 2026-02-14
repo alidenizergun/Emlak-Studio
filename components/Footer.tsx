@@ -7,7 +7,10 @@ const Footer = () => {
             <div className={`container ${styles.container}`}>
                 <div className={styles.column}>
                     <div className={styles.brand}>
-                        <h3>Emlak{' '}<span style={{ color: '#10b981' }}>AIStudio</span></h3>
+                        <div className={styles.logoWrapper}>
+                            <span className={styles.logoBrand}>Emlak</span>
+                            <span className={styles.logoStudio}>AIStudio</span>
+                        </div>
                         <p>Emlak pazarlamasında yapay zeka devrimi.</p>
                         <div className={styles.copyrightWrapper}>
                             <p className="text-secondary">© 2026 Emlak Studio by ADE</p>

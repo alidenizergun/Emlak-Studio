@@ -15,12 +15,32 @@
     margin-bottom: 3rem;
 }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
+.logoWrapper {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 1px;
+    margin-bottom: 1.5rem;
+}
+
+.logoBrand {
+    font-size: 1.6rem;
+    font-weight: 800;
     color: #f8fafc;
-    /* Force white */
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+}
+
+.logoStudio {
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
 }
 
 .description {
