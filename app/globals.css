@@ -72,6 +72,12 @@ a {
   padding: 0 2rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
 .gradient-text {
   background: linear-gradient(to right, #60a5fa, #c084fc);
   -webkit-background-clip: text;
