@@ -196,7 +196,7 @@ const Header = () => {
                             <div className={styles.mobileIconWrapper}>{Icons.Enhance}</div>
                             <div className={styles.mobileLinkContent}>
                                 <span className={styles.mobileLinkLabel}>Fotoğraf Geliştirme</span>
-                                <span className={styles.mobileLinkDesc}>Görsellerinizi HD kalitesine yükseltin</span>
+                                <span className={styles.mobileLinkDesc}>Emlak fotoğraflarını yapay zeka ile mükemmelleştirin</span>
                             </div>
                         </Link>
                         <Link href="/stage" className={styles.mobileNavLink}>
