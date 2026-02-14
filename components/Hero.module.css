@@ -329,7 +329,9 @@
 
 @media (max-width: 640px) {
     .hero {
-        padding-top: 60px;
+        padding-top: 120px;
+        align-items: flex-start;
+        min-height: auto;
     }
 
     .visual {
