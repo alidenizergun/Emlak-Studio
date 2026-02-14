@@ -204,31 +204,36 @@
     flex-shrink: 0;
 }
 
-/* Process Button */
-.processBtn {
-    background: linear-gradient(to right, var(--primary), var(--secondary));
-    color: white;
+/* Process Button (Renamed to match Stage design) */
+/* Apply Button (Renamed to match Stage design) */
+.applyEnhanceBtn {
+    background-image: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    background-color: #10b981 !important;
+    color: white !important;
     border: none;
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 1.1rem;
+    border-radius: 14px;
     font-weight: 700;
     font-size: 1.1rem;
     cursor: pointer;
+    margin-top: auto;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.8rem;
-    transition: opacity 0.2s;
-    margin-top: auto;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
 }
 
-.processBtn:hover:not(:disabled) {
-    opacity: 0.9;
+.applyEnhanceBtn:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
 }
 
-.processBtn:disabled {
+.applyEnhanceBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    filter: grayscale(0.5);
 }
 
 .spinnerSm {

@@ -178,17 +178,43 @@ export default function EnhanceClient() {
                             </div>
 
                             <button
-                                className={styles.processBtn}
+                                className={styles.applyEnhanceBtn}
                                 onClick={handleProcess}
                                 disabled={!file || isProcessing}
+                                style={{
+                                    background: (!file || isProcessing)
+                                        ? 'rgba(16, 185, 129, 0.5)'
+                                        : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '1.1rem',
+                                    borderRadius: '14px',
+                                    fontWeight: '700',
+                                    fontSize: '1.1rem',
+                                    cursor: (!file || isProcessing) ? 'not-allowed' : 'pointer',
+                                    marginTop: 'auto',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '0.8rem',
+                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                    boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)',
+                                    filter: (!file || isProcessing) ? 'grayscale(0.5)' : 'none',
+                                    opacity: (!file || isProcessing) ? '0.5' : '1'
+                                }}
                             >
                                 {isProcessing ? (
                                     <>
-                                        <div className={styles.spinnerSm}></div>
+                                        <span className={styles.spinnerSm}></span>
                                         İşleniyor...
                                     </>
                                 ) : (
-                                    'Seçilenleri Uygula'
+                                    <>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                            <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
+                                        </svg>
+                                        Seçilenleri Uygula
+                                    </>
                                 )}
                             </button>
                         </div>
