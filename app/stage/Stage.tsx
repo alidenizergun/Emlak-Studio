@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-// Forced rebuild to pick up styling updates
+import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import styles from './Stage.module.css';
@@ -153,6 +153,7 @@ const STYLES = [
 ];
 
 export default function StageClient() {
+    const router = useRouter();
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
@@ -180,6 +181,10 @@ export default function StageClient() {
 
     const handleGenerate = async () => {
         if (!file) return;
+        if (typeof window !== 'undefined' && !window.localStorage.getItem('emlak_authed')) {
+            router.push('/register');
+            return;
+        }
         setIsProcessing(true);
 
         try {
@@ -316,7 +321,7 @@ export default function StageClient() {
                                                 <path d="M19 16l.65 1.85L21.5 18.5l-1.85.65L19 21l-.65-1.85L16.5 18.5l1.85-.65L19 16z" fill="currentColor" />
                                             </svg>
                                         </div>
-                                        {isDetectingRoom ? '...' : 'AI Seçsin'}
+                                        {isDetectingRoom ? '...' : 'Yapay Zeka Seçsin'}
                                     </button>
                                 </div>
                             </div>
@@ -353,7 +358,7 @@ export default function StageClient() {
                                                 <path d="M19 16l.65 1.85L21.5 18.5l-1.85.65L19 21l-.65-1.85L16.5 18.5l1.85-.65L19 16z" fill="currentColor" />
                                             </svg>
                                         </div>
-                                        {isSelectingStyle ? '...' : 'AI Seçsin'}
+                                        {isSelectingStyle ? '...' : 'Yapay Zeka Seçsin'}
                                     </button>
                                 </div>
                             </div>

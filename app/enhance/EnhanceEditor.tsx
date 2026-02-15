@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import styles from './Enhance.module.css';
 
 export default function EnhanceClient() {
+    const router = useRouter();
     const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({});
     const [file, setFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -35,6 +37,10 @@ export default function EnhanceClient() {
 
     const handleProcess = async () => {
         if (!file) return;
+        if (typeof window !== 'undefined' && !window.localStorage.getItem('emlak_authed')) {
+            router.push('/register');
+            return;
+        }
         setIsProcessing(true);
 
         try {

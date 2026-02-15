@@ -154,21 +154,21 @@
     width: 100%;
     max-width: 440px;
     background: white;
-    padding: 2.5rem;
+    padding: 2rem 2.5rem;
     border-radius: 24px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
 .formHeader {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .title {
     font-size: 1.75rem;
     font-weight: 700;
     color: #0f172a;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
 }
 
 .subtitle {
@@ -176,58 +176,10 @@
     color: #64748b;
 }
 
-.socialButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-}
-
-.socialButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    width: 100%;
-    padding: 0.875rem;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    background: white;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #1e293b;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.socialButton:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 1.5rem 0;
-    color: #94a3b8;
-    font-size: 0.875rem;
-}
-
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-}
-
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
 }
 
 .inputGroup {
@@ -274,13 +226,86 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.input::placeholder {
+    color: #94a3b8;
+}
+
 .inputError {
     border-color: #ef4444;
+}
+
+.inputError:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 .errorText {
     font-size: 0.8125rem;
     color: #ef4444;
+    margin-top: -0.25rem;
+}
+
+.sendOtpBtn {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+.sendOtpBtn:hover {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 40%, #15803d 100%);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+.sendOtpBtn:disabled {
+    opacity: 0.85;
+    cursor: not-allowed;
+}
+
+.otpSentNote {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+.otpInput {
+    text-align: center;
+    letter-spacing: 0.35em;
+    font-size: 1.25rem;
+}
+
+.resendNote {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+.resendButton {
+    background: none;
+    border: none;
+    color: #2563EB;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    padding: 0;
+}
+
+.resendButton:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+.resendButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .passwordWrapper {
@@ -319,28 +344,28 @@
 .submitButton {
     width: 100%;
     padding: 1rem 1.5rem;
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     color: white;
-    border: none;
-    border-radius: 12px;
     font-size: 1rem;
     font-weight: 600;
+    border: none;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-top: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
 }
 
 .submitButton:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 12px 24px rgba(22, 163, 74, 0.35);
 }
 
 .submitButton:disabled {
-    opacity: 0.85;
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
@@ -363,7 +388,7 @@
     text-align: center;
     font-size: 0.9375rem;
     color: #475569;
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
 }
 
 .link {
@@ -468,12 +493,7 @@
         font-size: 0.875rem;
     }
 
-    .socialButton {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-    }
-
     .form {
-        gap: 1rem;
+        gap: 0.875rem;
     }
 }

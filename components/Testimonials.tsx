@@ -25,7 +25,24 @@ const Testimonials = () => {
         <section className={styles.testimonialsSection}>
             <div className={`container ${styles.testimonialsContainer}`}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Logo Emlak AIStudio ile çalışan emlakçılar satışlarını artırıyor!</h2>
+                    <h2 className={styles.title}>
+                        <span className={styles.titleLogoIcon} aria-hidden>
+                            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 20L16 16L20 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M16 16V24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M6 14C6 8.47715 10.4772 4 16 4C21.5228 4 26 8.47715 26 14V22C26 23.1046 25.1046 24 24 24H8C6.89543 24 6 23.1046 6 22V14Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+                                <circle cx="24" cy="8" r="4" fill="url(#logo_gradient_testimonials)" />
+                                <path d="M24 6.5L25 8L24 9.5L23 8L24 6.5Z" fill="white" />
+                                <defs>
+                                    <linearGradient id="logo_gradient_testimonials" x1="20" y1="4" x2="28" y2="12" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#10b981" />
+                                        <stop offset="1" stopColor="#3b82f6" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </span>
+                        {' '}<span className={styles.titleLogoBrand}>Emlak</span> <span className={styles.titleLogoStudio}>AISTUDIO</span> ile çalışan emlakçılar satışlarını artırıyor!
+                    </h2>
                     <p className={styles.subtitle}>
                         Türkiye&apos;nin dört bir yanından {TESTIMONIALS.length}+ emlakçının deneyimleri
                     </p>

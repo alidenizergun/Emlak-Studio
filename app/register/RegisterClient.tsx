@@ -91,6 +91,7 @@ export default function RegisterClient() {
             });
             const data = await res.json().catch(() => ({}));
             if (data.success) {
+                if (typeof window !== 'undefined') window.localStorage.setItem('emlak_authed', '1');
                 alert('Kayıt başarılı! (Demo - Backend entegrasyonu gerekli)');
             } else {
                 setErrors({ otp: data.error || 'Kod geçersiz veya süresi dolmuş.' });

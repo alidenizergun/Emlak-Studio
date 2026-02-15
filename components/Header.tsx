@@ -236,7 +236,7 @@ const Header = () => {
 
                         <div className={styles.mobileCtaCard}>
                             <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
-                            <Link href="/login" className={styles.mobileLoginBtn}>Mevcut Hesaba Giriş Yap</Link>
+                            <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
                         </div>
                     </nav>
 
