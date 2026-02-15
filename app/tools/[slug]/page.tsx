@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { TOOLS } from '../toolsData';
-import styles from '../Tools.module.css'; // Reusing some styles
 
 export async function generateStaticParams() {
     return TOOLS.filter(t => t.href.startsWith('/tools/')).map((tool) => ({

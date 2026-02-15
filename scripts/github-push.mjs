@@ -118,7 +118,7 @@ async function main() {
     for (const node of treeRes.tree || []) {
       if (node.type === 'blob') basePathToSha[node.path] = node.sha;
     }
-  } catch (_) {}
+  } catch { /* ignore tree fetch */ }
 
   const localPaths = new Set(files);
   const treeEntries = [];

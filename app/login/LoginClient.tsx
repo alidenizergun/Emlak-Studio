@@ -139,7 +139,7 @@ export default function LoginClient() {
                     </ul>
                     <div className={styles.testimonial} key={currentTestimonial}>
                         <div className={styles.testimonialStars}>⭐⭐⭐⭐⭐</div>
-                        <p className={styles.testimonialText}>"{testimonial.text}"</p>
+                        <p className={styles.testimonialText}>&quot;{testimonial.text}&quot;</p>
                         <div className={styles.authorInfo}>
                             <p className={styles.testimonialAuthor}>{testimonial.author}</p>
                             <p className={styles.testimonialCompany}>{testimonial.company}</p>

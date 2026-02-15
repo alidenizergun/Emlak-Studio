@@ -161,7 +161,7 @@ const ComparisonSlider = ({
     useEffect(() => {
         if (!hintSlide || !hintVisible || hintPlayedRef.current) return;
         hintPlayedRef.current = true;
-        setHintPlaying(true);
+        const id = setTimeout(() => setHintPlaying(true), 0);
 
         const startDelay = 0;
         const duration = 1200;
@@ -189,6 +189,7 @@ const ComparisonSlider = ({
         const t4 = setTimeout(() => setHintPlaying(false), startDelay + duration * 3);
 
         return () => {
+            clearTimeout(id);
             clearTimeout(t1);
             clearTimeout(t2);
             clearTimeout(t3);

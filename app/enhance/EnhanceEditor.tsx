@@ -26,6 +26,7 @@ export default function EnhanceClient() {
 
             if (isSelected) {
                 // If selecting, remove 'auto' and set the new option
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentionally omit 'auto'
                 const { auto, ...others } = prev;
                 return { ...others, [id]: true };
             } else {

@@ -189,7 +189,7 @@
 .popupCol {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
     align-items: center;
     min-height: 0;
 }
@@ -353,6 +353,10 @@
     .popupImageWrap {
         min-height: 160px;
         max-height: 36vh;
+    }
+
+    .popupCol {
+        gap: 0.2rem;
     }
 
     .popupImages {

@@ -721,5 +721,23 @@
 
     .mobileToggle {
         display: block;
+        padding: 10px;
+    }
+
+    .hamburger {
+        width: 28px;
+        height: 22px;
+    }
+
+    .hamburger span {
+        height: 2.5px;
+    }
+
+    .hamburger.open span:nth-child(1) {
+        transform: translateY(9.75px) rotate(45deg);
+    }
+
+    .hamburger.open span:nth-child(3) {
+        transform: translateY(-9.75px) rotate(-45deg);
     }
 }

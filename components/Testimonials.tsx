@@ -8,9 +8,11 @@ const Testimonials = () => {
     const [visibleTestimonials, setVisibleTestimonials] = useState<typeof TESTIMONIALS>([]);
 
     useEffect(() => {
-        // Randomly select 4 testimonials to display initially
-        const shuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
-        setVisibleTestimonials(shuffled.slice(0, 4));
+        // Randomly select 4 testimonials to display initially (defer to satisfy lint: no sync setState in effect)
+        const t = setTimeout(() => {
+            const shuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
+            setVisibleTestimonials(shuffled.slice(0, 4));
+        }, 0);
 
         // Rotate every 8 seconds
         const interval = setInterval(() => {
@@ -18,7 +20,10 @@ const Testimonials = () => {
             setVisibleTestimonials(shuffled.slice(0, 4));
         }, 8000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearTimeout(t);
+            clearInterval(interval);
+        };
     }, []);
 
     return (
@@ -80,7 +85,7 @@ const Testimonials = () => {
                                     );
                                 })}
                             </div>
-                            <p className={styles.text}>"{testimonial.text}"</p>
+                            <p className={styles.text}>&quot;{testimonial.text}&quot;</p>
                             <div className={styles.authorInfo}>
                                 <p className={styles.authorName}>{testimonial.author}</p>
                                 <p className={styles.authorCompany}>{testimonial.company}</p>

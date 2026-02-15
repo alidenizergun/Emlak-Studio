@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './Header.module.css';
@@ -48,12 +48,14 @@ const Header = () => {
 
     // Set mounted state
     useEffect(() => {
-        setIsMounted(true);
+        const t = setTimeout(() => setIsMounted(true), 0);
+        return () => clearTimeout(t);
     }, []);
 
     // Close menu when route changes
     useEffect(() => {
-        setIsMenuOpen(false);
+        const t = setTimeout(() => setIsMenuOpen(false), 0);
+        return () => clearTimeout(t);
     }, [pathname]);
 
     // Close menu when resizing to desktop
@@ -240,7 +242,7 @@ const Header = () => {
                         </div>
                     </nav>
 
-                    <div className={styles.mobileMenuFooter} style={{ "--i": "4" } as any}>
+                    <div className={styles.mobileMenuFooter} style={{ "--i": "4" } as CSSProperties}>
                         <div className={styles.footerLinks}>
                             <Link href="/help" className={styles.footerLink}>
                                 {Icons.Support} <span>Yardım Merkezi</span>

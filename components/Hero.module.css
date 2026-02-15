@@ -347,6 +347,10 @@
         align-items: center;
     }
 
+    .title {
+        margin-top: 0.5em;
+    }
+
     .actions {
         align-self: center;
         margin-left: auto;
@@ -792,23 +796,26 @@
     }
 
     .heroPopupOverlay {
-        padding: 0.75rem;
-        align-items: center;
+        padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+        align-items: flex-start;
         justify-content: center;
     }
 
     .heroPopup {
-        max-height: calc(100vh - 1.5rem);
-        max-height: calc(100dvh - 1.5rem);
+        max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        width: 100%;
         overflow-y: auto;
+        overflow-x: hidden;
         transform: scale(1);
         animation: heroPopupInMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        flex-shrink: 1;
+        min-height: 0;
     }
 
     @keyframes heroPopupInMobile {
         from {
             opacity: 0;
-            transform: scale(0.96) translateY(12px);
+            transform: scale(0.96) translateY(8px);
         }
         to {
             opacity: 1;
@@ -816,22 +823,43 @@
         }
     }
 
+    .heroPopupClose {
+        top: 0.5rem;
+        right: max(0.5rem, env(safe-area-inset-right));
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        border-radius: 8px;
+    }
+
+    .heroPopupClose svg {
+        width: 16px;
+        height: 16px;
+    }
+
     .heroPopupImages {
         grid-template-columns: 1fr;
-        padding: 1rem 1.25rem 0.75rem;
+        padding: 0.5rem 1rem 0.5rem;
+        padding-top: 0.25rem;
     }
 
     .heroPopupImageWrap {
-        min-height: 140px;
-        max-height: min(38vh, 220px);
+        min-height: 120px;
+        max-height: min(32vh, 200px);
     }
 
     .heroPopupFooter {
         flex-direction: column;
-        padding: 1rem 1.25rem 1.25rem;
+        padding: 0.75rem 1rem 1rem;
     }
 
     .heroPopupCta {
         width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .heroPopupCtaHintWrap {
+        min-height: 2em;
     }
 }

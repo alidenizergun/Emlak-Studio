@@ -248,7 +248,7 @@ export default function ExamplesPage() {
             document.body.style.overflow = prevOverflow;
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, [popupExample]);
+    }, [popupExample, filteredExamples]);
 
     return (
         <div className={styles.container}>

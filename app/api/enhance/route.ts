@@ -48,8 +48,7 @@ export async function POST(request: NextRequest) {
             }
         ]);
 
-        const response = await result.response;
-        const text = response.text();
+        await result.response;
 
         // For now, return the base64 image (in production, Gemini would return enhanced image)
         return NextResponse.json({
@@ -58,10 +57,11 @@ export async function POST(request: NextRequest) {
             prompt: prompt // Include prompt for debugging
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Enhance API Error:', error);
+        const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json(
-            { success: false, error: error.message || 'İşlem başarısız oldu' },
+            { success: false, error: message },
             { status: 500 }
         );
     }

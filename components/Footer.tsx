@@ -42,6 +42,7 @@ const Footer = () => {
                         <li><Link href="/enhance">Fotoğraf Geliştirme</Link></li>
                         <li><Link href="/stage">Sanal Dekorasyon</Link></li>
                         <li><Link href="/tools">Metin Üretici</Link></li>
+                        <li><Link href="/">Tüm araçlar</Link></li>
                     </ul>
                 </div>
 
@@ -49,6 +50,7 @@ const Footer = () => {
                     <h4>Kurumsal</h4>
                     <ul>
                         <li><Link href="/about">Hakkımızda</Link></li>
+                        <li><Link href="/help">Yardım Merkezi</Link></li>
                         <li><Link href="/blog">Blog</Link></li>
                         <li><Link href="/contact">İletişim</Link></li>
                     </ul>
