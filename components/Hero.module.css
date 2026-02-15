@@ -461,3 +461,169 @@
         min-height: 2.25em;
     }
 }
+
+/* Hero büyütme butonu (Examples ile aynı ikon) */
+.heroZoomBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 15;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    color: #0f172a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.heroZoomBtn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.heroPopupOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: heroPopupFadeIn 0.2s ease;
+}
+
+@keyframes heroPopupFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.heroPopup {
+    background: var(--card-bg);
+    border-radius: 16px;
+    max-width: 1680px;
+    width: 98%;
+    max-height: 94vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    padding: 2rem;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+.heroPopupClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    z-index: 2;
+    transition: background 0.2s ease;
+}
+
+.heroPopupClose:hover {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.heroPopupImages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: end;
+}
+
+.heroPopupCol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 0;
+}
+
+.heroPopupImageWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    min-height: 480px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5),
+        0 0 16px rgba(255, 255, 255, 0.35),
+        0 0 32px rgba(255, 255, 255, 0.15);
+}
+
+.heroPopupImageWrapNoFrame {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.heroPopupImageWrapBefore {
+    filter: brightness(0.8);
+}
+
+.heroPopupLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    text-align: center;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.heroPopupLabelStar {
+    display: inline-flex;
+    color: #fde047;
+    filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.95)) drop-shadow(0 0 22px rgba(253, 224, 71, 0.7)) drop-shadow(0 0 36px rgba(253, 224, 71, 0.4));
+    animation: starSparkle 1.6s ease-in-out infinite;
+}
+
+@keyframes starSparkle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+}
+
+@media (max-width: 768px) {
+    .heroZoomBtn {
+        top: 8px;
+        right: 8px;
+        width: 44px;
+        height: 44px;
+    }
+
+    .heroZoomBtn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .heroPopup {
+        width: calc(100% - 2rem);
+        max-height: 95vh;
+        padding: 1rem;
+    }
+
+    .heroPopupImages {
+        grid-template-columns: 1fr;
+    }
+
+    .heroPopupImageWrap {
+        min-height: 280px;
+    }
+}

@@ -334,7 +334,7 @@ export default function ExamplesPage() {
                         </button>
                         <div className={styles.popupImages}>
                             <div className={styles.popupCol}>
-                                <div className={styles.popupImageWrap}>
+                                <div className={`${styles.popupImageWrap} ${styles.popupImageWrapNoFrame}`}>
                                     <div className={styles.popupImageWrapBeforeInner}>
                                         <Image src={popupExample.before} alt="Önce" fill sizes="50vw" style={{ objectFit: 'contain' }} />
                                     </div>

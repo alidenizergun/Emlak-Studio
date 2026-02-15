@@ -221,6 +221,12 @@
     }
 }
 
+.popupImageWrapNoFrame {
+    border: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+}
+
 .popupImageWrapBeforeInner {
     position: absolute;
     inset: 0;

@@ -65,6 +65,10 @@
     object-position: center;
 }
 
+.imageWrapperAfterBright {
+    filter: brightness(1.02);
+}
+
 .sliderHandle {
     position: absolute;
     top: 0;

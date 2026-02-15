@@ -1,12 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import ComparisonSlider from './ComparisonSlider';
 import styles from './Hero.module.css';
 
+const HERO_BEFORE = '/images/hero-before-v18.png';
+const HERO_AFTER = '/images/hero-after-v16.png';
+
 const Hero = () => {
     const [sliderPosition, setSliderPosition] = useState(50);
+    const [heroPopupOpen, setHeroPopupOpen] = useState(false);
+
+    useEffect(() => {
+        if (!heroPopupOpen) return;
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setHeroPopupOpen(false); };
+        window.addEventListener('keydown', onKeyDown);
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, [heroPopupOpen]);
 
     return (
         <section className={styles.hero}>
@@ -59,11 +76,25 @@ const Hero = () => {
                 <div className={styles.visual}>
                     <div className={styles.sliderWrapper}>
                         <ComparisonSlider
-                            beforeImage="/images/hero-before-v18.png"
-                            afterImage="/images/hero-after-v16.png"
+                            beforeImage={HERO_BEFORE}
+                            afterImage={HERO_AFTER}
                             onPositionChange={setSliderPosition}
                             hintSlide
+                            brightenAfter
                         />
+                        <button
+                            type="button"
+                            className={styles.heroZoomBtn}
+                            onClick={(e) => { e.stopPropagation(); setHeroPopupOpen(true); }}
+                            aria-label="Büyüt"
+                        >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M15 3h6v6" />
+                                <path d="M9 21H3v-6" />
+                                <path d="M21 3l-7 7" />
+                                <path d="M3 21l7-7" />
+                            </svg>
+                        </button>
                         <div className={styles.sliderLabel}>
                             <span
                                 className={`${styles.labelBefore} ${sliderPosition <= 50 ? styles.labelGlow : ''}`}
@@ -87,6 +118,37 @@ const Hero = () => {
                     </div>
                 </div>
             </div>
+
+            {heroPopupOpen && (
+                <div className={styles.heroPopupOverlay} onClick={() => setHeroPopupOpen(false)}>
+                    <div className={styles.heroPopup} onClick={(e) => e.stopPropagation()}>
+                        <button type="button" className={styles.heroPopupClose} onClick={() => setHeroPopupOpen(false)} aria-label="Kapat">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
+                        <div className={styles.heroPopupImages}>
+                            <div className={styles.heroPopupCol}>
+                                <div className={`${styles.heroPopupImageWrap} ${styles.heroPopupImageWrapBefore} ${styles.heroPopupImageWrapNoFrame}`}>
+                                    <Image src={HERO_BEFORE} alt="Önce" fill sizes="50vw" style={{ objectFit: 'contain' }} />
+                                </div>
+                                <span className={styles.heroPopupLabel}>Önce</span>
+                            </div>
+                            <div className={styles.heroPopupCol}>
+                                <div className={styles.heroPopupImageWrap}>
+                                    <Image src={HERO_AFTER} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="50vw" style={{ objectFit: 'contain' }} />
+                                </div>
+                                <span className={styles.heroPopupLabel}>
+                                    Yapay Zeka ile Dekore Edildikten Sonra
+                                    <span className={styles.heroPopupLabelStar} aria-hidden>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                                        </svg>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

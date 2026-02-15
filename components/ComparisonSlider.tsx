@@ -27,6 +27,8 @@ interface ComparisonSliderProps {
     preserveAspect?: boolean;
     /** true ise ipucu animasyonu en sola ve en sağa gider (ör. Examples sayfası) */
     hintFullRange?: boolean;
+    /** true ise "sonra" (dekore edilmiş) görseli %2 daha parlak gösterilir (örn. Hero) */
+    brightenAfter?: boolean;
 }
 
 const ComparisonSlider = ({
@@ -38,7 +40,8 @@ const ComparisonSlider = ({
     onPositionChange,
     hintSlide = false,
     preserveAspect = false,
-    hintFullRange = false
+    hintFullRange = false,
+    brightenAfter = false
 }: ComparisonSliderProps) => {
     const [isResizing, setIsResizing] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -204,7 +207,7 @@ const ComparisonSlider = ({
             onTouchMove={handleMouseMove}
             style={{ ['--slider-position' as string]: safePosition }}
         >
-            <div className={styles.imageWrapperAfter}>
+            <div className={`${styles.imageWrapperAfter} ${brightenAfter ? styles.imageWrapperAfterBright : ''}`}>
                 <Image
                     src={afterImage}
                     alt={afterAlt}
