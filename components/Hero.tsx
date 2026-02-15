@@ -16,11 +16,14 @@ const Hero = () => {
     useEffect(() => {
         if (!heroPopupOpen) return;
         const prevOverflow = document.body.style.overflow;
+        const prevOverflowX = document.body.style.overflowX;
         document.body.style.overflow = 'hidden';
+        document.body.style.overflowX = 'hidden';
         const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setHeroPopupOpen(false); };
         window.addEventListener('keydown', onKeyDown);
         return () => {
             document.body.style.overflow = prevOverflow;
+            document.body.style.overflowX = prevOverflowX;
             window.removeEventListener('keydown', onKeyDown);
         };
     }, [heroPopupOpen]);
@@ -61,15 +64,15 @@ const Hero = () => {
                         </li>
                     </ul>
                     <div className={styles.actions}>
+                        <Link href="/register" className={styles.primaryBtn}>
+                            Hemen Ücretsiz Dene
+                        </Link>
+
                         <Link href="/examples" className={styles.secondaryBtn} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
                             Örnekleri İncele
-                        </Link>
-
-                        <Link href="/register" className={styles.primaryBtn}>
-                            Hemen Ücretsiz Dene
                         </Link>
                     </div>
                 </div>
@@ -88,7 +91,7 @@ const Hero = () => {
                             onClick={(e) => { e.stopPropagation(); setHeroPopupOpen(true); }}
                             aria-label="Büyüt"
                         >
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M15 3h6v6" />
                                 <path d="M9 21H3v-6" />
                                 <path d="M21 3l-7 7" />
@@ -123,7 +126,7 @@ const Hero = () => {
                 <div className={styles.heroPopupOverlay} onClick={() => setHeroPopupOpen(false)}>
                     <div className={styles.heroPopup} onClick={(e) => e.stopPropagation()}>
                         <button type="button" className={styles.heroPopupClose} onClick={() => setHeroPopupOpen(false)} aria-label="Kapat">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                         <div className={styles.heroPopupImages}>
                             <div className={styles.heroPopupCol}>
@@ -133,8 +136,8 @@ const Hero = () => {
                                 <span className={styles.heroPopupLabel}>Önce</span>
                             </div>
                             <div className={styles.heroPopupCol}>
-                                <div className={styles.heroPopupImageWrap}>
-                                    <Image src={HERO_AFTER} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="50vw" style={{ objectFit: 'contain' }} />
+                                <div className={`${styles.heroPopupImageWrap} ${styles.heroPopupImageWrapAfter}`}>
+                                    <Image src={HERO_AFTER} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="50vw" style={{ objectFit: 'cover' }} />
                                 </div>
                                 <span className={styles.heroPopupLabel}>
                                     Yapay Zeka ile Dekore Edildikten Sonra

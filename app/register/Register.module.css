@@ -277,6 +277,69 @@
     margin-top: -0.25rem;
 }
 
+.sendOtpBtn {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+.sendOtpBtn:hover {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 40%, #15803d 100%);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+.sendOtpBtn:disabled {
+    opacity: 0.85;
+    cursor: not-allowed;
+}
+
+.otpSentNote {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+.otpInput {
+    text-align: center;
+    letter-spacing: 0.35em;
+    font-size: 1.25rem;
+}
+
+.resendNote {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+}
+
+.resendButton {
+    background: none;
+    border: none;
+    color: #2563EB;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    padding: 0;
+}
+
+.resendButton:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+.resendButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .passwordWrapper {
     position: relative;
 }

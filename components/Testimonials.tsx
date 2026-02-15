@@ -25,9 +25,9 @@ const Testimonials = () => {
         <section className={styles.testimonialsSection}>
             <div className={`container ${styles.testimonialsContainer}`}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Emlakçılar Ne Diyor?</h2>
+                    <h2 className={styles.title}>Logo Emlak AIStudio ile çalışan emlakçılar satışlarını artırıyor!</h2>
                     <p className={styles.subtitle}>
-                        Türkiye'nin dört bir yanından {TESTIMONIALS.length}+ emlakçının deneyimleri
+                        Türkiye&apos;nin dört bir yanından {TESTIMONIALS.length}+ emlakçının deneyimleri
                     </p>
                 </div>
 

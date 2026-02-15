@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './ComparisonSlider.module.css';
 
-/** Tüm sitedeki slider handle ikonu — tek yerden güncellenir (Hero, Examples, enhance, stage). */
+/** Tüm sitedeki slider handle ikonu — beyaz arka plan üzerinde koyu stroke (currentColor). */
 const SLIDER_HANDLE_ICON = (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M10 12H4" />
         <path d="M20 12h-6" />
         <path d="M8 8L4 12l4 4" />
