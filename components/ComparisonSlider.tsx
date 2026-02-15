@@ -4,6 +4,16 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './ComparisonSlider.module.css';
 
+/** Tüm sitedeki slider handle ikonu — tek yerden güncellenir (Hero, Examples, enhance, stage). */
+const SLIDER_HANDLE_ICON = (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10 12H4" />
+        <path d="M20 12h-6" />
+        <path d="M8 8L4 12l4 4" />
+        <path d="M16 8l4 4-4 4" />
+    </svg>
+);
+
 interface ComparisonSliderProps {
     beforeImage: string;
     afterImage: string;
@@ -11,6 +21,12 @@ interface ComparisonSliderProps {
     afterAlt?: string;
     degradeBefore?: boolean;
     onPositionChange?: (position: number) => void;
+    /** Ana sayfada ilk görüşte sol-sağ kaydırma ipucu (sadece bir kez) */
+    hintSlide?: boolean;
+    /** true ise sadece aspect-ratio kullanılır (ör. Examples grid), sabit 500px uygulanmaz */
+    preserveAspect?: boolean;
+    /** true ise ipucu animasyonu en sola ve en sağa gider (ör. Examples sayfası) */
+    hintFullRange?: boolean;
 }
 
 const ComparisonSlider = ({
@@ -19,11 +35,18 @@ const ComparisonSlider = ({
     beforeAlt = "Boş Oda",
     afterAlt = "Yapay Zeka ile Dekorasyon",
     degradeBefore = false,
-    onPositionChange
+    onPositionChange,
+    hintSlide = false,
+    preserveAspect = false,
+    hintFullRange = false
 }: ComparisonSliderProps) => {
     const [isResizing, setIsResizing] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
+    const [hintPlaying, setHintPlaying] = useState(false);
+    const [hintVisible, setHintVisible] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
+    const hintPlayedRef = useRef(false);
+    const visibilityTriggeredRef = useRef(false);
 
     const handleMouseDown = () => setIsResizing(true);
     const handleMouseUp = () => setIsResizing(false);
@@ -59,55 +82,166 @@ const ComparisonSlider = ({
         };
     }, []);
 
-    return (
+    // Slider %100 görünür olduğunda ipucunu başlat (desktop + mobil); mobilde scroll ile tam görünce de tetiklenir
+    useEffect(() => {
+        if (!hintSlide || !sliderRef.current) return;
+        const el = sliderRef.current;
+
+        const triggerHint = () => {
+            if (visibilityTriggeredRef.current) return;
+            visibilityTriggeredRef.current = true;
+            setHintVisible(true);
+        };
+
+        const checkFullyVisible = () => {
+            const rect = el.getBoundingClientRect();
+            if (typeof window === 'undefined') return false;
+            const vp = window.visualViewport;
+            if (vp) {
+                const top = rect.top - vp.offsetTop;
+                const bottom = rect.bottom - vp.offsetTop;
+                const left = rect.left - vp.offsetLeft;
+                const right = rect.right - vp.offsetLeft;
+                return top >= 0 && bottom <= vp.height && left >= 0 && right <= vp.width;
+            }
+            return rect.top >= 0 && rect.bottom <= window.innerHeight && rect.left >= 0 && rect.right <= window.innerWidth;
+        };
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[0];
+                if (!entry?.isIntersecting) return;
+                if (entry.intersectionRatio >= 1) {
+                    triggerHint();
+                    observer.disconnect();
+                }
+            },
+            { threshold: [0, 0.5, 0.99, 1], rootMargin: '0px', root: null }
+        );
+        observer.observe(el);
+
+        // Desktop: sayfa açıldığında slider zaten tam görünürse observer bazen 1 vermeyebilir; fallback
+        const fallbackId = setTimeout(() => {
+            if (checkFullyVisible()) triggerHint();
+        }, 150);
+
+        // Mobil: kullanıcı scroll edip hero %100 görünce tetikle (observer bazen mobilde ratio 1 vermeyebilir)
+        let rafId = 0;
+        const onScrollOrResize = () => {
+            if (visibilityTriggeredRef.current) return;
+            rafId = requestAnimationFrame(() => {
+                if (checkFullyVisible()) triggerHint();
+            });
+        };
+        window.addEventListener('scroll', onScrollOrResize, { passive: true });
+        window.addEventListener('resize', onScrollOrResize);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('scroll', onScrollOrResize, { passive: true });
+            window.visualViewport.addEventListener('resize', onScrollOrResize);
+        }
+
+        return () => {
+            observer.disconnect();
+            clearTimeout(fallbackId);
+            cancelAnimationFrame(rafId);
+            window.removeEventListener('scroll', onScrollOrResize);
+            window.removeEventListener('resize', onScrollOrResize);
+            if (typeof window !== 'undefined' && window.visualViewport) {
+                window.visualViewport.removeEventListener('scroll', onScrollOrResize);
+                window.visualViewport.removeEventListener('resize', onScrollOrResize);
+            }
+        };
+    }, [hintSlide]);
+
+    // İpucu: görünür olduktan sonra konumu kare kare güncelle — handle ve kesim senkron
+    const hintRafRef = useRef<number>(0);
+    useEffect(() => {
+        if (!hintSlide || !hintVisible || hintPlayedRef.current) return;
+        hintPlayedRef.current = true;
+        setHintPlaying(true);
+
+        const startDelay = 0;
+        const duration = 1200;
+        const linear = (t: number) => t;
+
+        const runPhase = (from: number, to: number, phaseDuration: number) => {
+            cancelAnimationFrame(hintRafRef.current);
+            const phaseStart = performance.now();
+            const tick = (now: number) => {
+                const elapsed = now - phaseStart;
+                const t = Math.min(elapsed / phaseDuration, 1);
+                const value = from + (to - from) * linear(t);
+                setSliderPosition(value);
+                onPositionChange?.(value);
+                if (t < 1) hintRafRef.current = requestAnimationFrame(tick);
+            };
+            hintRafRef.current = requestAnimationFrame(tick);
+        };
+
+        const left = hintFullRange ? 5 : 25.5;
+        const right = hintFullRange ? 95 : 74.5;
+        const t1 = setTimeout(() => runPhase(50, right, duration), startDelay);
+        const t2 = setTimeout(() => runPhase(right, left, duration), startDelay + duration);
+        const t3 = setTimeout(() => runPhase(left, 50, duration), startDelay + duration * 2);
+        const t4 = setTimeout(() => setHintPlaying(false), startDelay + duration * 3);
+
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+            clearTimeout(t3);
+            clearTimeout(t4);
+            cancelAnimationFrame(hintRafRef.current);
+        };
+    }, [hintSlide, hintVisible, onPositionChange, hintFullRange]);
+
+    const safePosition = Math.max(0.5, Math.min(99.5, sliderPosition));
+
+        return (
         <div
-            className={styles.container}
+            className={`${styles.container} ${preserveAspect ? styles.containerPreserveAspect : ''}`}
             ref={sliderRef}
             onMouseMove={handleMouseMove}
             onTouchMove={handleMouseMove}
+            style={{ ['--slider-position' as string]: safePosition }}
         >
-            <div className={styles.imageWrapper}>
+            <div className={styles.imageWrapperAfter}>
                 <Image
                     src={afterImage}
                     alt={afterAlt}
                     fill
                     quality={100}
                     priority
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
                     draggable={false}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                 />
             </div>
             <div
-                className={styles.imageWrapper}
-                style={{
-                    clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
-                    filter: degradeBefore ? 'brightness(0.7) contrast(1.1) sepia(0.2)' : 'none'
-                }}
+                className={styles.beforeClip}
+                style={{ filter: degradeBefore ? 'brightness(0.7) contrast(1.1) sepia(0.2)' : 'none' }}
             >
-                <Image
-                    src={beforeImage}
-                    alt={beforeAlt}
-                    fill
-                    quality={100}
-                    priority
-                    style={{ objectFit: 'cover' }}
-                    draggable={false}
-                />
+                <div className={styles.beforeInner}>
+                    <Image
+                        src={beforeImage}
+                        alt={beforeAlt}
+                        fill
+                        quality={100}
+                        priority
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                        draggable={false}
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                </div>
             </div>
             <div
-                className={styles.sliderHandle}
-                style={{ left: `${sliderPosition}%` }}
+                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying ? styles.sliderHandleNoTransition : ''}`}
+                style={{ left: `${safePosition}%` }}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleMouseDown}
             >
                 <div className={styles.handleLine} />
                 <div className={styles.handleCircle}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        {/* Left arrow */}
-                        <path d="M11 17l-5-5 5-5" />
-                        {/* Right arrow */}
-                        <path d="M13 7l5 5-5 5" />
-                    </svg>
+                    {SLIDER_HANDLE_ICON}
                 </div>
             </div>
         </div>

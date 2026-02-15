@@ -81,28 +81,35 @@ export default function LoginClient() {
         <div className={styles.pageContainer}>
             <div className={styles.leftPanel}>
                 <div className={styles.leftContent}>
-                    <h2 className={styles.benefitsTitle}>Tekrar Hoş Geldiniz!</h2>
+                    <h2 className={styles.benefitsTitle}>Neden Emlak AIStudio?</h2>
 
                     <ul className={styles.benefitsList}>
                         <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>🏡</div>
+                            <div className={styles.benefitIcon}>✨</div>
                             <div>
-                                <h3>Portföy Yönetimi</h3>
-                                <p>Tüm ilanlarınızı ve tasarımlarınızı tek yerden yönetin</p>
+                                <h3>Fotoğraf Geliştirme & Sanal Dekorasyon</h3>
+                                <p>Düşük çözünürlüklü fotoğrafları 4K'ya yükseltin; boş odaları yapay zeka ile modern mobilyalarla döşeyin.</p>
                             </div>
                         </li>
                         <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>💎</div>
+                            <div className={styles.benefitIcon}>⚡</div>
                             <div>
-                                <h3>Özel Stil Kütüphanesi</h3>
-                                <p>Kendi tarzınızı oluşturun ve ilanlarınıza yansıtın</p>
+                                <h3>Saniyeler İçinde Sonuç</h3>
+                                <p>Manuel çekim veya dekoratör beklemeden ilan görsellerinizi tek platformda hazırlayın.</p>
                             </div>
                         </li>
                         <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>📈</div>
+                            <div className={styles.benefitIcon}>💰</div>
                             <div>
-                                <h3>Performans Takibi</h3>
-                                <p>İlanlarınızın aldığı etkileşimi ve dönüşümleri izleyin</p>
+                                <h3>Maliyet Tasarrufu</h3>
+                                <p>Profesyonel fotoğrafçı ve sanal dekorasyon hizmetlerine kıyasla çok daha uygun maliyetle çalışın.</p>
+                            </div>
+                        </li>
+                        <li className={styles.benefitItem}>
+                            <div className={styles.benefitIcon}>🏆</div>
+                            <div>
+                                <h3>Tüm Araçlar Tek Yerde</h3>
+                                <p>Geliştirme, sanal dekorasyon, gökyüzü değiştirme, ilan metni ve daha fazlası—emlak ilanlarınız için ihtiyacınız olan her şey.</p>
                             </div>
                         </li>
                     </ul>

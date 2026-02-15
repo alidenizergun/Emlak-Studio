@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ComparisonSlider from '../../components/ComparisonSlider';
 import TrialCTA from '../../components/TrialCTA';
 import styles from './Examples.module.css';
+
+type ExampleItem = { id: number; title: string; category: string; categoryId: string; before: string; after: string };
 
 const CATEGORIES = [
     { id: 'all', label: 'Tümü' },
@@ -212,10 +215,40 @@ const EXAMPLES = [
 
 export default function ExamplesPage() {
     const [activeCategory, setActiveCategory] = useState('all');
+    const [popupExample, setPopupExample] = useState<ExampleItem | null>(null);
 
     const filteredExamples = activeCategory === 'all'
         ? EXAMPLES
         : EXAMPLES.filter(ex => ex.categoryId === activeCategory);
+
+    // Body scroll lock, Escape to close, Arrow keys for prev/next when popup is open
+    useEffect(() => {
+        if (!popupExample) return;
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setPopupExample(null);
+                return;
+            }
+            if (filteredExamples.length === 0) return;
+            const currentIndex = filteredExamples.findIndex(ex => ex.id === popupExample.id);
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prev = currentIndex > 0 ? filteredExamples[currentIndex - 1] : filteredExamples[filteredExamples.length - 1];
+                setPopupExample(prev);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const next = currentIndex < filteredExamples.length - 1 ? filteredExamples[currentIndex + 1] : filteredExamples[0];
+                setPopupExample(next);
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, [popupExample]);
 
     return (
         <div className={styles.container}>
@@ -249,17 +282,83 @@ export default function ExamplesPage() {
                                 beforeImage={ex.before}
                                 afterImage={ex.after}
                                 degradeBefore={true}
+                                preserveAspect
                             />
-                        </div>
-                        <div className={styles.cardContent}>
-                            <h3 className={styles.cardTitle}>{ex.title}</h3>
-                            <span className={styles.categoryTag}>
-                                {ex.category}
-                            </span>
+                            <button
+                                type="button"
+                                className={styles.zoomBtn}
+                                onClick={(e) => { e.stopPropagation(); setPopupExample(ex); }}
+                                aria-label="Büyüt"
+                            >
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M15 3h6v6" />
+                                    <path d="M9 21H3v-6" />
+                                    <path d="M21 3l-7 7" />
+                                    <path d="M3 21l7-7" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {popupExample && (() => {
+                const currentIndex = filteredExamples.findIndex(ex => ex.id === popupExample.id);
+                const prevExample = currentIndex > 0 ? filteredExamples[currentIndex - 1] : filteredExamples[filteredExamples.length - 1];
+                const nextExample = currentIndex < filteredExamples.length - 1 ? filteredExamples[currentIndex + 1] : filteredExamples[0];
+                return (
+                <div className={styles.popupOverlay} onClick={() => setPopupExample(null)}>
+                    {filteredExamples.length > 0 && (
+                        <button
+                            type="button"
+                            className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
+                            onClick={(e) => { e.stopPropagation(); setPopupExample(prevExample); }}
+                            aria-label="Önceki örnek"
+                        >
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                        </button>
+                    )}
+                    {filteredExamples.length > 0 && (
+                        <button
+                            type="button"
+                            className={`${styles.popupArrow} ${styles.popupArrowRight}`}
+                            onClick={(e) => { e.stopPropagation(); setPopupExample(nextExample); }}
+                            aria-label="Sonraki örnek"
+                        >
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                        </button>
+                    )}
+                    <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+                        <button type="button" className={styles.popupClose} onClick={() => setPopupExample(null)} aria-label="Kapat">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
+                        <div className={styles.popupImages}>
+                            <div className={styles.popupCol}>
+                                <div className={styles.popupImageWrap}>
+                                    <div className={styles.popupImageWrapBeforeInner}>
+                                        <Image src={popupExample.before} alt="Önce" fill sizes="50vw" style={{ objectFit: 'contain' }} />
+                                    </div>
+                                </div>
+                                <span className={styles.popupLabel}>Önce</span>
+                            </div>
+                            <div className={styles.popupCol}>
+                                <div className={styles.popupImageWrap}>
+                                    <Image src={popupExample.after} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="50vw" style={{ objectFit: 'contain' }} />
+                                </div>
+                                <span className={styles.popupLabel}>
+                                    Yapay Zeka ile Dekore Edildikten Sonra
+                                    <span className={styles.popupLabelStar} aria-hidden>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                                        </svg>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                );
+            })()}
 
             <TrialCTA />
         </div>

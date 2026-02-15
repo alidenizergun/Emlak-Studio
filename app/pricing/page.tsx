@@ -6,12 +6,12 @@ import styles from '../../components/Pricing.module.css';
 const PRICING_TIERS = [
     {
         name: "Danışman",
-        price: "₺349",
+        price: "₺1.199",
         period: "/ay",
         description: "",
         features: [
-            "60 Kredi (Aylık)",
-            "30 fotoğrafa kadar yetebilir",
+            "100 Kredi (Aylık)",
+            "Yaklaşık 50 ilan görseli",
             "Tüm AI Modelleri",
             "Hızlı İşlem Önceliği",
             "Ticari Kullanım İzni",
@@ -23,12 +23,12 @@ const PRICING_TIERS = [
     },
     {
         name: "Ofis",
-        price: "₺699",
+        price: "₺1.999",
         period: "/ay",
         description: "",
         features: [
-            "150 Kredi (Aylık)",
-            "75 fotoğrafa kadar yetebilir",
+            "200 Kredi (Aylık)",
+            "Yaklaşık 100 ilan görseli",
             "Tüm AI Modelleri",
             "Hızlı İşlem Önceliği",
             "Ticari Kullanım İzni",
@@ -40,12 +40,12 @@ const PRICING_TIERS = [
     },
     {
         name: "Kurumsal",
-        price: "₺1.499",
+        price: "₺4.999",
         period: "/ay",
         description: "",
         features: [
-            "400 Kredi (Aylık)",
-            "200 fotoğrafa kadar yetebilir",
+            "500 Kredi (Aylık)",
+            "Yaklaşık 250 ilan görseli",
             "Tüm AI Modelleri",
             "Hızlı İşlem Önceliği",
             "Ticari Kullanım İzni",
@@ -60,7 +60,7 @@ const PRICING_TIERS = [
 const FAQ_ITEMS = [
     {
         question: "💳 Kredi nedir ve nasıl kullanılır?",
-        answer: "1 kredi, 1 odayı sanal olarak dekore etmek veya düzenlemek anlamına gelir. Kredilerinizi ay boyunca dilediğiniz zaman kullanabilirsiniz. Örneğin bir dairenin salonunu, yatak odasını ve mutfağını düzenlemek 3 kredi harcar."
+        answer: "1 kredi, 1 odayı sanal olarak dekore etmek veya düzenlemek anlamına gelir. Ortalama 2 kredi 1 ilan görseline denk gelir (ör. 100 kredi ile yaklaşık 50 ilan görseli). Kredilerinizi ay boyunca dilediğiniz zaman kullanabilirsiniz."
     },
     {
         question: "🔄 Planımı sonradan değiştirebilir miyim?",

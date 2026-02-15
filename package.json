@@ -4,10 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname localhost --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "github-push": "node scripts/github-push.mjs",
+    "test:slider": "node scripts/test-slider-hint.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

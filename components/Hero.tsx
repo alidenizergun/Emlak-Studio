@@ -62,22 +62,23 @@ const Hero = () => {
                             beforeImage="/images/hero-before-v18.png"
                             afterImage="/images/hero-after-v16.png"
                             onPositionChange={setSliderPosition}
+                            hintSlide
                         />
                         <div className={styles.sliderLabel}>
                             <span
-                                className={styles.labelBefore}
+                                className={`${styles.labelBefore} ${sliderPosition <= 50 ? styles.labelGlow : ''}`}
                                 style={{
                                     opacity: sliderPosition > 20 ? 1 : 0,
-                                    transition: 'opacity 0.3s ease'
+                                    transition: 'opacity 0.3s ease, box-shadow 0.3s ease'
                                 }}
                             >
                                 Boş Oda
                             </span>
                             <span
-                                className={styles.labelAfter}
+                                className={`${styles.labelAfter} ${sliderPosition >= 50 ? styles.labelGlow : ''}`}
                                 style={{
                                     opacity: sliderPosition < 80 ? 1 : 0,
-                                    transition: 'opacity 0.3s ease'
+                                    transition: 'opacity 0.3s ease, box-shadow 0.3s ease'
                                 }}
                             >
                                 Yapay Zeka ile Dekorasyon

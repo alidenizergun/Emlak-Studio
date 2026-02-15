@@ -4,7 +4,7 @@
     min-height: 50vh;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .backgroundGlow {
@@ -20,12 +20,12 @@
     filter: blur(80px);
 }
 
+/* Global .container ile aynı hizada (logo + Ücretsiz Dene) */
 .container {
     display: grid;
     grid-template-columns: 0.9fr 1.6fr;
     gap: 2.5rem;
     align-items: end;
-    /* Align bottoms */
 }
 
 .content {
@@ -132,16 +132,16 @@
 }
 
 .primaryBtn {
-    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 50%, #1E3A8A 100%);
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
     color: white;
     padding: 0.875rem 2rem;
     border-radius: 12px;
     font-weight: 700;
     font-size: 1rem;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25),
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35),
         0 2px 8px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: none;
     position: relative;
     overflow: hidden;
@@ -172,15 +172,15 @@
 
 .primaryBtn:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4),
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.45),
         0 4px 12px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 40%, #1E3A8A 90%);
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 40%, #15803d 90%);
 }
 
 .primaryBtn:active {
     transform: translateY(-1px) scale(1.01);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
 }
 
 .secondaryBtn {
@@ -267,8 +267,28 @@
     position: relative;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--card-border);
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.6),
+        0 0 24px rgba(255, 255, 255, 0.25),
+        0 0 48px rgba(253, 230, 138, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    isolation: isolate;
+    animation: frameGlow 4s ease-in-out infinite;
+}
+
+@keyframes frameGlow {
+    0%, 100% {
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.5),
+            0 0 20px rgba(255, 255, 255, 0.2),
+            0 0 40px rgba(253, 230, 138, 0.1);
+    }
+    50% {
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.85),
+            0 0 32px rgba(255, 255, 255, 0.4),
+            0 0 56px rgba(253, 230, 138, 0.25);
+    }
 }
 
 .sliderLabel {
@@ -278,27 +298,35 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
     padding: 0 20px;
     pointer-events: none;
     z-index: 20;
+    gap: 8px;
 }
 
 .labelBefore,
 .labelAfter {
-    background: rgba(0, 0, 0, 0.4);
-    border: 2px solid rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     color: white;
     padding: 6px 14px;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.3px;
     text-transform: uppercase;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4),
-        0 0 40px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
     white-space: nowrap;
+}
+
+.labelGlow {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.45),
+        0 0 40px rgba(255, 255, 255, 0.2),
+        0 2px 12px rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.95);
 }
 
 @media (max-width: 1024px) {
@@ -308,18 +336,42 @@
         gap: 2.5rem;
     }
 
+    .content {
+        align-items: center;
+    }
+
+    .actions {
+        align-self: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .visual {
         height: auto !important;
         min-height: 0 !important;
         aspect-ratio: 4/3;
         max-width: 500px;
         margin: 0 auto;
+        transform: none;
+        width: 100%;
     }
 
     .sliderWrapper {
         height: auto !important;
         width: 100%;
         display: block;
+        border-radius: 16px;
+    }
+
+    .sliderLabel {
+        padding: 0 16px;
+        bottom: 16px;
+    }
+
+    .labelBefore,
+    .labelAfter {
+        font-size: 0.7rem;
+        padding: 6px 10px;
     }
 
     .stats {
@@ -329,30 +381,83 @@
 
 @media (max-width: 640px) {
     .hero {
-        padding-top: 120px;
+        padding-top: 100px;
         align-items: flex-start;
         min-height: auto;
+        overflow-x: hidden;
+    }
+
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 
     .visual {
         aspect-ratio: 16/10;
         max-width: 100%;
+        width: 100%;
         height: auto !important;
+        transform: none;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .sliderWrapper {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
     }
 
     .sliderLabel {
         position: absolute;
-        bottom: 12px;
+        bottom: 10px;
         left: 0;
         width: 100%;
-        padding: 0 12px;
+        padding: 0 10px;
         margin: 0;
         z-index: 30;
+        justify-content: space-between;
+        gap: 6px;
     }
 
     .labelBefore,
     .labelAfter {
-        font-size: 0.65rem;
-        padding: 4px 8px;
+        font-size: 0.7rem;
+        padding: 6px 10px;
+        white-space: normal;
+        line-height: 1.25;
+        max-width: 48%;
+        text-align: center;
+        min-height: 2.5em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        padding-top: 88px;
+    }
+
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .visual {
+        aspect-ratio: 4/3;
+    }
+
+    .sliderLabel {
+        bottom: 8px;
+        padding: 0 8px;
+    }
+
+.labelBefore,
+.labelAfter {
+        font-size: 0.7rem;
+        padding: 5px 8px;
+        min-height: 2.25em;
     }
 }

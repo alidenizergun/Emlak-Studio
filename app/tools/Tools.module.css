@@ -82,13 +82,61 @@
     font-size: 0.95rem;
 }
 
-.badge {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+.badgeCorner {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(37, 99, 235, 0.2);
+    color: var(--primary);
     font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+    border: 1px solid rgba(37, 99, 235, 0.35);
+}
+
+@media (max-width: 768px) {
+    .pageContainer {
+        padding-top: 88px;
+        padding-bottom: 2.5rem;
+    }
+
+    .header {
+        margin-bottom: 2.5rem;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .description {
+        font-size: 0.95rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .card {
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+
+    .cardTitle {
+        font-size: 1.05rem;
+    }
+
+    .cardDescription {
+        font-size: 0.9rem;
+    }
+
+    .badgeCorner {
+        top: 8px;
+        right: 8px;
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
 }

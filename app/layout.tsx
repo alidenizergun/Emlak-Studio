@@ -7,12 +7,12 @@ import Footer from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Emlak AIStudio - Yapay Zeka ile Emlak Görselleştirme | AI Fotoğraf Düzenleme",
+  title: "Emlak AISTUDIO - Yapay Zeka ile Emlak Görselleştirme | AI Fotoğraf Düzenleme",
   description: "Emlak ilanlarınızı yapay zeka ile dönüştürün. Boş odaları mobilyalandırın, karanlık fotoğrafları aydınlatın, gökyüzünü maviye boyayın. Ücretsiz deneyin!",
   keywords: ["emlak ai", "yapay zeka emlak", "sanal mobilyalama", "emlak fotoğraf", "ai dekorasyon", "emlak görselleştirme", "sanal staging"],
-  authors: [{ name: "Emlak AIStudio" }],
-  creator: "Emlak AIStudio",
-  publisher: "Emlak AIStudio",
+  authors: [{ name: "Emlak AISTUDIO" }],
+  creator: "Emlak AISTUDIO",
+  publisher: "Emlak AISTUDIO",
   formatDetection: {
     email: false,
     address: false,
@@ -23,10 +23,10 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Emlak AIStudio - Yapay Zeka ile Emlak Görselleştirme",
+    title: "Emlak AISTUDIO - Yapay Zeka ile Emlak Görselleştirme",
     description: "Emlak ilanlarınızı yapay zeka ile dönüştürün. Boş odaları mobilyalandırın, karanlık fotoğrafları aydınlatın, gökyüzünü maviye boyayın.",
     url: 'https://emlak-aistudio.com',
-    siteName: 'Emlak AIStudio',
+    siteName: 'Emlak AISTUDIO',
     locale: 'tr_TR',
     type: 'website',
     images: [
@@ -34,13 +34,13 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Emlak AIStudio - Yapay Zeka ile Emlak Görselleştirme',
+        alt: 'Emlak AISTUDIO - Yapay Zeka ile Emlak Görselleştirme',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Emlak AIStudio - Yapay Zeka ile Emlak Görselleştirme",
+    title: "Emlak AISTUDIO - Yapay Zeka ile Emlak Görselleştirme",
     description: "Emlak ilanlarınızı yapay zeka ile dönüştürün. Ücretsiz deneyin!",
     images: ['/og-image.jpg'],
   },

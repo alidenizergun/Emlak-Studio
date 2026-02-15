@@ -356,7 +356,7 @@
 .submitButton {
     width: 100%;
     padding: 1rem 1.5rem;
-    background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     color: white;
     font-size: 1rem;
     font-weight: 600;
@@ -373,7 +373,7 @@
 
 .submitButton:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 12px 24px rgba(22, 163, 74, 0.35);
 }
 
 .submitButton:disabled {
@@ -420,36 +420,104 @@
     margin-top: 1.25rem;
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive: form (Ücretsiz Başlayın) önce, benefits aşağıda */
 @media (max-width: 1024px) {
     .pageContainer {
         grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        padding-top: 64px;
+        min-height: 100vh;
+        box-sizing: border-box;
+        align-content: start;
     }
 
     .rightPanel {
-        padding-top: 100px;
+        order: -1;
+        padding: 1rem 1.25rem 1.5rem;
+        align-items: flex-start;
+        justify-content: flex-start;
     }
 
     .formContainer {
-        padding: 2rem;
+        padding: 1.5rem 1.25rem;
+        max-width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .formHeader {
+        margin-bottom: 1.25rem;
+    }
+
+    .leftPanel {
+        padding: 1.5rem 1.25rem 2rem;
+    }
+
+    .leftContent {
+        max-width: 100%;
+    }
+
+    .benefitsTitle {
+        font-size: 1.35rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .benefitsList {
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .benefitItem h3 {
+        font-size: 1rem;
+    }
+
+    .benefitItem p {
+        font-size: 0.875rem;
+    }
+
+    .benefitIcon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .testimonial {
+        padding: 1rem;
+    }
+
+    .testimonialText {
+        font-size: 0.9rem;
     }
 }
 
 @media (max-width: 640px) {
+    .pageContainer {
+        padding-top: 60px;
+    }
+
     .rightPanel {
-        padding: 1rem;
+        padding: 0.75rem 1rem 1rem;
     }
 
     .formContainer {
-        padding: 1.5rem;
+        padding: 1.25rem 1rem;
         border-radius: 16px;
     }
 
     .title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 
     .subtitle {
-        font-size: 0.9375rem;
+        font-size: 0.875rem;
+    }
+
+    .socialButton {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .form {
+        gap: 0.875rem;
     }
 }

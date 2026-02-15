@@ -99,7 +99,7 @@ const Header = () => {
                         </div>
                         <div className={styles.logoTextWrapper}>
                             <span className={styles.logoBrand}>Emlak</span>
-                            <span className={styles.logoStudio}>AIStudio</span>
+                            <span className={styles.logoStudio}>AISTUDIO</span>
                         </div>
                     </Link>
                 </div>
@@ -114,19 +114,32 @@ const Header = () => {
                             <Link href="/stage" className={styles.navLink}>Sanal Dekorasyon</Link>
                         </li>
                         <li className={styles.navItem}>
-                            <Link href="/tools" className={styles.navLink}>Araçlar</Link>
+                            <Link href="/tools" className={styles.navLink}>Tüm Araçlar</Link>
                             <div className={styles.megaMenu}>
-                                {TOOLS.map((tool) => (
-                                    <Link key={tool.id} href={tool.href} className={styles.megaMenuItem}>
-                                        <div className={styles.menuIcon}>
-                                            {tool.icon}
-                                        </div>
-                                        <div className={styles.menuContent}>
-                                            <span className={styles.menuTitle}>{tool.title}</span>
-                                            <span className={styles.menuDesc}>{tool.description}</span>
-                                        </div>
-                                    </Link>
-                                ))}
+                                {TOOLS.map((tool) => {
+                                    const isSoon = !!tool.status;
+                                    const content = (
+                                        <>
+                                            <div className={styles.menuIcon}>{tool.icon}</div>
+                                            <div className={styles.menuContent}>
+                                                <span className={styles.menuTitle}>
+                                                    {tool.title}
+                                                    {tool.status && <span className={styles.menuBadge}>{tool.status}</span>}
+                                                </span>
+                                                <span className={styles.menuDesc}>{tool.description}</span>
+                                            </div>
+                                        </>
+                                    );
+                                    return isSoon ? (
+                                        <span key={tool.id} className={`${styles.megaMenuItem} ${styles.megaMenuItemDisabled}`} aria-disabled="true">
+                                            {content}
+                                        </span>
+                                    ) : (
+                                        <Link key={tool.id} href={tool.href} className={styles.megaMenuItem}>
+                                            {content}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </li>
                         <li>
@@ -182,7 +195,7 @@ const Header = () => {
                                 </div>
                                 <div className={styles.logoTextWrapper}>
                                     <span className={styles.logoBrand}>Emlak</span>
-                                    <span className={styles.logoStudio}>AIStudio</span>
+                                    <span className={styles.logoStudio}>AISTUDIO</span>
                                 </div>
                             </Link>
                         </div>
@@ -210,7 +223,7 @@ const Header = () => {
                             <div className={styles.mobileIconWrapper}>{Icons.Tools}</div>
                             <div className={styles.mobileLinkContent}>
                                 <span className={styles.mobileLinkLabel}>Tüm Araçlar</span>
-                                <span className={styles.mobileLinkDesc}>20+ farklı yapay zeka aracı</span>
+                                <span className={styles.mobileLinkDesc}>Aktif araçlar + Yakında gelecekler</span>
                             </div>
                         </Link>
                         <Link href="/pricing" className={styles.mobileNavLink}>

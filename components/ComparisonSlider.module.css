@@ -8,6 +8,9 @@
     cursor: col-resize;
     user-select: none;
     border: 1px solid var(--card-border);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 1),
+        0 0 14px 2px rgba(255, 255, 255, 0.7);
+    --slider-position: 50;
 }
 
 @media (min-width: 1025px) {
@@ -17,36 +20,81 @@
     }
 }
 
-.imageWrapper {
+/* Examples vb. grid: sadece aspect-ratio, sabit yükseklik yok — görsel tam görünsün */
+.containerPreserveAspect {
+    height: auto !important;
+    aspect-ratio: 4/3;
+}
+
+/* Arka plan (sonra) görseli — tam alan, GPU katmanı */
+.imageWrapperAfter {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Önce görseli — overflow ile kesim, clip-path yok (kesiklik önlenir) */
+.beforeClip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: calc(var(--slider-position, 50) * 1%);
+    overflow: hidden;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.beforeInner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: calc(100% * 100 / var(--slider-position, 50));
+    min-width: 100%;
+}
+
+.beforeInner img,
+.imageWrapperAfter img {
+    object-fit: cover;
+    object-position: center;
 }
 
 .sliderHandle {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 4px;
-    background: white;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.95);
     transform: translateX(-50%);
     z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: left 0.22s ease-out;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.sliderHandleDragging,
+.sliderHandleNoTransition {
+    transition: none;
 }
 
 .handleCircle {
     width: 32px;
     height: 32px;
-    background: var(--primary);
+    background: rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    border: 2px solid white;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
 }
