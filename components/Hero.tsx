@@ -27,6 +27,10 @@ const Hero = () => {
 
     useEffect(() => {
         if (!heroPopupOpen) return;
+
+        // Dispatch event to close other UI elements like notifications
+        window.dispatchEvent(new CustomEvent('heroPopupOpen'));
+
         const prevOverflow = document.body.style.overflow;
         const prevOverflowX = document.body.style.overflowX;
         document.body.style.overflow = 'hidden';
@@ -86,14 +90,14 @@ const Hero = () => {
                     </ul>
                     <div className={styles.actions}>
                         <Link href="/register" className={styles.primaryBtn}>
-                            Hemen Ücretsiz Dene
+                            Hemen Ücretsiz Deneyin
                         </Link>
 
                         <Link href="/examples" className={styles.secondaryBtn} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
-                            Örnekleri İncele
+                            Örnekleri İnceleyin
                         </Link>
                     </div>
                 </div>
@@ -179,12 +183,9 @@ const Hero = () => {
                             </div>
                         </div>
                         <footer className={styles.heroPopupFooter}>
-                            <div className={styles.heroPopupCtaWrapper}>
-                                <Link href="/register" className={styles.heroPopupCta} onClick={() => setHeroPopupOpen(false)}>
-                                    Hemen Ücretsiz Dene
-                                </Link>
-                                <span className={styles.ctaSubText}>2 kredi ile ücretsiz dene</span>
-                            </div>
+                            <Link href="/register" className={styles.heroPopupCta} onClick={() => setHeroPopupOpen(false)}>
+                                Hemen Ücretsiz Deneyin
+                            </Link>
                             <div className={styles.heroPopupCtaHintWrap}>
                                 <p key={popupHintIndex} className={styles.heroPopupCtaHint}>
                                     {POPUP_HINT_SENTENCES[popupHintIndex]}

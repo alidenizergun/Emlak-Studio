@@ -43,18 +43,39 @@ const Header = () => {
     const [showRegisterNotify, setShowRegisterNotify] = useState(false);
     const pathname = usePathname();
 
-    // Set mounted state and timer for notification
+    // Set mounted state
     useEffect(() => {
-        const t = setTimeout(() => setIsMounted(true), 0);
+        setIsMounted(true);
 
-        // Notification timer (10 seconds)
-        const notifyTimer = setTimeout(() => {
-            setShowRegisterNotify(true);
-        }, 10000);
+        let timeoutId: NodeJS.Timeout;
+
+        const startCycle = () => {
+            // Wait 10s before showing
+            timeoutId = setTimeout(() => {
+                setShowRegisterNotify(true);
+                // Show for 20s
+                timeoutId = setTimeout(() => {
+                    setShowRegisterNotify(false);
+                    // Cycle again after 10s hide
+                    startCycle();
+                }, 20000);
+            }, 10000);
+        };
+
+        startCycle();
+
+        // Close notification if hero popup opens
+        const handleHeroPopup = () => {
+            setShowRegisterNotify(false);
+            // Optionally clear timeout to reset cycle if it's currently showing or about to show
+            if (timeoutId) clearTimeout(timeoutId);
+            // Restart cycle after a delay if popup closed? No, let's keep it simple for now as per request.
+        };
+        window.addEventListener('heroPopupOpen', handleHeroPopup);
 
         return () => {
-            clearTimeout(t);
-            clearTimeout(notifyTimer);
+            if (timeoutId) clearTimeout(timeoutId);
+            window.removeEventListener('heroPopupOpen', handleHeroPopup);
         };
     }, []);
 
@@ -160,11 +181,11 @@ const Header = () => {
                     <Link href="/login" className={styles.loginBtn} onClick={() => setShowRegisterNotify(false)}>Giriş Yap</Link>
                     <div className={styles.registerWrapper}>
                         <Link href="/register" className={styles.registerBtn} onClick={() => setShowRegisterNotify(false)}>
-                            Ücretsiz Dene
+                            Ücretsiz Deneyin
                         </Link>
                         {showRegisterNotify && (
                             <div className={styles.notification} onClick={() => setShowRegisterNotify(false)}>
-                                <span>2 kredi ile ücretsiz dene 🎁</span>
+                                <span>1 fotoğraf için ücretsiz deneyin 🎁</span>
                             </div>
                         )}
                     </div>
@@ -254,7 +275,7 @@ const Header = () => {
                         <div className={styles.mobileCtaCard}>
                             <div className={styles.mobileRegisterWrapper}>
                                 <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
-                                <span className={styles.mobileCtaSubText}>2 kredi ile ücretsiz dene</span>
+                                <span className={styles.mobileCtaSubText}>1 fotoğraf için ücretsiz deneyin</span>
                             </div>
                             <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
                         </div>

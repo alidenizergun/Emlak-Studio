@@ -66,7 +66,7 @@ const CATEGORIES = [
 const FAQ_ITEMS = [
   {
     question: "Emlak AIStudio’ya nasıl kayıt olurum?",
-    answer: "Ana sayfadaki \"Ücretsiz Dene\" veya \"Kayıt Ol\" butonuna tıklayın. Cep telefonu numaranızı girin, SMS ile gelen 6 haneli doğrulama kodunu girerek hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen Fotoğraf Geliştirme ve Sanal Dekorasyon araçlarını kullanmaya başlayabilirsiniz.",
+    answer: "Ana sayfadaki \"Ücretsiz Deneyin\" veya \"Kayıt Ol\" butonuna tıklayın. Cep telefonu numaranızı girin, SMS ile gelen 6 haneli doğrulama kodunu girerek hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen Fotoğraf Geliştirme ve Sanal Dekorasyon araçlarını kullanmaya başlayabilirsiniz.",
   },
   {
     question: "Kredi nedir? Nasıl kullanılır?",

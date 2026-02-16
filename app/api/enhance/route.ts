@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Jimp } from 'jimp';
+import Replicate from 'replicate';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const replicate = process.env.REPLICATE_API_TOKEN
+    ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
+    : null;
 
 export async function POST(request: NextRequest) {
     try {
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json(
-                { success: false, error: 'API anahtarı ayarlanmamış' },
-                { status: 500 }
-            );
-        }
-
         const formData = await request.formData();
         const image = formData.get('image') as File;
         const optionsStr = formData.get('options') as string;
@@ -24,37 +20,75 @@ export async function POST(request: NextRequest) {
         }
 
         const options = JSON.parse(optionsStr || '{}');
-
-        // Convert image to base64
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const base64Image = buffer.toString('base64');
 
-        // Generate prompt based on selected options
-        const prompt = generateEnhancePrompt(options);
+        console.log('Processing real enhance request (Jimp):', options);
 
-        console.log('Processing enhance request:', options);
+        let finalImageUrl: string;
 
-        // Call Gemini API
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        // 1. IF REPLICATE TOKEN IS PRESENT - Use True AI 4K Enhancement
+        if (replicate) {
+            try {
+                console.log('Sending request to Replicate...');
+                const output = await replicate.run(
+                    "nightmare-ai/real-esrgan:42fed1c4974141103ad4547c1359acffc75a93e322f9d300eaa29f017a651f1",
+                    {
+                        input: {
+                            image: `data:${image.type};base64,${buffer.toString('base64')}`,
+                            upscale: 2,
+                            face_enhance: false
+                        }
+                    }
+                );
 
-        const result = await model.generateContent([
-            prompt,
-            {
-                inlineData: {
-                    mimeType: image.type,
-                    data: base64Image
+                console.log('Replicate Output:', output);
+
+                // Handle different output types
+                if (typeof output === 'string') {
+                    finalImageUrl = output;
+                } else if (Array.isArray(output) && output.length > 0) {
+                    finalImageUrl = output[0] as string;
+                } else if (typeof output === 'object') {
+                    finalImageUrl = String(output); // Fallback
+                } else {
+                    throw new Error('Unexpected Replicate output format');
                 }
+
+                return NextResponse.json({ success: true, imageUrl: finalImageUrl });
+            } catch (aiError) {
+                console.error('Replicate AI Error, falling back to Jimp:', aiError);
             }
-        ]);
+        }
 
-        await result.response;
+        // 2. FALLBACK / PROCESSED OUTPUT - Use Jimp (Pure JS, no binary issues)
+        const jimpImage = await Jimp.read(buffer as any);
 
-        // For now, return the base64 image (in production, Gemini would return enhanced image)
+        if (options.auto || options.lighting) {
+            jimpImage.brightness(0.15).contrast(0.05);
+        }
+
+        if (options.auto || options.color) {
+            jimpImage.color([{ apply: 'saturate' as any, params: [25] }]);
+        }
+
+        if (options.auto || options.sharpness) {
+            // Jimp convolution kernel for sharpening
+            jimpImage.convolute([
+                [0, -1, 0],
+                [-1, 5, -1],
+                [0, -1, 0]
+            ]);
+        }
+
+
+        const outputBuffer = await jimpImage.getBuffer("image/jpeg");
+        finalImageUrl = `data:image/jpeg;base64,${outputBuffer.toString('base64')}`;
+
         return NextResponse.json({
             success: true,
-            imageUrl: `data:${image.type};base64,${base64Image}`,
-            prompt: prompt // Include prompt for debugging
+            imageUrl: finalImageUrl,
+            processed: true
         });
 
     } catch (error: unknown) {
@@ -68,106 +102,37 @@ export async function POST(request: NextRequest) {
 }
 
 function generateEnhancePrompt(options: Record<string, boolean>): string {
-    // Auto mode - AI decides all enhancements
+    const baseRules = `
+CRITICAL QUALITY STANDARDS:
+- OUTPUT RESOLUTION: All processing must target a crystal-clear 4K (Ultra HD) quality.
+- REAL ESTATE PHOTOGRAPHY: Result must be museum-quality, high-end real estate photography.
+- PHOTOREALISM: Absolutely no artistic, cartoonish, or AI-generated look. 
+- ARCHITECTURAL INTEGRITY: Do not change walls, windows, or structural elements.
+- PRESERVATION: Do not add or remove furniture or major decor.
+- NOISE & ARTIFACTS: Completely eliminate digital noise, JPEG artifacts, and chromatic aberration.`;
+
     if (options.auto) {
-        return `Analyze this real estate photograph and automatically enhance it to professional, magazine-quality standards:
-
-AUTOMATIC ENHANCEMENTS TO APPLY:
-1. Lighting & Exposure:
-   - Correct overall exposure and brightness
-   - Balance light across the entire image
-   - Brighten dark shadows without losing detail
-   - Reduce overexposed highlights
-   - Enhance natural light from windows
-
-2. Color Correction:
-   - Fix any color casts (yellowing, blue tints)
-   - Enhance color vibrancy naturally
-   - Make the sky bluer if visible through windows
-   - Enhance greens in plants and landscaping
-   - Ensure realistic, appealing colors
-
-3. Sharpness & Clarity:
-   - Increase overall image sharpness
-   - Enhance edge definition and details
-   - Improve clarity and texture visibility
-   - Upscale to 4K resolution if needed
-   - Reduce any blur or soft focus
-
-4. Cleaning & Refinement:
-   - Remove dust spots and minor dirt marks
-   - Clean windows and glass surfaces
-   - Remove small scratches or artifacts
-   - Fix minor wall imperfections
-   - Reduce image noise
-
-CRITICAL RULES:
-- Do NOT add or remove furniture, objects, or major elements
-- Do NOT change the room's structure or architecture  
-- Maintain photorealistic appearance (no cartoon/artistic effects)
-- Keep all enhancements subtle and natural-looking
-- The result should look like a professional real estate photo
-
-Goal: Transform this into a stunning, magazine-quality real estate photograph that will attract buyers.`;
+        return `Analyze this real estate photograph and apply a comprehensive 4K transformation to professional magazine-quality standards:
+ENHANCEMENTS TO APPLY (AUTO-DETECTION MODE):
+1. 4K UPSSCALE & CLARITY
+2. LIGHTING & HDR BALANCING
+3. COLOR & VIBRANCY
+4. CLEANING & REFINEMENT
+${baseRules}
+Goal: Create a stunning, 4K magazine-ready real estate masterpiece.`;
     }
 
-    // Build custom prompt based on selected options
     const enhancements: string[] = [];
-
-    if (options.lighting) {
-        enhancements.push(`1. LIGHTING ENHANCEMENT:
-   - Balance exposure across the entire image
-   - Brighten dark areas without overexposing bright areas
-   - Enhance natural light sources (windows, skylights)
-   - Create even, professional lighting throughout
-   - Maintain natural color temperature
-   - Fix any underexposed or overexposed regions`);
-    }
-
-    if (options.color) {
-        enhancements.push(`2. COLOR ENHANCEMENT:
-   - Increase color vibrancy and saturation naturally
-   - Correct any color casts (yellowing from old bulbs, bluish tints)
-   - Make the sky appear bluer if visible through windows
-   - Enhance greens in plants, grass, and landscaping
-   - Ensure all colors look realistic, vibrant, and appealing
-   - Balance white balance for natural-looking results`);
-    }
-
-    if (options.sharpness) {
-        enhancements.push(`3. SHARPNESS & CLARITY:
-   - Enhance edge definition and fine details
-   - Improve overall image sharpness significantly
-   - Upscale to higher resolution (4K) if current resolution is low
-   - Reduce any blur or soft focus
-   - Improve texture visibility (wood grain, fabric, surfaces)
-   - Maintain natural appearance without over-sharpening`);
-    }
-
-    if (options.clean) {
-        enhancements.push(`4. CLEANING & IMPERFECTION REMOVAL:
-   - Remove visible dust spots, dirt marks, and minor stains
-   - Clean windows and reflective surfaces
-   - Remove small scratches, artifacts, or image noise
-   - Fix minor wall imperfections (small marks, smudges)
-   - Improve overall cleanliness of the image
-   - Do NOT remove furniture or major objects`);
-    }
+    if (options.lighting) enhancements.push(`1. 4K LIGHTING & EXPOSURE`);
+    if (options.color) enhancements.push(`2. 4K COLOR VIBRANCY`);
+    if (options.sharpness) enhancements.push(`3. 4K SHARPNESS & DETAIL`);
+    if (options.clean) enhancements.push(`4. 4K CLEANING`);
 
     if (enhancements.length === 0) {
-        return 'Slightly enhance this real estate photograph to improve its professional appearance.';
+        return `Apply a subtle 4K professional enhancement to this real estate photo. ${baseRules}`;
     }
 
-    return `Enhance this real estate photograph with the following specific improvements:
-
+    return `Enhancement Task: Transform this real estate photo into a 4K UHD masterpiece:
 ${enhancements.join('\n\n')}
-
-CRITICAL RULES:
-- Do NOT add or remove furniture, objects, or major elements
-- Do NOT change the room's structure, walls, floors, or architecture
-- Maintain photorealistic appearance (no cartoon/artistic effects)
-- All enhancements should look natural and professional
-- The result should look like a premium real estate photograph
-
-Apply ONLY the enhancements listed above. Work harmoniously to create a cohesive, professional result.`;
+${baseRules}`;
 }

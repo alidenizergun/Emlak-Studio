@@ -106,9 +106,11 @@ export default function PricingPage() {
             <div className={`container ${styles.container}`}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
-                        Emlak Fotoğraflarınızı <br />
-                        <span className={styles.titleGradient}>Yapay Zeka</span> ile <br />
-                        Güçlendirin
+                        <span style={{ display: 'block' }}>Emlak Fotoğraflarınızı</span>
+                        <span style={{ display: 'block' }}>
+                            <span className={styles.titleGradient}>Yapay Zeka</span> ile
+                        </span>
+                        <span style={{ display: 'block' }}>Güçlendirin</span>
                     </h1>
                     <p className={styles.subtitle}>
                         Her bütçeye uygun, şeffaf fiyatlandırma. Karmaşık sözleşmeler yok, istediğiniz an iptal edin.

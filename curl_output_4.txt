@@ -1,0 +1,4 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   121    0   121    0     0    536      0 --:--:-- --:--:-- --:--:--   537
+{"success":false,"error":"Content-Type was not one of \"multipart/form-data\" or \"application/x-www-form-urlencoded\"."}

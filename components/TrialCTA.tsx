@@ -40,7 +40,7 @@ const TrialCTA = () => {
     return (
         <div className={styles.ctaWrapper} ref={containerRef}>
             <div className={styles.ctaContainer}>
-                <h2 className={styles.ctaTitle}>🎯 Sınırlı Süre için Ücretsiz Dene!</h2>
+                <h2 className={styles.ctaTitle}>🎯 Sınırlı Süre için Ücretsiz Deneyin!</h2>
 
                 <div className={styles.promoText}>
                     🎁 2 Kredi Hediye 🎁

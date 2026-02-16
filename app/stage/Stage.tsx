@@ -181,10 +181,6 @@ export default function StageClient() {
 
     const handleGenerate = async () => {
         if (!file) return;
-        if (typeof window !== 'undefined' && !window.localStorage.getItem('emlak_authed')) {
-            router.push('/register');
-            return;
-        }
         setIsProcessing(true);
 
         try {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
+import EnhanceResultModal from '@/components/EnhanceResultModal';
 import styles from './Enhance.module.css';
 
 export default function EnhanceClient() {
@@ -12,6 +13,7 @@ export default function EnhanceClient() {
     const [file, setFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
+    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
     const handleImageSelect = (selectedFile: File) => {
         setFile(selectedFile);
@@ -38,10 +40,6 @@ export default function EnhanceClient() {
 
     const handleProcess = async () => {
         if (!file) return;
-        if (typeof window !== 'undefined' && !window.localStorage.getItem('emlak_authed')) {
-            router.push('/register');
-            return;
-        }
         setIsProcessing(true);
 
         try {
@@ -55,6 +53,7 @@ export default function EnhanceClient() {
             });
 
             const data = await response.json();
+            console.log('Enhance API Response:', data);
 
             if (data.success) {
                 const objectUrl = URL.createObjectURL(file);
@@ -62,6 +61,7 @@ export default function EnhanceClient() {
                     before: objectUrl,
                     after: data.imageUrl
                 });
+                setIsResultModalOpen(true);
             } else {
                 alert('İşlem başarısız: ' + (data.error || 'Bilinmeyen hata'));
             }
@@ -94,9 +94,20 @@ export default function EnhanceClient() {
             <div className={styles.workspace}>
                 {result ? (
                     <div className={styles.resultArea}>
+                        <div className={styles.resultHeader}>
+                            <div className={styles.statusBadge}>
+                                <span className={styles.badgePulse}></span>
+                                4K Uygulandı
+                            </div>
+                        </div>
                         <ComparisonSlider beforeImage={result.before} afterImage={result.after} />
                         <div className={styles.actions}>
-                            <button className={styles.downloadBtn}>Fotoğrafı İndir</button>
+                            <button className={styles.downloadBtn} onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = result.after;
+                                link.download = 'emlak-studio-4k-enhanced.jpg';
+                                link.click();
+                            }}>4K Fotoğrafı İndir</button>
                             <button className={styles.resetBtn} onClick={() => {
                                 setFile(null);
                                 setResult(null);
@@ -228,7 +239,14 @@ export default function EnhanceClient() {
                     </div>
                 )}
             </div>
-        </div >
+
+            <EnhanceResultModal
+                isOpen={isResultModalOpen}
+                onClose={() => setIsResultModalOpen(false)}
+                beforeImage={result?.before || ''}
+                afterImage={result?.after || ''}
+            />
+        </div>
     );
 }
 

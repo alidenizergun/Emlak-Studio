@@ -23,7 +23,7 @@
 /* Global .container ile aynı hizada (logo + Ücretsiz Dene) */
 .container {
     display: grid;
-    grid-template-columns: 0.9fr 1.6fr;
+    grid-template-columns: 1.1fr 1.4fr;
     gap: 2.5rem;
     align-items: end;
 }
@@ -738,6 +738,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.75rem 1.5rem;
+    margin-top: 1.25rem;
     font-size: 1rem;
     font-weight: 600;
     color: #fff;

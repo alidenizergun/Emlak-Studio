@@ -351,7 +351,7 @@ export default function ExamplesPage() {
                             </div>
                             <footer className={styles.popupFooter}>
                                 <Link href="/register" className={styles.popupCta} onClick={() => setPopupExample(null)}>
-                                    Hemen Ücretsiz Dene
+                                    Hemen Ücretsiz Deneyin
                                 </Link>
                                 <div className={styles.popupCtaHintWrap}>
                                     <p key={ctaHintIndex} className={styles.popupCtaHint}>
@@ -386,7 +386,7 @@ export default function ExamplesPage() {
 
             <section className={styles.ctaSection}>
                 <Link href="/register" className={styles.ctaButton}>
-                    Hemen Ücretsiz Dene
+                    Hemen Ücretsiz Deneyin
                 </Link>
                 <div className={styles.ctaHintWrap}>
                     <p key={ctaHintIndex} className={styles.ctaHint}>
