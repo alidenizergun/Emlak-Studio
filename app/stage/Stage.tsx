@@ -337,7 +337,7 @@ export default function StageClient() {
                 {/* RIGHT: Controls Sidebar */}
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
-                        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
+                        <div className={styles.optionsArea} style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             <div className={styles.controlGroup}>
                                 <label className={styles.label}>Oda Tipi</label>
                                 <div className={styles.roomGrid}>
