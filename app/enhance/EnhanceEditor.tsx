@@ -251,12 +251,8 @@ export default function EnhanceClient() {
 
                 {/* RIGHT: Sidebar Controls */}
                 <div className={styles.controlsSidebar}>
-                    <div className={styles.panel} style={{ height: '100%', minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
-                        <div className={styles.panelTitle}>
-                            <span>İşlem Seçenekleri</span>
-                        </div>
-
-                        <div className={styles.optionsList} style={{ flex: 1 }}>
+                    <div className={styles.panel}>
+                        <div className={styles.optionsList}>
                             {/* Manual Options First */}
                             {OPTIONS.map(opt => (
                                 <div
@@ -279,17 +275,17 @@ export default function EnhanceClient() {
 
                             {/* Auto Option Last */}
                             <div
-                                className={`${styles.optionItem} ${selectedOptions['auto'] ? styles.active : ''}`}
+                                className={`${styles.optionItem} ${selectedOptions['auto'] ? styles.activeAi : ''}`}
                                 onClick={() => toggleOption('auto')}
-                                style={{ marginTop: 'auto', marginBottom: '1rem', border: '2px solid rgba(16, 185, 129, 0.2)', background: selectedOptions['auto'] ? 'rgba(16, 185, 129, 0.05)' : '' }}
+                                style={{ border: '2px solid rgba(16, 185, 129, 0.2)' }}
                             >
-                                <div className={styles.checkbox} style={{ borderColor: selectedOptions['auto'] ? '#10b981' : '#cbd5e1', background: selectedOptions['auto'] ? '#10b981' : '' }}>
+                                <div className={styles.checkbox}>
                                     {selectedOptions['auto'] && (
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                                     )}
                                 </div>
                                 <div className={styles.optionText}>
-                                    <span className={styles.optionName} style={{ color: '#059669' }}>Yapay Zeka Seçsin</span>
+                                    <span className={styles.optionName}>Yapay Zeka Seçsin</span>
                                     <span className={styles.optionDesc}>Yapay zeka en iyi ayarları seçsin</span>
                                 </div>
                                 <div className={styles.optionIcon}>

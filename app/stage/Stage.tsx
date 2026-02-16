@@ -337,10 +337,6 @@ export default function StageClient() {
                 {/* RIGHT: Controls Sidebar */}
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
-                        <div className={styles.panelTitle}>
-                            <span>Dekorasyon Seçenekleri</span>
-                        </div>
-
                         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             <div className={styles.controlGroup}>
                                 <label className={styles.label}>Oda Tipi</label>
