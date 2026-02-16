@@ -9,21 +9,37 @@ import styles from './Hero.module.css';
 const HERO_BEFORE = '/images/hero-empty-room-4k.png';
 const HERO_AFTER = '/images/hero-decorated-4k.png';
 
-const POPUP_HINT_SENTENCES = [
-    'Boş oda fotoğrafı ilanı zayıflatır; dekore görsel satışı hızlandırır.',
-    'Profesyonel görsel, daha az pazarlık ve daha yüksek fiyat demek.',
-    'Bir tıkla boş oda dolu odaya dönüşüyor; denemesi ücretsiz.',
-    'Dikkat çekmeyen ilan satılmaz; bu görseller dikkat çeker.',
-    'Müşteri “bu evde yaşarım” hissini dekore fotoğrafla daha çok yaşıyor.',
-    'İlan süresini kısaltın: güçlü görsel, daha hızlı satış.',
-    'Ücretsiz deneyin; farkı kendi ilanlarınızda görün.',
-    'Saniyeler içinde ilan görselinizi rakiplerinizden daha güçlü hale getirin.',
-];
+import { EXAMPLES, POPUP_HINT_SENTENCES, type ExampleItem } from '../lib/examplesData';
 
 const Hero = () => {
     const [sliderPosition, setSliderPosition] = useState(50);
     const [heroPopupOpen, setHeroPopupOpen] = useState(false);
     const [popupHintIndex, setPopupHintIndex] = useState(0);
+    const [activeExampleIndex, setActiveExampleIndex] = useState(0);
+
+    // Initial example for the hero (the one shown on the page)
+    const heroExample: ExampleItem = {
+        id: 0,
+        title: "Kapak Örneği",
+        category: "Salon",
+        categoryId: "living",
+        before: HERO_BEFORE,
+        after: HERO_AFTER
+    };
+
+    // Combine hero example with the rest for the gallery
+    const allExamples = [heroExample, ...EXAMPLES];
+    const currentExample = allExamples[activeExampleIndex];
+
+    const handlePrev = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setActiveExampleIndex((prev) => (prev > 0 ? prev - 1 : allExamples.length - 1));
+    };
+
+    const handleNext = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setActiveExampleIndex((prev) => (prev < allExamples.length - 1 ? prev + 1 : 0));
+    };
 
     useEffect(() => {
         if (!heroPopupOpen) return;
@@ -35,14 +51,20 @@ const Hero = () => {
         const prevOverflowX = document.body.style.overflowX;
         document.body.style.overflow = 'hidden';
         document.body.style.overflowX = 'hidden';
-        const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') setHeroPopupOpen(false); };
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setHeroPopupOpen(false);
+            if (e.key === 'ArrowLeft') handlePrev();
+            if (e.key === 'ArrowRight') handleNext();
+        };
+
         window.addEventListener('keydown', onKeyDown);
         return () => {
             document.body.style.overflow = prevOverflow;
             document.body.style.overflowX = prevOverflowX;
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, [heroPopupOpen]);
+    }, [heroPopupOpen, activeExampleIndex]);
 
     useEffect(() => {
         if (!heroPopupOpen) return;
@@ -69,8 +91,8 @@ const Hero = () => {
                                 <path d="M19 14.5C19.4 16.2 20.8 17.6 22.5 18C20.8 18.4 19.4 19.8 19 21.5C18.6 19.8 17.2 18.4 15.5 18C17.2 17.6 18.6 16.2 19 14.5Z" fill="url(#paint0_linear_ai)" stroke="url(#paint0_linear_ai)" strokeWidth="1" strokeLinejoin="round" />
                                 <defs>
                                     <linearGradient id="paint0_linear_ai" x1="12" y1="2" x2="12" y2="22.2" gradientUnits="userSpaceOnUse">
-                                        <stop stopColor="#2563EB" />
-                                        <stop offset="1" stopColor="#7C3AED" />
+                                        <stop stopColor="#10b981" />
+                                        <stop offset="1" stopColor="#3b82f6" />
                                     </linearGradient>
                                 </defs>
                             </svg>
@@ -167,20 +189,61 @@ const Hero = () => {
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
+
+                        {/* Navigation Arrows */}
+                        <button
+                            className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
+                            onClick={handlePrev}
+                            aria-label="Önceki örnek"
+                        >
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                        </button>
+                        <button
+                            className={`${styles.popupArrow} ${styles.popupArrowRight}`}
+                            onClick={handleNext}
+                            aria-label="Sonraki örnek"
+                        >
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                        </button>
+
                         <div className={styles.heroPopupImages}>
                             <div className={styles.heroPopupCol}>
-                                <span className={`${styles.heroPopupBadge} ${styles.heroPopupBadgeBefore}`}>Önce</span>
+                                <span className={`${styles.heroPopupBadge} ${styles.heroPopupBadgeBefore}`}>
+                                    Önce
+                                </span>
                                 <div className={styles.heroPopupImageWrap}>
-                                    <Image src={HERO_BEFORE} alt="Boş oda" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                                    <Image
+                                        src={currentExample.before}
+                                        alt="Boş oda"
+                                        fill
+                                        sizes="(max-width: 1200px) 100vw, 50vw"
+                                        style={{ objectFit: 'contain' }}
+                                        priority
+                                    />
                                 </div>
                             </div>
                             <div className={styles.heroPopupCol}>
                                 <span className={`${styles.heroPopupBadge} ${styles.heroPopupBadgeAfter}`}>
                                     Yapay Zeka ile Dekore Edildikten Sonra
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                                        <defs>
+                                            <linearGradient id="hero_pop_paint_ai" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stopColor="#10b981" />
+                                                <stop offset="100%" stopColor="#3b82f6" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="url(#hero_pop_paint_ai)" stroke="url(#hero_pop_paint_ai)" strokeWidth="1.2" strokeLinejoin="round" />
+                                    </svg>
                                 </span>
                                 <div className={`${styles.heroPopupImageWrap} ${styles.heroPopupImageWrapAfter}`}>
-                                    <Image src={HERO_AFTER} alt="Yapay zeka ile dekore edilmiş oda" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                                    <Image
+                                        src={currentExample.after}
+                                        alt="Yapay zeka ile dekore edilmiş oda"
+                                        fill
+                                        sizes="(max-width: 1200px) 100vw, 50vw"
+                                        style={{ objectFit: 'contain' }}
+                                        priority
+                                    />
                                 </div>
                             </div>
                         </div>

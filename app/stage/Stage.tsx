@@ -363,16 +363,26 @@ export default function StageClient() {
                                         onClick={handleAIDetectRoom}
                                         disabled={isDetectingRoom}
                                     >
-                                        <div className={styles.aiSparkle}>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M12 3l1.45 4.45L18 9l-4.55 1.55L12 15l-1.45-4.45L6 9l4.55-1.55L12 3z" />
-                                                <path d="M20 3v4" />
-                                                <path d="M22 5h-4" />
-                                            </svg>
+                                        <div className={styles.checkbox}>
+                                            {isAiRoom && (
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                            )}
                                         </div>
                                         <div className={styles.aiText}>
                                             <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
                                             <span className={styles.aiDesc}>Oda tipini otomatik algıla</span>
+                                        </div>
+                                        <div className={styles.aiSparkle}>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <defs>
+                                                    <linearGradient id="yzSparkleGradientStage" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                        <stop offset="0%" stopColor="#10b981" />
+                                                        <stop offset="100%" stopColor="#3b82f6" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStage)" />
+                                                <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStage)" />
+                                            </svg>
                                         </div>
                                     </button>
                                 </div>

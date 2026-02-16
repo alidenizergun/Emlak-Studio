@@ -119,8 +119,13 @@
 }
 
 @keyframes popupOverlayIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .popupArrow {
@@ -128,8 +133,8 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 5;
-    width: 52px;
-    height: 52px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.95);
@@ -149,11 +154,11 @@
 }
 
 .popupArrowLeft {
-    left: 0.75rem;
+    left: 0.3rem;
 }
 
 .popupArrowRight {
-    right: 0.75rem;
+    right: 0.3rem;
 }
 
 .popup {
@@ -182,6 +187,7 @@
         opacity: 0;
         transform: scale(0.96) translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: scale(1.25) translateY(0);
@@ -283,6 +289,7 @@
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    filter: brightness(0.9);
 }
 
 .popupImageWrap img {
@@ -290,7 +297,7 @@
 }
 
 .popupImageWrapAfter {
-    filter: brightness(1);
+    filter: brightness(0.8);
 }
 
 .popupFooter {
@@ -336,9 +343,17 @@
 }
 
 @keyframes popupCtaSweep {
-    0% { left: -100%; }
-    50% { left: 140%; }
-    100% { left: -100%; }
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 140%;
+    }
+
+    100% {
+        left: -100%;
+    }
 }
 
 .popupCta:hover {
@@ -364,14 +379,22 @@
 }
 
 @keyframes popupHintFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes popupCtaShadow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 20px rgba(22, 163, 74, 0.2);
     }
+
     50% {
         box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5), 0 0 32px rgba(22, 163, 74, 0.35);
     }
@@ -433,9 +456,17 @@
 }
 
 @keyframes ctaButtonSweep {
-    0% { left: -100%; }
-    50% { left: 140%; }
-    100% { left: -100%; }
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 140%;
+    }
+
+    100% {
+        left: -100%;
+    }
 }
 
 .ctaButton:hover {
@@ -443,9 +474,12 @@
 }
 
 @keyframes ctaButtonShadow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 24px rgba(22, 163, 74, 0.25);
     }
+
     50% {
         box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5), 0 0 32px rgba(22, 163, 74, 0.35);
     }
@@ -469,8 +503,13 @@
 }
 
 @keyframes ctaHintFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Mobile Responsive */
@@ -564,6 +603,7 @@
             opacity: 0;
             transform: scale(0.96) translateY(8px);
         }
+
         to {
             opacity: 1;
             transform: scale(1) translateY(0);

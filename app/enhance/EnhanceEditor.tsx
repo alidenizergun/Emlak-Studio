@@ -292,7 +292,18 @@ export default function EnhanceClient() {
                                     <span className={styles.optionName} style={{ color: '#059669' }}>Yapay Zeka Seçsin</span>
                                     <span className={styles.optionDesc}>Yapay zeka en iyi ayarları seçsin</span>
                                 </div>
-                                <div className={styles.optionIcon}>✨</div>
+                                <div className={styles.optionIcon}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <linearGradient id="yzSparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stopColor="#10b981" />
+                                                <stop offset="100%" stopColor="#3b82f6" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradient)" />
+                                        <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradient)" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
 
