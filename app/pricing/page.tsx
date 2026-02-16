@@ -113,7 +113,7 @@ export default function PricingPage() {
                         <span style={{ display: 'block' }}>Güçlendirin</span>
                     </h1>
                     <p className={styles.subtitle}>
-                        Her bütçeye uygun, şeffaf fiyatlandırma. Karmaşık sözleşmeler yok, istediğiniz an iptal edin.
+                        Şeffaf fiyatlandırma, sınırsız potansiyel. İstediğiniz an iptal edin.
                     </p>
                 </div>
 
