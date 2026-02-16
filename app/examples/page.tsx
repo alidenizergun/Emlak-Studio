@@ -4,8 +4,18 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ComparisonSlider from '../../components/ComparisonSlider';
-import TrialCTA from '../../components/TrialCTA';
 import styles from './Examples.module.css';
+
+const POPUP_HINT_SENTENCES = [
+    'Boş oda fotoğrafı ilanı zayıflatır; dekore görsel satışı hızlandırır.',
+    'Profesyonel görsel, daha az pazarlık ve daha yüksek fiyat demek.',
+    'Bir tıkla boş oda dolu odaya dönüşüyor; denemesi ücretsiz.',
+    'Dikkat çekmeyen ilan satılmaz; bu görseller dikkat çeker.',
+    'Müşteri "bu evde yaşarım" hissini dekore fotoğrafla daha çok yaşıyor.',
+    'İlan süresini kısaltın: güçlü görsel, daha hızlı satış.',
+    'Ücretsiz deneyin; farkı kendi ilanlarınızda görün.',
+    'Saniyeler içinde ilan görselinizi rakiplerinizden daha güçlü hale getirin.',
+];
 
 type ExampleItem = { id: number; title: string; category: string; categoryId: string; before: string; after: string };
 
@@ -217,10 +227,19 @@ const EXAMPLES = [
 export default function ExamplesPage() {
     const [activeCategory, setActiveCategory] = useState('all');
     const [popupExample, setPopupExample] = useState<ExampleItem | null>(null);
+    const [ctaHintIndex, setCtaHintIndex] = useState(0);
 
     const filteredExamples = activeCategory === 'all'
         ? EXAMPLES
         : EXAMPLES.filter(ex => ex.categoryId === activeCategory);
+
+    // Rotate CTA hint sentences
+    useEffect(() => {
+        const t = setInterval(() => {
+            setCtaHintIndex((i) => (i + 1) % POPUP_HINT_SENTENCES.length);
+        }, 4000);
+        return () => clearInterval(t);
+    }, []);
 
     // Body scroll lock, Escape to close, Arrow keys for prev/next when popup is open
     useEffect(() => {
@@ -363,7 +382,16 @@ export default function ExamplesPage() {
                 );
             })()}
 
-            <TrialCTA />
+            <section className={styles.ctaSection}>
+                <Link href="/register" className={styles.ctaButton}>
+                    Hemen Ücretsiz Dene
+                </Link>
+                <div className={styles.ctaHintWrap}>
+                    <p key={ctaHintIndex} className={styles.ctaHint}>
+                        {POPUP_HINT_SENTENCES[ctaHintIndex]}
+                    </p>
+                </div>
+            </section>
         </div>
     );
 }
