@@ -441,7 +441,10 @@
     }
 
     .popupOverlay {
-        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        height: 100svh;
+        height: 100dvh;
+        min-height: 100vh;
+        padding: max(0.35rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.35rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
         align-items: flex-start;
         justify-content: center;
         box-sizing: border-box;
@@ -451,8 +454,9 @@
 
     .popup {
         max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-        max-height: calc(100vh - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        /* Ek pay (2.5rem) ile üst kesilmez; 100svh = mobilde her zaman görünen alan */
+        max-height: calc(100vh - 2.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 2.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         width: 100%;
         overflow-y: auto;
         overflow-x: hidden;
@@ -500,8 +504,8 @@
     }
 
     .popupImageWrap {
-        min-height: 80px;
-        max-height: min(38vh, 280px);
+        min-height: 60px;
+        max-height: min(30vh, 220px);
     }
 
     .popupFooter {
