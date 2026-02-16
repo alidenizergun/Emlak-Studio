@@ -164,7 +164,7 @@ const ComparisonSlider = ({
         const id = setTimeout(() => setHintPlaying(true), 0);
 
         const startDelay = 0;
-        const duration = 1200;
+        const duration = 1500;
         const linear = (t: number) => t;
 
         const runPhase = (from: number, to: number, phaseDuration: number) => {
@@ -181,8 +181,8 @@ const ComparisonSlider = ({
             hintRafRef.current = requestAnimationFrame(tick);
         };
 
-        const left = hintFullRange ? 5 : 25.5;
-        const right = hintFullRange ? 95 : 74.5;
+        const left = hintFullRange ? 0.5 : 25.5;
+        const right = hintFullRange ? 99.5 : 74.5;
         const t1 = setTimeout(() => runPhase(50, right, duration), startDelay);
         const t2 = setTimeout(() => runPhase(right, left, duration), startDelay + duration);
         const t3 = setTimeout(() => runPhase(left, 50, duration), startDelay + duration * 2);
@@ -200,7 +200,7 @@ const ComparisonSlider = ({
 
     const safePosition = Math.max(0.5, Math.min(99.5, sliderPosition));
 
-        return (
+    return (
         <div
             className={`${styles.container} ${preserveAspect ? styles.containerPreserveAspect : ''}`}
             ref={sliderRef}

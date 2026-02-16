@@ -233,9 +233,17 @@
 }
 
 @keyframes registerBtnSweep {
-    0% { left: -100%; }
-    50% { left: 140%; }
-    100% { left: -100%; }
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 140%;
+    }
+
+    100% {
+        left: -100%;
+    }
 }
 
 .registerBtn::before {

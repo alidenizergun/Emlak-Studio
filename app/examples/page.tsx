@@ -11,7 +11,7 @@ const POPUP_HINT_SENTENCES = [
     'Profesyonel görsel, daha az pazarlık ve daha yüksek fiyat demek.',
     'Bir tıkla boş oda dolu odaya dönüşüyor; denemesi ücretsiz.',
     'Dikkat çekmeyen ilan satılmaz; bu görseller dikkat çeker.',
-    'Müşteri "bu evde yaşarım" hissini dekore fotoğrafla daha çok yaşıyor.',
+    'Müşteri “bu evde yaşarım” hissini dekore fotoğrafla daha çok yaşıyor.',
     'İlan süresini kısaltın: güçlü görsel, daha hızlı satış.',
     'Ücretsiz deneyin; farkı kendi ilanlarınızda görün.',
     'Saniyeler içinde ilan görselinizi rakiplerinizden daha güçlü hale getirin.',
@@ -237,7 +237,7 @@ export default function ExamplesPage() {
     useEffect(() => {
         const t = setInterval(() => {
             setCtaHintIndex((i) => (i + 1) % POPUP_HINT_SENTENCES.length);
-        }, 4000);
+        }, 5000);
         return () => clearInterval(t);
     }, []);
 
@@ -327,58 +327,60 @@ export default function ExamplesPage() {
                 const prevExample = currentIndex > 0 ? filteredExamples[currentIndex - 1] : filteredExamples[filteredExamples.length - 1];
                 const nextExample = currentIndex < filteredExamples.length - 1 ? filteredExamples[currentIndex + 1] : filteredExamples[0];
                 return (
-                <div className={styles.popupOverlay} onClick={() => setPopupExample(null)} role="dialog" aria-modal="true" aria-label="Önce ve sonra karşılaştırması">
-                    <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
-                        <button type="button" className={styles.popupClose} onClick={() => setPopupExample(null)} aria-label="Kapat">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                        </button>
-                        <div className={styles.popupImages}>
-                            <div className={styles.popupCol}>
-                                <span className={`${styles.popupBadge} ${styles.popupBadgeBefore}`}>Önce</span>
-                                <div className={styles.popupImageWrap}>
-                                    <Image src={popupExample.before} alt="Önce" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                    <div className={styles.popupOverlay} onClick={() => setPopupExample(null)} role="dialog" aria-modal="true" aria-label="Önce ve sonra karşılaştırması">
+                        <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+                            <button type="button" className={styles.popupClose} onClick={() => setPopupExample(null)} aria-label="Kapat">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            </button>
+                            <div className={styles.popupImages}>
+                                <div className={styles.popupCol}>
+                                    <span className={`${styles.popupBadge} ${styles.popupBadgeBefore}`}>Önce</span>
+                                    <div className={styles.popupImageWrap}>
+                                        <Image src={popupExample.before} alt="Önce" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                                    </div>
+                                </div>
+                                <div className={styles.popupCol}>
+                                    <span className={`${styles.popupBadge} ${styles.popupBadgeAfter}`}>
+                                        Yapay Zeka ile Dekore Edildikten Sonra
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>
+                                    </span>
+                                    <div className={`${styles.popupImageWrap} ${styles.popupImageWrapAfter}`}>
+                                        <Image src={popupExample.after} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                                    </div>
                                 </div>
                             </div>
-                            <div className={styles.popupCol}>
-                                <span className={`${styles.popupBadge} ${styles.popupBadgeAfter}`}>
-                                    Yapay Zeka ile Dekore Edildikten Sonra
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>
-                                </span>
-                                <div className={`${styles.popupImageWrap} ${styles.popupImageWrapAfter}`}>
-                                    <Image src={popupExample.after} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                            <footer className={styles.popupFooter}>
+                                <Link href="/register" className={styles.popupCta} onClick={() => setPopupExample(null)}>
+                                    Hemen Ücretsiz Dene
+                                </Link>
+                                <div className={styles.popupCtaHintWrap}>
+                                    <p key={ctaHintIndex} className={styles.popupCtaHint}>
+                                        {POPUP_HINT_SENTENCES[ctaHintIndex]}
+                                    </p>
                                 </div>
-                            </div>
+                            </footer>
+                            {filteredExamples.length > 0 && (
+                                <button
+                                    type="button"
+                                    className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
+                                    onClick={(e) => { e.stopPropagation(); setPopupExample(prevExample); }}
+                                    aria-label="Önceki örnek"
+                                >
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                </button>
+                            )}
+                            {filteredExamples.length > 0 && (
+                                <button
+                                    type="button"
+                                    className={`${styles.popupArrow} ${styles.popupArrowRight}`}
+                                    onClick={(e) => { e.stopPropagation(); setPopupExample(nextExample); }}
+                                    aria-label="Sonraki örnek"
+                                >
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                </button>
+                            )}
                         </div>
-                        <footer className={styles.popupFooter}>
-                            <Link href="/register" className={styles.popupCta} onClick={() => setPopupExample(null)}>
-                                Hemen Ücretsiz Dene
-                            </Link>
-                            <div className={styles.popupCtaHintWrap}>
-                                <p className={styles.popupCtaHint}>Siz de ilanlarınızı böyle güçlendirin.</p>
-                            </div>
-                        </footer>
-                        {filteredExamples.length > 0 && (
-                            <button
-                                type="button"
-                                className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
-                                onClick={(e) => { e.stopPropagation(); setPopupExample(prevExample); }}
-                                aria-label="Önceki örnek"
-                            >
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                            </button>
-                        )}
-                        {filteredExamples.length > 0 && (
-                            <button
-                                type="button"
-                                className={`${styles.popupArrow} ${styles.popupArrowRight}`}
-                                onClick={(e) => { e.stopPropagation(); setPopupExample(nextExample); }}
-                                aria-label="Sonraki örnek"
-                            >
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                            </button>
-                        )}
                     </div>
-                </div>
                 );
             })()}
 

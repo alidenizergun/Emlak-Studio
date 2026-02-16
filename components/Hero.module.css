@@ -284,12 +284,15 @@
 }
 
 @keyframes frameGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
             0 0 0 1px rgba(255, 255, 255, 0.5),
             0 0 20px rgba(255, 255, 255, 0.2),
             0 0 40px rgba(253, 230, 138, 0.1);
     }
+
     50% {
         box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
             0 0 0 1px rgba(255, 255, 255, 0.85),
@@ -546,8 +549,13 @@
 }
 
 @keyframes heroPopupOverlayIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .heroPopup {
@@ -576,6 +584,7 @@
         opacity: 0;
         transform: scale(0.96) translateY(12px);
     }
+
     to {
         opacity: 1;
         transform: scale(1.25) translateY(0);
@@ -584,7 +593,7 @@
 
 .heroPopupClose {
     position: absolute;
-    top: 1rem;
+    top: 0.75rem;
     right: 1rem;
     z-index: 2;
     width: 32px;
@@ -730,9 +739,17 @@
 }
 
 @keyframes heroPopupCtaSweep {
-    0% { left: -100%; }
-    50% { left: 140%; }
-    100% { left: -100%; }
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 140%;
+    }
+
+    100% {
+        left: -100%;
+    }
 }
 
 .heroPopupCta:hover {
@@ -758,14 +775,22 @@
 }
 
 @keyframes heroPopupHintFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes heroPopupCtaShadow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 20px rgba(22, 163, 74, 0.2);
     }
+
     50% {
         box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5), 0 0 32px rgba(22, 163, 74, 0.35);
     }
@@ -837,6 +862,7 @@
             opacity: 0;
             transform: scale(0.96) translateY(8px);
         }
+
         to {
             opacity: 1;
             transform: scale(1) translateY(0);

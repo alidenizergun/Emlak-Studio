@@ -72,7 +72,7 @@ const Hero = () => {
                     <ul className={styles.subtitleList}>
                         <li>
                             <strong>İlanlarınız Daha Fazla Tıklansın</strong>
-                            <span className={styles.listDesc}>AI destekli profesyonel görsellerle dikkat çekin, talebi artırın.</span>
+                            <span className={styles.listDesc}>Yapay Zeka destekli profesyonel görsellerle dikkat çekin, talebi artırın.</span>
                         </li>
                         <li>
                             <strong>Mülkün Potansiyelini Anında Gösterin</strong>
@@ -103,6 +103,7 @@ const Hero = () => {
                             afterImage={HERO_AFTER}
                             onPositionChange={setSliderPosition}
                             hintSlide
+                            hintFullRange
                             brightenAfter
                         />
                         <button
