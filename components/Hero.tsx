@@ -10,11 +10,14 @@ const HERO_BEFORE = '/images/hero-empty-room-4k.png';
 const HERO_AFTER = '/images/hero-decorated-4k.png';
 
 const POPUP_HINT_SENTENCES = [
-    'Rakipleriniz bu görsellerle ilanlarını öne taşıyor — siz de hemen deneyin.',
-    'Binlerce emlakçı boş odaları böyle dolduruyor. Siz hâlâ boş fotoğraf mı kullanacaksınız?',
-    'İlanı dekore edilmiş görselle yayınlayanlar daha hızlı satıyor. Ücretsiz deneyin.',
-    'Rakiplerinizden geri kalmayın — ilk 100 kullanıcıya ücretsiz.',
-    'Dikkat çeken ilanlar daha çok tıklanıyor. Saniyeler içinde deneyin.',
+    'Boş oda fotoğrafı ilanı zayıflatır; dekore görsel satışı hızlandırır.',
+    'Profesyonel görsel, daha az pazarlık ve daha yüksek fiyat demek.',
+    'Bir tıkla boş oda dolu odaya dönüşüyor; denemesi ücretsiz.',
+    'Dikkat çekmeyen ilan satılmaz; bu görseller dikkat çeker.',
+    'Müşteri “bu evde yaşarım” hissini dekore fotoğrafla daha çok yaşıyor.',
+    'İlan süresini kısaltın: güçlü görsel, daha hızlı satış.',
+    'Ücretsiz deneyin; farkı kendi ilanlarınızda görün.',
+    'Saniyeler içinde ilan görselinizi rakiplerinizden daha güçlü hale getirin.',
 ];
 
 const Hero = () => {
@@ -160,7 +163,7 @@ const Hero = () => {
                             <div className={styles.heroPopupCol}>
                                 <span className={`${styles.heroPopupBadge} ${styles.heroPopupBadgeBefore}`}>Önce</span>
                                 <div className={styles.heroPopupImageWrap}>
-                                    <Image src={HERO_BEFORE} alt="Boş oda" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'cover' }} />
+                                    <Image src={HERO_BEFORE} alt="Boş oda" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
                                 </div>
                             </div>
                             <div className={styles.heroPopupCol}>
@@ -169,7 +172,7 @@ const Hero = () => {
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>
                                 </span>
                                 <div className={`${styles.heroPopupImageWrap} ${styles.heroPopupImageWrapAfter}`}>
-                                    <Image src={HERO_AFTER} alt="Yapay zeka ile dekore edilmiş oda" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'cover' }} />
+                                    <Image src={HERO_AFTER} alt="Yapay zeka ile dekore edilmiş oda" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
                                 </div>
                             </div>
                         </div>

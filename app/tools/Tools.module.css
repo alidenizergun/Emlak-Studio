@@ -97,6 +97,115 @@
     border: 1px solid rgba(37, 99, 235, 0.35);
 }
 
+/* Öneride bulunun - araç kartlarıyla aynı dil */
+.suggestSection {
+    margin-top: 4rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.suggestTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--foreground);
+}
+
+.suggestDesc {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.suggestForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.suggestRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.suggestLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.suggestInput,
+.suggestTextarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--card-border);
+    border-radius: 12px;
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 1rem;
+    font-family: var(--font-sans);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.suggestInput:focus,
+.suggestTextarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.suggestInput::placeholder,
+.suggestTextarea::placeholder {
+    color: #94a3b8;
+}
+
+.suggestTextarea {
+    resize: vertical;
+    min-height: 88px;
+}
+
+.suggestSubmit {
+    align-self: flex-start;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestSubmit:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+.suggestSubmit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.suggestSuccess {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.suggestError {
+    font-size: 0.875rem;
+    color: #ef4444;
+}
+
 @media (max-width: 768px) {
     .pageContainer {
         padding-top: 88px;
@@ -138,5 +247,19 @@
         right: 8px;
         font-size: 0.65rem;
         padding: 0.25rem 0.5rem;
+    }
+
+    .suggestSection {
+        margin-top: 3rem;
+        padding: 1.5rem 1.25rem;
+    }
+
+    .suggestTitle {
+        font-size: 1.15rem;
+    }
+
+    .suggestDesc {
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
     }
 }

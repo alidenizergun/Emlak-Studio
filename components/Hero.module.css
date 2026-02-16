@@ -563,7 +563,7 @@
     margin: auto;
     box-shadow: 0 32px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
     animation: heroPopupIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    transform: scale(1);
+    transform: scale(1.25);
     transform-origin: center center;
     display: flex;
     flex-direction: column;
@@ -578,7 +578,7 @@
     }
     to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: scale(1.25) translateY(0);
     }
 }
 
@@ -587,17 +587,24 @@
     top: 1rem;
     right: 1rem;
     z-index: 2;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     border: none;
     background: #f1f5f9;
-    border-radius: 12px;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #475569;
     transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.heroPopupClose svg {
+    width: 16px;
+    height: 16px;
 }
 
 .heroPopupClose:hover {
@@ -609,8 +616,8 @@
 .heroPopupImages {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-    padding: 1.25rem 1.5rem 0.75rem;
+    gap: 1rem;
+    padding: 0.75rem 1rem 0.5rem;
     align-items: start;
     min-width: 0;
     flex: 1;
@@ -664,16 +671,16 @@
 .heroPopupImageWrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/3;
+    aspect-ratio: 16/9;
     min-height: 120px;
-    max-height: min(42vh, 280px);
+    max-height: min(65.625vh, 437px);
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .heroPopupImageWrap img {
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .heroPopupImageWrapAfter {
@@ -806,7 +813,8 @@
         width: 100%;
         overflow-y: auto;
         overflow-x: hidden;
-        transform: scale(1);
+        transform: scale(1.25);
+        transform-origin: center center;
         animation: heroPopupInMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         flex-shrink: 1;
         min-height: 0;
@@ -819,34 +827,34 @@
         }
         to {
             opacity: 1;
-            transform: scale(1) translateY(0);
+            transform: scale(1.25) translateY(0);
         }
     }
 
     .heroPopupClose {
         top: 0.5rem;
         right: max(0.5rem, env(safe-area-inset-right));
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        min-height: 32px;
-        border-radius: 8px;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        min-height: 28px;
+        border-radius: 6px;
     }
 
     .heroPopupClose svg {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
     }
 
     .heroPopupImages {
         grid-template-columns: 1fr;
-        padding: 0.5rem 1rem 0.5rem;
+        padding: 0.5rem 0.75rem 0.5rem;
         padding-top: 0.25rem;
     }
 
     .heroPopupImageWrap {
         min-height: 120px;
-        max-height: min(32vh, 200px);
+        max-height: min(50vh, 312px);
     }
 
     .heroPopupFooter {

@@ -125,6 +125,16 @@ export default function PricingPage() {
     return (
         <div className={styles.pricingPage}>
             <div className="container">
+                <div className={styles.priceNotice}>
+                    <span className={styles.priceNoticeIcon} aria-hidden>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+                        </svg>
+                    </span>
+                    <p className={styles.priceNoticeText}>
+                        <strong>Kısa süreli fırsat:</strong> Şu an tüm planlarda %50 indirim. Fiyatlar yakında yükseliyor — aşağıdaki planlardan birini seçin, indirimli fiyatlarla hemen başlayın.
+                    </p>
+                </div>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
                         Başarınıza Uygun Planı Seçin

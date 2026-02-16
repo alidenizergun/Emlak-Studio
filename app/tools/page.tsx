@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import styles from './Tools.module.css';
 import { TOOLS } from './toolsData';
+import ToolsSuggest from './ToolsSuggest';
 
 export const metadata = {
     title: "Araçlar - Emlak AIStudio",
@@ -11,7 +12,7 @@ export default function ToolsPage() {
     return (
         <div className={`container ${styles.pageContainer}`}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Yapay Zeka Araçları</h1>
+                <h1 className={styles.title}>Emlak Yapay Zeka Araçları</h1>
                 <p className={styles.description}>
                     İş akışınızı hızlandıracak ve satışlarınızı artıracak tüm araçlar tek bir yerde.
                 </p>
@@ -41,6 +42,8 @@ export default function ToolsPage() {
                     );
                 })}
             </div>
+
+            <ToolsSuggest />
         </div>
     );
 }

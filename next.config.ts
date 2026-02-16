@@ -2,7 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true, // Disable optimization to preserve image quality
+    unoptimized: true,
+    qualities: [75, 100],
   },
 };
 

@@ -4,6 +4,43 @@
     background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
 }
 
+.priceNotice {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 640px;
+    margin: 0 auto 32px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12);
+}
+
+.priceNoticeIcon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    color: #059669;
+}
+
+.priceNoticeText {
+    margin: 0;
+    font-size: 1rem;
+    color: #065f46;
+    line-height: 1.55;
+}
+
+.priceNoticeText strong {
+    color: #047857;
+    font-weight: 700;
+}
+
 .header {
     text-align: center;
     margin-bottom: 40px;

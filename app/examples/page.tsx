@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import ComparisonSlider from '../../components/ComparisonSlider';
 import TrialCTA from '../../components/TrialCTA';
 import styles from './Examples.module.css';
@@ -307,7 +308,7 @@ export default function ExamplesPage() {
                 const prevExample = currentIndex > 0 ? filteredExamples[currentIndex - 1] : filteredExamples[filteredExamples.length - 1];
                 const nextExample = currentIndex < filteredExamples.length - 1 ? filteredExamples[currentIndex + 1] : filteredExamples[0];
                 return (
-                <div className={styles.popupOverlay} onClick={() => setPopupExample(null)}>
+                <div className={styles.popupOverlay} onClick={() => setPopupExample(null)} role="dialog" aria-modal="true" aria-label="Önce ve sonra karşılaştırması">
                     {filteredExamples.length > 0 && (
                         <button
                             type="button"
@@ -330,31 +331,33 @@ export default function ExamplesPage() {
                     )}
                     <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
                         <button type="button" className={styles.popupClose} onClick={() => setPopupExample(null)} aria-label="Kapat">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                         <div className={styles.popupImages}>
                             <div className={styles.popupCol}>
-                                <div className={`${styles.popupImageWrap} ${styles.popupImageWrapNoFrame}`}>
-                                    <div className={styles.popupImageWrapBeforeInner}>
-                                        <Image src={popupExample.before} alt="Önce" fill sizes="50vw" style={{ objectFit: 'contain' }} />
-                                    </div>
+                                <span className={`${styles.popupBadge} ${styles.popupBadgeBefore}`}>Önce</span>
+                                <div className={styles.popupImageWrap}>
+                                    <Image src={popupExample.before} alt="Önce" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
                                 </div>
-                                <span className={styles.popupLabel}>Önce</span>
                             </div>
                             <div className={styles.popupCol}>
-                                <div className={styles.popupImageWrap}>
-                                    <Image src={popupExample.after} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="50vw" style={{ objectFit: 'contain' }} />
-                                </div>
-                                <span className={styles.popupLabel}>
+                                <span className={`${styles.popupBadge} ${styles.popupBadgeAfter}`}>
                                     Yapay Zeka ile Dekore Edildikten Sonra
-                                    <span className={styles.popupLabelStar} aria-hidden>
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-                                        </svg>
-                                    </span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>
                                 </span>
+                                <div className={`${styles.popupImageWrap} ${styles.popupImageWrapAfter}`}>
+                                    <Image src={popupExample.after} alt="Yapay Zeka ile Dekore Edildikten Sonra" fill sizes="(max-width: 768px) 100vw, 45vw" style={{ objectFit: 'contain' }} />
+                                </div>
                             </div>
                         </div>
+                        <footer className={styles.popupFooter}>
+                            <Link href="/register" className={styles.popupCta} onClick={() => setPopupExample(null)}>
+                                Hemen Ücretsiz Dene
+                            </Link>
+                            <div className={styles.popupCtaHintWrap}>
+                                <p className={styles.popupCtaHint}>Siz de ilanlarınızı böyle güçlendirin.</p>
+                            </div>
+                        </footer>
                     </div>
                 </div>
                 );
