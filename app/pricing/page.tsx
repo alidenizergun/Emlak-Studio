@@ -51,8 +51,7 @@ const PRICING_TIERS = [
             "Tüm AI Modellerine Erişim",
             "Özel API Erişimi",
             "Ticari Kullanım İzni",
-            "7/24 Özel Müşteri Temsilcisi",
-            "White-label Raporlama"
+            "7/24 Özel Müşteri Temsilcisi"
         ],
         cta: "Kurumsal İletişim",
         popular: false
