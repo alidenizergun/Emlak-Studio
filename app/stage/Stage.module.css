@@ -46,7 +46,7 @@
     display: flex;
     gap: 1.5rem;
     padding: 0 1.5rem;
-    align-items: stretch;
+    align-items: flex-start;
     min-height: 400px;
 }
 
@@ -56,15 +56,17 @@
     background: white;
     border-radius: 24px;
     border: 1px solid #e2e8f0;
-    padding: 2rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    height: 450px;
+    /* Strong rigid height */
+    overflow: hidden;
 }
 
 .emptyState {
-    height: 100%;
-    width: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -74,7 +76,6 @@
     border-radius: 16px;
     background: #f8fafc;
     transition: all 0.2s;
-    min-height: 100%;
 }
 
 .emptyState:hover {
@@ -96,8 +97,10 @@
 }
 
 .previewImage {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
 }
 
@@ -139,9 +142,8 @@
     background: white;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
-    padding: 1rem;
+    padding: 0.85rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -158,7 +160,7 @@
 }
 
 .controlGroup {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .label {
@@ -185,7 +187,7 @@
     background: white;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    padding: 8px 4px;
+    padding: 4px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -232,7 +234,8 @@
 .styleIcon {
     position: relative;
     z-index: 2;
-    line-height: 1.2;
+    line-height: 1.1;
+    font-size: 0.6rem;
 }
 
 /* AI Button - Full Width below grid */
@@ -246,9 +249,9 @@
     align-items: center;
     justify-content: center;
     /* Center content */
-    gap: 12px;
-    padding: 12px;
-    border-radius: 12px;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 10px;
     border: 2px solid rgba(16, 185, 129, 0.2);
     background: rgba(16, 185, 129, 0.05);
     cursor: pointer;
@@ -304,11 +307,11 @@
     grid-column: 1 / -1;
     /* Span full width within the grid */
     width: 100%;
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: 12px;
     border: none;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     display: flex;
     align-items: center;

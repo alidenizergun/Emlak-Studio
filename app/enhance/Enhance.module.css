@@ -47,7 +47,7 @@
     display: flex;
     gap: 1rem;
     padding: 0 1.5rem;
-    align-items: stretch;
+    align-items: flex-start;
     min-height: 400px;
 }
 
@@ -61,6 +61,8 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    height: 450px;
+    overflow: hidden;
 }
 
 /* ... */
@@ -116,7 +118,7 @@
 }
 
 .emptyState {
-    height: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -126,6 +128,7 @@
     border-radius: 16px;
     background: #f8fafc;
     transition: all 0.2s;
+    height: 100%;
 }
 
 .emptyState:hover {
@@ -138,6 +141,9 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1.5rem;
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
 }
 
 .itemCard {
@@ -296,7 +302,7 @@
     background: white;
     border-radius: 20px;
     border: 1px solid #e2e8f0;
-    padding: 1.5rem;
+    padding: 1.25rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
@@ -313,14 +319,14 @@
 .optionsList {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.4rem;
 }
 
 .optionItem {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px;
+    padding: 8px 12px;
     border-radius: 12px;
     border: 1px solid #f1f5f9;
     background: #fff;
@@ -342,13 +348,13 @@
 }
 
 .optionIcon {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f1f5f9;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #64748b;
     flex-shrink: 0;
 }
@@ -367,11 +373,11 @@
 
 .optionName {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .optionDesc {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #64748b;
 }
 
@@ -399,11 +405,11 @@
 
 .processBtn {
     width: 100%;
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: 14px;
     border: none;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     display: flex;
     align-items: center;

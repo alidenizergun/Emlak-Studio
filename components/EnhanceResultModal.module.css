@@ -89,6 +89,7 @@
 .previewArea {
     flex: 1;
     min-height: 400px;
+    max-height: 60vh;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid var(--border);
