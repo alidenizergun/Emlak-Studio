@@ -167,7 +167,7 @@ export default function ExamplesPage() {
                                     onClick={(e) => { e.stopPropagation(); setPopupExample(prevExample); }}
                                     aria-label="Önceki örnek"
                                 >
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
                                 </button>
                             )}
                             {filteredExamples.length > 0 && (
@@ -177,7 +177,7 @@ export default function ExamplesPage() {
                                     onClick={(e) => { e.stopPropagation(); setPopupExample(nextExample); }}
                                     aria-label="Sonraki örnek"
                                 >
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                                    <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                 </button>
                             )}
                         </div>
