@@ -26,14 +26,15 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.15);
+    width: 56px;
+    height: 56px;
+    background: transparent;
     border-radius: 12px;
     flex-shrink: 0;
     color: #ffffff !important;
     visibility: visible !important;
     opacity: 1 !important;
+    overflow: hidden;
 }
 
 .logoIcon svg {
@@ -135,8 +136,8 @@
     }
 
     .logoIcon {
-        width: 38px;
-        height: 38px;
+        width: 48px;
+        height: 48px;
     }
 
     .logoIcon svg {

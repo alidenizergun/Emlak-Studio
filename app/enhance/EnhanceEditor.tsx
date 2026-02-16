@@ -1,50 +1,93 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
-import ComparisonSlider from '@/components/ComparisonSlider';
 import EnhanceResultModal from '@/components/EnhanceResultModal';
 import styles from './Enhance.module.css';
 
+interface EnhancedItem {
+    id: string;
+    file: File;
+    previewUrl: string;
+    status: 'pending' | 'processing' | 'success' | 'error';
+    resultUrl?: string;
+    error?: string;
+}
+
+const MAX_FILES = 2;
+
 export default function EnhanceClient() {
     const router = useRouter();
-    const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({});
-    const [file, setFile] = useState<File | null>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [result, setResult] = useState<{ before: string; after: string } | null>(null);
-    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({ 'auto': true }); // Default to Auto
+    const [items, setItems] = useState<EnhancedItem[]>([]);
+    const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
 
-    const handleImageSelect = (selectedFile: File) => {
-        setFile(selectedFile);
-        setIsProcessing(false);
-        setResult(null);
-        setSelectedOptions({});
-    };
+    // Modal State
+    const [modalState, setModalState] = useState<{
+        isOpen: boolean;
+        before: string;
+        after: string;
+    }>({ isOpen: false, before: '', after: '' });
 
-    const toggleOption = (id: string) => {
-        setSelectedOptions(prev => {
-            const isSelected = !prev[id];
+    // Cleanup object URLs
+    useEffect(() => {
+        return () => {
+            items.forEach(item => URL.revokeObjectURL(item.previewUrl));
+        };
+    }, []);
 
-            if (isSelected) {
-                // If selecting, remove 'auto' and set the new option
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentionally omit 'auto'
-                const { auto, ...others } = prev;
-                return { ...others, [id]: true };
-            } else {
-                // If deselecting, just update the value
-                return { ...prev, [id]: false };
+    const handleFilesSelect = (files: File[]) => {
+        const newItems: EnhancedItem[] = files.map(file => ({
+            id: crypto.randomUUID(),
+            file,
+            previewUrl: URL.createObjectURL(file),
+            status: 'pending'
+        }));
+
+        setItems(prev => {
+            const combined = [...prev, ...newItems];
+            if (combined.length > MAX_FILES) {
+                alert(`En fazla ${MAX_FILES} fotoğraf yükleyebilirsiniz.`);
+                // Cleanup unused URLs
+                newItems.slice(MAX_FILES - prev.length).forEach(i => URL.revokeObjectURL(i.previewUrl));
+                return combined.slice(0, MAX_FILES);
             }
+            return combined;
         });
     };
 
-    const handleProcess = async () => {
-        if (!file) return;
-        setIsProcessing(true);
+    const removeFile = (id: string) => {
+        setItems(prev => {
+            const itemToRemove = prev.find(i => i.id === id);
+            if (itemToRemove) URL.revokeObjectURL(itemToRemove.previewUrl);
+            return prev.filter(i => i.id !== id);
+        });
+    };
+
+    const toggleOption = (id: string) => {
+        if (isGlobalProcessing) return;
+
+        setSelectedOptions(prev => {
+            const isSelected = !prev[id];
+            if (id === 'auto') {
+                return isSelected ? { 'auto': true } : {};
+            }
+            // If selecting manual option, deselect auto
+            const newOptions = { ...prev, [id]: isSelected };
+            if (isSelected) delete newOptions['auto'];
+            return newOptions;
+        });
+    };
+
+    const processItem = async (item: EnhancedItem) => {
+        if (item.status === 'success') return;
+
+        setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'processing' } : i));
 
         try {
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('image', item.file);
             formData.append('options', JSON.stringify(selectedOptions));
 
             const response = await fetch('/api/enhance', {
@@ -53,198 +96,232 @@ export default function EnhanceClient() {
             });
 
             const data = await response.json();
-            console.log('Enhance API Response:', data);
 
             if (data.success) {
-                const objectUrl = URL.createObjectURL(file);
-                setResult({
-                    before: objectUrl,
-                    after: data.imageUrl
-                });
-                setIsResultModalOpen(true);
+                setItems(prev => prev.map(i => i.id === item.id ? {
+                    ...i,
+                    status: 'success',
+                    resultUrl: data.imageUrl
+                } : i));
             } else {
-                alert('İşlem başarısız: ' + (data.error || 'Bilinmeyen hata'));
+                setItems(prev => prev.map(i => i.id === item.id ? {
+                    ...i,
+                    status: 'error',
+                    error: data.error
+                } : i));
             }
         } catch (error) {
             console.error('Enhance error:', error);
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
-        } finally {
-            setIsProcessing(false);
+            setItems(prev => prev.map(i => i.id === item.id ? {
+                ...i,
+                status: 'error',
+                error: 'Hata'
+            } : i));
         }
     };
 
-    const handleAutoFix = () => {
-        const isAuto = selectedOptions['auto'];
-        if (isAuto) {
-            setSelectedOptions({});
-        } else {
-            setSelectedOptions({ 'auto': true });
+    const handleProcessAll = async () => {
+        const pending = items.filter(i => i.status !== 'success');
+        if (pending.length === 0) return;
+
+        setIsGlobalProcessing(true);
+        // Process in parallel with limit of 3 to be nice to server
+        const chunk = (arr: EnhancedItem[], size: number) =>
+            Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+                arr.slice(i * size, i * size + size)
+            );
+
+        const chunks = chunk(pending, 3);
+
+        for (const batch of chunks) {
+            await Promise.all(batch.map(item => processItem(item)));
+        }
+
+        setIsGlobalProcessing(false);
+    };
+
+    const openResult = (item: EnhancedItem) => {
+        if (item.status === 'success' && item.resultUrl) {
+            setModalState({
+                isOpen: true,
+                before: item.previewUrl,
+                after: item.resultUrl
+            });
         }
     };
+
+    const hasItems = items.length > 0;
+    const allDone = hasItems && items.every(i => i.status === 'success' || i.status === 'error');
+    const pendingCount = items.filter(i => i.status === 'pending').length;
 
     return (
-        <div className={`container ${styles.pageContainer}`}>
-            <div className={styles.header}>
-                <h1 className={styles.title}>Fotoğraf Geliştirme</h1>
-                <p className={styles.description}>
-                    Karanlık, solgun veya düşük çözünürlüklü fotoğrafları saniyeler içinde 4K kalitesine yükseltin.
-                </p>
-            </div>
+        <div className={styles.pageContainer}>
+            <header className={styles.header}>
+                <div className={styles.headerContent}>
+                    <h1 className={styles.title}>Fotoğraf Geliştirme Stüdyosu</h1>
+                    <p className={styles.description}>
+                        Yapay zeka ile fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar,
+                        çözünürlüğü 4K kaliteye yükseltir.
+                    </p>
+                </div>
+            </header>
 
             <div className={styles.workspace}>
-                {result ? (
-                    <div className={styles.resultArea}>
-                        <div className={styles.resultHeader}>
-                            <div className={styles.statusBadge}>
-                                <span className={styles.badgePulse}></span>
-                                4K Uygulandı
-                            </div>
+                {/* LEFT: Gallery Area */}
+                <div className={styles.gallerySection}>
+                    {!hasItems ? (
+                        <div className={styles.emptyState}>
+                            <ImageUploader
+                                onImagesSelect={handleFilesSelect}
+                                label="Fotoğrafları Buraya Tıklayıp Yükleyin"
+                                multiple={true}
+                                maxFiles={MAX_FILES}
+                            />
                         </div>
-                        <ComparisonSlider beforeImage={result.before} afterImage={result.after} />
-                        <div className={styles.actions}>
-                            <button className={styles.downloadBtn} onClick={() => {
-                                const link = document.createElement('a');
-                                link.href = result.after;
-                                link.download = 'emlak-studio-4k-enhanced.jpg';
-                                link.click();
-                            }}>4K Fotoğrafı İndir</button>
-                            <button className={styles.resetBtn} onClick={() => {
-                                setFile(null);
-                                setResult(null);
-                            }}>Yeni Fotoğraf Yükle</button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className={styles.editorLayout}>
-                        <div className={styles.uploadSection}>
-                            {file ? (
-                                <div className={styles.previewContainer}>
+                    ) : (
+                        <div className={styles.itemsGrid}>
+                            {items.map(item => (
+                                <div key={item.id} className={styles.itemCard} onClick={() => openResult(item)}>
+                                    {/* Status Badge */}
+                                    <div className={`${styles.statusBadge} ${item.status === 'pending' ? styles.statusPending :
+                                        item.status === 'processing' ? styles.statusProcessing :
+                                            item.status === 'success' ? styles.statusSuccess :
+                                                styles.statusError
+                                        }`}>
+                                        {item.status === 'pending' && <span className={styles.dotPending} />}
+                                        {item.status === 'processing' && <span className={styles.spinner} style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }} />}
+                                        {item.status === 'success' && '✓'}
+                                        {item.status === 'error' && '!'}
+
+                                        {item.status === 'pending' && 'Bekliyor'}
+                                        {item.status === 'processing' && 'İşleniyor'}
+                                        {item.status === 'success' && 'Hazır'}
+                                        {item.status === 'error' && 'Hata'}
+                                    </div>
+
+                                    {/* Image */}
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
-                                        src={URL.createObjectURL(file)}
+                                        src={item.status === 'success' ? item.resultUrl : item.previewUrl}
                                         alt="Preview"
-                                        className={styles.previewImage}
+                                        className={styles.itemImage}
                                     />
-                                    <button
-                                        className={styles.changeImageBtn}
-                                        onClick={() => setFile(null)}
-                                    >
-                                        Değiştir
-                                    </button>
+
+                                    {/* Overlay Actions */}
+                                    <div className={styles.itemOverlay}>
+                                        {item.status === 'success' ? (
+                                            <button
+                                                className={`${styles.actionBtn} ${styles.btnView}`}
+                                                onClick={(e) => { e.stopPropagation(); openResult(item); }}
+                                                title="İncele"
+                                            >
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                            </button>
+                                        ) : null}
+
+                                        {item.status !== 'processing' && (
+                                            <button
+                                                className={`${styles.actionBtn} ${styles.btnRemove}`}
+                                                onClick={(e) => { e.stopPropagation(); removeFile(item.id); }}
+                                                title="Sil"
+                                            >
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            ) : (
-                                <ImageUploader onImageSelect={handleImageSelect} label="Geliştirilecek Fotoğrafı Seçin" />
+                            ))}
+
+                            {/* Add More Button */}
+                            {items.length < MAX_FILES && (
+                                <div className={styles.uploadCard}>
+                                    <div style={{ transform: 'scale(0.8)', width: '100%', height: '100%' }}>
+                                        <ImageUploader
+                                            onImagesSelect={handleFilesSelect}
+                                            label="+"
+                                            multiple={true}
+                                            maxFiles={MAX_FILES - items.length}
+                                        />
+                                    </div>
+                                </div>
                             )}
                         </div>
+                    )}
+                </div>
 
-                        <div className={styles.controlsSection}>
-                            <div className={styles.controlGroup}>
-                                <label className={styles.label}>Geliştirme Seçenekleri</label>
-                                <div className={styles.optionsGrid}>
-                                    {OPTIONS.map(option => (
-                                        <button
-                                            key={option.id}
-                                            className={`${styles.optionCard} ${selectedOptions[option.id] ? styles.active : ''}`}
-                                            onClick={() => toggleOption(option.id)}
-                                        >
-                                            <div className={styles.optionIcon}>{option.icon}</div>
-                                            <span className={styles.optionLabel}>{option.label}</span>
-                                            <div className={styles.checkbox}>
-                                                {selectedOptions[option.id] && (
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                        <polyline points="20 6 9 17 4 12" />
-                                                    </svg>
-                                                )}
-                                            </div>
-                                        </button>
-                                    ))}
-
-                                    {/* Auto Fix Button as Grid Item */}
-                                    <button
-                                        className={`${styles.optionCard} ${styles.autoOption} ${selectedOptions['auto'] ? styles.active : ''}`}
-                                        /* Force Update */
-                                        onClick={handleAutoFix}
-                                    >
-                                        <div className={styles.optionIcon}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <line x1="4" x2="4" y1="21" y2="14" />
-                                                <line x1="4" x2="4" y1="10" y2="3" />
-                                                <line x1="12" x2="12" y1="21" y2="12" />
-                                                <line x1="12" x2="12" y1="8" y2="3" />
-                                                <line x1="20" x2="20" y1="21" y2="16" />
-                                                <line x1="20" x2="20" y1="12" y2="3" />
-                                                <line x1="2" x2="6" y1="14" y2="14" />
-                                                <line x1="10" x2="14" y1="8" y2="8" />
-                                                <line x1="18" x2="22" y1="16" y2="16" />
-                                            </svg>
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.35rem', flex: 1 }}>
-                                            <span className={styles.optionLabel}>Otomatik İyileştir</span>
-                                            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 400, lineHeight: 1.5 }}>
-                                                Işık, renk ve netlik ayarları yapılıp varsa kirler temizlenir. Yapay zeka tespit ettiği diğer hataları da düzeltir.
-                                            </span>
-                                        </div>
-                                        <div className={styles.checkbox}>
-                                            {selectedOptions['auto'] && (
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button
-                                className={styles.applyEnhanceBtn}
-                                onClick={handleProcess}
-                                disabled={!file || isProcessing}
-                                style={{
-                                    background: (!file || isProcessing)
-                                        ? 'rgba(16, 185, 129, 0.5)'
-                                        : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '1.1rem',
-                                    borderRadius: '14px',
-                                    fontWeight: '700',
-                                    fontSize: '1.1rem',
-                                    cursor: (!file || isProcessing) ? 'not-allowed' : 'pointer',
-                                    marginTop: 'auto',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    gap: '0.8rem',
-                                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                    boxShadow: '0 10px 20px rgba(16, 185, 129, 0.2)',
-                                    filter: (!file || isProcessing) ? 'grayscale(0.5)' : 'none',
-                                    opacity: (!file || isProcessing) ? '0.5' : '1'
-                                }}
-                            >
-                                {isProcessing ? (
-                                    <>
-                                        <span className={styles.spinnerSm}></span>
-                                        İşleniyor...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                            <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
-                                        </svg>
-                                        Seçilenleri Uygula
-                                    </>
-                                )}
-                            </button>
+                {/* RIGHT: Sidebar Controls */}
+                <div className={styles.controlsSidebar}>
+                    <div className={styles.panel} style={{ height: '100%', minHeight: '600px', display: 'flex', flexDirection: 'column' }}>
+                        <div className={styles.panelTitle}>
+                            <span>İşlem Seçenekleri</span>
                         </div>
+
+                        <div className={styles.optionsList} style={{ flex: 1 }}>
+                            {/* Manual Options First */}
+                            {OPTIONS.map(opt => (
+                                <div
+                                    key={opt.id}
+                                    className={`${styles.optionItem} ${selectedOptions[opt.id] ? styles.active : ''}`}
+                                    onClick={() => toggleOption(opt.id)}
+                                >
+                                    <div className={styles.checkbox}>
+                                        {selectedOptions[opt.id] && (
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                        )}
+                                    </div>
+                                    <div className={styles.optionText}>
+                                        <span className={styles.optionName}>{opt.label}</span>
+                                        <span className={styles.optionDesc}>{opt.desc}</span>
+                                    </div>
+                                    <div className={styles.optionIcon}>{opt.icon}</div>
+                                </div>
+                            ))}
+
+                            {/* Auto Option Last */}
+                            <div
+                                className={`${styles.optionItem} ${selectedOptions['auto'] ? styles.active : ''}`}
+                                onClick={() => toggleOption('auto')}
+                                style={{ marginTop: 'auto', marginBottom: '1rem', border: '2px solid rgba(16, 185, 129, 0.2)', background: selectedOptions['auto'] ? 'rgba(16, 185, 129, 0.05)' : '' }}
+                            >
+                                <div className={styles.checkbox} style={{ borderColor: selectedOptions['auto'] ? '#10b981' : '#cbd5e1', background: selectedOptions['auto'] ? '#10b981' : '' }}>
+                                    {selectedOptions['auto'] && (
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                    )}
+                                </div>
+                                <div className={styles.optionText}>
+                                    <span className={styles.optionName} style={{ color: '#059669' }}>Yapay Zeka Seçsin</span>
+                                    <span className={styles.optionDesc}>Yapay zeka en iyi ayarları seçsin</span>
+                                </div>
+                                <div className={styles.optionIcon}>✨</div>
+                            </div>
+                        </div>
+
+                        <button
+                            className={styles.processBtn}
+                            onClick={handleProcessAll}
+                            disabled={isGlobalProcessing || !hasItems || (pendingCount === 0 && !items.some(i => i.status === 'error'))}
+                        >
+                            {isGlobalProcessing ? (
+                                <>
+                                    <span className={styles.spinner} />
+                                    İşleniyor...
+                                </>
+                            ) : (
+                                <>
+                                    {allDone ? 'Tekrar İşle' : 'Geliştirmeyi Başlat'}
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                </>
+                            )}
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
 
             <EnhanceResultModal
-                isOpen={isResultModalOpen}
-                onClose={() => setIsResultModalOpen(false)}
-                beforeImage={result?.before || ''}
-                afterImage={result?.after || ''}
+                isOpen={modalState.isOpen}
+                onClose={() => setModalState(s => ({ ...s, isOpen: false }))}
+                beforeImage={modalState.before}
+                afterImage={modalState.after}
             />
         </div>
     );
@@ -253,51 +330,44 @@ export default function EnhanceClient() {
 const OPTIONS = [
     {
         id: 'lighting',
-        label: 'Işığı Düzelt',
-        icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2" />
-                <path d="M12 20v2" />
-                <path d="M4.93 4.93l1.41 1.41" />
-                <path d="M17.66 17.66l1.41 1.41" />
-                <path d="M2 12h2" />
-                <path d="M20 12h2" />
-                <path d="M6.34 17.66l-1.41 1.41" />
-                <path d="M19.07 4.93l-1.41 1.41" />
-            </svg>
-        )
+        label: 'Işık Düzeltme',
+        desc: 'Karanlık alanları aydınlatır',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
     },
     {
         id: 'color',
-        label: 'Renkleri Canlandır',
-        icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2.69l5.74 5.74c3.04 3.04 3.04 7.96 0 11a7.8 7.8 0 0 1-11.48 0c-3.04-3.04-3.04-7.96 0-11L12 2.69z" />
-                <path d="M8.7 8.5c1.6 0 2.9 1.3 2.9 2.9" />
-                <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
-            </svg>
-        )
+        label: 'Renk Canlandırma',
+        desc: 'Solgun renkleri düzeltir',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M12 2.69l5.74 5.74c3.04 3.04 3.04 7.96 0 11a7.8 7.8 0 0 1-11.48 0c-3.04-3.04-3.04-7.96 0-11L12 2.69z" /></svg>
     },
     {
         id: 'sharpness',
-        label: 'Netleştir',
-        icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                <circle cx="12" cy="12" r="3" />
-            </svg>
-        )
+        label: 'Ultra Netlik',
+        desc: 'Bulanıklığı giderir',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
     },
     {
         id: 'clean',
-        label: 'Kirleri Temizle',
-        icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" />
-                <path d="m5 11 6 6" />
-                <path d="m12 13-4-4" />
-            </svg>
-        )
+        label: 'Oda Temizliği',
+        desc: 'Leke ve kirleri temizler',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" /></svg>
+    },
+    {
+        id: 'privacy',
+        label: 'Gizlilik Mozaiği',
+        desc: 'Özel fotoğraflar ve yüzleri blurlar',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+    },
+    {
+        id: 'sky',
+        label: 'Mavi Gökyüzü',
+        desc: 'Bulutlu havayı güneşe çevirir',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M17.5 19c0-1.7-1.3-3-3-3c-.4 0-.7.1-1 .3c-.4-2.2-2.3-3.8-4.5-3.8c-2.5 0-4.5 2-4.5 4.5c0 .2 0 .4.1.6c-1.6.4-2.6 1.9-2.6 3.4" /><circle cx="12" cy="5" r="3" /></svg>
+    },
+    {
+        id: 'twilight',
+        label: 'Gün Batımı Modu',
+        desc: 'Büyüleyici akşam ışıkları',
+        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M12 3a6 6 0 0 0 9 9 9 9 9 0 1 1-9-9Z" /><path d="M20 3v4" /><path d="M22 5h-4" /></svg>
     }
 ];

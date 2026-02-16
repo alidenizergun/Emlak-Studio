@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import styles from './Tools.module.css';
 import { TOOLS } from './toolsData';
-import ToolsSuggest from './ToolsSuggest';
+
 
 export const metadata = {
     title: "Araçlar - Emlak AIStudio",
@@ -43,7 +43,6 @@ export default function ToolsPage() {
                 })}
             </div>
 
-            <ToolsSuggest />
         </div>
     );
 }

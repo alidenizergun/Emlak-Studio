@@ -1,329 +1,441 @@
 .pageContainer {
-    padding-top: 100px;
-    padding-bottom: 50px;
-    min-height: 100vh;
+    padding-top: 105px;
+    padding-bottom: 40px;
+    background: #f8fafc;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-    .pageContainer {
-        padding-top: 100px;
-    }
-}
 
 .header {
+    margin-bottom: 1.5rem;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    margin-bottom: 3rem;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-.title {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    font-weight: 700;
-}
-
-.description {
-    color: #a1a1aa;
-    line-height: 1.6;
-}
-
-.workspace {
-    max-width: 1100px;
-    margin: 0 auto;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 2rem;
-    min-height: 500px;
-}
-
-.editorLayout {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 2rem;
-}
-
-.uploadSection {
-    /* No specific style needed, grid item */
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.previewContainer {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #000;
-}
-
-.previewImage {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.changeImageBtn {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.controlsSection {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    height: 100%;
-}
-
-.label {
-    display: block;
-    margin-bottom: 1rem;
-    font-weight: 600;
-    color: var(--foreground);
-    font-size: 0.95rem;
-}
-
-/* Options Grid */
-.optionsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 1rem;
-}
-
-.optionCard {
-    background: white;
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 1rem;
+.headerContent {
+    max-width: 800px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    text-align: center;
+    gap: 0.5rem;
 }
 
-.optionCard:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border-color: var(--primary);
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.description {
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 600px;
+}
+
+/* Main Workspace Layout */
+.workspace {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    align-items: stretch;
+    min-height: 400px;
+}
+
+/* Left Side: Gallery / Canvas */
+.gallerySection {
+    flex: 1;
     background: white;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.optionCard.active {
-    background: rgba(37, 99, 235, 0.03);
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+/* ... */
+
+/* Sidebar Controls */
+.controlsSidebar {
+    width: 340px;
+    /* sticky positioning */
+    position: sticky;
+    top: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.panel {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* ... */
+
+.optionItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    position: relative;
+}
+
+/* ... */
+
+.optionIcon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 8px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.emptyState {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px dashed #e2e8f0;
+    border-radius: 16px;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.emptyState:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+}
+
+/* Grid Layout */
+.itemsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.itemCard {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f1f5f9;
+    aspect-ratio: 1;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.itemCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e1;
+    z-index: 2;
+}
+
+.itemImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.itemCard:hover .itemImage {
+    transform: scale(1.05);
+}
+
+/* Status Badges */
+.statusBadge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.statusPending {
+    background: rgba(255, 255, 255, 0.9);
+    color: #64748b;
+}
+
+.statusProcessing {
+    background: rgba(37, 99, 235, 0.9);
+    color: white;
+}
+
+.statusSuccess {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.statusError {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+}
+
+/* Action Overlay */
+.itemOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    backdrop-filter: blur(2px);
+}
+
+.itemCard:hover .itemOverlay {
+    opacity: 1;
+}
+
+.actionBtn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+    color: white;
+}
+
+.btnView {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.btnView:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #0f172a;
+    transform: scale(1.1);
+}
+
+.btnRemove {
+    background: rgba(239, 68, 68, 0.8);
+}
+
+.btnRemove:hover {
+    background: #ef4444;
+    transform: scale(1.1);
+}
+
+/* Upload Card (Add More) */
+.uploadCard {
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    aspect-ratio: 1;
+    color: #64748b;
+}
+
+.uploadCard:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+/* Sidebar Controls */
+.controlsSidebar {
+    width: 340px;
+    /* sticky positioning */
+    position: sticky;
+    top: 110px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex-shrink: 0;
+}
+
+.panel {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.panelTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.optionsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.optionItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    position: relative;
+}
+
+.optionItem:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.optionItem.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
 .optionIcon {
     width: 32px;
     height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 8px;
     color: #64748b;
-    transition: color 0.2s;
+    flex-shrink: 0;
 }
 
-.optionCard.active .optionIcon {
-    color: var(--primary);
+.optionItem.active .optionIcon {
+    background: #dbeafe;
+    color: #2563EB;
 }
 
-.optionLabel {
+.optionText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.optionName {
+    font-weight: 600;
     font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--foreground);
-    line-height: 1.3;
+}
+
+.optionDesc {
+    font-size: 0.75rem;
+    color: #64748b;
 }
 
 .checkbox {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: 6px;
     border: 2px solid #cbd5e1;
-    position: absolute;
-    top: 8px;
-    right: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
 }
 
-.optionCard.active .checkbox {
-    background: var(--primary);
-    border-color: var(--primary);
+.optionItem.active .checkbox {
+    background: #2563EB;
+    border-color: #2563EB;
 }
 
 .checkbox svg {
-    width: 12px;
-    height: 12px;
-    stroke: white;
+    width: 14px;
+    height: 14px;
+    color: white;
 }
 
-/* Auto Option Special Style */
-.autoOption {
-    grid-column: 1 / -1;
-    border: 2px solid transparent;
-    background: linear-gradient(white, white) padding-box,
-        linear-gradient(135deg, #10b981, #059669) border-box;
-    padding: 1.25rem 1rem;
-    min-height: 100px;
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 1rem;
-    text-align: left;
-}
-
-.autoOption .optionLabel {
-    font-weight: 700;
-}
-
-.autoOption:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
-}
-
-.autoOption .optionIcon {
-    color: #10b981;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-}
-
-/* Process Button (Renamed to match Stage design) */
-/* Apply Button (Renamed to match Stage design) */
-.applyEnhanceBtn {
-    background-image: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    background-color: #10b981 !important;
-    color: white !important;
-    border: none;
-    padding: 1.1rem;
+.processBtn {
+    width: 100%;
+    padding: 1rem;
     border-radius: 14px;
+    border: none;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
     cursor: pointer;
-    margin-top: auto;
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 0.8rem;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    margin-top: 1rem;
 }
 
-.applyEnhanceBtn:hover:not(:disabled) {
-    transform: scale(1.02);
-    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
+.processBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
 
-.applyEnhanceBtn:disabled {
-    opacity: 0.5;
+.processBtn:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
-    filter: grayscale(0.5);
+    filter: grayscale(1);
+    transform: none !important;
 }
 
-.spinnerSm {
+/* Spinner */
+.spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
     border-top-color: white;
-    animation: spin 1s infinite linear;
-}
-
-/* Result Area */
-.resultArea {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.resultHeader {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-}
-
-.statusBadge {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-    padding: 0.6rem 1.2rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.badgePulse {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
     border-radius: 50%;
-    position: relative;
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-    }
-
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-    }
-
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-    }
-}
-
-.actions {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-}
-
-.downloadBtn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.resetBtn {
-    background: transparent;
-    color: var(--foreground);
-    border: 1px solid var(--card-border);
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
+    animation: spin 0.8s infinite linear;
 }
 
 @keyframes spin {
@@ -332,8 +444,18 @@
     }
 }
 
-@media (max-width: 900px) {
-    .editorLayout {
+/* Mobile */
+@media (max-width: 1024px) {
+    .workspace {
         grid-template-columns: 1fr;
+    }
+
+    .controlsSidebar {
+        position: static;
+        flex-direction: column;
+    }
+
+    .gallerySection {
+        min-height: 400px;
     }
 }

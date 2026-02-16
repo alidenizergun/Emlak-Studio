@@ -49,10 +49,22 @@
 }
 
 .heroTitleAi {
-    background: linear-gradient(135deg, #4555FF 0%, #8A3FFF 100%);
+    /* Removed background clip to allow child spans to have their own gradients if needed, 
+       but keeping it for the text "apay" and "eka" if we want them uniform. 
+       Actually, the User wants Y and Z to look like the logo. 
+       The logo YZ usually has a specific gradient. 
+       Let's style the initials specifically. */
+    color: #0f172a;
+    /* Default color for the rest of the text */
+}
+
+.heroLogoChar {
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    font-weight: 800;
+    /* Make them bolder like a logo */
 }
 
 .aiIcon {

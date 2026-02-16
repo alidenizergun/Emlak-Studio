@@ -1,8 +1,8 @@
 export default function manifest() {
     return {
-        name: 'Emlak AIStudio',
-        short_name: 'Emlak AI',
-        description: '	 zeka ile emlak görselleştirme',
+        name: 'Emlak YZ',
+        short_name: 'Emlak YZ',
+        description: 'Yapay zeka ile emlak görselleştirme',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',

@@ -59,7 +59,9 @@ const Hero = () => {
                 <div className={styles.content}>
                     <h1 className={styles.title}>
                         Emlak Fotoğraflarınızı <br />
-                        <span className={styles.heroTitleAi}>Yapay Zeka</span> ile <br />
+                        <span className={styles.heroTitleAi}>
+                            <span className={styles.heroLogoChar}>Y</span>apay <span className={styles.heroLogoChar}>Z</span>eka
+                        </span> ile <br />
                         Güçlendirin
                         <span className={styles.aiIcon}>
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

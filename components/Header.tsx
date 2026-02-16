@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type CSSProperties } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import styles from './Header.module.css';
 import { TOOLS, ENHANCE_ICON } from '@/app/tools/toolsData';
@@ -112,23 +113,18 @@ const Header = () => {
                 <div className={styles.logo}>
                     <Link href="/">
                         <div className={styles.logoIcon}>
-                            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 20L16 16L20 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M16 16V24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M6 14C6 8.47715 10.4772 4 16 4C21.5228 4 26 8.47715 26 14V22C26 23.1046 25.1046 24 24 24H8C6.89543 24 6 23.1046 6 22V14Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
-                                <circle cx="24" cy="8" r="4" fill="url(#logo_gradient)" />
-                                <path d="M24 6.5L25 8L24 9.5L23 8L24 6.5Z" fill="white" />
-                                <defs>
-                                    <linearGradient id="logo_gradient" x1="20" y1="4" x2="28" y2="12" gradientUnits="userSpaceOnUse">
-                                        <stop stopColor="#10b981" />
-                                        <stop offset="1" stopColor="#3b82f6" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
+                            <Image
+                                src="/logo.png"
+                                alt="Emlak YZ Logo"
+                                width={56}
+                                height={56}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                priority
+                            />
                         </div>
                         <div className={styles.logoTextWrapper}>
                             <span className={styles.logoBrand}>Emlak</span>
-                            <span className={styles.logoStudio}>AISTUDIO</span>
+                            <span className={styles.logoStudio}>YZ</span>
                         </div>
                     </Link>
                 </div>
@@ -217,23 +213,17 @@ const Header = () => {
                         <div className={styles.logo}>
                             <Link href="/" onClick={() => setIsMenuOpen(false)}>
                                 <div className={styles.logoIcon}>
-                                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 20L16 16L20 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <path d="M16 16V24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        <path d="M6 14C6 8.47715 10.4772 4 16 4C21.5228 4 26 8.47715 26 14V22C26 23.1046 25.1046 24 24 24H8C6.89543 24 6 23.1046 6 22V14Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
-                                        <circle cx="24" cy="8" r="4" fill="url(#logo_gradient_mobile)" />
-                                        <path d="M24 6.5L25 8L24 9.5L23 8L24 6.5Z" fill="white" />
-                                        <defs>
-                                            <linearGradient id="logo_gradient_mobile" x1="20" y1="4" x2="28" y2="12" gradientUnits="userSpaceOnUse">
-                                                <stop stopColor="#10b981" />
-                                                <stop offset="1" stopColor="#3b82f6" />
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
+                                    <Image
+                                        src="/logo.png"
+                                        alt="Emlak YZ Logo"
+                                        width={56}
+                                        height={56}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
                                 </div>
                                 <div className={styles.logoTextWrapper}>
                                     <span className={styles.logoBrand}>Emlak</span>
-                                    <span className={styles.logoStudio}>AISTUDIO</span>
+                                    <span className={styles.logoStudio}>YZ</span>
                                 </div>
                             </Link>
                         </div>
@@ -288,7 +278,7 @@ const Header = () => {
                             </Link>
                         </div>
                         <div className={styles.footerBrand}>
-                            <p>© 2026 Emlak Studio. Her hakkı saklıdır.</p>
+                            <p>© 2026 Emlak YZ. Her hakkı saklıdır.</p>
                         </div>
                     </div>
                 </div>
