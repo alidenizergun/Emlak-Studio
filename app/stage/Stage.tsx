@@ -337,106 +337,105 @@ export default function StageClient() {
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
                         <div className={styles.optionsArea} style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
-                            <div className={styles.controlGroup}>
-                                <label className={styles.label}>Oda Tipi</label>
-                                <div className={styles.roomGrid}>
-                                    {ROOM_TYPES.map((room) => (
+                            <div className={styles.functionalStep}>
+                                <div className={styles.stepHeader}>
+                                    <span className={styles.stepNumber}>1</span>
+                                    <label className={styles.label}>Oda Tipi</label>
+                                </div>
+                                <div className={styles.controlGroup}>
+                                    <div className={styles.roomGrid}>
+                                        {ROOM_TYPES.map((room) => (
+                                            <button
+                                                key={room.id}
+                                                className={`${styles.roomBtn} ${selectedRoom === room.id && !isAiRoom ? styles.selected : ''}`}
+                                                onClick={() => {
+                                                    setSelectedRoom(room.id);
+                                                    setIsAiRoom(false);
+                                                }}
+                                            >
+                                                <div className={styles.roomIcon}>{room.icon}</div>
+                                                <span>{room.label}</span>
+                                            </button>
+                                        ))}
                                         <button
-                                            key={room.id}
-                                            className={`${styles.roomBtn} ${selectedRoom === room.id && !isAiRoom ? styles.selected : ''}`}
-                                            onClick={() => {
-                                                setSelectedRoom(room.id);
-                                                setIsAiRoom(false);
-                                            }}
+                                            className={`${styles.aiButton} ${isAiRoom ? styles.selected : ''}`}
+                                            onClick={handleAIDetectRoom}
+                                            disabled={isDetectingRoom}
                                         >
-                                            <div className={styles.roomIcon}>{room.icon}</div>
-                                            <span>{room.label}</span>
+                                            <div className={styles.checkbox}>
+                                                {isAiRoom && (
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                                )}
+                                            </div>
+                                            <div className={styles.aiText}>
+                                                <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
+                                                <span className={styles.aiDesc}>Oda tipini otomatik algıla</span>
+                                            </div>
+                                            <div className={styles.aiSparkle}>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <defs>
+                                                        <linearGradient id="yzSparkleGradientStage" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                            <stop offset="0%" stopColor="#10b981" />
+                                                            <stop offset="100%" stopColor="#3b82f6" />
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStage)" />
+                                                    <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStage)" />
+                                                </svg>
+                                            </div>
                                         </button>
-                                    ))}
-                                    <button
-                                        className={`${styles.aiButton} ${isAiRoom ? styles.selected : ''}`}
-                                        onClick={handleAIDetectRoom}
-                                        disabled={isDetectingRoom}
-                                    >
-                                        <div className={styles.checkbox}>
-                                            {isAiRoom && (
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                            )}
-                                        </div>
-                                        <div className={styles.aiText}>
-                                            <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
-                                            <span className={styles.aiDesc}>Oda tipini otomatik algıla</span>
-                                        </div>
-                                        <div className={styles.aiSparkle}>
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <defs>
-                                                    <linearGradient id="yzSparkleGradientStage" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                        <stop offset="0%" stopColor="#10b981" />
-                                                        <stop offset="100%" stopColor="#3b82f6" />
-                                                    </linearGradient>
-                                                </defs>
-                                                <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStage)" />
-                                                <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStage)" />
-                                            </svg>
-                                        </div>
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className={styles.separator}>
-                                <div className={styles.separatorLine} />
-                                <div className={styles.separatorIcon}>
-                                    <span />
-                                    <span />
-                                    <span />
+                            <div className={styles.functionalStep}>
+                                <div className={styles.stepHeader}>
+                                    <span className={styles.stepNumber}>2</span>
+                                    <label className={styles.label}>Tasarım Tarzı</label>
                                 </div>
-                                <div className={styles.separatorLine} />
-                            </div>
-
-                            <div className={styles.controlGroup}>
-                                <label className={styles.label}>Tasarım Tarzı</label>
-                                <div className={styles.styleGrid}>
-                                    {STYLES.map((style) => (
+                                <div className={styles.controlGroup}>
+                                    <div className={styles.styleGrid}>
+                                        {STYLES.map((style) => (
+                                            <button
+                                                key={style.id}
+                                                className={`${styles.styleBtn} ${selectedStyle === style.id && !isAiStyle ? styles.selected : ''}`}
+                                                onClick={() => {
+                                                    setSelectedStyle(style.id);
+                                                    setIsAiStyle(false);
+                                                }}
+                                            >
+                                                <div className={styles.styleIcon}>{style.icon}</div>
+                                                <span>{style.label}</span>
+                                            </button>
+                                        ))}
                                         <button
-                                            key={style.id}
-                                            className={`${styles.styleBtn} ${selectedStyle === style.id && !isAiStyle ? styles.selected : ''}`}
-                                            onClick={() => {
-                                                setSelectedStyle(style.id);
-                                                setIsAiStyle(false);
-                                            }}
+                                            className={`${styles.aiButton} ${isAiStyle ? styles.selected : ''}`}
+                                            onClick={handleAISelectStyle}
+                                            disabled={isSelectingStyle}
                                         >
-                                            <div className={styles.styleIcon}>{style.icon}</div>
-                                            <span>{style.label}</span>
+                                            <div className={styles.checkbox}>
+                                                {isAiStyle && (
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                                )}
+                                            </div>
+                                            <div className={styles.aiText}>
+                                                <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
+                                                <span className={styles.aiDesc}>En uygun tarzı uygula</span>
+                                            </div>
+                                            <div className={styles.aiSparkle}>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <defs>
+                                                        <linearGradient id="yzSparkleGradientStyle" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                            <stop offset="0%" stopColor="#10b981" />
+                                                            <stop offset="100%" stopColor="#3b82f6" />
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStyle)" />
+                                                    <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStyle)" />
+                                                </svg>
+                                            </div>
                                         </button>
-                                    ))}
-                                    <button
-                                        className={`${styles.aiButton} ${isAiStyle ? styles.selected : ''}`}
-                                        onClick={handleAISelectStyle}
-                                        disabled={isSelectingStyle}
-                                    >
-                                        <div className={styles.checkbox}>
-                                            {isAiStyle && (
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                            )}
-                                        </div>
-                                        <div className={styles.aiText}>
-                                            <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
-                                            <span className={styles.aiDesc}>En uygun tarzı uygula</span>
-                                        </div>
-                                        <div className={styles.aiSparkle}>
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <defs>
-                                                    <linearGradient id="yzSparkleGradientStyle" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                        <stop offset="0%" stopColor="#10b981" />
-                                                        <stop offset="100%" stopColor="#3b82f6" />
-                                                    </linearGradient>
-                                                </defs>
-                                                <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStyle)" />
-                                                <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStyle)" />
-                                            </svg>
-                                        </div>
-                                    </button>
-
+                                    </div>
                                 </div>
                             </div>
                         </div>
