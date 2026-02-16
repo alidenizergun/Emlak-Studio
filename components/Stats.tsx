@@ -47,7 +47,7 @@ const stats = [
         )
     },
     {
-        value: '10.000+',
+        value: '2500+',
         label: 'Başarılı İşlem',
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
