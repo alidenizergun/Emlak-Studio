@@ -15,10 +15,7 @@ const PRICING_TIERS = [
         features: [
             "100 Kredi (Her ay yenilenir)",
             "Yaklaşık 50 ilan görseli",
-            "Tüm AI Modellerine Erişim",
-            "Hızlı İşlem Önceliği",
-            "Ticari Kullanım İzni",
-            "Standart Email Desteği"
+            "Ticari Kullanım İzni"
         ],
         cta: "Hemen Başla",
         popular: false
