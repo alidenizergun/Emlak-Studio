@@ -294,7 +294,6 @@ export default function StageClient() {
                             <ImageUploader
                                 onImageSelect={handleImageSelect}
                                 label="Fotoğrafı Buraya Tıklayıp Yükleyin"
-                                subtext="veya sürükleyip bırakın (1 fotoğraf)"
                             />
                         </div>
                     ) : (
