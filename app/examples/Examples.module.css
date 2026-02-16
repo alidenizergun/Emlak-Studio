@@ -260,7 +260,7 @@
     border-radius: 8px 8px 0 0;
     width: fit-content;
     margin-bottom: -1px;
-    z-index: 5;
+    z-index: 1;
 }
 
 .popupBadgeBefore {
@@ -292,6 +292,7 @@
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     filter: brightness(0.9);
+    z-index: 2;
 }
 
 .popupImageWrap img {
