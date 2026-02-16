@@ -8,8 +8,8 @@ const PRICING_TIERS = [
     {
         name: "Danışman",
         id: "danisman",
-        originalPrice: 1899,
-        discountedPrice: 749,
+        originalPrice: 2999,
+        discountedPrice: 1299,
         yearlyPriceMultiplier: 0.8,
         description: "Bireysel emlak danışmanları için başlangıç paketi.",
         features: [
@@ -23,8 +23,8 @@ const PRICING_TIERS = [
     {
         name: "Ofis",
         id: "ofis",
-        originalPrice: 3899,
-        discountedPrice: 1549,
+        originalPrice: 4499,
+        discountedPrice: 1999,
         yearlyPriceMultiplier: 0.8,
         description: "Ekipler ve büyüyen emlak ofisleri için ideal çözüm.",
         features: [
@@ -41,8 +41,8 @@ const PRICING_TIERS = [
     {
         name: "Kurumsal",
         id: "kurumsal",
-        originalPrice: 9499,
-        discountedPrice: 3749,
+        originalPrice: 10999,
+        discountedPrice: 4999,
         yearlyPriceMultiplier: 0.8,
         description: "Büyük ajanslar ve gelişmiş kurumsal ihtiyaçlar için.",
         features: [
