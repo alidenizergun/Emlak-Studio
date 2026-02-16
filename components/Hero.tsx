@@ -54,8 +54,9 @@ const Hero = () => {
             <div className={`container ${styles.container}`}>
                 <div className={styles.content}>
                     <h1 className={styles.title}>
-                        Emlak Görsellerinizi <br />
-                        <span className={styles.heroTitleAi}>Yapay Zeka</span> ile Dönüştürün
+                        Emlak Fotoğraflarınızı <br />
+                        <span className={styles.heroTitleAi}>Yapay Zeka</span> ile <br />
+                        Güçlendirin
                         <span className={styles.aiIcon}>
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2C13.2 8.5 15.5 10.8 22 12C15.5 13.2 13.2 15.5 12 22C10.8 15.5 8.5 13.2 2 12C8.5 10.8 10.8 8.5 12 2Z" fill="url(#paint0_linear_ai)" stroke="url(#paint0_linear_ai)" strokeWidth="1.5" strokeLinejoin="round" />
@@ -178,9 +179,12 @@ const Hero = () => {
                             </div>
                         </div>
                         <footer className={styles.heroPopupFooter}>
-                            <Link href="/register" className={styles.heroPopupCta} onClick={() => setHeroPopupOpen(false)}>
-                                Hemen Ücretsiz Dene
-                            </Link>
+                            <div className={styles.heroPopupCtaWrapper}>
+                                <Link href="/register" className={styles.heroPopupCta} onClick={() => setHeroPopupOpen(false)}>
+                                    Hemen Ücretsiz Dene
+                                </Link>
+                                <span className={styles.ctaSubText}>2 kredi ile ücretsiz dene</span>
+                            </div>
                             <div className={styles.heroPopupCtaHintWrap}>
                                 <p key={popupHintIndex} className={styles.heroPopupCtaHint}>
                                     {POPUP_HINT_SENTENCES[popupHintIndex]}

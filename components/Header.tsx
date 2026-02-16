@@ -40,12 +40,22 @@ const Icons = {
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const [showRegisterNotify, setShowRegisterNotify] = useState(false);
     const pathname = usePathname();
 
-    // Set mounted state
+    // Set mounted state and timer for notification
     useEffect(() => {
         const t = setTimeout(() => setIsMounted(true), 0);
-        return () => clearTimeout(t);
+
+        // Notification timer (10 seconds)
+        const notifyTimer = setTimeout(() => {
+            setShowRegisterNotify(true);
+        }, 10000);
+
+        return () => {
+            clearTimeout(t);
+            clearTimeout(notifyTimer);
+        };
     }, []);
 
     // Close menu when route changes
@@ -147,8 +157,17 @@ const Header = () => {
                 </nav>
 
                 <div className={`${styles.cta} ${styles.desktopCta}`}>
-                    <Link href="/login" className={styles.loginBtn}>Giriş Yap</Link>
-                    <Link href="/register" className={styles.registerBtn}>Ücretsiz Dene</Link>
+                    <Link href="/login" className={styles.loginBtn} onClick={() => setShowRegisterNotify(false)}>Giriş Yap</Link>
+                    <div className={styles.registerWrapper}>
+                        <Link href="/register" className={styles.registerBtn} onClick={() => setShowRegisterNotify(false)}>
+                            Ücretsiz Dene
+                        </Link>
+                        {showRegisterNotify && (
+                            <div className={styles.notification} onClick={() => setShowRegisterNotify(false)}>
+                                <span>2 kredi ile ücretsiz dene 🎁</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -233,7 +252,10 @@ const Header = () => {
                         </Link>
 
                         <div className={styles.mobileCtaCard}>
-                            <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
+                            <div className={styles.mobileRegisterWrapper}>
+                                <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
+                                <span className={styles.mobileCtaSubText}>2 kredi ile ücretsiz dene</span>
+                            </div>
                             <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
                         </div>
                     </nav>

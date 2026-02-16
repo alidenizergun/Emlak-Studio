@@ -49,7 +49,7 @@ const Testimonials = () => {
                         {' '}<span className={styles.titleLogoBrand}>Emlak</span> <span className={styles.titleLogoStudio}>AISTUDIO</span> ile çalışan emlakçılar satışlarını artırıyor!
                     </h2>
                     <p className={styles.subtitle}>
-                        Türkiye&apos;nin dört bir yanından {TESTIMONIALS.length}+ emlakçının deneyimleri
+                        Türkiye&apos;nin dört bir yanından emlakçıların deneyimleri
                     </p>
                 </div>
 

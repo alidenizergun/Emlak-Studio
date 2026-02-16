@@ -1,208 +1,231 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import styles from '../../components/Pricing.module.css';
 
 const PRICING_TIERS = [
     {
         name: "Danışman",
-        price: "₺1.199",
-        period: "/ay",
-        description: "",
+        id: "danisman",
+        originalPrice: 2999,
+        discountedPrice: 1199,
+        yearlyPriceMultiplier: 0.8,
+        description: "Bireysel emlak danışmanları için başlangıç paketi.",
         features: [
-            "100 Kredi (Aylık)",
+            "100 Kredi (Her ay yenilenir)",
             "Yaklaşık 50 ilan görseli",
-            "Tüm AI Modelleri",
+            "Tüm AI Modellerine Erişim",
             "Hızlı İşlem Önceliği",
             "Ticari Kullanım İzni",
-            "Email destek"
+            "Standart Email Desteği"
         ],
-        cta: "Abone Ol",
-        popular: false,
-        discount: "%50 İNDİRİM"
+        cta: "Hemen Başla",
+        popular: false
     },
     {
         name: "Ofis",
-        price: "₺1.999",
-        period: "/ay",
-        description: "",
+        id: "ofis",
+        originalPrice: 4999,
+        discountedPrice: 1999,
+        yearlyPriceMultiplier: 0.8,
+        description: "Ekipler ve büyüyen emlak ofisleri için ideal çözüm.",
         features: [
-            "200 Kredi (Aylık)",
-            "Yaklaşık 100 ilan görseli",
-            "Tüm AI Modelleri",
-            "Hızlı İşlem Önceliği",
+            "250 Kredi (Her ay yenilenir)",
+            "Yaklaşık 125 ilan görseli",
+            "Tüm AI Modellerine Erişim",
+            "En Yüksek İşlem Önceliği",
             "Ticari Kullanım İzni",
-            "Öncelikli destek"
+            "Öncelikli Canlı Destek",
+            "Ekip Paylaşım Özelliği"
         ],
-        cta: "Abone Ol",
-        popular: true,
-        discount: "%50 İNDİRİM"
+        cta: "En Popüler Planı Seç",
+        popular: true
     },
     {
         name: "Kurumsal",
-        price: "₺4.999",
-        period: "/ay",
-        description: "",
+        id: "kurumsal",
+        originalPrice: 12499,
+        discountedPrice: 4999,
+        yearlyPriceMultiplier: 0.8,
+        description: "Büyük ajanslar ve gelişmiş kurumsal ihtiyaçlar için.",
         features: [
-            "500 Kredi (Aylık)",
-            "Yaklaşık 250 ilan görseli",
-            "Tüm AI Modelleri",
-            "Hızlı İşlem Önceliği",
+            "750 Kredi (Her ay yenilenir)",
+            "Yaklaşık 375 ilan görseli",
+            "Tüm AI Modellerine Erişim",
+            "Özel API Erişimi",
             "Ticari Kullanım İzni",
-            "7/24 canlı destek"
+            "7/24 Özel Müşteri Temsilcisi",
+            "White-label Raporlama"
         ],
-        cta: "Abone Ol",
-        popular: false,
-        discount: "%50 İNDİRİM"
+        cta: "Kurumsal İletişim",
+        popular: false
     }
 ];
 
 const FAQ_ITEMS = [
     {
-        question: "💳 Kredi nedir ve nasıl kullanılır?",
-        answer: "1 kredi, 1 odayı sanal olarak dekore etmek veya düzenlemek anlamına gelir. Ortalama 2 kredi 1 ilan görseline denk gelir (ör. 100 kredi ile yaklaşık 50 ilan görseli). Kredilerinizi ay boyunca dilediğiniz zaman kullanabilirsiniz."
+        question: "1 kredi ne anlama geliyor?",
+        answer: "Her bir AI işlemi (örneğin bir odayı dekore etmek veya fotoğraf kalitesini artırmak) kredinizi kullanır. Ortalama bir ilan için 5-10 kredi kullanımı yeterli olmaktadır."
     },
     {
-        question: "🔄 Planımı sonradan değiştirebilir miyim?",
-        answer: "Evet, istediğiniz zaman planınızı yükseltebilir veya düşürebilirsiniz. Yükseltme işlemlerinde aradaki fark anında yansıtılır, düşürme işlemlerinde ise bir sonraki fatura döneminde yeni plan devreye girer."
+        question: "İstediğim zaman iptal edebilir miyim?",
+        answer: "Evet, taahhüt yok. İstediğiniz zaman panel üzerinden aboneliğinizi dilediğiniz zaman tek tıkla iptal edebilirsiniz."
     },
     {
-        question: "💰 Kullanılmayan krediler bir sonraki aya devreder mi?",
-        answer: "Hayır, krediler aylık kullanım içindir ve her fatura döneminde yenilenir. Kullanılmayan krediler bir sonraki aya devretmez, bu yüzden kredilerinizi ay içinde kullanmanızı öneririz."
+        question: "Fatura kesiyor musunuz?",
+        answer: "Kesinlikle. Tüm ödemeleriniz için otomatik e-fatura oluşturulur ve email adresinize gönderilir. Şirket gideri olarak gösterebilirsiniz."
     },
     {
-        question: "📄 Fatura alabilir miyim? Şirketim için gider gösterebilir miyim?",
-        answer: "Kesinlikle. Ödemeniz tamamlandıktan sonra e-faturanız otomatik olarak oluşturulur ve kayıtlı e-posta adresinize gönderilir. Bu faturayı şirket harcamalarınızda gider olarak kullanabilirsiniz."
+        question: "Kredilerim sonraki aya devreder mi?",
+        answer: "Abonelik planlarındaki krediler her ay yenilenir. Kullanılmayan krediler ay sonunda sıfırlanır, bu yüzden ay içinde aktif kullanmanızı öneririz."
     },
     {
-        question: "❌ İptal ve iade politikanız nedir?",
-        answer: "Hizmetimizden memnun kalmazsanız, ilk 14 gün içinde koşulsuz şartsız para iadesi talep edebilirsiniz. Aboneliğinizi ise dilediğiniz zaman panel üzerinden tek tıkla iptal edebilirsiniz."
+        question: "Kurumsal ihtiyaçlar için özel plan var mı?",
+        answer: "Eğer aylık 750 kredi size yetmiyorsa, ihtiyaçlarınıza özel bir 'Kurumsal Plus' teklifi hazırlayabiliriz. Bizimle iletişime geçebilirsiniz."
     },
     {
-        question: "🏢 Kurumsal planın avantajları nelerdir?",
-        answer: "Kurumsal plan, büyük emlak ofisleri ve ajanslar için tasarlanmıştır. Bu planda daha yüksek kredi limitleri, 8K ultra çözünürlük desteği, özel logo ekleme (white-label) ve 7/24 öncelikli canlı destek sunulmaktadır."
-    },
-    {
-        question: "🖼️ Görsellerde filigran (watermark) olacak mı?",
-        answer: "Danışman (Başlangıç) planında görsellerde küçük bir logo bulunabilir. Ofis ve Kurumsal planlarımızda ise görseller tamamen filigransızdır ve kendi logonuzu ekleme seçeneği sunulur."
-    },
-    {
-        question: "⚖️ Oluşturulan görselleri ticari olarak kullanabilir miyim?",
-        answer: "Evet, tüm planlarımız size oluşturduğunuz görseller üzerinde tam ticari kullanım hakkı verir. İlan sitelerinde, sosyal medyada veya basılı materyallerde özgürce kullanabilirsiniz."
+        question: "Ücretsiz deneme var mı?",
+        answer: "Sisteme kayıt olduğunuzda size hediye edilen ücretsiz kredilerle tüm özellikleri test edebilir, sonuçları kendi gözlerinizle görebilirsiniz."
     }
 ];
 
-const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    return (
-        <div className={styles.faqItem}>
-            <button
-                className={styles.faqQuestion}
-                onClick={() => setIsOpen(!isOpen)}
-                aria-expanded={isOpen}
-            >
-                <h4>{question}</h4>
-                <svg
-                    className={`${styles.icon} ${isOpen ? styles.iconOpen : ''}`}
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            </button>
-            <div className={`${styles.faqAnswer} ${isOpen ? styles.faqAnswerOpen : ''}`}>
-                <p>{answer}</p>
-            </div>
-        </div>
-    );
-};
+const CheckIcon = () => (
+    <svg className={styles.checkIcon} viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+    </svg>
+);
 
 export default function PricingPage() {
+    const [isYearly, setIsYearly] = useState(false);
+
     return (
         <div className={styles.pricingPage}>
-            <div className="container">
-                <div className={styles.priceNotice}>
-                    <span className={styles.priceNoticeIcon} aria-hidden>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
-                        </svg>
-                    </span>
-                    <p className={styles.priceNoticeText}>
-                        <strong>Kısa süreli fırsat:</strong> Şu an tüm planlarda %50 indirim. Fiyatlar yakında yükseliyor — aşağıdaki planlardan birini seçin, indirimli fiyatlarla hemen başlayın.
-                    </p>
-                </div>
+            <div className={styles.backgroundGlow} />
+
+            <div className={`container ${styles.container}`}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
-                        Başarınıza Uygun Planı Seçin
+                        Emlak Fotoğraflarınızı <br />
+                        <span className={styles.titleGradient}>Yapay Zeka</span> ile <br />
+                        Güçlendirin
                     </h1>
                     <p className={styles.subtitle}>
-                        Tüm planlar 14 gün para iade garantisi ile gelir.<br />
-                        İstediğiniz zaman iptal edebilirsiniz.
+                        Her bütçeye uygun, şeffaf fiyatlandırma. Karmaşık sözleşmeler yok, istediğiniz an iptal edin.
                     </p>
+                </div>
+
+                <div className={styles.toggleSection}>
+                    <div className={styles.toggleContainer}>
+                        <span className={`${styles.toggleLabel} ${!isYearly ? styles.toggleLabelActive : ''}`}>Aylık</span>
+                        <button
+                            className={`${styles.toggleSwitch} ${isYearly ? styles.toggleSwitchActive : ''}`}
+                            onClick={() => setIsYearly(!isYearly)}
+                            aria-label="Ödeme periyodu değiştir"
+                        >
+                            <div className={`${styles.toggleHandle} ${isYearly ? styles.toggleHandleActive : ''}`} />
+                        </button>
+                        <span className={`${styles.toggleLabel} ${isYearly ? styles.toggleLabelActive : ''}`}>
+                            Yıllık <span className={styles.saveBadge}>En Avantajlı</span>
+                        </span>
+                    </div>
+                    <div className={styles.annualDiscountBadge}>
+                        🌟 Yıllık ödemede %20 indirim fırsatını kaçırmayın
+                    </div>
                 </div>
 
                 <div className={styles.grid}>
-                    {PRICING_TIERS.map((tier) => (
-                        <div
-                            key={tier.name}
-                            className={`${styles.card} ${tier.popular ? styles.popular : ''}`}
-                        >
-                            {tier.popular && (
-                                <div className={styles.badge}>
-                                    🏆 En Çok Tercih Edilen
-                                </div>
-                            )}
+                    {PRICING_TIERS.map((tier) => {
+                        const basePrice = tier.discountedPrice;
+                        const originalMonthlyPrice = tier.originalPrice;
 
-                            <div className={styles.cardHeader}>
-                                <h3 className={styles.tierName}>{tier.name}</h3>
-                                <p className={styles.description}>{tier.description}</p>
-                            </div>
+                        const displayPrice = isYearly
+                            ? Math.round(basePrice * tier.yearlyPriceMultiplier)
+                            : basePrice;
 
-                            <div className={styles.priceSection}>
-                                <div className={styles.price}>
-                                    {tier.price}
-                                    <span className={styles.period}>{tier.period}</span>
-                                </div>
-                                {tier.discount && (
-                                    <div className={styles.discount}>{tier.discount}</div>
-                                )}
-                            </div>
+                        // Yıllıkta orijinal fiyat da (karşılaştırma için) yıllık bazda çarpılmalı mı? 
+                        // Genelde aylık karşılaştırma daha etkileyici: "Şu fiyattı, şimdi bu"
+                        const displayOriginalPrice = originalMonthlyPrice;
 
-                            <ul className={styles.features}>
-                                {tier.features.map((feature, idx) => (
-                                    <li key={idx} className={styles.feature}>
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <circle cx="10" cy="10" r="10" fill="#10b981" />
-                                            <path d="M6 10l2.5 2.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <a
-                                href={tier.name === "Kurumsal" ? "/contact" : "/register"}
-                                className={`${styles.ctaButton} ${tier.popular ? styles.ctaPopular : ''}`}
+                        return (
+                            <div
+                                key={tier.id}
+                                className={`${styles.card} ${tier.popular ? styles.popularCard : ''}`}
                             >
-                                {tier.cta}
-                            </a>
-                        </div>
-                    ))}
-                </div>
+                                {tier.popular && (
+                                    <div className={styles.popularBadge}>EN ÇOK TERCİH EDİLEN</div>
+                                )}
 
-                <div className={styles.faq}>
-                    <h2>Sıkça Sorulan Sorular</h2>
-                    <div className={styles.faqList}>
+                                <div className={styles.cardHeader}>
+                                    <h3 className={styles.tierName}>{tier.name}</h3>
+                                    <p className={styles.tierDesc}>{tier.description}</p>
+                                </div>
+
+                                <div className={styles.priceContainer}>
+                                    <span className={styles.currency}>₺</span>
+                                    <span className={styles.price}>{displayPrice.toLocaleString('tr-TR')}</span>
+                                    <span className={styles.period}>/ay</span>
+                                </div>
+
+                                <div className={styles.discountWrapper}>
+                                    <span className={styles.originalPrice}>₺{displayOriginalPrice.toLocaleString('tr-TR')}</span>
+                                    <span className={styles.discountLabel}>Kısa süreliğine %60 İndirimli</span>
+                                </div>
+
+                                {isYearly && (
+                                    <div className={styles.yearlyExtraNote}>
+                                        Yıllık ödemede ek %20 avantajlı
+                                    </div>
+                                )}
+
+                                <Link
+                                    href={tier.id === 'kurumsal' ? '/contact' : '/register'}
+                                    className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}
+                                >
+                                    {tier.cta}
+                                </Link>
+
+                                <div className={styles.features}>
+                                    <p className={styles.featuresTitle}>Neler Dahil?</p>
+                                    <ul className={styles.featureList}>
+                                        {tier.features.map((feature, index) => (
+                                            <li key={index} className={styles.featureItem}>
+                                                <CheckIcon />
+                                                <span>{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <section className={styles.faqSection}>
+                <div className="container">
+                    <div className={styles.faqHeader}>
+                        <h2 className={styles.faqTitle}>Sıkça Sorulan Sorular</h2>
+                        <p className={styles.faqSubtitle}>Aklınıza takılan soruların cevaplarını burada bulabilirsiniz.</p>
+                    </div>
+
+                    <div className={styles.faqGrid}>
                         {FAQ_ITEMS.map((item, index) => (
-                            <FAQItem key={index} question={item.question} answer={item.answer} />
+                            <div key={index} className={styles.faqCard}>
+                                <h4 className={styles.faqQuestion}>
+                                    <svg className={styles.checkIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: '2px' }}>
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                                    </svg>
+                                    {item.question}
+                                </h4>
+                                <p className={styles.faqAnswer}>{item.answer}</p>
+                            </div>
                         ))}
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

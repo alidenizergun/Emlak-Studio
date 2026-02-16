@@ -138,6 +138,22 @@
     /* Adjusted to avoid visual lift */
 }
 
+.primaryBtnWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.ctaSubText {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 400;
+    text-align: center;
+    opacity: 0.9;
+}
+
 .primaryBtn {
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
     color: white;
@@ -707,13 +723,20 @@
     background: #fafbfc;
 }
 
+.heroPopupCtaWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
 .heroPopupCta {
     position: relative;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-top: 1.25rem;
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
     font-weight: 600;

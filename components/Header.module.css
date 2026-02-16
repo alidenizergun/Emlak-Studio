@@ -136,8 +136,9 @@
 }
 
 .navLink:hover {
-    color: var(--foreground);
-    background: rgba(255, 255, 255, 0.85);
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
 }
 
 .cta {
@@ -213,11 +214,72 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: none;
     position: relative;
-    overflow: hidden;
     letter-spacing: 0.3px;
     cursor: pointer;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     text-decoration: none;
+}
+
+.registerWrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.notification {
+    position: absolute;
+    top: calc(100% + 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    color: #1e293b;
+    padding: 10px 20px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(37, 99, 235, 0.1);
+    z-index: 1000;
+    animation: notifyBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    pointer-events: auto;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-bottom-color: rgba(37, 99, 235, 0.1);
+}
+
+.notification::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 9px solid transparent;
+    border-bottom-color: #ffffff;
+}
+
+@keyframes notifyBounce {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 10px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
 }
 
 .registerBtn::after {
@@ -319,7 +381,9 @@
 }
 
 .megaMenuItem:hover {
-    background: rgba(37, 99, 235, 0.04);
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .menuIcon {
@@ -594,10 +658,18 @@
     border: 1px solid #e2e8f0;
 }
 
+.mobileRegisterWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .mobileRegisterBtn {
     position: relative;
     overflow: hidden;
     padding: 0.85rem;
+    width: 100%;
     text-align: center;
     font-weight: 700;
     color: white;
@@ -606,6 +678,13 @@
     text-decoration: none;
     box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
     font-size: 0.95rem;
+}
+
+.mobileCtaSubText {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 400;
+    text-align: center;
 }
 
 .mobileRegisterBtn::after {
