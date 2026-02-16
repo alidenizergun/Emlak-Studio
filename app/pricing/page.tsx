@@ -13,8 +13,8 @@ const PRICING_TIERS = [
         yearlyPriceMultiplier: 0.8,
         description: "Bireysel emlak danışmanları için başlangıç paketi.",
         features: [
-            "100 Kredi (Her ay yenilenir)",
-            "Yaklaşık 50 ilan görseli",
+            "180 Kredi (Her ay yenilenir)",
+            "Yaklaşık 90 ilan görseli",
             "Ticari Kullanım İzni"
         ],
         cta: "Hemen Başla",
@@ -28,8 +28,8 @@ const PRICING_TIERS = [
         yearlyPriceMultiplier: 0.8,
         description: "Ekipler ve büyüyen emlak ofisleri için ideal çözüm.",
         features: [
-            "250 Kredi (Her ay yenilenir)",
-            "Yaklaşık 125 ilan görseli",
+            "320 Kredi (Her ay yenilenir)",
+            "Yaklaşık 160 ilan görseli",
             "Tüm AI Modellerine Erişim",
             "Yüksek İşlem Önceliği",
             "Ticari Kullanım İzni",
@@ -46,8 +46,8 @@ const PRICING_TIERS = [
         yearlyPriceMultiplier: 0.8,
         description: "Büyük ajanslar ve gelişmiş kurumsal ihtiyaçlar için.",
         features: [
-            "750 Kredi (Her ay yenilenir)",
-            "Yaklaşık 375 ilan görseli",
+            "1000 Kredi (Her ay yenilenir)",
+            "Yaklaşık 500 ilan görseli",
             "Tüm AI Modellerine Erişim",
             "Özel API Erişimi",
             "Ticari Kullanım İzni",
