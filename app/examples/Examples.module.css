@@ -444,8 +444,8 @@
         height: 100svh;
         height: 100dvh;
         min-height: 100vh;
-        /* Üstte header'a yakın, altta ekran sonuna kadar: minimal padding */
-        padding: max(0.25rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.25rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        /* Header'dan 2 satır aşağıda başlasın; altta ekran sonuna kadar */
+        padding: max(2rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.25rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
         align-items: flex-start;
         justify-content: center;
         box-sizing: border-box;
@@ -455,9 +455,9 @@
 
     .popup {
         max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-        /* Neredeyse tam ekran yüksekliği: üst ve alt minimal pay */
-        max-height: calc(100vh - 0.75rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 0.75rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        /* Header altı 2rem + alt pay; ekrana sığar */
+        max-height: calc(100vh - 2.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 2.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         width: 100%;
         overflow-y: auto;
         overflow-x: hidden;
