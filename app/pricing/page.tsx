@@ -31,10 +31,9 @@ const PRICING_TIERS = [
             "250 Kredi (Her ay yenilenir)",
             "Yaklaşık 125 ilan görseli",
             "Tüm AI Modellerine Erişim",
-            "En Yüksek İşlem Önceliği",
+            "Yüksek İşlem Önceliği",
             "Ticari Kullanım İzni",
-            "Öncelikli Canlı Destek",
-            "Ekip Paylaşım Özelliği"
+            "Standart Email Desteği"
         ],
         cta: "En Popüler Planı Seç",
         popular: true
