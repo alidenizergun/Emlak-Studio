@@ -240,7 +240,7 @@
 .popupCol {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0px;
     align-items: center;
     min-width: 0;
 }
@@ -257,8 +257,10 @@
     color: #64748b;
     background: #f1f5f9;
     padding: 0.4rem 0.75rem;
-    border-radius: 8px;
+    border-radius: 8px 8px 0 0;
     width: fit-content;
+    margin-bottom: -1px;
+    z-index: 5;
 }
 
 .popupBadgeBefore {
@@ -715,7 +717,7 @@
     }
 
     .popupCol {
-        gap: 0.35rem;
+        gap: 0px;
     }
 
     .popupArrow {
