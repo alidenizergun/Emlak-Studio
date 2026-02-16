@@ -383,6 +383,16 @@ export default function StageClient() {
                                 </div>
                             </div>
 
+                            <div className={styles.separator}>
+                                <div className={styles.separatorLine} />
+                                <div className={styles.separatorIcon}>
+                                    <span />
+                                    <span />
+                                    <span />
+                                </div>
+                                <div className={styles.separatorLine} />
+                            </div>
+
                             <div className={styles.controlGroup}>
                                 <label className={styles.label}>Tasarım Tarzı</label>
                                 <div className={styles.styleGrid}>
