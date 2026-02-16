@@ -309,26 +309,6 @@ export default function ExamplesPage() {
                 const nextExample = currentIndex < filteredExamples.length - 1 ? filteredExamples[currentIndex + 1] : filteredExamples[0];
                 return (
                 <div className={styles.popupOverlay} onClick={() => setPopupExample(null)} role="dialog" aria-modal="true" aria-label="Önce ve sonra karşılaştırması">
-                    {filteredExamples.length > 0 && (
-                        <button
-                            type="button"
-                            className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
-                            onClick={(e) => { e.stopPropagation(); setPopupExample(prevExample); }}
-                            aria-label="Önceki örnek"
-                        >
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                        </button>
-                    )}
-                    {filteredExamples.length > 0 && (
-                        <button
-                            type="button"
-                            className={`${styles.popupArrow} ${styles.popupArrowRight}`}
-                            onClick={(e) => { e.stopPropagation(); setPopupExample(nextExample); }}
-                            aria-label="Sonraki örnek"
-                        >
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                        </button>
-                    )}
                     <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
                         <button type="button" className={styles.popupClose} onClick={() => setPopupExample(null)} aria-label="Kapat">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -358,6 +338,26 @@ export default function ExamplesPage() {
                                 <p className={styles.popupCtaHint}>Siz de ilanlarınızı böyle güçlendirin.</p>
                             </div>
                         </footer>
+                        {filteredExamples.length > 0 && (
+                            <button
+                                type="button"
+                                className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
+                                onClick={(e) => { e.stopPropagation(); setPopupExample(prevExample); }}
+                                aria-label="Önceki örnek"
+                            >
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                            </button>
+                        )}
+                        {filteredExamples.length > 0 && (
+                            <button
+                                type="button"
+                                className={`${styles.popupArrow} ${styles.popupArrowRight}`}
+                                onClick={(e) => { e.stopPropagation(); setPopupExample(nextExample); }}
+                                aria-label="Sonraki örnek"
+                            >
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                            </button>
+                        )}
                     </div>
                 </div>
                 );
