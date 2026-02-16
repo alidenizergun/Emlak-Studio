@@ -803,21 +803,31 @@
     }
 
     .heroPopupOverlay {
-        padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
-        align-items: flex-start;
+        height: 100svh;
+        height: 100dvh;
+        min-height: 100vh;
+        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        align-items: flex-end;
         justify-content: center;
+        box-sizing: border-box;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .heroPopup {
-        max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        max-height: calc(100vh - 2.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 2.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         width: 100%;
         overflow-y: auto;
         overflow-x: hidden;
-        transform: scale(1.25);
+        transform: scale(1);
         transform-origin: center center;
         animation: heroPopupInMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        flex-shrink: 1;
+        flex-shrink: 0;
         min-height: 0;
+        box-sizing: border-box;
+        margin: 0 auto;
     }
 
     @keyframes heroPopupInMobile {
@@ -827,12 +837,12 @@
         }
         to {
             opacity: 1;
-            transform: scale(1.25) translateY(0);
+            transform: scale(1) translateY(0);
         }
     }
 
     .heroPopupClose {
-        top: 0.5rem;
+        top: 0.2rem;
         right: max(0.5rem, env(safe-area-inset-right));
         width: 28px;
         height: 28px;
@@ -848,18 +858,21 @@
 
     .heroPopupImages {
         grid-template-columns: 1fr;
-        padding: 0.5rem 0.75rem 0.5rem;
-        padding-top: 0.25rem;
+        padding: 0.35rem 0.5rem 0.35rem;
+        padding-top: 0.2rem;
+        min-height: 0;
+        flex: 1 1 auto;
     }
 
     .heroPopupImageWrap {
-        min-height: 120px;
-        max-height: min(50vh, 312px);
+        min-height: 50px;
+        max-height: min(26vh, 200px);
     }
 
     .heroPopupFooter {
         flex-direction: column;
-        padding: 0.75rem 1rem 1rem;
+        padding: 0.5rem 0.75rem 0.75rem;
+        flex-shrink: 0;
     }
 
     .heroPopupCta {
@@ -869,5 +882,38 @@
 
     .heroPopupCtaHintWrap {
         min-height: 2em;
+    }
+}
+
+/* Telefon yatay (landscape): dikey alan kısıtlı, popup tam sığsın */
+@media (max-width: 768px) and (max-height: 500px) {
+    .heroPopupOverlay {
+        padding: max(0.35rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    }
+
+    .heroPopup {
+        max-height: calc(100vh - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    }
+
+    .heroPopupImageWrap {
+        max-height: min(22vh, 160px);
+    }
+
+    .heroPopupImages {
+        padding: 0.25rem 0.4rem;
+    }
+
+    .heroPopupFooter {
+        padding: 0.4rem 0.6rem 0.6rem;
+    }
+
+    .heroPopupBadge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    .heroPopupCol {
+        gap: 0.35rem;
     }
 }

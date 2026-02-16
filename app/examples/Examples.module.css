@@ -556,3 +556,48 @@
         height: 24px;
     }
 }
+
+/* Telefon yatay (landscape): dikey alan kısıtlı, popup tam sığsın */
+@media (max-width: 768px) and (max-height: 500px) {
+    .popupOverlay {
+        padding: max(0.35rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    }
+
+    .popup {
+        max-height: calc(100vh - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    }
+
+    .popupImageWrap {
+        max-height: min(22vh, 160px);
+    }
+
+    .popupImages {
+        padding: 0.25rem 0.4rem;
+    }
+
+    .popupFooter {
+        padding: 0.4rem 0.6rem 0.6rem;
+    }
+
+    .popupBadge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    .popupCol {
+        gap: 0.35rem;
+    }
+
+    .popupArrow {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .popupArrow svg {
+        width: 20px;
+        height: 20px;
+    }
+}
