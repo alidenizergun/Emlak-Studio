@@ -301,8 +301,9 @@
     .popup {
         border-radius: 20px;
         max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-        max-height: calc(100vh - 6.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 6.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        /* ~4 satır aşağı uzat (6.65rem - 4rem ≈ 2.65rem) */
+        max-height: calc(100vh - 2.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 2.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         width: 100%;
         overflow-y: hidden;
         overflow-x: hidden;
@@ -323,8 +324,8 @@
     }
 
     .popupClose {
-        top: 1rem;
-        right: 1rem;
+        top: 0.5rem;
+        right: 0.5rem;
         position: absolute;
         margin-top: 0;
     }

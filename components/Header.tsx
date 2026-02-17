@@ -48,6 +48,9 @@ const Header = () => {
     const logoTextWrapperRef = useRef<HTMLDivElement>(null);
     const logoBrandRef = useRef<HTMLSpanElement>(null);
     const logoStudioRef = useRef<HTMLSpanElement>(null);
+    const mobileLogoTextWrapperRef = useRef<HTMLDivElement>(null);
+    const mobileLogoBrandRef = useRef<HTMLSpanElement>(null);
+    const mobileLogoStudioRef = useRef<HTMLSpanElement>(null);
 
     // Set mounted state and read auth
     useEffect(() => {
@@ -102,32 +105,39 @@ const Header = () => {
         } catch {}
     }, [pathname, isMounted]);
 
-    // YZ.com'u EMLAK genişliğine sığdır (scaleX + sağ hizalı)
+    // YZ.com'u EMLAK genişliğine sığdır (desktop + mobil menü)
+    const applyLogoScale = (wrapper: HTMLDivElement, brand: HTMLSpanElement, studio: HTMLSpanElement) => {
+        studio.style.transform = '';
+        studio.style.transformOrigin = '';
+        wrapper.style.width = '';
+        wrapper.style.minWidth = '';
+        wrapper.offsetHeight; // reflow
+        const wBrand = brand.offsetWidth;
+        const wStudio = studio.offsetWidth;
+        if (wStudio <= 0) return;
+        wrapper.style.width = `${wBrand}px`;
+        wrapper.style.minWidth = `${wBrand}px`;
+        const scale = wBrand / wStudio;
+        studio.style.transform = `scaleX(${scale})`;
+        studio.style.transformOrigin = 'left';
+    };
     useEffect(() => {
         const wrapper = logoTextWrapperRef.current;
         const brand = logoBrandRef.current;
         const studio = logoStudioRef.current;
-        if (!wrapper || !brand || !studio) return;
+        const mWrapper = mobileLogoTextWrapperRef.current;
+        const mBrand = mobileLogoBrandRef.current;
+        const mStudio = mobileLogoStudioRef.current;
         const apply = () => {
-            studio.style.transform = '';
-            studio.style.transformOrigin = '';
-            wrapper.style.width = '';
-            wrapper.style.minWidth = '';
-            wrapper.offsetHeight; // reflow
-            const wBrand = brand.offsetWidth;
-            const wStudio = studio.offsetWidth;
-            if (wStudio <= 0) return;
-            wrapper.style.width = `${wBrand}px`;
-            wrapper.style.minWidth = `${wBrand}px`;
-            const scale = wBrand / wStudio;
-            studio.style.transform = `scaleX(${scale})`;
-            studio.style.transformOrigin = 'left';
+            if (wrapper && brand && studio) applyLogoScale(wrapper, brand, studio);
+            if (mWrapper && mBrand && mStudio) applyLogoScale(mWrapper, mBrand, mStudio);
         };
         apply();
         const ro = new ResizeObserver(apply);
-        ro.observe(wrapper);
+        if (wrapper) ro.observe(wrapper);
+        if (mWrapper) ro.observe(mWrapper);
         return () => ro.disconnect();
-    }, [isMounted]);
+    }, [isMounted, isMenuOpen]);
 
     const handleLogout = () => {
         try {
@@ -289,9 +299,9 @@ const Header = () => {
                                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     />
                                 </div>
-                                <div className={styles.logoTextWrapper}>
-                                    <span className={styles.logoBrand}>Emlak</span>
-                                    <span className={styles.logoStudio}>YZ</span>
+                                <div className={styles.logoTextWrapper} ref={mobileLogoTextWrapperRef}>
+                                    <span className={styles.logoBrand} ref={mobileLogoBrandRef}>EMLAK</span>
+                                    <span className={styles.logoStudio}><span className={styles.logoStudioInner} ref={mobileLogoStudioRef}>YZ.com</span></span>
                                 </div>
                             </Link>
                         </div>
@@ -346,7 +356,7 @@ const Header = () => {
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
                                         <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
-                                        <span className={styles.mobileCtaSubText}>1 fotoğraf için ücretsiz deneyin</span>
+                                        <span className={styles.mobileCtaSubText}>1 fotoğraf için ücretsiz deneyin 🎁</span>
                                     </div>
                                     <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
                                 </>
