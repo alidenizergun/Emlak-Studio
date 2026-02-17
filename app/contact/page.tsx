@@ -28,7 +28,6 @@ export default function ContactPage() {
                         </div>
                         <div className={styles.cardInfo}>
                             <h3 className={styles.cardInfoTitle}>Müşteri İlişkileri</h3>
-                            <p className={styles.supportName}>B.C.</p>
                             <p className={styles.supportNote}>Her türlü probleminizi çözelim :)</p>
                         </div>
                     </div>
