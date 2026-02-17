@@ -1,0 +1,150 @@
+.page {
+    padding: 100px 0 4rem;
+    min-height: 70vh;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.contactGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.contactCard {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.contactCard:hover {
+    transform: translateY(-5px);
+    border-color: #2563eb;
+    box-shadow: 0 12px 24px -10px rgba(37, 99, 235, 0.15);
+}
+
+.cardIcon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    margin-bottom: 1.5rem;
+}
+
+.cardInfoTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.supportName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+}
+
+.phoneLink,
+.contactLink {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color 0.2s;
+}
+
+.phoneLink:hover,
+.contactLink:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+.supportNote {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.helpGuide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 1rem;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.helpIcon {
+    font-size: 1.25rem;
+}
+
+.helpGuide a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.helpGuide a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .page {
+        padding: 88px 1.25rem 3rem;
+    }
+
+    .contactGrid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .contactCard {
+        padding: 1.5rem;
+    }
+}
