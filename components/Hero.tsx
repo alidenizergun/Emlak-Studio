@@ -114,10 +114,6 @@ const Hero = () => {
                         </li>
                     </ul>
                     <div className={styles.actions}>
-                        <Link href="/register" className={styles.primaryBtn}>
-                            Hemen Ücretsiz Deneyin
-                        </Link>
-
                         <a
                             id="hero-examples-link"
                             href="/examples"
@@ -129,6 +125,10 @@ const Hero = () => {
                             </svg>
                             Örnekleri İnceleyin
                         </a>
+
+                        <Link href="/register" className={styles.primaryBtn}>
+                            Hemen Ücretsiz Deneyin
+                        </Link>
                     </div>
                 </div>
                 <div className={styles.visual}>

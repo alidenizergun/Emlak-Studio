@@ -54,6 +54,16 @@ const ComparisonSlider = ({
     const handleMouseDown = () => setIsResizing(true);
     const handleMouseUp = () => setIsResizing(false);
 
+    const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!sliderRef.current || typeof window === 'undefined' || window.innerWidth < 1025) return;
+        const rect = sliderRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const pct = (x / rect.width) * 100;
+        const clamped = Math.min(100, Math.max(0, pct));
+        setSliderPosition(clamped);
+        onPositionChange?.(clamped);
+    };
+
     const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
         if (!isResizing || !sliderRef.current) return;
 
@@ -203,6 +213,7 @@ const ComparisonSlider = ({
             ref={sliderRef}
             onMouseMove={handleMouseMove}
             onTouchMove={handleMouseMove}
+            onClick={handleContainerClick}
             style={{ ['--slider-position' as string]: safePosition }}
         >
             <div className={`${styles.imageWrapperAfter} ${brightenAfter ? styles.imageWrapperAfterBright : ''}`}>

@@ -56,7 +56,7 @@ const Header = () => {
         let timeoutId: NodeJS.Timeout;
 
         const startCycle = () => {
-            // Wait 10s before showing
+            // Wait 15s before showing (ilk açılışta 15 sn sonra gelsin)
             timeoutId = setTimeout(() => {
                 setShowRegisterNotify(true);
                 // Show for 20s
@@ -65,7 +65,7 @@ const Header = () => {
                     // Cycle again after 10s hide
                     startCycle();
                 }, 20000);
-            }, 10000);
+            }, 15000);
         };
 
         startCycle();
