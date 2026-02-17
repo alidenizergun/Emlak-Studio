@@ -147,31 +147,36 @@
 }
 
 .popupBadge {
+    /* Tasarım 6: hafif outline, minimal label */
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #64748b;
-    background: #f1f5f9;
-    padding: 0.4rem 0.75rem;
-    border-radius: 8px 8px 0 0;
+    gap: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0.03em;
+    padding: 0.12rem 0.45rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: transparent;
+    color: #6b7280;
     width: fit-content;
-    margin-bottom: -1px;
+    margin-bottom: 0.4rem;
     z-index: 1;
 }
 
-.popupBadgeBefore { text-transform: none; }
+.popupBadgeBefore {
+    /* Before: tamamen nötr label */
+    opacity: 0.95;
+}
 
 .popupBadgeAfter {
-    color: #854d0e;
-    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
-    box-shadow: 0 1px 3px rgba(234, 179, 8, 0.2);
+    /* After: hafif dolgu + yeşil vurgu */
+    background: rgba(22, 163, 74, 0.06);
+    border-color: rgba(22, 163, 74, 0.3);
+    color: #15803d;
     text-transform: none;
-    font-size: 0.75rem;
     white-space: normal;
     text-align: center;
     max-width: 100%;
