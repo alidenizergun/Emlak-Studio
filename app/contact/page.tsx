@@ -29,8 +29,7 @@ export default function ContactPage() {
                         <div className={styles.cardInfo}>
                             <h3 className={styles.cardInfoTitle}>Müşteri İlişkileri</h3>
                             <p className={styles.supportName}>B.C.</p>
-                            <a href="tel:05303646109" className={styles.phoneLink}>0530 364 61 09</a>
-                            <p className={styles.supportNote}>Arayın her türlü probleminizi çözelim :)</p>
+                            <p className={styles.supportNote}>Her türlü probleminizi çözelim :)</p>
                         </div>
                     </div>
 
