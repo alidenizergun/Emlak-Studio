@@ -3,7 +3,7 @@
 import { useState, useEffect, type CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import styles from './Header.module.css';
 import { TOOLS, ENHANCE_ICON } from '@/app/tools/toolsData';
 
@@ -39,14 +39,19 @@ const Icons = {
 };
 
 const Header = () => {
+    const pathname = usePathname();
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [showRegisterNotify, setShowRegisterNotify] = useState(false);
-    const pathname = usePathname();
+    const [isAuthed, setIsAuthed] = useState(false);
 
-    // Set mounted state
+    // Set mounted state and read auth
     useEffect(() => {
         setIsMounted(true);
+        try {
+            if (typeof window !== 'undefined') setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+        } catch {}
 
         let timeoutId: NodeJS.Timeout;
 
@@ -85,6 +90,28 @@ const Header = () => {
         const t = setTimeout(() => setIsMenuOpen(false), 0);
         return () => clearTimeout(t);
     }, [pathname]);
+
+    // Re-read auth when pathname changes (e.g. after login redirect)
+    useEffect(() => {
+        if (!isMounted || typeof window === 'undefined') return;
+        try {
+            setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+        } catch {}
+    }, [pathname, isMounted]);
+
+    const handleLogout = () => {
+        try {
+            if (typeof window !== 'undefined') {
+                window.localStorage.removeItem('emlak_authed');
+                window.localStorage.removeItem('emlak_user_phone');
+                window.localStorage.removeItem('emlak_credits');
+            }
+        } catch {}
+        setIsAuthed(false);
+        setShowRegisterNotify(false);
+        setIsMenuOpen(false);
+        router.push('/');
+    };
 
     // Close menu when resizing to desktop
     useEffect(() => {
@@ -136,7 +163,7 @@ const Header = () => {
                             <Link href="/enhance" className={styles.navLink}>Fotoğraf Geliştirme</Link>
                         </li>
                         <li>
-                            <Link href="/stage" className={styles.navLink}>Sanal Dekorasyon</Link>
+                            <Link href="/stage" className={styles.navLink}>Dekorasyon Stüdyosu</Link>
                         </li>
                         <li className={styles.navItem}>
                             <Link href="/tools" className={styles.navLink}>Tüm Araçlar</Link>
@@ -174,17 +201,28 @@ const Header = () => {
                 </nav>
 
                 <div className={`${styles.cta} ${styles.desktopCta}`}>
-                    <Link href="/login" className={styles.loginBtn} onClick={() => setShowRegisterNotify(false)}>Giriş Yap</Link>
-                    <div className={styles.registerWrapper}>
-                        <Link href="/register" className={styles.registerBtn} onClick={() => setShowRegisterNotify(false)}>
-                            Ücretsiz Deneyin
-                        </Link>
-                        {showRegisterNotify && (
-                            <div className={styles.notification} onClick={() => setShowRegisterNotify(false)}>
-                                <span>1 fotoğraf için ücretsiz deneyin 🎁</span>
+                    {isAuthed ? (
+                        <>
+                            <Link href="/dashboard" className={styles.registerBtn}>Bana Özel</Link>
+                            <button type="button" className={styles.loginBtn} onClick={handleLogout}>
+                                Çıkış Yap
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/login" className={styles.loginBtn} onClick={() => setShowRegisterNotify(false)}>Giriş Yap</Link>
+                            <div className={styles.registerWrapper}>
+                                <Link href="/register" className={styles.registerBtn} onClick={() => setShowRegisterNotify(false)}>
+                                    Ücretsiz Deneyin
+                                </Link>
+                                {showRegisterNotify && (
+                                    <div className={styles.notification} onClick={() => setShowRegisterNotify(false)}>
+                                        <span>1 fotoğraf için ücretsiz deneyin 🎁</span>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -243,7 +281,7 @@ const Header = () => {
                         <Link href="/stage" className={styles.mobileNavLink}>
                             <div className={styles.mobileIconWrapper}>{Icons.Stage}</div>
                             <div className={styles.mobileLinkContent}>
-                                <span className={styles.mobileLinkLabel}>Sanal Dekorasyon</span>
+                                <span className={styles.mobileLinkLabel}>Dekorasyon Stüdyosu</span>
                                 <span className={styles.mobileLinkDesc}>Boş odaları yapay zeka ile döşeyin</span>
                             </div>
                         </Link>
@@ -263,11 +301,26 @@ const Header = () => {
                         </Link>
 
                         <div className={styles.mobileCtaCard}>
-                            <div className={styles.mobileRegisterWrapper}>
-                                <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
-                                <span className={styles.mobileCtaSubText}>1 fotoğraf için ücretsiz deneyin</span>
-                            </div>
-                            <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
+                            {isAuthed ? (
+                                <>
+                                    <div className={styles.mobileRegisterWrapper}>
+                                        <Link href="/dashboard" className={styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
+                                            Bana Özel
+                                        </Link>
+                                    </div>
+                                    <button type="button" className={styles.mobileLoginBtn} onClick={handleLogout}>
+                                        Çıkış Yap
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <div className={styles.mobileRegisterWrapper}>
+                                        <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
+                                        <span className={styles.mobileCtaSubText}>1 fotoğraf için ücretsiz deneyin</span>
+                                    </div>
+                                    <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
+                                </>
+                            )}
                         </div>
                     </nav>
 

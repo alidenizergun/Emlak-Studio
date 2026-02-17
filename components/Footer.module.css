@@ -26,8 +26,9 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
-    width: 64px;
-    height: 64px;
+    width: 51px;
+    height: 51px;
+    border-radius: 12px;
     background: transparent;
     flex-shrink: 0;
     color: #ffffff !important;
@@ -53,7 +54,7 @@
 }
 
 .logoBrand {
-    font-size: 1.6rem;
+    font-size: 1.12rem;
     font-weight: 800;
     color: #f8fafc;
     letter-spacing: -0.02em;
@@ -61,7 +62,7 @@
 }
 
 .logoStudio {
-    font-size: 1.1rem;
+    font-size: 1.12rem;
     font-weight: 700;
     background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
     -webkit-background-clip: text;
@@ -70,6 +71,19 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     font-family: 'Inter', sans-serif;
+}
+
+/* Cümle içinde Y Z – paragraf harfleriyle aynı boyut */
+.logoStudioInline {
+    font-size: 1em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-family: inherit;
 }
 
 .description {
@@ -138,6 +152,7 @@
     .logoIcon {
         width: 48px;
         height: 48px;
+        border-radius: 10px;
     }
 
     .logoIcon svg {
@@ -150,6 +165,6 @@
     }
 
     .logoStudio {
-        font-size: 0.9rem;
+        font-size: 1.3rem;
     }
 }

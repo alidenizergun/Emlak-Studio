@@ -69,13 +69,15 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(37, 99, 235, 0.05);
-    color: var(--primary);
+    background: rgba(16, 185, 129, 0.08);
+    border: 1.5px solid rgba(16, 185, 129, 0.35);
+    color: #059669;
     transition: all 0.3s ease;
 }
 
 .statItem:hover .iconWrapper {
-    background: var(--primary);
+    background: #10b981;
+    border-color: #10b981;
     color: white;
     transform: scale(1.1);
 }

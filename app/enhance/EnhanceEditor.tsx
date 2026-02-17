@@ -293,7 +293,7 @@ export default function EnhanceClient() {
                                         <defs>
                                             <linearGradient id="yzSparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                                 <stop offset="0%" stopColor="#10b981" />
-                                                <stop offset="100%" stopColor="#3b82f6" />
+                                                <stop offset="100%" stopColor="#059669" />
                                             </linearGradient>
                                         </defs>
                                         <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradient)" />

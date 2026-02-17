@@ -23,7 +23,7 @@ const Footer = () => {
                                 <span className={styles.logoStudio}>YZ</span>
                             </div>
                         </div>
-                        <p>Emlak pazarlamasında <span className={styles.logoStudio}>Y</span>apay <span className={styles.logoStudio}>Z</span>eka devrimi.</p>
+                        <p>Emlak pazarlamasında <span className={styles.logoStudioInline}>Y</span>apay <span className={styles.logoStudioInline}>Z</span>eka devrimi.</p>
                         <div className={styles.copyrightWrapper}>
                             <p className="text-secondary">© 2026 Emlak YZ</p>
                             <p className="text-secondary">Tüm hakları saklıdır.</p>
@@ -35,8 +35,7 @@ const Footer = () => {
                     <h4>Ürünler</h4>
                     <ul>
                         <li><Link href="/enhance">Fotoğraf Geliştirme</Link></li>
-                        <li><Link href="/stage">Sanal Dekorasyon</Link></li>
-                        <li><Link href="/tools">Metin Üretici</Link></li>
+                        <li><Link href="/stage">Dekorasyon Stüdyosu</Link></li>
                         <li><Link href="/">Tüm araçlar</Link></li>
                     </ul>
                 </div>
@@ -46,9 +45,8 @@ const Footer = () => {
                     <ul>
                         <li><Link href="/about">Hakkımızda</Link></li>
                         <li><Link href="/help">Yardım Merkezi</Link></li>
-                        <li><Link href="/blog">Blog</Link></li>
-                        <li><Link href="/contact">İletişim</Link></li>
                         <li><Link href="/suggestions">Öneriler</Link></li>
+                        <li><Link href="/contact">İletişim</Link></li>
                     </ul>
                 </div>
 

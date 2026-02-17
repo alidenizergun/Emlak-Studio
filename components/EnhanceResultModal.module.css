@@ -46,14 +46,14 @@
 }
 
 .badge {
-    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #6366f1 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     font-size: 0.75rem;
     padding: 0.35rem 0.85rem;
     border-radius: 9999px;
     font-weight: 700;
     letter-spacing: 0.05em;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     text-transform: uppercase;
     display: flex;
     align-items: center;
@@ -75,9 +75,9 @@
 }
 
 .closeButton:hover {
-    background: #eff6ff;
-    color: #2563eb;
-    border-color: #bfdbfe;
+    background: rgba(16, 185, 129, 0.08);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.3);
     transform: rotate(90deg);
 }
 
@@ -137,15 +137,15 @@
 }
 
 .primaryButton {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border: none;
     color: white;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .primaryButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 @keyframes fadeIn {

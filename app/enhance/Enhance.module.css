@@ -49,11 +49,11 @@
     display: flex;
     gap: 1rem;
     padding: 0 1.5rem;
-    align-items: flex-start;
+    align-items: stretch;
     min-height: 400px;
 }
 
-/* Left Side: Gallery / Canvas */
+/* Left Side: Gallery / Canvas – sağ panelin altıyla hizalı */
 .gallerySection {
     flex: 1;
     background: white;
@@ -63,7 +63,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    height: 450px;
+    min-height: 450px;
     overflow: hidden;
 }
 
@@ -200,7 +200,7 @@
 }
 
 .statusProcessing {
-    background: rgba(37, 99, 235, 0.9);
+    background: rgba(16, 185, 129, 0.9);
     color: white;
 }
 
@@ -283,9 +283,9 @@
 }
 
 .uploadCard:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
-    background: #eff6ff;
+    border-color: #10b981;
+    color: #059669;
+    background: rgba(16, 185, 129, 0.06);
 }
 
 /* Sidebar Controls */
@@ -344,9 +344,9 @@
 }
 
 .optionItem.active {
-    border-color: #3b82f6;
-    background: #eff6ff;
-    color: #1d4ed8;
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.08);
+    color: #059669;
 }
 
 .optionItem.activeAi {
@@ -371,9 +371,10 @@
     flex-shrink: 0;
 }
 
-.optionItem.active .optionIcon {
-    background: #dbeafe;
-    color: #2563EB;
+.optionItem.active .optionIcon,
+.optionItem.activeAi .optionIcon {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
 }
 
 .optionText {
@@ -404,9 +405,10 @@
     transition: all 0.2s;
 }
 
-.optionItem.active .checkbox {
-    background: #2563EB;
-    border-color: #2563EB;
+.optionItem.active .checkbox,
+.optionItem.activeAi .checkbox {
+    background: #10b981;
+    border-color: #10b981;
 }
 
 .checkbox svg {
@@ -428,15 +430,15 @@
     justify-content: center;
     gap: 10px;
     transition: all 0.3s;
-    background: linear-gradient(135deg, #2563EB 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     margin-top: 1rem;
 }
 
 .processBtn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
 .processBtn:disabled {
@@ -534,6 +536,6 @@
         position: sticky;
         bottom: 1.5rem;
         z-index: 50;
-        box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
     }
 }

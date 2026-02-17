@@ -157,6 +157,10 @@
     background: #f1f5f9;
 }
 
+.hoursBadge {
+    margin-top: 1em;
+}
+
 .dot {
     width: 8px;
     height: 8px;

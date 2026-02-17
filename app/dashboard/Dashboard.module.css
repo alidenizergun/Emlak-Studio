@@ -1,0 +1,308 @@
+.pageContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 100px;
+    padding-bottom: 0;
+}
+
+.loading {
+    text-align: center;
+    color: #64748b;
+    font-size: 1rem;
+    padding: 3rem;
+}
+
+/* ----- Üst bölüm: Hesabım, kredi, ayarlar ----- */
+.topSection {
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem 1.5rem 2.5rem;
+}
+
+.topInner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.accountCard {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.accountRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.krediBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.krediLabel {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.krediValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d9488;
+}
+
+.accountActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.accountBtn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: #0d9488;
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.accountBtn:hover {
+    background: #0f766e;
+    transform: translateY(-1px);
+}
+
+.accountBtnSecondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.accountBtnSecondary:hover {
+    border-color: #0d9488;
+    color: #0d9488;
+}
+
+.accountNote {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin: 1rem 0 0;
+}
+
+/* ----- Alt bölüm: Tüm araçlar ----- */
+.bottomSection {
+    flex: 1 1 auto;
+    padding: 2rem 1.5rem 3rem;
+}
+
+.bottomInner {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.toolsTitle {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 1.25rem 0;
+}
+
+.toolsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.toolCard {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-decoration: none;
+    color: #0f172a;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.toolCard:hover:not(.toolCardDisabled) {
+    border-color: #0d9488;
+    box-shadow: 0 8px 20px -6px rgba(13, 148, 136, 0.2);
+    transform: translateY(-2px);
+}
+
+.toolCardDisabled {
+    opacity: 0.85;
+    cursor: default;
+    background: #f8fafc;
+    border-color: #f1f5f9;
+}
+
+.toolCardDisabled .toolIcon {
+    background: #e2e8f0;
+    color: #94a3b8;
+}
+
+.toolBadge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.toolIcon {
+    width: 42px;
+    height: 42px;
+    background: #ccfbf1;
+    color: #0d9488;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toolIcon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.toolCard:hover:not(.toolCardDisabled) .toolIcon {
+    background: #0d9488;
+    color: #fff;
+}
+
+.toolContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.toolCardTitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.toolCardDesc {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.45;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .pageContainer {
+        padding-top: 88px;
+    }
+
+    .topSection {
+        padding: 1.25rem 1rem 2rem;
+    }
+
+    .title {
+        font-size: 1.6rem;
+    }
+
+    .accountRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .accountActions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .accountBtn,
+    .accountBtnSecondary {
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+
+    .bottomSection {
+        padding: 1.5rem 1rem 2rem;
+    }
+
+    .toolsTitle {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .toolsGrid {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+    }
+
+    .toolCard {
+        padding: 1rem;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .toolContent {
+        gap: 0.2rem;
+    }
+
+    .toolCardTitle {
+        font-size: 1rem;
+    }
+
+    .toolCardDesc {
+        font-size: 0.85rem;
+    }
+
+    .toolCard:hover:not(.toolCardDisabled) {
+        transform: none;
+    }
+}

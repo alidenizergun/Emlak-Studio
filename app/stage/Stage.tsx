@@ -279,7 +279,7 @@ export default function StageClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Sanal Dekorasyon Stüdyosu</h1>
+                    <h1 className={styles.title}>Yapay Zeka Dekorasyon Stüdyosu</h1>
                     <p className={styles.description}>
                         Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
                     </p>
@@ -376,7 +376,7 @@ export default function StageClient() {
                                                     <defs>
                                                         <linearGradient id="yzSparkleGradientStage" x1="0%" y1="0%" x2="100%" y2="100%">
                                                             <stop offset="0%" stopColor="#10b981" />
-                                                            <stop offset="100%" stopColor="#3b82f6" />
+                                                            <stop offset="100%" stopColor="#059669" />
                                                         </linearGradient>
                                                     </defs>
                                                     <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStage)" />
@@ -427,7 +427,7 @@ export default function StageClient() {
                                                     <defs>
                                                         <linearGradient id="yzSparkleGradientStyle" x1="0%" y1="0%" x2="100%" y2="100%">
                                                             <stop offset="0%" stopColor="#10b981" />
-                                                            <stop offset="100%" stopColor="#3b82f6" />
+                                                            <stop offset="100%" stopColor="#059669" />
                                                         </linearGradient>
                                                     </defs>
                                                     <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStyle)" />

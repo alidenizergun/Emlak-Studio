@@ -12,7 +12,7 @@ export default function ToolsPage() {
     return (
         <div className={`container ${styles.pageContainer}`}>
             <div className={styles.header}>
-                <h1 className={styles.title}>Emlak Yapay Zeka Araçları</h1>
+                <h1 className={styles.title}>Emlak <span className={styles.titleAi}>Yapay Zeka</span> Araçları</h1>
                 <p className={styles.description}>
                     İş akışınızı hızlandıracak ve satışlarınızı artıracak tüm araçlar tek bir yerde.
                 </p>

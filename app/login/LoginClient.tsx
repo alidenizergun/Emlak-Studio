@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './Login.module.css';
 import { TESTIMONIALS } from '@/lib/data/testimonials';
 
@@ -18,6 +19,7 @@ function isValidPhone(phone: string): boolean {
 }
 
 export default function LoginClient() {
+    const router = useRouter();
     const [phone, setPhone] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [otpCode, setOtpCode] = useState('');
@@ -88,8 +90,11 @@ export default function LoginClient() {
             });
             const data = await res.json().catch(() => ({}));
             if (data.success) {
-                if (typeof window !== 'undefined') window.localStorage.setItem('emlak_authed', '1');
-                alert('Giriş başarılı! (Demo - Backend entegrasyonu gerekli)');
+                if (typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_authed', '1');
+                    window.localStorage.setItem('emlak_user_phone', phone.replace(/\D/g, ''));
+                }
+                router.push('/dashboard');
             } else {
                 setErrors({ otp: data.error || 'Kod geçersiz veya süresi dolmuş.' });
             }
@@ -106,12 +111,12 @@ export default function LoginClient() {
         <div className={styles.pageContainer}>
             <div className={styles.leftPanel}>
                 <div className={styles.leftContent}>
-                    <h2 className={styles.benefitsTitle}>Neden Emlak AIStudio?</h2>
+                    <h2 className={styles.benefitsTitle}>Neden Emlak YZ?</h2>
                     <ul className={styles.benefitsList}>
                         <li className={styles.benefitItem}>
                             <div className={styles.benefitIcon}>✨</div>
                             <div>
-                                <h3>Fotoğraf Geliştirme & Sanal Dekorasyon</h3>
+                                <h3>Fotoğraf Geliştirme & Dekorasyon Stüdyosu</h3>
                                 <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları yapay zeka ile modern mobilyalarla döşeyin.</p>
                             </div>
                         </li>
