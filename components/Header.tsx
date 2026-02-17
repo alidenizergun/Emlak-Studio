@@ -116,9 +116,9 @@ const Header = () => {
                             <Image
                                 src="/logo.png"
                                 alt="Emlak YZ Logo"
-                                width={56}
-                                height={56}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                width={64}
+                                height={64}
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                 priority
                             />
                         </div>
@@ -216,9 +216,9 @@ const Header = () => {
                                     <Image
                                         src="/logo.png"
                                         alt="Emlak YZ Logo"
-                                        width={56}
-                                        height={56}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        width={64}
+                                        height={64}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     />
                                 </div>
                                 <div className={styles.logoTextWrapper}>
