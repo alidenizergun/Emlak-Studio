@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type CSSProperties } from 'react';
+import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -45,6 +45,9 @@ const Header = () => {
     const [isMounted, setIsMounted] = useState(false);
     const [showRegisterNotify, setShowRegisterNotify] = useState(false);
     const [isAuthed, setIsAuthed] = useState(false);
+    const logoTextWrapperRef = useRef<HTMLDivElement>(null);
+    const logoBrandRef = useRef<HTMLSpanElement>(null);
+    const logoStudioRef = useRef<HTMLSpanElement>(null);
 
     // Set mounted state and read auth
     useEffect(() => {
@@ -99,6 +102,33 @@ const Header = () => {
         } catch {}
     }, [pathname, isMounted]);
 
+    // YZ.com'u EMLAK genişliğine sığdır (scaleX + sağ hizalı)
+    useEffect(() => {
+        const wrapper = logoTextWrapperRef.current;
+        const brand = logoBrandRef.current;
+        const studio = logoStudioRef.current;
+        if (!wrapper || !brand || !studio) return;
+        const apply = () => {
+            studio.style.transform = '';
+            studio.style.transformOrigin = '';
+            wrapper.style.width = '';
+            wrapper.style.minWidth = '';
+            wrapper.offsetHeight; // reflow
+            const wBrand = brand.offsetWidth;
+            const wStudio = studio.offsetWidth;
+            if (wStudio <= 0) return;
+            wrapper.style.width = `${wBrand}px`;
+            wrapper.style.minWidth = `${wBrand}px`;
+            const scale = wBrand / wStudio;
+            studio.style.transform = `scaleX(${scale})`;
+            studio.style.transformOrigin = 'left';
+        };
+        apply();
+        const ro = new ResizeObserver(apply);
+        ro.observe(wrapper);
+        return () => ro.disconnect();
+    }, [isMounted]);
+
     const handleLogout = () => {
         try {
             if (typeof window !== 'undefined') {
@@ -149,9 +179,9 @@ const Header = () => {
                                 priority
                             />
                         </div>
-                        <div className={styles.logoTextWrapper}>
-                            <span className={styles.logoBrand}>Emlak</span>
-                            <span className={styles.logoStudio}>YZ</span>
+                        <div className={styles.logoTextWrapper} ref={logoTextWrapperRef}>
+                            <span className={styles.logoBrand} ref={logoBrandRef}>EMLAK</span>
+                            <span className={styles.logoStudio}><span className={styles.logoStudioInner} ref={logoStudioRef}>YZ.com</span></span>
                         </div>
                     </Link>
                 </div>

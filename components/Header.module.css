@@ -32,8 +32,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 51px;
-    height: 51px;
+    width: 48.45px;
+    height: 48.45px;
     border-radius: 12px;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     flex-shrink: 0;
@@ -55,25 +55,40 @@
 }
 
 .logo:hover .logoIcon {
-    transform: scale(1.025);
     box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
     background: #f8fafc;
+}
+
+.logo:hover .logoBrand,
+.logo:hover .logoStudioInner {
+    filter: brightness(1.08);
 }
 
 .logoTextWrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    width: max-content;
+    min-width: max-content;
     line-height: 1;
     gap: 1px;
+    text-align: left;
+    overflow: hidden;
 }
 
 .logoBrand {
+    display: block;
+    width: 100%;
     font-size: 1.12rem;
     font-weight: 800;
-    color: #1e293b;
     letter-spacing: -0.02em;
     text-transform: uppercase;
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    box-sizing: border-box;
+    transition: filter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @media (max-width: 768px) {
@@ -83,19 +98,28 @@
 }
 
 .logoStudio {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.logoStudioInner {
+    display: inline-block;
     font-size: 1.12rem;
-    font-weight: 700;
+    font-weight: 800;
     background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: 0.1em;
+    letter-spacing: -0.02em;
     text-transform: uppercase;
     font-family: 'Inter', sans-serif;
+    transform-origin: left;
+    transition: filter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @media (max-width: 768px) {
-    .logoStudio {
+    .logoStudioInner {
         font-size: 1.1rem;
     }
 }
@@ -162,7 +186,7 @@
     color: #1e293b;
     padding: 0.5rem 1.2rem;
     border-radius: 12px;
-    font-weight: 700;
+    font-weight: 500;
     font-size: 0.9rem;
     border: none;
     text-decoration: none;

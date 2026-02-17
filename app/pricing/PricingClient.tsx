@@ -8,13 +8,14 @@ const PRICING_TIERS = [
     {
         name: "Danışman",
         id: "danisman",
-        originalPrice: 2999,
-        discountedPrice: 1299,
+        originalPrice: 2499,
+        discountedPrice: 1999,
         yearlyPriceMultiplier: 0.8,
+        ilanGorseli: 100,
         description: "Bireysel emlak danışmanları için başlangıç paketi.",
         features: [
-            "180 Kredi (Her ay yenilenir)",
-            "Yaklaşık 90 ilan görseli",
+            "200 Kredi",
+            "100 ilan görseline YZ çalışması",
             "Ticari Kullanım İzni"
         ],
         cta: "Hemen Başla",
@@ -23,13 +24,14 @@ const PRICING_TIERS = [
     {
         name: "Ofis",
         id: "ofis",
-        originalPrice: 4499,
-        discountedPrice: 1999,
+        originalPrice: 2999,
+        discountedPrice: 2499,
         yearlyPriceMultiplier: 0.8,
-        description: "Ekipler ve büyüyen emlak ofisleri için ideal çözüm.",
+        ilanGorseli: 200,
+        description: "Ekipler ve emlak ofisleri için ideal çözüm.",
         features: [
-            "320 Kredi (Her ay yenilenir)",
-            "Yaklaşık 160 ilan görseli",
+            "400 Kredi",
+            "200 ilan görseline YZ çalışması",
             "Tüm AI Modellerine Erişim",
             "Yüksek İşlem Önceliği",
             "Ticari Kullanım İzni",
@@ -41,13 +43,14 @@ const PRICING_TIERS = [
     {
         name: "Kurumsal",
         id: "kurumsal",
-        originalPrice: 10999,
+        originalPrice: 5999,
         discountedPrice: 4999,
         yearlyPriceMultiplier: 0.8,
+        ilanGorseli: 500,
         description: "Büyük ajanslar ve gelişmiş kurumsal ihtiyaçlar için.",
         features: [
-            "1000 Kredi (Her ay yenilenir)",
-            "Yaklaşık 500 ilan görseli",
+            "1000 Kredi",
+            "500 ilan görseline YZ çalışması",
             "Tüm AI Modellerine Erişim",
             "Özel API Erişimi",
             "Ticari Kullanım İzni",
@@ -185,12 +188,25 @@ export default function PricingClient() {
                                 <div className={styles.features}>
                                     <p className={styles.featuresTitle}>Neler Dahil?</p>
                                     <ul className={styles.featureList}>
-                                        {tier.features.map((feature, index) => (
-                                            <li key={index} className={styles.featureItem}>
-                                                <CheckIcon />
-                                                <span>{feature}</span>
-                                            </li>
-                                        ))}
+                                        {tier.features.map((feature, index) => {
+                                            const isIlanGorseli = feature.includes('ilan görseline YZ çalışması');
+                                            const perImagePrice = isIlanGorseli && tier.ilanGorseli
+                                                ? (displayPrice / tier.ilanGorseli).toFixed(0)
+                                                : null;
+                                            return (
+                                                <li key={index} className={styles.featureItem}>
+                                                    <CheckIcon />
+                                                    <span>
+                                                        {feature}
+                                                        {perImagePrice != null && (
+                                                            <span className={styles.perImagePrice}>
+                                                                Görsel başına {Number(perImagePrice).toLocaleString('tr-TR')} TL
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
                                 </div>
                             </div>

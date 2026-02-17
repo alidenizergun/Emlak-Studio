@@ -323,6 +323,14 @@
     line-height: 1.4;
 }
 
+.perImagePrice {
+    display: block;
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin-top: 2px;
+    font-weight: 500;
+}
+
 .checkIcon {
     flex-shrink: 0;
     width: 20px;

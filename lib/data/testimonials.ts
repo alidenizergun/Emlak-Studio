@@ -150,7 +150,7 @@ const BASE_TESTIMONIALS: Testimonial[] = [
     { text: "Müşteri geri dönüşlerinde belirgin bir artış var.", author: "Zeliha S.", company: "Cascade Emlak" },
     { text: "Görseller ilanlarımı öne çıkarıyor.", author: "Hamdi Y.", company: "Monarch Konut" },
     { text: "Platform sayesinde rakiplerimden öndeyim.", author: "Ayşegül F.", company: "Trinity Gayrimenkul" },
-    { text: "Müşterilerim görsellere çok beğeniyor.", author: "Veysel B.", company: "Elysium Emlak" },
+    { text: "Müşterilerim görselleri çok beğeniyor.", author: "Veysel B.", company: "Elysium Emlak" },
     { text: "İlanlarımın etkinliği arttı.", author: "Hatun Ç.", company: "Olympus Konut" },
     { text: "Platform kullanımı son derece pratik.", author: "Hikmet M.", company: "Atlas Prime" },
     { text: "Görseller müşteri çekmeme yardımcı oluyor.", author: "Sabiha K.", company: "İnci Gayrimenkul" },

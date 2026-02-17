@@ -73,9 +73,9 @@
 
 .aiIcon {
     display: inline-block;
-    /* Inline with text */
     vertical-align: middle;
     margin-left: 12px;
+    transform: scale(0.9675);
     animation: sparklePulse 2.5s ease-in-out infinite;
 }
 
@@ -83,13 +83,13 @@
 
     0%,
     100% {
-        transform: scale(1);
+        transform: scale(0.9675);
         opacity: 1;
         filter: none;
     }
 
     50% {
-        transform: scale(1.15);
+        transform: scale(1.113);
         opacity: 1;
         filter: none;
     }

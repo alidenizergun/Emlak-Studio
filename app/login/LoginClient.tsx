@@ -109,50 +109,6 @@ export default function LoginClient() {
 
     return (
         <div className={styles.pageContainer}>
-            <div className={styles.leftPanel}>
-                <div className={styles.leftContent}>
-                    <h2 className={styles.benefitsTitle}>Neden Emlak YZ?</h2>
-                    <ul className={styles.benefitsList}>
-                        <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>✨</div>
-                            <div>
-                                <h3>Fotoğraf Geliştirme & Dekorasyon Stüdyosu</h3>
-                                <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları yapay zeka ile modern mobilyalarla döşeyin.</p>
-                            </div>
-                        </li>
-                        <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>⚡</div>
-                            <div>
-                                <h3>Saniyeler İçinde Sonuç</h3>
-                                <p>Manuel çekim veya dekoratör beklemeden ilan görsellerinizi tek platformda hazırlayın.</p>
-                            </div>
-                        </li>
-                        <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>💰</div>
-                            <div>
-                                <h3>Maliyet Tasarrufu</h3>
-                                <p>Profesyonel fotoğrafçı ve sanal dekorasyon hizmetlerine kıyasla çok daha uygun maliyetle çalışın.</p>
-                            </div>
-                        </li>
-                        <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>🏆</div>
-                            <div>
-                                <h3>Tüm Araçlar Tek Yerde</h3>
-                                <p>Geliştirme, sanal dekorasyon, gökyüzü değiştirme, ilan metni ve daha fazlası—emlak ilanlarınız için ihtiyacınız olan her şey.</p>
-                            </div>
-                        </li>
-                    </ul>
-                    <div className={styles.testimonial} key={currentTestimonial}>
-                        <div className={styles.testimonialStars}>⭐⭐⭐⭐⭐</div>
-                        <p className={styles.testimonialText}>&quot;{testimonial.text}&quot;</p>
-                        <div className={styles.authorInfo}>
-                            <p className={styles.testimonialAuthor}>{testimonial.author}</p>
-                            <p className={styles.testimonialCompany}>{testimonial.company}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div className={styles.rightPanel}>
                 <div className={styles.formContainer}>
                     <div className={styles.formHeader}>
@@ -252,6 +208,49 @@ export default function LoginClient() {
                     <p className={styles.registerLink}>
                         Hesabınız yok mu? <Link href="/register" className={styles.link}>Şimdi Kayıt Olun</Link>
                     </p>
+                </div>
+            </div>
+
+            <div className={styles.leftPanel}>
+                <div className={styles.leftContent}>
+                    <ul className={styles.benefitsList}>
+                        <li className={styles.benefitItem}>
+                            <div className={styles.benefitIcon}>✨</div>
+                            <div>
+                                <h3>Fotoğraf Geliştirme & Dekorasyon Stüdyosu</h3>
+                                <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları yapay zeka ile modern mobilyalarla döşeyin.</p>
+                            </div>
+                        </li>
+                        <li className={styles.benefitItem}>
+                            <div className={styles.benefitIcon}>⚡</div>
+                            <div>
+                                <h3>Saniyeler İçinde Sonuç</h3>
+                                <p>Manuel çekim veya dekoratör beklemeden ilan görsellerinizi tek platformda hazırlayın.</p>
+                            </div>
+                        </li>
+                        <li className={styles.benefitItem}>
+                            <div className={styles.benefitIcon}>💰</div>
+                            <div>
+                                <h3>Maliyet Tasarrufu</h3>
+                                <p>Profesyonel fotoğrafçı ve sanal dekorasyon hizmetlerine kıyasla çok daha uygun maliyetle çalışın.</p>
+                            </div>
+                        </li>
+                        <li className={styles.benefitItem}>
+                            <div className={styles.benefitIcon}>🏆</div>
+                            <div>
+                                <h3>Tüm Araçlar Tek Yerde</h3>
+                                <p>Geliştirme, sanal dekorasyon, gökyüzü değiştirme, ilan metni ve daha fazlası—emlak ilanlarınız için ihtiyacınız olan her şey.</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div className={styles.testimonial} key={currentTestimonial}>
+                        <div className={styles.testimonialStars}>⭐⭐⭐⭐⭐</div>
+                        <p className={styles.testimonialText}>&quot;{testimonial.text}&quot;</p>
+                        <div className={styles.authorInfo}>
+                            <p className={styles.testimonialAuthor}>{testimonial.author}</p>
+                            <p className={styles.testimonialCompany}>{testimonial.company}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
