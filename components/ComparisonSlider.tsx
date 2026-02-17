@@ -97,17 +97,14 @@ const ComparisonSlider = ({
         };
 
         const checkFullyVisible = () => {
+            if (!el || typeof window === 'undefined') return false;
             const rect = el.getBoundingClientRect();
-            if (typeof window === 'undefined') return false;
-            const vp = window.visualViewport;
-            if (vp) {
-                const top = rect.top - vp.offsetTop;
-                const bottom = rect.bottom - vp.offsetTop;
-                const left = rect.left - vp.offsetLeft;
-                const right = rect.right - vp.offsetLeft;
-                return top >= 0 && bottom <= vp.height && left >= 0 && right <= vp.width;
-            }
-            return rect.top >= 0 && rect.bottom <= window.innerHeight && rect.left >= 0 && rect.right <= window.innerWidth;
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
         };
 
         const observer = new IntersectionObserver(

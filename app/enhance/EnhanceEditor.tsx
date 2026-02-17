@@ -357,13 +357,51 @@ const OPTIONS = [
         id: 'clean',
         label: 'Oda Temizliği',
         desc: 'Leke ve kirleri temizler',
-        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z" /></svg>
+        icon: (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                width="18"
+                height="18"
+            >
+                {/* Sap */}
+                <path d="M11 3v7" />
+                {/* Fırça başı */}
+                <path d="M7 14h10l-2 5H9l-2-5Z" />
+                {/* Zemin */}
+                <path d="M3 21h18" />
+                {/* Parıltılar */}
+                <path d="M5 7l1 1-1 1-1-1 1-1Z" />
+                <path d="M18 6l1 1-1 1-1-1 1-1Z" />
+            </svg>
+        )
     },
     {
         id: 'privacy',
         label: 'Gizlilik Mozaiği',
         desc: 'Özel fotoğraflar ve yüzleri blurlar',
-        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+        icon: (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                width="18"
+                height="18"
+            >
+                {/* Mozaik kareler */}
+                <rect x="3" y="4" width="7" height="6" rx="1" />
+                <rect x="14" y="4" width="7" height="6" rx="1" />
+                <rect x="3" y="14" width="7" height="6" rx="1" />
+                <rect x="14" y="14" width="7" height="6" rx="1" />
+            </svg>
+        )
     },
     {
         id: 'sky',
@@ -375,6 +413,26 @@ const OPTIONS = [
         id: 'twilight',
         label: 'Gün Batımı Modu',
         desc: 'Büyüleyici akşam ışıkları',
-        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M12 3a6 6 0 0 0 9 9 9 9 9 0 1 1-9-9Z" /><path d="M20 3v4" /><path d="M22 5h-4" /></svg>
+        icon: (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                width="18"
+                height="18"
+            >
+                {/* Ufuk çizgisi */}
+                <path d="M3 17h18" />
+                {/* Yarım güneş */}
+                <path d="M6 17a6 6 0 0 1 12 0" />
+                {/* Işınlar */}
+                <path d="M12 7V4" />
+                <path d="M8 9l-1.5-1.5" />
+                <path d="M16 9l1.5-1.5" />
+            </svg>
+        )
     }
 ];

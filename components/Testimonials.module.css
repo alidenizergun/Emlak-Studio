@@ -1,5 +1,5 @@
 .testimonialsSection {
-    padding: 6rem 0;
+    padding: 5.25rem 0 6rem 0;
     background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
     margin-top: 15px;
 }
@@ -7,6 +7,7 @@
 .testimonialsContainer {
     max-width: 1080px;
     margin: 0 auto;
+    margin-top: -0.5em;
     padding: 0 1.5rem;
 }
 

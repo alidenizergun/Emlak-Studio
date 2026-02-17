@@ -33,6 +33,8 @@
     flex-direction: column;
     justify-content: center;
     margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
     /* Reduced to 4px to achieve actual ~7px visual lift */
 }
 
@@ -140,7 +142,8 @@
     top: 6px;
     width: 8px;
     height: 8px;
-    background-color: #2563EB;
+    /* Logo ile aynı yeşil-mavi geçişli renk */
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
     border-radius: 50%;
 }
 
@@ -148,12 +151,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    /* Reduced from 1rem */
     margin-bottom: 0 !important;
     width: 100%;
     max-width: 400px;
     transform: translateY(2px);
-    /* Adjusted to avoid visual lift */
+    position: relative;
+    z-index: 2;
 }
 
 .primaryBtnWrapper {
@@ -383,18 +386,18 @@
 
 .labelBefore,
 .labelAfter {
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 6px 12px;
+    border-radius: 6px;
     font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-shadow: none;
     white-space: nowrap;
 }
 
@@ -595,495 +598,18 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 
-/* —— Popup overlay —— */
-.heroPopupOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: rgba(248, 250, 252, 0.5);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    animation: heroPopupOverlayIn 0.25s ease;
-    overflow: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
-    box-sizing: border-box;
-}
-
-@keyframes heroPopupOverlayIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-.heroPopup {
-    background: var(--card-bg);
-    border-radius: 20px;
-    max-width: min(1200px, calc(100vw - 2rem));
-    max-height: calc(100vh - 2rem);
-    max-height: calc(100dvh - 2rem);
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: relative;
-    margin: auto;
-    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
-    animation: heroPopupIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    transform: scale(1.25);
-    transform-origin: center center;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    box-sizing: border-box;
-}
-
-@keyframes heroPopupIn {
-    from {
-        opacity: 0;
-        transform: scale(0.96) translateY(12px);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1.25) translateY(0);
-    }
-}
-
-.heroPopupClose {
-    position: absolute;
-    top: 0.25rem;
-    right: 1rem;
-    z-index: 2;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    border: none;
-    background: #f1f5f9;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #475569;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.heroPopupClose svg {
-    width: 16px;
-    height: 16px;
-}
-
-.heroPopupClose:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-    transform: scale(1.05);
-}
-
-.heroPopupImages {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    padding: 0.75rem 1rem 0.5rem;
-    align-items: start;
-    min-width: 0;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.heroPopupCol {
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-    align-items: center;
-    min-width: 0;
-}
-
-.heroPopupBadge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #64748b;
-    background: #f1f5f9;
-    padding: 0.4rem 0.75rem;
-    border-radius: 8px 8px 0 0;
-    width: fit-content;
-    margin-bottom: -1px;
-    z-index: 1;
-}
-
-.heroPopupBadgeBefore {
-    text-transform: none;
-}
-
-.heroPopupBadgeAfter {
-    color: #854d0e;
-    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
-    box-shadow: 0 1px 3px rgba(234, 179, 8, 0.2);
-    text-transform: none;
-    font-size: 0.75rem;
-    white-space: normal;
-    text-align: center;
-    max-width: 100%;
-}
-
-.heroPopupBadgeAfter svg {
-    color: #ca8a04;
-}
-
-.heroPopupImageWrap {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16/9;
-    min-height: 120px;
-    max-height: min(65.625vh, 437px);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    filter: brightness(0.9);
-    z-index: 2;
-}
-
-.heroPopupImageWrap img {
-    object-fit: contain;
-}
-
-.heroPopupImageWrapAfter {
-    filter: brightness(1.0);
-}
-
-.heroPopupFooter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem 1.25rem;
-    border-top: 1px solid #f1f5f9;
-    background: #fafbfc;
-}
-
-.heroPopupCtaWrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
-}
-
-.heroPopupCta {
-    position: relative;
-    overflow: hidden;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
-    margin-top: 1.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #fff;
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-    border-radius: 12px;
-    text-decoration: none;
-    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 24px rgba(22, 163, 74, 0.25);
-    animation: heroPopupCtaShadow 2.5s ease-in-out infinite;
-    transition: transform 0.2s ease;
-}
-
-.heroPopupCta::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-    animation: heroPopupCtaSweep 10s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes heroPopupCtaSweep {
-    0% {
-        left: -100%;
-    }
-
-    50% {
-        left: 140%;
-    }
-
-    100% {
-        left: -100%;
-    }
-}
-
-.heroPopupCta:hover {
-    transform: translateY(-1px);
-}
-
-.heroPopupCtaHintWrap {
-    min-height: 2.5em;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-}
-
-.heroPopupCtaHint {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #94a3b8;
-    font-weight: 400;
-    text-align: center;
-    animation: heroPopupHintFadeIn 0.5s ease;
-}
-
-@keyframes heroPopupHintFadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes heroPopupCtaShadow {
-
-    0%,
-    100% {
-        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 20px rgba(22, 163, 74, 0.2);
-    }
-
-    50% {
-        box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5), 0 0 32px rgba(22, 163, 74, 0.35);
-    }
-}
-
-.heroPopupFooterClose {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #94a3b8;
-    background: transparent;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.heroPopupFooterClose:hover {
-    color: #64748b;
-}
-
-.popupArrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 34px;
-    height: 34px;
-    background: rgba(255, 255, 255, 0.95);
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #1e293b;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 50;
-}
-
-.popupArrow:hover {
-    background: #ffffff;
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-}
-
-.popupArrow:active {
-    transform: translateY(-50%) scale(0.95);
-}
-
-.popupArrowLeft {
-    left: 0.3rem;
-}
-
-.popupArrowRight {
-    right: 0.3rem;
-}
-
-@media (max-width: 1400px) {
-    .popupArrow {
-        width: 48px;
-        height: 48px;
-    }
-}
+/* Popup artık components/BeforeAfterPopup.tsx şablonunda */
 
 @media (max-width: 768px) {
     .heroZoomBtn {
         top: 8px;
         right: 8px;
-        width: 34px;
-        height: 34px;
-        min-width: 34px;
-        min-height: 34px;
+        width: 32px;
+        height: 32px;
     }
 
     .heroZoomBtn svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    .heroPopupOverlay {
-        height: 100svh;
-        height: 100dvh;
-        min-height: 100vh;
-        /* Popup en üstü: header altı + 20% daha yukarı çekilmiş (8rem -> 6.4rem) */
-        padding: max(6.4rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.25rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
-        align-items: flex-start;
-        justify-content: center;
-        box-sizing: border-box;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .heroPopup {
-        max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-        /* Header+4satır (8rem) + alt pay; ekrana sığar */
-        max-height: calc(100vh - 6.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 6.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        width: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        transform: scale(1);
-        transform-origin: center center;
-        animation: heroPopupInMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        flex-shrink: 0;
-        min-height: 0;
-        box-sizing: border-box;
-        margin: 0 auto;
-    }
-
-    @keyframes heroPopupInMobile {
-        from {
-            opacity: 0;
-            transform: scale(0.96) translateY(8px);
-        }
-
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-
-    .heroPopupClose {
-        top: 0.2rem;
-        right: max(0.5rem, env(safe-area-inset-right));
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
-        min-height: 28px;
-        border-radius: 6px;
-    }
-
-    .heroPopupClose svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    .heroPopupImages {
-        grid-template-columns: 1fr;
-        padding: 0.35rem 0.5rem 0.35rem;
-        padding-top: 0.2rem;
-        min-height: 0;
-        flex: 1 1 auto;
-    }
-
-    .heroPopupImageWrap {
-        min-height: 50px;
-        max-height: min(26vh, 200px);
-    }
-
-    .heroPopupFooter {
-        flex-direction: column;
-        padding: 0.5rem 0.75rem 0.75rem;
-        flex-shrink: 0;
-    }
-
-    .heroPopupCta {
-        width: 100%;
-        margin-top: 0.5rem;
-    }
-
-    .heroPopupCtaHintWrap {
-        min-height: 2em;
-    }
-
-    .popupArrow {
-        width: 43px;
-        height: 43px;
-        min-width: 43px;
-        min-height: 43px;
-        left: 0.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .popupArrowRight {
-        right: 0.5rem;
-        left: auto;
-    }
-
-    .popupArrow svg {
-        width: 22px;
-        height: 22px;
-    }
-}
-
-/* Telefon yatay (landscape): dikey alan kısıtlı, popup tam sığsın */
-@media (max-width: 768px) and (max-height: 500px) {
-    .heroPopupOverlay {
-        padding: max(0.2rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.2rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
-    }
-
-    .heroPopup {
-        max-height: calc(100vh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-    }
-
-    .heroPopupImageWrap {
-        max-height: min(22vh, 160px);
-    }
-
-    .heroPopupImages {
-        padding: 0.25rem 0.4rem;
-    }
-
-    .heroPopupFooter {
-        padding: 0.4rem 0.6rem 0.6rem;
-    }
-
-    .heroPopupBadge {
-        font-size: 0.65rem;
-        padding: 0.25rem 0.4rem;
-    }
-
-    .heroPopupCol {
-        gap: 0px;
+        width: 16px;
+        height: 16px;
     }
 }

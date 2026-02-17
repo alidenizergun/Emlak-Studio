@@ -1,0 +1,379 @@
+/* Tek şablon: Hero + Examples aynı popup */
+.popupOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(248, 250, 252, 0.5);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(80px + 1.5rem) 1.5rem 1.5rem;
+    animation: popupOverlayIn 0.25s ease;
+    overflow: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    box-sizing: border-box;
+}
+
+@keyframes popupOverlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.popup {
+    background: var(--card-bg);
+    border-radius: 24px;
+    max-width: min(1218px, calc((100vw - 3rem) * 0.84));
+    max-height: calc((100vh - 80px - 3rem) * 0.88);
+    max-height: calc((100dvh - 80px - 3rem) * 0.88);
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
+    margin: auto;
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    animation: popupIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transform: scale(1.2);
+    transform-origin: center center;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.popupInner {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transform: scale(1.05);
+    transform-origin: center center;
+}
+
+@keyframes popupIn {
+    from { opacity: 0; transform: scale(0.96) translateY(12px); }
+    to { opacity: 1; transform: scale(1.2) translateY(0); }
+}
+
+.popupClose {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e293b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+.popupClose svg { width: 20px; height: 20px; }
+
+.popupClose:hover {
+    background: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    color: #ef4444;
+}
+
+.popupArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+.popupArrow:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.popupArrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.popupArrowLeft { left: 0.3rem; }
+.popupArrowRight { right: 0.3rem; }
+
+@media (max-width: 1400px) {
+    .popupArrow { width: 38px; height: 38px; }
+}
+
+.popupImages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 3.5rem 2rem 1rem;
+    align-items: center;
+    min-width: 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.popupCol {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+    min-width: 0;
+}
+
+.popupBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px 8px 0 0;
+    width: fit-content;
+    margin-bottom: -1px;
+    z-index: 1;
+}
+
+.popupBadgeBefore { text-transform: none; }
+
+.popupBadgeAfter {
+    color: #854d0e;
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+    box-shadow: 0 1px 3px rgba(234, 179, 8, 0.2);
+    text-transform: none;
+    font-size: 0.75rem;
+    white-space: normal;
+    text-align: center;
+    max-width: 100%;
+}
+
+.popupBadgeAfter svg { color: #ca8a04; }
+
+.popupImageWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    min-height: 120px;
+    max-height: 75vh;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    filter: brightness(0.9);
+    z-index: 2;
+}
+
+.popupImage { object-fit: cover !important; }
+.popupImageWrap img { object-fit: cover !important; }
+.popupImageWrapAfter { filter: brightness(1.1); }
+
+.popupFooter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem 1.25rem;
+    border-top: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+
+.popupCtaWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+
+.popupCta {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* %25 küçültülmüş buton boyutu ve iç boşluklar */
+    padding: 0.55rem 1.1rem;
+    /* 1 satıra yakın yukarı almak için marj azaltıldı */
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 24px rgba(22, 163, 74, 0.25);
+    animation: popupCtaShadow 2.5s ease-in-out infinite;
+    transition: transform 0.2s ease;
+}
+
+.popupCta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    animation: popupCtaSweep 10s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes popupCtaSweep {
+    0% { left: -100%; }
+    50% { left: 140%; }
+    100% { left: -100%; }
+}
+
+@keyframes popupCtaShadow {
+    0%, 100% { box-shadow: 0 4px 14px rgba(22, 163, 74, 0.4), 0 0 24px rgba(22, 163, 74, 0.25); }
+    50% { box-shadow: 0 6px 20px rgba(22, 163, 74, 0.5), 0 0 32px rgba(22, 163, 74, 0.35); }
+}
+
+/* Buton ile alt yazı arasında ~yarım satır, sonrasında ~2 satır boşluk */
+.popupCtaHintWrap {
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.popupCtaHint {
+    /* Yazı boyutu da %25 küçüldü */
+    font-size: 0.6rem;
+    color: #64748b;
+    text-align: center;
+    animation: popupCtaHintIn 0.5s ease forwards;
+}
+
+@keyframes popupCtaHintIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .popupOverlay {
+        height: 100svh;
+        height: 100dvh;
+        min-height: 100vh;
+        padding: max(80px, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.25rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        align-items: flex-start;
+        justify-content: center;
+        box-sizing: border-box;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .popup {
+        border-radius: 20px;
+        max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        max-height: calc(100vh - 6.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 6.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        width: 100%;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        transform: scale(1);
+        transform-origin: center center;
+        animation: popupInMobile 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        flex-shrink: 0;
+        min-height: 0;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    .popupInner { transform: scale(1.05); }
+
+    @keyframes popupInMobile {
+        from { opacity: 0; transform: scale(0.96) translateY(8px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .popupClose {
+        top: 1rem;
+        right: 1rem;
+        position: absolute;
+        margin-top: 0;
+    }
+
+    .popupClose svg { width: 16px; height: 16px; }
+
+    .popupImages {
+        grid-template-columns: 1fr;
+        padding: 2.5rem 1rem 1rem;
+        min-height: 0;
+        flex: 1 1 auto;
+    }
+
+    .popupImageWrap {
+        min-height: 50px;
+        max-height: min(26vh, 200px);
+    }
+
+    .popupFooter {
+        padding: 0.5rem 0.75rem 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .popupCta { width: 100%; margin-top: 0.5rem; }
+    .popupCtaHintWrap { min-height: 2em; }
+
+    .popupArrow {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+        left: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .popupArrowRight { right: 0.5rem; left: auto; }
+    .popupArrow svg { width: 18px; height: 18px; }
+}
+
+/* Telefon yatay (landscape) */
+@media (max-width: 768px) and (max-height: 500px) {
+    .popupOverlay {
+        padding: max(0.2rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.2rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    }
+
+    .popup {
+        max-height: calc(100vh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    }
+
+    .popupImageWrap { max-height: min(22vh, 160px); }
+    .popupImages { padding: 0.25rem 0.4rem; }
+    .popupFooter { padding: 0.4rem 0.6rem 0.6rem; }
+    .popupBadge { font-size: 0.65rem; padding: 0.25rem 0.4rem; }
+    .popupCol { gap: 0; }
+}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ComparisonSlider from './ComparisonSlider';
+import BeforeAfterPopup from './BeforeAfterPopup';
 import styles from './Hero.module.css';
 
 const HERO_BEFORE = '/images/hero-empty-room-4k.png';
@@ -117,12 +118,17 @@ const Hero = () => {
                             Hemen Ücretsiz Deneyin
                         </Link>
 
-                        <Link href="/examples" className={styles.secondaryBtn} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <a
+                            id="hero-examples-link"
+                            href="/examples"
+                            className={styles.secondaryBtn}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+                        >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
                             Örnekleri İnceleyin
-                        </Link>
+                        </a>
                     </div>
                 </div>
                 <div className={styles.visual}>
@@ -172,94 +178,21 @@ const Hero = () => {
                 </div>
             </div>
 
-            {heroPopupOpen && (
-                <div
-                    className={styles.heroPopupOverlay}
-                    onClick={() => setHeroPopupOpen(false)}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Önce ve sonra karşılaştırması"
-                >
-                    <div className={styles.heroPopup} onClick={(e) => e.stopPropagation()}>
-                        <button
-                            type="button"
-                            className={styles.heroPopupClose}
-                            onClick={() => setHeroPopupOpen(false)}
-                            aria-label="Kapat"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                        </button>
-
-                        {/* Navigation Arrows */}
-                        <button
-                            className={`${styles.popupArrow} ${styles.popupArrowLeft}`}
-                            onClick={handlePrev}
-                            aria-label="Önceki örnek"
-                        >
-                            <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-                        </button>
-                        <button
-                            className={`${styles.popupArrow} ${styles.popupArrowRight}`}
-                            onClick={handleNext}
-                            aria-label="Sonraki örnek"
-                        >
-                            <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                        </button>
-
-                        <div className={styles.heroPopupImages}>
-                            <div className={styles.heroPopupCol}>
-                                <span className={`${styles.heroPopupBadge} ${styles.heroPopupBadgeBefore}`}>
-                                    Önce
-                                </span>
-                                <div className={styles.heroPopupImageWrap}>
-                                    <Image
-                                        src={currentExample.before}
-                                        alt="Boş oda"
-                                        fill
-                                        sizes="(max-width: 1200px) 100vw, 50vw"
-                                        style={{ objectFit: 'contain' }}
-                                        priority
-                                    />
-                                </div>
-                            </div>
-                            <div className={styles.heroPopupCol}>
-                                <span className={`${styles.heroPopupBadge} ${styles.heroPopupBadgeAfter}`}>
-                                    Yapay Zeka ile Dekore Edildikten Sonra
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                                        <defs>
-                                            <linearGradient id="hero_pop_paint_ai" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                <stop offset="0%" stopColor="#10b981" />
-                                                <stop offset="100%" stopColor="#3b82f6" />
-                                            </linearGradient>
-                                        </defs>
-                                        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="url(#hero_pop_paint_ai)" stroke="url(#hero_pop_paint_ai)" strokeWidth="1.2" strokeLinejoin="round" />
-                                    </svg>
-                                </span>
-                                <div className={`${styles.heroPopupImageWrap} ${styles.heroPopupImageWrapAfter}`}>
-                                    <Image
-                                        src={currentExample.after}
-                                        alt="Yapay zeka ile dekore edilmiş oda"
-                                        fill
-                                        sizes="(max-width: 1200px) 100vw, 50vw"
-                                        style={{ objectFit: 'contain' }}
-                                        priority
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                        <footer className={styles.heroPopupFooter}>
-                            <Link href="/register" className={styles.heroPopupCta} onClick={() => setHeroPopupOpen(false)}>
-                                Hemen Ücretsiz Deneyin
-                            </Link>
-                            <div className={styles.heroPopupCtaHintWrap}>
-                                <p key={popupHintIndex} className={styles.heroPopupCtaHint}>
-                                    {POPUP_HINT_SENTENCES[popupHintIndex]}
-                                </p>
-                            </div>
-                        </footer>
-                    </div>
-                </div>
-            )}
+            <BeforeAfterPopup
+                open={heroPopupOpen}
+                onClose={() => setHeroPopupOpen(false)}
+                beforeSrc={currentExample.before}
+                afterSrc={currentExample.after}
+                beforeAlt="Boş oda"
+                afterAlt="Yapay zeka ile dekore edilmiş oda"
+                showArrows={true}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                ctaText="Hemen Ücretsiz Deneyin"
+                ctaHref="/register"
+                hintText={POPUP_HINT_SENTENCES[popupHintIndex]}
+                gradientIdPrefix="hero_popup_ai"
+            />
         </section>
     );
 };
