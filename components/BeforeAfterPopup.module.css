@@ -188,13 +188,13 @@
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    filter: brightness(0.9);
+    filter: brightness(0.87);
     z-index: 2;
 }
 
 .popupImage { object-fit: cover !important; }
 .popupImageWrap img { object-fit: cover !important; }
-.popupImageWrapAfter { filter: brightness(1.1); }
+.popupImageWrapAfter { filter: brightness(1.15); }
 
 .popupFooter {
     display: flex;
