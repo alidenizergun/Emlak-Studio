@@ -133,10 +133,6 @@ export default function AiTourGuideClient() {
                             />
                             <span className={styles.scriptCounter}>{scriptText.length}/{SCRIPT_MAX_LENGTH}</span>
                         </div>
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
-                        <div className={styles.tipBlock}>
-                            <p>Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, yukarıda girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
-                        </div>
                         <button
                             type="button"
                             className={styles.processBtn}
@@ -157,6 +153,10 @@ export default function AiTourGuideClient() {
                                 </>
                             )}
                         </button>
+                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.tipBlock}>
+                            <p>Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, yukarıda girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
+                        </div>
                     </div>
                 </div>
             </div>

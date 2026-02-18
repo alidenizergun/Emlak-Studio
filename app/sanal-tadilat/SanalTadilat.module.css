@@ -1,4 +1,4 @@
-.pageContainer { padding-top: 120px; padding-bottom: 40px; background: #f8fafc; max-width: 1400px; margin: 0 auto; }
+.pageContainer { padding-top: 120px; padding-bottom: 40px; background: #f8fafc; max-width: 1400px; margin: 0 auto; font-family: var(--font-sans); }
 .header { text-align: center; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto; padding: 0 1.5rem; }
 .headerContent { display: contents; }
 .title { font-size: 2.25rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.75rem; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #0f172a; }

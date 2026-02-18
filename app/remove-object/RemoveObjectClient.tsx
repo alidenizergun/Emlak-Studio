@@ -170,14 +170,6 @@ export default function RemoveObjectClient() {
 
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
-                        <div className={styles.tipBlock}>
-                            <p>
-                                Fotoğrafı yükleyin. Aşağıdan tüm eşyaları silme veya sadece belirli eşyaları metne göre silme
-                                seçeneğini işaretleyin, ardından <strong>Eşyayı Sil</strong> butonuna tıklayın.
-                            </p>
-                        </div>
-
                         <div className={styles.modeGroup}>
                             <label
                                 className={`${styles.modeOption} ${
@@ -218,7 +210,13 @@ export default function RemoveObjectClient() {
                                 className={styles.promptInput}
                                 placeholder="Örnek: koltuğu sil, televizyonu sil"
                                 value={removePrompt}
-                                onChange={(e) => setRemovePrompt(e.target.value)}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setRemovePrompt(value);
+                                    if (value.trim()) {
+                                        setMode('prompt');
+                                    }
+                                }}
                                 rows={3}
                                 lang="tr"
                             />
@@ -249,11 +247,14 @@ export default function RemoveObjectClient() {
                             )}
                         </button>
 
-                        <ul className={styles.tipList}>
-                            <li>Emlak fotoğraflarından eşya veya kişi kaldırma</li>
-                            <li>Dağınıklığı temizleme</li>
-                            <li>Eski mobilyaları silme</li>
-                        </ul>
+                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.tipBlock}>
+                            <p>
+                                Fotoğrafı yükleyin. Aşağıdan tüm eşyaları silme veya sadece belirli eşyaları metne göre silme
+                                seçeneğini işaretleyin, ardından <strong>Eşyayı Sil</strong> butonuna tıklayın.
+                            </p>
+                        </div>
+
                     </div>
                 </div>
             </div>

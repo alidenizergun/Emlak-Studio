@@ -4,6 +4,7 @@
     background: #f8fafc;
     max-width: 1400px;
     margin: 0 auto;
+    font-family: var(--font-sans);
 }
 
 .header {

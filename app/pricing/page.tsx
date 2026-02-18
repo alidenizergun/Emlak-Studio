@@ -15,7 +15,7 @@ const PRICING_TIERS = [
         description: "Bireysel emlak danışmanları için başlangıç paketi.",
         features: [
             "200 Kredi",
-            "100 ilan görseline YZ çalışması",
+            "100 görsele YZ çalışması",
             "Ticari Kullanım İzni"
         ],
         cta: "Planı Seç",
@@ -31,7 +31,7 @@ const PRICING_TIERS = [
         description: "Ekipler ve emlak ofisleri için ideal çözüm.",
         features: [
             "400 Kredi",
-            "200 ilan görseline YZ çalışması",
+            "200 görsele YZ çalışması",
             "Tüm AI Modellerine Erişim",
             "İşlem önceliği",
             "Ticari Kullanım İzni",
@@ -50,7 +50,7 @@ const PRICING_TIERS = [
         description: "Büyük ajanslar ve gelişmiş kurumsal ihtiyaçlar için.",
         features: [
             "1000 Kredi",
-            "500 ilan görseline YZ çalışması",
+            "500 görsele YZ çalışması",
             "Tüm AI Modellerine Erişim",
             "Yüksek işlem önceliği",
             "Özel API Erişimi",
@@ -189,7 +189,7 @@ export default function PricingPage() {
                                     <p className={styles.featuresTitle}>Neler Dahil?</p>
                                     <ul className={styles.featureList}>
                                         {tier.features.map((feature, index) => {
-                                            const isIlanGorseli = feature.includes('ilan görseline YZ çalışması');
+                                            const isIlanGorseli = feature.includes('görsele YZ çalışması');
                                             const perImagePrice = isIlanGorseli && tier.ilanGorseli
                                                 ? (displayPrice / tier.ilanGorseli).toFixed(0)
                                                 : null;

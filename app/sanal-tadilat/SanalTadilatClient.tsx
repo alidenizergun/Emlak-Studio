@@ -153,10 +153,6 @@ export default function SanalTadilatClient() {
                                 rows={3}
                             />
                         </div>
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
-                        <div className={styles.tipBlock}>
-                            <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Tadilatı Uygula</strong> butonuna basın.</p>
-                        </div>
                         <button
                             type="button"
                             className={styles.processBtn}
@@ -177,6 +173,10 @@ export default function SanalTadilatClient() {
                                 </>
                             )}
                         </button>
+                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.tipBlock}>
+                            <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Tadilatı Uygula</strong> butonuna basın.</p>
+                        </div>
                     </div>
                 </div>
             </div>

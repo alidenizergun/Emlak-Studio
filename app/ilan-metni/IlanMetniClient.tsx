@@ -267,10 +267,6 @@ export default function IlanMetniClient() {
                             </div>
                         </div>
 
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
-                        <div className={styles.tipBlock}>
-                            <p>Fotoğraf ve zorunlu alanları doldurup <strong>Metni Oluştur</strong> butonuna tıklayın. Yapay zeka bu bilgiler ve görsellerden ilan metnini üretir.</p>
-                        </div>
                         <button
                             type="button"
                             className={styles.processBtn}
@@ -291,6 +287,10 @@ export default function IlanMetniClient() {
                                 </>
                             )}
                         </button>
+                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.tipBlock}>
+                            <p>Fotoğraf ve zorunlu alanları doldurup <strong>Metni Oluştur</strong> butonuna tıklayın. Yapay zeka bu bilgiler ve görsellerden ilan metnini üretir.</p>
+                        </div>
                     </div>
                 </div>
             </div>
