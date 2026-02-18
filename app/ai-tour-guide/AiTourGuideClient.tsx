@@ -118,7 +118,7 @@ export default function AiTourGuideClient() {
                     <div className={styles.panel}>
                         <div className={styles.scriptField}>
                             <label htmlFor="ai-script" className={styles.scriptLabel}>
-                                Videoda söylenecek metin (150 karakter)
+                                Videoda söylenecek metin
                             </label>
                             <textarea
                                 id="ai-script"
