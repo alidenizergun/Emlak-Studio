@@ -36,7 +36,7 @@ export default function ToolsPage() {
                             {cardContent}
                         </span>
                     ) : (
-                        <Link key={tool.id} href={tool.href} className={styles.card}>
+                        <Link key={tool.id} href={`/studio?tool=${encodeURIComponent(tool.id)}`} className={styles.card}>
                             {cardContent}
                         </Link>
                     );

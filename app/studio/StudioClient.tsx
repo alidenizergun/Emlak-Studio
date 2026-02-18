@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -37,6 +37,7 @@ export default function StudioClient() {
     const [mounted, setMounted] = useState(false);
     const [credits, setCredits] = useState<number | null>(null);
     const [selectedToolId, setSelectedToolId] = useState<string>(() => getToolIdFromParam(toolParam));
+    const workspaceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -46,6 +47,14 @@ export default function StudioClient() {
         const id = getToolIdFromParam(searchParams.get('tool'));
         setSelectedToolId(id);
     }, [searchParams]);
+
+    useEffect(() => {
+        const workspace = workspaceRef.current;
+        if (!workspace) return;
+
+        // Tool değiştiğinde içerik alanını en üste al.
+        workspace.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }, [selectedToolId]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
@@ -136,7 +145,7 @@ export default function StudioClient() {
                     </nav>
                 </aside>
 
-                <main className={styles.workspace}>
+                <main className={styles.workspace} ref={workspaceRef}>
                     {ToolComponent ? (
                         <div className={styles.workspaceToolWrap}>
                             <ToolComponent />
