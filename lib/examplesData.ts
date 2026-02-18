@@ -36,20 +36,20 @@ export const EXAMPLES: ExampleItem[] = [
         after: "/images/examples/bedroom-furnished.png"
     },
     {
-        id: 3,
-        title: "Modern Mutfak",
-        category: "Mutfak",
-        categoryId: "kitchen",
-        before: "/images/examples/kitchen-empty.png",
-        after: "/images/examples/kitchen-furnished.png"
+        id: 33,
+        title: "Çalışma Odası",
+        category: "Diğer & Ofis",
+        categoryId: "other",
+        before: "/images/examples/study-empty.png",
+        after: "/images/examples/study-furnished.png"
     },
     {
-        id: 4,
-        title: "Spa Banyo",
-        category: "Banyo",
-        categoryId: "bathroom",
-        before: "/images/examples/bathroom-empty-v3.png",
-        after: "/images/examples/bathroom-furnished-v3.png"
+        id: 34,
+        title: "Teras",
+        category: "Bahçe & Dış Mekan",
+        categoryId: "outdoor",
+        before: "/images/examples/terrace-empty.png",
+        after: "/images/examples/terrace-furnished.png"
     },
     {
         id: 5,
@@ -212,19 +212,19 @@ export const EXAMPLES: ExampleItem[] = [
         categoryId: "bathroom"
     },
     {
-        id: 33,
-        title: "Çalışma Odası",
-        category: "Diğer & Ofis",
-        categoryId: "other",
-        before: "/images/examples/study-empty.png",
-        after: "/images/examples/study-furnished.png"
+        id: 3,
+        title: "Modern Mutfak",
+        category: "Mutfak",
+        categoryId: "kitchen",
+        before: "/images/examples/kitchen-empty.png",
+        after: "/images/examples/kitchen-furnished.png"
     },
     {
-        id: 34,
-        title: "Teras",
-        category: "Bahçe & Dış Mekan",
-        categoryId: "outdoor",
-        before: "/images/examples/terrace-empty.png",
-        after: "/images/examples/terrace-furnished.png"
+        id: 4,
+        title: "Spa Banyo",
+        category: "Banyo",
+        categoryId: "bathroom",
+        before: "/images/examples/bathroom-empty-v3.png",
+        after: "/images/examples/bathroom-furnished-v3.png"
     }
 ];
