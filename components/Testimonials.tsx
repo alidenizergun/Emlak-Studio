@@ -32,11 +32,8 @@ const Testimonials = () => {
             <div className={`container ${styles.testimonialsContainer}`}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>
-                        Müşteri deneyimleri
-                    </h2>
-                    <p className={styles.subtitle}>
                         Türkiye&apos;nin dört bir yanından emlakçıların deneyimleri
-                    </p>
+                    </h2>
                 </div>
 
                 <div className={styles.grid}>
