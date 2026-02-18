@@ -116,10 +116,6 @@ export default function AiTourGuideClient() {
 
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
-                        <div className={styles.tipBlock}>
-                            <p>Mülk fotoğraflarınızı yükleyin; yapay zeka sunucusu evi gezer, bilgileri video ve sesli tur olarak sunar.</p>
-                        </div>
                         <div className={styles.scriptField}>
                             <label htmlFor="ai-script" className={styles.scriptLabel}>
                                 Videoda söylenecek metin (8 sn)
@@ -134,6 +130,10 @@ export default function AiTourGuideClient() {
                                 rows={3}
                             />
                             <span className={styles.scriptCounter}>{scriptText.length}/{SCRIPT_MAX_LENGTH}</span>
+                        </div>
+                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.tipBlock}>
+                            <p>Mülk fotoğraflarınızı yükleyin; yapay zeka sunucusu evi gezer, bilgileri video ve sesli tur olarak sunar.</p>
                         </div>
                         <ul className={styles.tipList}>
                             <li>Fotoğraflardan oda sırası ve rota</li>

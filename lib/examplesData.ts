@@ -11,7 +11,7 @@ export const POPUP_HINT_SENTENCES = [
     'Boş oda fotoğrafı ilanı zayıflatır; dekore görsel satışı hızlandırır.',
     'Profesyonel görsel, daha az pazarlık ve daha yüksek fiyat demek.',
     'Bir tıkla boş oda dolu odaya dönüşüyor; denemesi ücretsiz.',
-    'Dikkat çekmeyen ilan satılmaz; bu görseller dikkat çeker.',
+    'Dikkat çekmeyen ilan zor satılır; bu görseller dikkat çeker.',
     'Müşteri “bu evde yaşarım” hissini dekore fotoğrafla daha çok yaşıyor.',
     'İlan süresini kısaltın: güçlü görsel, daha hızlı satış.',
     'Ücretsiz deneyin; farkı kendi ilanlarınızda görün.',

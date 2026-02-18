@@ -18,7 +18,7 @@
 .tadilatQuestionLabel { display: block; font-size: 0.9rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem; }
 .formGroup { margin-bottom: 1rem; }
 .formLabel { display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem; }
-.formTextarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; color: #334155; background: #fff; resize: vertical; min-height: 72px; transition: border-color 0.2s; }
+.formTextarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; color: #334155; background: #fff; resize: none; height: 72px; min-height: 72px; max-height: 220px; overflow-y: auto; transition: border-color 0.2s; }
 .formTextarea:focus { outline: none; border-color: #10b981; }
 .formTextarea::placeholder { color: #94a3b8; }
 .tipBlock { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
