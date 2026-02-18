@@ -247,7 +247,7 @@ export default function RemoveObjectClient() {
                             )}
                         </button>
 
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.panelTitle} style={{ marginTop: '1rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
                             <p>
                                 Fotoğrafı yükleyin. Aşağıdan tüm eşyaları silme veya sadece belirli eşyaları metne göre silme

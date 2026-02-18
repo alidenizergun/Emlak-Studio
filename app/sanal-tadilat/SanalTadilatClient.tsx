@@ -173,7 +173,7 @@ export default function SanalTadilatClient() {
                                 </>
                             )}
                         </button>
-                        <div className={styles.panelTitle}>Nasıl çalışır?</div>
+                        <div className={styles.panelTitle} style={{ marginTop: '1rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
                             <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Tadilatı Uygula</strong> butonuna basın.</p>
                         </div>
