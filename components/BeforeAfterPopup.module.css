@@ -207,7 +207,6 @@
 .popupImageWrapAfter img {
     object-fit: cover !important;
     image-rendering: high-quality;
-    image-rendering: -webkit-optimize-contrast;
 }
 .popupImageWrapAfter { filter: brightness(1.15); }
 
@@ -229,6 +228,21 @@
     justify-content: center;
     text-align: center;
     width: 100%;
+}
+
+/* Desktop: CTA ve ipucu metnini "Yapay zeka ile dekore edildikten sonra" alanına doğru sağa taşı */
+@media (min-width: 1024px) {
+    .popupFooter {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+    }
+
+    .popupCtaWrap {
+        grid-column: 2;
+        justify-self: center;
+        width: auto;
+    }
 }
 
 .popupCta {
