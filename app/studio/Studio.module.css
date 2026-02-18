@@ -307,29 +307,22 @@
     }
 
     .toolNav {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 0.45rem;
-        padding: 0.6rem 0.75rem 0.7rem;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .toolNav::-webkit-scrollbar {
-        display: none;
+        padding: 0.6rem 0.75rem 0.75rem;
     }
 
     .toolItem {
-        flex: 0 0 auto;
-        min-width: 162px;
-        max-width: 220px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
         margin: 0;
-        padding: 0.62rem 0.75rem;
+        padding: 0.62rem 0.68rem;
         border: 1px solid #e2e8f0;
         background: #ffffff;
         border-radius: 12px;
+        gap: 0.5rem;
     }
 
     .toolItemActive {
@@ -348,16 +341,20 @@
     }
 
     .toolItemTitle {
-        white-space: nowrap;
+        white-space: normal;
         overflow: hidden;
-        text-overflow: ellipsis;
+        text-overflow: clip;
         line-height: 1.2;
-        font-size: 0.83rem;
+        font-size: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
     .toolBadge {
         font-size: 0.58rem;
         padding: 0.14rem 0.4rem;
+        justify-self: end;
     }
 
     .workspace {
