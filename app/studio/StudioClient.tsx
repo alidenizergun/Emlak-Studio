@@ -20,7 +20,7 @@ const IlanMetniClient = dynamic(() => import('@/app/ilan-metni/IlanMetniClient')
 const SanalTadilatClient = dynamic(() => import('@/app/sanal-tadilat/SanalTadilatClient'), { ssr: false });
 const AiTourGuideClient = dynamic(() => import('@/app/ai-tour-guide/AiTourGuideClient'), { ssr: false });
 
-const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
+const TOOL_COMPONENTS: Record<string, React.ComponentType<{ embedded?: boolean }>> = {
     'enhance': EnhanceClient,
     'stage': StageClient,
     'remove-object': RemoveObjectClient,
@@ -138,7 +138,7 @@ export default function StudioClient() {
                 <main className={styles.workspace}>
                     {ToolComponent ? (
                         <div className={styles.workspaceToolWrap}>
-                            <ToolComponent embedded />
+                            <ToolComponent embedded={true} />
                         </div>
                     ) : (
                         <div className={styles.noTool}>Bir araç seçin.</div>
