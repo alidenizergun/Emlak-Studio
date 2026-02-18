@@ -32,7 +32,7 @@ const Testimonials = () => {
             <div className={`container ${styles.testimonialsContainer}`}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>
-                        <span className={styles.titleLogoBrand}>Emlak</span> <span className={styles.titleLogoStudio}>YZ</span> ile çalışan emlakçılar satışlarını artırıyor!
+                        Müşteri deneyimleri
                     </h2>
                     <p className={styles.subtitle}>
                         Türkiye&apos;nin dört bir yanından emlakçıların deneyimleri

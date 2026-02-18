@@ -13,6 +13,7 @@ function getToolIdFromParam(param: string | null): string {
     return TOOLS[0]?.id ?? 'enhance';
 }
 
+/** Aynı bileşenler standalone sayfalarda da kullanılıyor; enhance/stage vb. sayfalardaki değişiklikler Studio'da otomatik yansır. */
 const EnhanceClient = dynamic(() => import('@/app/enhance/EnhanceEditor'), { ssr: false });
 const StageClient = dynamic(() => import('@/app/stage/Stage'), { ssr: false });
 const RemoveObjectClient = dynamic(() => import('@/app/remove-object/RemoveObjectClient'), { ssr: false });
@@ -20,7 +21,7 @@ const IlanMetniClient = dynamic(() => import('@/app/ilan-metni/IlanMetniClient')
 const SanalTadilatClient = dynamic(() => import('@/app/sanal-tadilat/SanalTadilatClient'), { ssr: false });
 const AiTourGuideClient = dynamic(() => import('@/app/ai-tour-guide/AiTourGuideClient'), { ssr: false });
 
-const TOOL_COMPONENTS: Record<string, React.ComponentType<{ embedded?: boolean }>> = {
+const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
     'enhance': EnhanceClient,
     'stage': StageClient,
     'remove-object': RemoveObjectClient,
@@ -138,7 +139,7 @@ export default function StudioClient() {
                 <main className={styles.workspace}>
                     {ToolComponent ? (
                         <div className={styles.workspaceToolWrap}>
-                            <ToolComponent embedded={true} />
+                            <ToolComponent />
                         </div>
                     ) : (
                         <div className={styles.noTool}>Bir araç seçin.</div>

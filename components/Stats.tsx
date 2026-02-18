@@ -61,6 +61,7 @@ const Stats = () => {
     return (
         <section className={styles.statsSection}>
             <div className={`container ${styles.statsContainer}`}>
+                <h2 className={styles.advantagesTitle}><span className={styles.advantagesTitleYz}>Emlak YZ</span>&apos;nin avantajları</h2>
                 <div className={styles.stats}>
                     {stats.map((stat, index) => (
                         <div key={index} className={styles.statItem}>

@@ -5,11 +5,7 @@ import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import styles from './RemoveObject.module.css';
 
-interface RemoveObjectClientProps {
-    embedded?: boolean;
-}
-
-export default function RemoveObjectClient({ embedded = false }: RemoveObjectClientProps) {
+export default function RemoveObjectClient() {
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);

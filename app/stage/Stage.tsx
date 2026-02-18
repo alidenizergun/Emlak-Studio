@@ -167,11 +167,7 @@ const STYLES = [
     },
 ];
 
-interface StageClientProps {
-    embedded?: boolean;
-}
-
-export default function StageClient({ embedded = false }: StageClientProps) {
+export default function StageClient() {
     const router = useRouter();
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -283,7 +279,7 @@ export default function StageClient({ embedded = false }: StageClientProps) {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}><span className={styles.titleYz}>Yapay Zeka</span> Dekorasyon Stüdyosu</h1>
+                    <h1 className={styles.title}>Dekorasyon Stüdyosu</h1>
                     <p className={styles.description}>
                         Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
                     </p>

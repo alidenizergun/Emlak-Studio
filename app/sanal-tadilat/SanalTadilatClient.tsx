@@ -5,11 +5,7 @@ import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import styles from './SanalTadilat.module.css';
 
-interface SanalTadilatClientProps {
-    embedded?: boolean;
-}
-
-export default function SanalTadilatClient({ embedded = false }: SanalTadilatClientProps) {
+export default function SanalTadilatClient() {
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [instructions, setInstructions] = useState('');
@@ -144,15 +140,14 @@ export default function SanalTadilatClient({ embedded = false }: SanalTadilatCli
 
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
-                        <div className={styles.panelTitle}>Tadilat talimatları</div>
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel} htmlFor="sanal-tadilat-instructions">
-                                Nasıl bir tadilat istiyorsunuz?
+                        <div className={styles.tadilatQuestionBlock}>
+                            <label className={styles.tadilatQuestionLabel} htmlFor="sanal-tadilat-instructions">
+                                Ne tür tadilat istiyorsunuz?
                             </label>
                             <textarea
                                 id="sanal-tadilat-instructions"
                                 className={styles.formTextarea}
-                                placeholder="Örn: Duvarları griye boya, parkeleri değiştir, mutfak dolaplarını yenile"
+                                placeholder="Örn: Parkeler değişsin, duvarlar gri renge boyansın, mutfak dolapları yenilensin"
                                 value={instructions}
                                 onChange={(e) => setInstructions(e.target.value)}
                                 rows={3}

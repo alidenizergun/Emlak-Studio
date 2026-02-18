@@ -4,11 +4,7 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import styles from './AiTourGuide.module.css';
 
-interface AiTourGuideClientProps {
-    embedded?: boolean;
-}
-
-export default function AiTourGuideClient({ embedded = false }: AiTourGuideClientProps) {
+export default function AiTourGuideClient() {
     const SCRIPT_MAX_LENGTH = 150;
 
     const [file, setFile] = useState<File | null>(null);

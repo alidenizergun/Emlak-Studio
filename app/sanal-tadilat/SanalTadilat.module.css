@@ -14,6 +14,8 @@
 .controlsSidebar { width: 320px; min-height: 450px; position: sticky; top: 90px; display: flex; flex-direction: column; gap: 0; flex-shrink: 0; }
 .panel { flex: 1; min-height: 0; display: flex; flex-direction: column; background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
 .panelTitle { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+.tadilatQuestionBlock { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+.tadilatQuestionLabel { display: block; font-size: 0.9rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem; }
 .formGroup { margin-bottom: 1rem; }
 .formLabel { display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem; }
 .formTextarea { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; line-height: 1.5; color: #334155; background: #fff; resize: vertical; min-height: 72px; transition: border-color 0.2s; }
