@@ -13,7 +13,7 @@ export default function SettingsPage() {
                 <div className={styles.topInner}>
                     <h1 className={styles.title}>Ayarlar</h1>
                     <p className={styles.subtitle}>Hesap ve tercih ayarları yakında eklenecek.</p>
-                    <Link href="/dashboard" className={styles.accountBtn}>Bana Özele dön</Link>
+                    <Link href="/studio" className={styles.accountBtn}>Stüdyoya dön</Link>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Jimp } from 'jimp';
 import Replicate from 'replicate';
+import { buildEnhancePrompt } from '@/app/enhance/prompts';
 
 const replicate = process.env.REPLICATE_API_TOKEN
     ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
@@ -101,38 +102,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
+/** Seçilen option'lara göre prompt üretir; [app/enhance/prompts.ts] tek kaynaktır. */
 function generateEnhancePrompt(options: Record<string, boolean>): string {
-    const baseRules = `
-CRITICAL QUALITY STANDARDS:
-- OUTPUT RESOLUTION: All processing must target a crystal-clear 4K (Ultra HD) quality.
-- REAL ESTATE PHOTOGRAPHY: Result must be museum-quality, high-end real estate photography.
-- PHOTOREALISM: Absolutely no artistic, cartoonish, or AI-generated look. 
-- ARCHITECTURAL INTEGRITY: Do not change walls, windows, or structural elements.
-- PRESERVATION: Do not add or remove furniture or major decor.
-- NOISE & ARTIFACTS: Completely eliminate digital noise, JPEG artifacts, and chromatic aberration.`;
-
-    if (options.auto) {
-        return `Analyze this real estate photograph and apply a comprehensive 4K transformation to professional magazine-quality standards:
-ENHANCEMENTS TO APPLY (AUTO-DETECTION MODE):
-1. 4K UPSSCALE & CLARITY
-2. LIGHTING & HDR BALANCING
-3. COLOR & VIBRANCY
-4. CLEANING & REFINEMENT
-${baseRules}
-Goal: Create a stunning, 4K magazine-ready real estate masterpiece.`;
-    }
-
-    const enhancements: string[] = [];
-    if (options.lighting) enhancements.push(`1. 4K LIGHTING & EXPOSURE`);
-    if (options.color) enhancements.push(`2. 4K COLOR VIBRANCY`);
-    if (options.sharpness) enhancements.push(`3. 4K SHARPNESS & DETAIL`);
-    if (options.clean) enhancements.push(`4. 4K CLEANING`);
-
-    if (enhancements.length === 0) {
-        return `Apply a subtle 4K professional enhancement to this real estate photo. ${baseRules}`;
-    }
-
-    return `Enhancement Task: Transform this real estate photo into a 4K UHD masterpiece:
-${enhancements.join('\n\n')}
-${baseRules}`;
+    return buildEnhancePrompt(options);
 }

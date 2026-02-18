@@ -5,9 +5,14 @@ import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import styles from './SanalTadilat.module.css';
 
-export default function SanalTadilatClient() {
+interface SanalTadilatClientProps {
+    embedded?: boolean;
+}
+
+export default function SanalTadilatClient({ embedded = false }: SanalTadilatClientProps) {
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
+    const [instructions, setInstructions] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -38,6 +43,7 @@ export default function SanalTadilatClient() {
         try {
             const formData = new FormData();
             formData.append('image', file);
+            if (instructions.trim()) formData.append('instructions', instructions.trim());
             const response = await fetch('/api/sanal-tadilat', { method: 'POST', body: formData });
             const data = await response.json();
             if (data.success && data.imageUrl) {
@@ -60,6 +66,7 @@ export default function SanalTadilatClient() {
         setFile(null);
         setFileUrl(null);
         setResult(null);
+        setInstructions('');
     };
 
     const handleDownload = () => {
@@ -137,15 +144,24 @@ export default function SanalTadilatClient() {
 
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
+                        <div className={styles.panelTitle}>Tadilat talimatları</div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.formLabel} htmlFor="sanal-tadilat-instructions">
+                                Nasıl bir tadilat istiyorsunuz?
+                            </label>
+                            <textarea
+                                id="sanal-tadilat-instructions"
+                                className={styles.formTextarea}
+                                placeholder="Örn: Duvarları griye boya, parkeleri değiştir, mutfak dolaplarını yenile"
+                                value={instructions}
+                                onChange={(e) => setInstructions(e.target.value)}
+                                rows={3}
+                            />
+                        </div>
                         <div className={styles.panelTitle}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Fotoğrafı yükleyin ve <strong>Tadilatı Uygula</strong> butonuna tıklayın. Yapay zeka duvar rengi, zemin veya mutfak gibi alanları yenileyerek potansiyeli gösterir.</p>
+                            <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Tadilatı Uygula</strong> butonuna basın.</p>
                         </div>
-                        <ul className={styles.tipList}>
-                            <li>Duvar renkleri ve malzeme değişimi</li>
-                            <li>Zemin kaplama ve parke görünümü</li>
-                            <li>Mutfak ve banyo yenileme önizlemesi</li>
-                        </ul>
                         <button
                             type="button"
                             className={styles.processBtn}

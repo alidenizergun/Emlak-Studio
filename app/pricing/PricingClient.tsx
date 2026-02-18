@@ -18,7 +18,7 @@ const PRICING_TIERS = [
             "100 ilan görseline YZ çalışması",
             "Ticari Kullanım İzni"
         ],
-        cta: "Hemen Başla",
+        cta: "Planı Seç",
         popular: false
     },
     {
@@ -33,9 +33,9 @@ const PRICING_TIERS = [
             "400 Kredi",
             "200 ilan görseline YZ çalışması",
             "Tüm AI Modellerine Erişim",
-            "Yüksek İşlem Önceliği",
+            "İşlem önceliği",
             "Ticari Kullanım İzni",
-            "Standart Email Desteği"
+            "Email ile destek"
         ],
         cta: "En Popüler Planı Seç",
         popular: true
@@ -52,11 +52,12 @@ const PRICING_TIERS = [
             "1000 Kredi",
             "500 ilan görseline YZ çalışması",
             "Tüm AI Modellerine Erişim",
+            "Yüksek işlem önceliği",
             "Özel API Erişimi",
             "Ticari Kullanım İzni",
             "7/24 Özel Müşteri Temsilcisi"
         ],
-        cta: "Kurumsal İletişim",
+        cta: "Planı Seç",
         popular: false
     }
 ];
@@ -106,12 +107,11 @@ export default function PricingClient() {
                     <h1 className={styles.title}>
                         <span style={{ display: 'block' }}>Emlak Fotoğraflarınızı</span>
                         <span style={{ display: 'block' }}>
-                            <span className={styles.titleGradient}>Yapay Zeka</span> ile
+                            <span className={styles.titleGradient}>Yapay Zeka</span> ile Güçlendirin
                         </span>
-                        <span style={{ display: 'block' }}>Güçlendirin</span>
                     </h1>
                     <p className={styles.subtitle}>
-                        Şeffaf fiyatlandırma, sınırsız potansiyel. İstediğiniz an iptal edin.
+                        Net fiyat, güçlü görseller. Taahhüt yok. Dilediğiniz an iptal.
                     </p>
                 </div>
 
@@ -153,7 +153,7 @@ export default function PricingClient() {
                                 className={`${styles.card} ${tier.popular ? styles.popularCard : ''}`}
                             >
                                 {tier.popular && (
-                                    <div className={styles.popularBadge}>EN ÇOK TERCİH EDİLEN</div>
+                                    <div className={styles.popularBadge}>En Çok Tercih Edilen</div>
                                 )}
 
                                 <div className={styles.cardHeader}>

@@ -97,7 +97,7 @@ export default function RegisterClient() {
                     window.localStorage.setItem('emlak_authed', '1');
                     window.localStorage.setItem('emlak_user_phone', phone.replace(/\D/g, ''));
                 }
-                router.push('/dashboard');
+                router.push('/studio');
             } else {
                 setErrors({ otp: data.error || 'Kod geçersiz veya süresi dolmuş.' });
             }

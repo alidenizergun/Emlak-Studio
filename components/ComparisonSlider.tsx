@@ -223,9 +223,10 @@ const ComparisonSlider = ({
                     fill
                     quality={100}
                     priority
+                    unoptimized
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
                     draggable={false}
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 1218px"
                 />
             </div>
             <div
@@ -239,9 +240,10 @@ const ComparisonSlider = ({
                         fill
                         quality={100}
                         priority
+                        unoptimized
                         style={{ objectFit: 'cover', objectPosition: 'center' }}
                         draggable={false}
-                        sizes="(max-width: 768px) 100vw, 50vw"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 1218px"
                     />
                 </div>
             </div>

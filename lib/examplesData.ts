@@ -210,5 +210,21 @@ export const EXAMPLES: ExampleItem[] = [
         after: "/images/examples/bathroom-furnished.png",
         category: "Banyo",
         categoryId: "bathroom"
+    },
+    {
+        id: 33,
+        title: "Çalışma Odası",
+        category: "Diğer & Ofis",
+        categoryId: "other",
+        before: "/images/examples/study-empty.png",
+        after: "/images/examples/study-furnished.png"
+    },
+    {
+        id: 34,
+        title: "Teras",
+        category: "Bahçe & Dış Mekan",
+        categoryId: "outdoor",
+        before: "/images/examples/terrace-empty.png",
+        after: "/images/examples/terrace-furnished.png"
     }
 ];

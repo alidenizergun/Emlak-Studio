@@ -195,6 +195,50 @@
     line-height: 1.5;
 }
 
+.scriptField {
+    margin-bottom: 1rem;
+}
+
+.scriptLabel {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.scriptInput {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: #0f172a;
+    background: #fff;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.scriptInput::placeholder {
+    color: #94a3b8;
+}
+
+.scriptInput:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.scriptCounter {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.35rem;
+    text-align: right;
+}
+
 .tipList {
     list-style: none;
     padding: 0;

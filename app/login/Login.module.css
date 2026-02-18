@@ -382,8 +382,6 @@
 
     .leftContent { max-width: 100%; }
 
-    .benefitsTitle { font-size: 1.35rem; margin-bottom: 1.25rem; }
-
     .benefitsList { gap: 1rem; margin-bottom: 1.5rem; }
 
     .benefitItem h3 { font-size: 1rem; }

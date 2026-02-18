@@ -1,0 +1,292 @@
+.pageContainer {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    /* Global sabit header için boşluk; Dashboard ile aynı hizaya getir. */
+    padding-top: 100px;
+}
+
+.loading {
+    text-align: center;
+    color: #64748b;
+    font-size: 1rem;
+    padding: 3rem;
+}
+
+/* ----- Sol menü (sidebar) üst: Stüdyo, kredi, Kredi al, Ayarlar ----- */
+.sidebarTop {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.sidebarTitle {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.sidebarCreditRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebarCreditLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sidebarCreditValue {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0d9488;
+    letter-spacing: -0.02em;
+}
+
+.sidebarRefreshBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #64748b;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.sidebarRefreshBtn:hover {
+    border-color: #0d9488;
+    color: #0d9488;
+    background: #f0fdf4;
+}
+
+.sidebarCta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    background: #0d9488;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.sidebarCta:hover {
+    background: #0f766e;
+    transform: translateY(-1px);
+}
+
+.sidebarSettings {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.75rem;
+    background: transparent;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.sidebarSettings:hover {
+    border-color: #0d9488;
+    color: #0d9488;
+}
+
+/* ----- Ana layout: sidebar + workspace ----- */
+/* Üst içerik hizası: sağdaki araç başlığı (Fotoğraf Geliştirme Stüdyosu vb.) soldaki "Stüdyo" yazısıyla aynı seviyede. */
+.mainLayout {
+    --studio-content-top: 1rem;
+    flex: 1 1 auto;
+    display: flex;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.sidebar {
+    flex: 0 0 260px;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.toolNav {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0;
+}
+
+.toolItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin: 0 0.5rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+}
+
+.toolItem:hover:not(.toolItemDisabled) {
+    background: #f0fdf4;
+    color: #0d9488;
+}
+
+.toolItemActive {
+    background: #ccfbf1;
+    color: #0d9488;
+    font-weight: 600;
+}
+
+.toolItemActive:hover {
+    background: #99f6e4;
+    color: #0f766e;
+}
+
+.toolItemDisabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.toolItemIcon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolItemIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.toolItemTitle {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toolBadge {
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.workspace {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 60vh;
+    overflow: auto;
+    background: #f8fafc;
+}
+
+/* Tüm araçlar bu wrapper içinde; üst boşluk tek yerden (sol butonla hizalı). */
+.workspaceToolWrap {
+    padding-top: var(--studio-content-top);
+    padding-bottom: 1.5rem;
+    width: 100%;
+    min-height: 100%;
+}
+
+/* Tek kaynak: araç kökünün üst padding'ini sıfırla (tool CSS'deki pageContainer override). */
+.workspaceToolWrap > * {
+    padding-top: 0 !important;
+}
+
+/* Araç başlığını saran ilk eleman (header) margin'i kaldır; sol butonla hiza korunur. */
+.workspaceToolWrap > * > :first-child {
+    margin-top: 0 !important;
+}
+
+.noTool {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .sidebarTop {
+        padding: 0.75rem 1rem;
+    }
+
+    .sidebarTitle {
+        font-size: 1.1rem;
+    }
+
+    .sidebarCreditValue {
+        font-size: 1rem;
+    }
+
+    .mainLayout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        flex: 0 0 auto;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .toolNav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 0.5rem;
+        gap: 0.25rem;
+    }
+
+    .toolItem {
+        flex: 1 1 auto;
+        min-width: 140px;
+        margin: 0;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .toolItemTitle {
+        white-space: normal;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+}

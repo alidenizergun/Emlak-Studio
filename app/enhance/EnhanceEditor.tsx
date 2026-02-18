@@ -17,9 +17,14 @@ interface EnhancedItem {
 
 const MAX_FILES = 2;
 
-export default function EnhanceClient() {
+interface EnhanceClientProps {
+    embedded?: boolean;
+}
+
+export default function EnhanceClient({ embedded = false }: EnhanceClientProps) {
     const router = useRouter();
-    const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({ 'auto': true }); // Default to Auto
+    // Başlangıçta hiçbir seçenek seçili değil (Yapay Zeka Seçsin kapalı)
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({});
     const [items, setItems] = useState<EnhancedItem[]>([]);
     const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
 

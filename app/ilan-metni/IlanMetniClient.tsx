@@ -30,7 +30,11 @@ const defaultForm: IlanBilgileri = {
     ekNotlar: '',
 };
 
-export default function IlanMetniClient() {
+interface IlanMetniClientProps {
+    embedded?: boolean;
+}
+
+export default function IlanMetniClient({ embedded = false }: IlanMetniClientProps) {
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [form, setForm] = useState<IlanBilgileri>(defaultForm);

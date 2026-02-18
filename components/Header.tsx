@@ -200,10 +200,10 @@ const Header = () => {
                 <nav className={`${styles.nav} ${styles.desktopNav}`}>
                     <ul className={styles.navList}>
                         <li>
-                            <Link href="/enhance" className={styles.navLink}>Fotoğraf Geliştirme</Link>
+                            <Link href={isAuthed ? '/studio?tool=enhance' : '/enhance'} className={styles.navLink}>Fotoğraf Geliştirme</Link>
                         </li>
                         <li>
-                            <Link href="/stage" className={styles.navLink}>Dekorasyon Stüdyosu</Link>
+                            <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.navLink}>Dekorasyon Stüdyosu</Link>
                         </li>
                         <li className={styles.navItem}>
                             <Link href="/tools" className={styles.navLink}>Tüm Araçlar</Link>
@@ -227,7 +227,7 @@ const Header = () => {
                                             {content}
                                         </span>
                                     ) : (
-                                        <Link key={tool.id} href={tool.href} className={styles.megaMenuItem}>
+                                        <Link key={tool.id} href={isAuthed ? `/studio?tool=${encodeURIComponent(tool.id)}` : tool.href} className={styles.megaMenuItem}>
                                             {content}
                                         </Link>
                                     );
@@ -243,7 +243,7 @@ const Header = () => {
                 <div className={`${styles.cta} ${styles.desktopCta}`}>
                     {isAuthed ? (
                         <>
-                            <Link href="/dashboard" className={styles.registerBtn}>Bana Özel</Link>
+                            <Link href="/studio" className={styles.registerBtn}>Bana Özel</Link>
                             <button type="button" className={styles.loginBtn} onClick={handleLogout}>
                                 Çıkış Yap
                             </button>
@@ -311,14 +311,14 @@ const Header = () => {
                     </div>
 
                     <nav className={styles.mobileNav}>
-                        <Link href="/enhance" className={styles.mobileNavLink}>
+                        <Link href={isAuthed ? '/studio?tool=enhance' : '/enhance'} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
                             <div className={styles.mobileIconWrapper}>{Icons.Enhance}</div>
                             <div className={styles.mobileLinkContent}>
                                 <span className={styles.mobileLinkLabel}>Fotoğraf Geliştirme</span>
                                 <span className={styles.mobileLinkDesc}>Emlak fotoğraflarını yapay zeka ile mükemmelleştirin</span>
                             </div>
                         </Link>
-                        <Link href="/stage" className={styles.mobileNavLink}>
+                        <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
                             <div className={styles.mobileIconWrapper}>{Icons.Stage}</div>
                             <div className={styles.mobileLinkContent}>
                                 <span className={styles.mobileLinkLabel}>Dekorasyon Stüdyosu</span>
@@ -344,7 +344,7 @@ const Header = () => {
                             {isAuthed ? (
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
-                                        <Link href="/dashboard" className={styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
+                                        <Link href="/studio" className={styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
                                             Bana Özel
                                         </Link>
                                     </div>

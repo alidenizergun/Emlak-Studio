@@ -1,11 +1,10 @@
-import type { Metadata } from 'next';
-import DashboardClient from './DashboardClient';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-    title: 'Bana Özel - Emlak YZ',
-    description: 'Hesabınız ve araçlara hızlı erişim.',
+export const metadata = {
+    title: 'Yönlendiriliyor - Emlak YZ',
 };
 
+/** Dashboard iptal; giriş yapan kullanıcı doğrudan Stüdyo sayfasına yönlendirilir. */
 export default function DashboardPage() {
-    return <DashboardClient />;
+    redirect('/studio');
 }

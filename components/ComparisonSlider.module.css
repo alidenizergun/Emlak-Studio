@@ -63,6 +63,8 @@
 .imageWrapperAfter img {
     object-fit: cover;
     object-position: center;
+    image-rendering: high-quality;
+    image-rendering: -webkit-optimize-contrast;
 }
 
 .imageWrapperAfterBright {

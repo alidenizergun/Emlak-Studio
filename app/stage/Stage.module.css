@@ -33,6 +33,13 @@
     color: #0f172a;
 }
 
+.titleYz {
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .description {
     color: #64748b;
     line-height: 1.5;

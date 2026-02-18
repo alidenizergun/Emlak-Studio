@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const image = formData.get('image') as File;
+        const instructions = (formData.get('instructions') as string) || '';
         if (!image) {
             return NextResponse.json(
                 { success: false, error: 'Görsel gerekli' },
@@ -16,6 +17,7 @@ export async function POST(request: NextRequest) {
         const base64 = buffer.toString('base64');
         const mime = image.type || 'image/jpeg';
         const imageUrl = `data:${mime};base64,${base64}`;
+        if (instructions) console.log('Sanal tadilat talimatı:', instructions);
         return NextResponse.json({
             success: true,
             imageUrl,

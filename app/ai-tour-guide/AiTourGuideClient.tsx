@@ -4,9 +4,16 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import styles from './AiTourGuide.module.css';
 
-export default function AiTourGuideClient() {
+interface AiTourGuideClientProps {
+    embedded?: boolean;
+}
+
+export default function AiTourGuideClient({ embedded = false }: AiTourGuideClientProps) {
+    const SCRIPT_MAX_LENGTH = 150;
+
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
+    const [scriptText, setScriptText] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -36,6 +43,7 @@ export default function AiTourGuideClient() {
         try {
             const formData = new FormData();
             formData.append('image', file);
+            formData.append('script', scriptText.trim().slice(0, SCRIPT_MAX_LENGTH));
             await fetch('/api/ai-tour-guide', { method: 'POST', body: formData });
             setSubmitted(true);
         } catch {
@@ -49,6 +57,7 @@ export default function AiTourGuideClient() {
         if (fileUrl) URL.revokeObjectURL(fileUrl);
         setFile(null);
         setFileUrl(null);
+        setScriptText('');
         setSubmitted(false);
     };
 
@@ -66,7 +75,7 @@ export default function AiTourGuideClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Yapay Zeka Sunucusu</h1>
                     <p className={styles.description}>
-                        Mülk fotoğraflarınızı yükleyin; yapay zeka sunucusu evi gezer, bilgileri video veya sesli tur olarak sunar.
+                        Mülk fotoğraflarınızı yükleyin; yapay zeka sunucusu evi gezer, bilgileri video ve sesli tur olarak sunar.
                     </p>
                 </div>
             </header>
@@ -113,7 +122,22 @@ export default function AiTourGuideClient() {
                     <div className={styles.panel}>
                         <div className={styles.panelTitle}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Mülk fotoğraflarınızı yükleyin ve <strong>Tur Oluştur</strong> butonuna tıklayın. Yapay zeka sunucusu görselleri analiz ederek sesli veya videolu sanal tur üretir.</p>
+                            <p>Mülk fotoğraflarınızı yükleyin; yapay zeka sunucusu evi gezer, bilgileri video ve sesli tur olarak sunar.</p>
+                        </div>
+                        <div className={styles.scriptField}>
+                            <label htmlFor="ai-script" className={styles.scriptLabel}>
+                                Videoda söylenecek metin (8 sn)
+                            </label>
+                            <textarea
+                                id="ai-script"
+                                className={styles.scriptInput}
+                                placeholder="Örn: Bu ev 3 odalı, geniş mutfağı ve balkonu ile dikkat çekiyor."
+                                value={scriptText}
+                                onChange={(e) => setScriptText(e.target.value.slice(0, SCRIPT_MAX_LENGTH))}
+                                maxLength={SCRIPT_MAX_LENGTH}
+                                rows={3}
+                            />
+                            <span className={styles.scriptCounter}>{scriptText.length}/{SCRIPT_MAX_LENGTH}</span>
                         </div>
                         <ul className={styles.tipList}>
                             <li>Fotoğraflardan oda sırası ve rota</li>
