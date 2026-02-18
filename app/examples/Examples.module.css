@@ -235,6 +235,7 @@
         margin-bottom: 40px;
         overflow-x: auto;
         justify-content: flex-start;
+        padding-top: 4px;
         padding-bottom: 10px;
         /* Scrollbar space */
         flex-wrap: nowrap;
@@ -245,6 +246,10 @@
         flex-shrink: 0;
         padding: 10px 18px;
         font-size: 0.9rem;
+    }
+
+    .tabButtonActive {
+        transform: translateY(0);
     }
 
     .grid {
