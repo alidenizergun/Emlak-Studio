@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface IlanBilgileri {
     lokasyon?: string;
@@ -13,8 +14,67 @@ interface IlanBilgileri {
     ekNotlar?: string;
 }
 
-/** Generates listing text from form data + image. AI integration can replace this body. */
-function generateListingText(info: IlanBilgileri): string {
+const GOOGLE_API_KEY =
+    process.env.GOOGLE_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    '';
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
+
+function buildListingPrompt(info: IlanBilgileri): string {
+    const kullanimLabel = info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
+    return `
+Sen Türkiye emlak sektöründe çalışan kıdemli bir ilan metni uzmanısın.
+Kullanıcının verdiği ilan bilgileri ve yüklenen fotoğrafı birlikte analiz ederek güçlü bir ilan metni üret.
+
+Amaç:
+- İlanın tıklanma oranını artıracak, güven veren ve profesyonel bir metin yaz.
+- Abartı, gerçek dışı vaat, yanıltıcı ifade kullanma.
+
+Dil ve stil:
+- Sadece Türkçe yaz.
+- Akıcı, satış odaklı ama doğal bir ton kullan.
+- Aşırı emoji, gereksiz büyük harf, spam tonu kullanma.
+- Gereksiz uzatma yapma; kısa ama etkili ol.
+
+Çıktı formatı (tam olarak bu sırayla):
+1) Tek satır başlık
+2) Kısa giriş paragrafı (2-3 cümle)
+3) "Öne Çıkan Özellikler" başlığı altında 5-8 madde
+4) Kapanış paragrafı (iletişime yönlendiren kısa çağrı)
+
+Kurallar:
+- Kullanıcının verdiği bilgileri önceliklendir.
+- Fotoğrafta gördüğün güçlü noktaları metne doğal şekilde yedir.
+- Bilinmeyen alanları uydurma.
+- Fiyat, konum, m² gibi alanlar varsa mutlaka metinde geçir.
+- Metni markdown code block içine alma.
+
+Kullanıcı verileri:
+- İlan Türü: ${kullanimLabel}
+- Lokasyon: ${info.lokasyon || 'Belirtilmedi'}
+- Metrekare: ${info.metrekare || 'Belirtilmedi'}
+- Oda Sayısı: ${info.odaSayisi || 'Belirtilmedi'}
+- Banyo Sayısı: ${info.banyoSayisi || 'Belirtilmedi'}
+- Kat: ${info.kat || 'Belirtilmedi'}
+- Bina Yaşı: ${info.binaYasi || 'Belirtilmedi'}
+- Isıtma: ${info.isitma || 'Belirtilmedi'}
+- Fiyat: ${info.fiyat || 'Belirtilmedi'}
+- Ek Notlar: ${info.ekNotlar || 'Yok'}
+`.trim();
+}
+
+function cleanModelOutput(text: string): string {
+    let out = text.trim();
+    out = out.replace(/^```[a-zA-Z]*\n?/, '');
+    out = out.replace(/\n?```$/, '');
+    return out.trim();
+}
+
+/** Fallback: API anahtarı yoksa veya model hata verirse yine metin üret. */
+function generateFallbackListingText(info: IlanBilgileri): string {
     const kullanimLabel = info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
     const parts: string[] = [];
 
@@ -82,8 +142,48 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const text = generateListingText(info);
-        return NextResponse.json({ success: true, text });
+        let text = '';
+        let provider: 'gemini' | 'fallback' = 'fallback';
+
+        if (genAI) {
+            try {
+                const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+                const mimeType = image.type || 'image/jpeg';
+                const bytes = await image.arrayBuffer();
+                const base64Data = Buffer.from(bytes).toString('base64');
+                const prompt = buildListingPrompt(info);
+
+                const result = await model.generateContent({
+                    contents: [
+                        {
+                            role: 'user',
+                            parts: [
+                                { text: prompt },
+                                { inlineData: { mimeType, data: base64Data } },
+                            ],
+                        },
+                    ],
+                    generationConfig: {
+                        temperature: 0.65,
+                        topP: 0.9,
+                        maxOutputTokens: 900,
+                    },
+                });
+
+                const generated = result.response.text() || '';
+                text = cleanModelOutput(generated);
+                if (text) provider = 'gemini';
+            } catch (aiError) {
+                console.error('Ilan-metni Gemini generation failed, using fallback:', aiError);
+            }
+        }
+
+        if (!text) {
+            text = generateFallbackListingText(info);
+            provider = 'fallback';
+        }
+
+        return NextResponse.json({ success: true, text, provider });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });

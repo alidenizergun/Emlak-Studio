@@ -153,7 +153,7 @@ export default function AiTourGuideClient() {
                                 </>
                             )}
                         </button>
-                        <div className={styles.panelTitle} style={{ marginTop: '1rem' }}>Nasıl çalışır?</div>
+                        <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
                             <p>Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, yukarıda girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
                         </div>

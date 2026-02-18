@@ -287,7 +287,7 @@ export default function IlanMetniClient() {
                                 </>
                             )}
                         </button>
-                        <div className={styles.panelTitle} style={{ marginTop: '1rem' }}>Nasıl çalışır?</div>
+                        <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
                             <p>Fotoğraf ve zorunlu alanları doldurup <strong>Metni Oluştur</strong> butonuna tıklayın. Yapay zeka bu bilgiler ve görsellerden ilan metnini üretir.</p>
                         </div>
