@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const image = formData.get('image') as File;
+        const prompt = (formData.get('prompt') as string) || '';
 
         if (!image) {
             return NextResponse.json(
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             imageUrl,
+            prompt: prompt || undefined,
             note: 'Object removal AI will be integrated here. Currently returning original image.',
         });
     } catch (error: unknown) {

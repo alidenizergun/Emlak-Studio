@@ -8,6 +8,8 @@ import styles from './RemoveObject.module.css';
 export default function RemoveObjectClient() {
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
+    const [removePrompt, setRemovePrompt] = useState('');
+    const [mode, setMode] = useState<'all' | 'prompt'>('all');
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -31,7 +33,7 @@ export default function RemoveObjectClient() {
         setResult(null);
     };
 
-    const handleRemove = async () => {
+    const callRemoveApi = async (prompt: string) => {
         if (!file) return;
         setIsProcessing(true);
         setResult(null);
@@ -39,6 +41,7 @@ export default function RemoveObjectClient() {
         try {
             const formData = new FormData();
             formData.append('image', file);
+            if (prompt) formData.append('prompt', prompt);
 
             const response = await fetch('/api/remove-object', {
                 method: 'POST',
@@ -64,11 +67,23 @@ export default function RemoveObjectClient() {
         }
     };
 
+    const handleRemoveAll = () => callRemoveApi('tüm eşyaları sil');
+    const handleRemoveWithPrompt = () => callRemoveApi(removePrompt.trim());
+    const handleProcess = () => {
+        if (mode === 'all') {
+            handleRemoveAll();
+        } else {
+            handleRemoveWithPrompt();
+        }
+    };
+
     const handleReset = () => {
         if (fileUrl) URL.revokeObjectURL(fileUrl);
         if (result?.before) URL.revokeObjectURL(result.before);
         setFile(null);
         setFileUrl(null);
+        setRemovePrompt('');
+        setMode('all');
         setResult(null);
     };
 
@@ -157,18 +172,67 @@ export default function RemoveObjectClient() {
                     <div className={styles.panel}>
                         <div className={styles.panelTitle}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Fotoğrafı yükleyin ve <strong>Eşyayı Sil</strong> butonuna tıklayın. Yapay zeka görseldeki istenmeyen nesneleri (eşya, dağınıklık, eski mobilya) otomatik tespit edip temizler.</p>
+                            <p>
+                                Fotoğrafı yükleyin. Aşağıdan tüm eşyaları silme veya sadece belirli eşyaları metne göre silme
+                                seçeneğini işaretleyin, ardından <strong>Eşyayı Sil</strong> butonuna tıklayın.
+                            </p>
                         </div>
-                        <ul className={styles.tipList}>
-                            <li>Emlak fotoğraflarından eşya veya kişi kaldırma</li>
-                            <li>Dağınıklığı temizleme</li>
-                            <li>Eski mobilyaları silme</li>
-                        </ul>
+
+                        <div className={styles.modeGroup}>
+                            <label
+                                className={`${styles.modeOption} ${
+                                    mode === 'all' ? styles.modeOptionActive : ''
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="remove-mode"
+                                    value="all"
+                                    checked={mode === 'all'}
+                                    onChange={() => setMode('all')}
+                                />
+                                <span>Tüm eşyaları sil</span>
+                            </label>
+                            <label
+                                className={`${styles.modeOption} ${
+                                    mode === 'prompt' ? styles.modeOptionActive : ''
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="remove-mode"
+                                    value="prompt"
+                                    checked={mode === 'prompt'}
+                                    onChange={() => setMode('prompt')}
+                                />
+                                <span>Belirli eşyaları metne göre sil</span>
+                            </label>
+                        </div>
+
+                        <div className={styles.promptBlock}>
+                            <label htmlFor="remove-prompt" className={styles.promptLabel}>
+                                Silmek istediğiniz eşyayı yazın
+                            </label>
+                            <textarea
+                                id="remove-prompt"
+                                className={styles.promptInput}
+                                placeholder="Örnek: koltuğu sil, televizyonu sil"
+                                value={removePrompt}
+                                onChange={(e) => setRemovePrompt(e.target.value)}
+                                rows={3}
+                                lang="tr"
+                            />
+                        </div>
+
                         <button
                             type="button"
                             className={styles.processBtn}
-                            onClick={handleRemove}
-                            disabled={!file || isProcessing}
+                            onClick={handleProcess}
+                            disabled={
+                                !file ||
+                                isProcessing ||
+                                (mode === 'prompt' && !removePrompt.trim())
+                            }
                         >
                             {isProcessing ? (
                                 <>
@@ -184,6 +248,12 @@ export default function RemoveObjectClient() {
                                 </>
                             )}
                         </button>
+
+                        <ul className={styles.tipList}>
+                            <li>Emlak fotoğraflarından eşya veya kişi kaldırma</li>
+                            <li>Dağınıklığı temizleme</li>
+                            <li>Eski mobilyaları silme</li>
+                        </ul>
                     </div>
                 </div>
             </div>

@@ -214,15 +214,19 @@
     border-radius: 12px;
     font-size: 0.95rem;
     font-family: inherit;
+    line-height: 1.5;
     color: #0f172a;
     background: #fff;
-    resize: vertical;
-    min-height: 80px;
+    resize: none;
+    height: 100px;
+    min-height: 100px;
+    max-height: 220px;
+    overflow-y: auto;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .scriptInput::placeholder {
-    color: #94a3b8;
+    color: #cbd5e1;
 }
 
 .scriptInput:focus {

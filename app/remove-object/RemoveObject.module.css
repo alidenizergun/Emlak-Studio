@@ -170,6 +170,77 @@
     line-height: 1.5;
 }
 
+.promptBlock {
+    margin: 1.25rem 0 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.promptLabel {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+}
+
+.promptInput {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #334155;
+    background: #fff;
+    resize: none;
+    height: 88px;
+    min-height: 88px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 0.75rem;
+    transition: border-color 0.2s;
+}
+
+.promptInput::placeholder {
+    color: #cbd5e1;
+}
+
+.promptInput:focus {
+    outline: none;
+    border-color: #10b981;
+}
+
+.processBtnSecondary {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #10b981;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
+    color: #10b981;
+    transition: all 0.2s;
+}
+
+.processBtnSecondary:hover:not(:disabled) {
+    background: #f0fdf4;
+    border-color: #059669;
+    color: #059669;
+}
+
+.processBtnSecondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+}
+
 .tipList {
     list-style: none;
     padding: 0;

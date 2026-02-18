@@ -147,7 +147,7 @@ export default function SanalTadilatClient() {
                             <textarea
                                 id="sanal-tadilat-instructions"
                                 className={styles.formTextarea}
-                                placeholder="Örn: Parkeler değişsin, duvarlar gri renge boyansın, mutfak dolapları yenilensin"
+                                placeholder="Örnek: Parkeler değişsin, duvarlar gri renge boyansın, mutfak dolapları yenilensin"
                                 value={instructions}
                                 onChange={(e) => setInstructions(e.target.value)}
                                 rows={3}
