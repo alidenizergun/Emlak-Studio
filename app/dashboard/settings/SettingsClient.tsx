@@ -61,7 +61,7 @@ export default function SettingsClient() {
 
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
                         <h2 className={styles.settingsSectionTitle}>Hesap</h2>
-                        <div className={styles.settingsRow}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             <span className={styles.krediLabel}>Telefon</span>
                             <span className={styles.krediValue} style={{ fontSize: '1.1rem' }}>{phoneDisplay}</span>
                         </div>
@@ -81,7 +81,7 @@ export default function SettingsClient() {
                         <p className={styles.accountNote} style={{ marginTop: 0 }}>
                             Aboneliğinizi iptal etmek veya planınızı değiştirmek için aşağıdaki bağlantıyı kullanın.
                         </p>
-                        <Link href="/pricing" className={styles.accountBtn}>
+                        <Link href="/pricing" className={styles.accountBtn} style={{ marginTop: '1.25rem' }}>
                             Paketleri görüntüle / Aboneliği yönet
                         </Link>
                     </div>
@@ -97,10 +97,6 @@ export default function SettingsClient() {
                             </Link>
                         </div>
                     </div>
-
-                    <Link href="/studio" className={styles.accountBtnSecondary}>
-                        Stüdyoya dön
-                    </Link>
                 </div>
             </section>
         </div>
