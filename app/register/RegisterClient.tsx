@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './Register.module.css';
 import { TESTIMONIALS } from '@/lib/data/testimonials';
+import {
+    clearPostAuthRedirect,
+    readPendingCheckoutSelection,
+    readPostAuthRedirect,
+    savePendingCheckoutSelection,
+    setPostAuthRedirect
+} from '@/lib/checkout';
 
 function normalizePhone(value: string): string {
     const digits = value.replace(/\D/g, '').slice(0, 10);
@@ -20,6 +27,7 @@ function isValidPhone(phone: string): boolean {
 
 export default function RegisterClient() {
     const router = useRouter();
+    const [authQuery, setAuthQuery] = useState('');
     const [phone, setPhone] = useState('');
     const [otpSent, setOtpSent] = useState(false);
     const [otpCode, setOtpCode] = useState('');
@@ -34,6 +42,26 @@ export default function RegisterClient() {
             setCurrentTestimonial(Math.floor(Math.random() * TESTIMONIALS.length));
         }, 4000);
         return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        const next = params.get('next');
+        const plan = params.get('plan');
+        const billing = params.get('billing');
+
+        if (next === 'checkout') {
+            setPostAuthRedirect('/checkout');
+            if (plan && (billing === 'monthly' || billing === 'yearly')) {
+                savePendingCheckoutSelection({ planId: plan, billing });
+                setAuthQuery(`?next=checkout&plan=${encodeURIComponent(plan)}&billing=${billing}`);
+                return;
+            }
+            setAuthQuery('?next=checkout');
+            return;
+        }
+        setAuthQuery('');
     }, []);
 
     useEffect(() => {
@@ -96,6 +124,17 @@ export default function RegisterClient() {
                 if (typeof window !== 'undefined') {
                     window.localStorage.setItem('emlak_authed', '1');
                     window.localStorage.setItem('emlak_user_phone', phone.replace(/\D/g, ''));
+                }
+                const redirect = readPostAuthRedirect();
+                if (redirect === '/checkout') {
+                    const pending = readPendingCheckoutSelection();
+                    clearPostAuthRedirect();
+                    if (pending) {
+                        router.push(`/checkout?plan=${encodeURIComponent(pending.planId)}&billing=${pending.billing}`);
+                        return;
+                    }
+                    router.push('/checkout');
+                    return;
                 }
                 router.push('/studio');
             } else {
@@ -227,7 +266,7 @@ export default function RegisterClient() {
                     </form>
 
                     <p className={styles.loginLink}>
-                        Zaten hesabınız var mı? <Link href="/login" className={styles.link}>Giriş Yapın</Link>
+                        Zaten hesabınız var mı? <Link href={`/login${authQuery}`} className={styles.link}>Giriş Yapın</Link>
                     </p>
                 </div>
             </div>
