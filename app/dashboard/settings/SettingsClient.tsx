@@ -20,6 +20,7 @@ export default function SettingsClient() {
     const [fullName, setFullName] = useState('');
     const [officeName, setOfficeName] = useState('');
     const [email, setEmail] = useState('');
+    const [saveNote, setSaveNote] = useState('');
     const redirectDone = useRef(false);
 
     useEffect(() => {
@@ -47,6 +48,14 @@ export default function SettingsClient() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, [router]);
+
+    const handleSave = () => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('emlak_profile_full_name', fullName.trim());
+        window.localStorage.setItem('emlak_profile_office_name', officeName.trim());
+        window.localStorage.setItem('emlak_profile_email', email.trim());
+        setSaveNote('Bilgiler kaydedildi.');
+    };
 
     if (!mounted) {
         return (
@@ -108,6 +117,12 @@ export default function SettingsClient() {
                                 />
                             </label>
                         </div>
+                        <div className={styles.accountActions} style={{ marginTop: '0.9rem' }}>
+                            <button type="button" className={styles.accountBtn} onClick={handleSave}>
+                                Kaydet
+                            </button>
+                        </div>
+                        {saveNote ? <p className={styles.accountNote}>{saveNote}</p> : null}
                     </div>
 
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
