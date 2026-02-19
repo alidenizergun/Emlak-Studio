@@ -199,11 +199,6 @@ export default function CheckoutClient() {
                                 : 'Ödemeyi hızlıca tamamlayın. Kart bilgileriniz güvenli ve şifreli biçimde işlenir.'}
                         </p>
                     </div>
-                    <div className={styles.heroBadges}>
-                        <span className={styles.heroBadge}>Paket: {plan.name}</span>
-                        <span className={styles.heroBadge}>Plan: {billing === 'yearly' ? 'Yıllık' : 'Aylık'}</span>
-                        {mode === 'topup' ? <span className={styles.heroBadge}>Ek Kredi: {topupCredits}</span> : null}
-                    </div>
                 </div>
 
                 <div className={styles.layout}>
@@ -283,9 +278,8 @@ export default function CheckoutClient() {
                         <button className={styles.payBtn} type="submit" disabled={!isFormReady || isSubmitting}>
                             {isSubmitting
                                 ? 'Ödeme İşleniyor...'
-                                : `₺${displayPrice.toLocaleString('tr-TR')} ile Ödemeyi Tamamla`}
+                                : 'Ödemeyi Tamamla'}
                         </button>
-                        <p className={styles.paySubtext}>Toplam: ₺{displayPrice.toLocaleString('tr-TR')}{displayPeriod}</p>
                         {errors.form ? <p className={styles.errorText}>{errors.form}</p> : null}
                         {submitted ? (
                             <p className={styles.success}>
