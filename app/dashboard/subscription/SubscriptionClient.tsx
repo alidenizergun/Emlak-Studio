@@ -1,0 +1,195 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import styles from './Subscription.module.css';
+
+interface SubscriptionInfo {
+    planId: 'danisman' | 'ofis' | 'kurumsal';
+    planName: string;
+    monthlyCredits: number;
+    monthlyPrice: number;
+    status: 'active' | 'cancelled';
+    startDate: string;
+    nextBillingDate: string;
+    cancelledAt?: string;
+    lastUsedCredits?: number;
+}
+
+function formatDate(iso: string): string {
+    try {
+        return new Date(iso).toLocaleDateString('tr-TR');
+    } catch {
+        return '-';
+    }
+}
+
+export default function SubscriptionClient() {
+    const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [processingCancel, setProcessingCancel] = useState(false);
+    const [phone, setPhone] = useState('');
+    const [credits, setCredits] = useState<number>(0);
+    const [usedCredits, setUsedCredits] = useState<number>(0);
+    const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+    const [error, setError] = useState<string>('');
+    const [resultNote, setResultNote] = useState<string>('');
+
+    useEffect(() => {
+        setMounted(true);
+        if (typeof window === 'undefined') return;
+
+        const authed = window.localStorage.getItem('emlak_authed') === '1';
+        if (!authed) {
+            router.replace('/login');
+            return;
+        }
+
+        const currentPhone = window.localStorage.getItem('emlak_user_phone') || '';
+        if (!currentPhone) {
+            setError('Telefon bilgisi bulunamadı.');
+            setLoading(false);
+            return;
+        }
+
+        setPhone(currentPhone);
+
+        fetch(`/api/subscription?phone=${encodeURIComponent(currentPhone)}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.success) {
+                    setError(data.error || 'Abonelik bilgileri alınamadı.');
+                    return;
+                }
+                setSubscription(data.subscription || null);
+                setCredits(typeof data.credits === 'number' ? data.credits : 0);
+                setUsedCredits(typeof data.usedCredits === 'number' ? data.usedCredits : 0);
+            })
+            .catch(() => setError('Abonelik bilgileri alınamadı.'))
+            .finally(() => setLoading(false));
+    }, [router]);
+
+    const statusText = useMemo(() => {
+        if (!subscription) return '-';
+        return subscription.status === 'active' ? 'Aktif' : 'İptal edildi';
+    }, [subscription]);
+
+    const handleCancelSubscription = async () => {
+        if (!phone || !subscription || subscription.status === 'cancelled') return;
+        const approved = window.confirm(
+            'Aboneliğiniz iptal edilecek. Kullanılmamış kredileriniz sıfırlanır. Devam etmek istiyor musunuz?'
+        );
+        if (!approved) return;
+
+        setProcessingCancel(true);
+        setError('');
+        setResultNote('');
+
+        try {
+            const response = await fetch('/api/subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, action: 'cancel' }),
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                setError(data.error || 'İptal işlemi başarısız oldu.');
+                return;
+            }
+
+            setSubscription(data.subscription || null);
+            setCredits(typeof data.credits === 'number' ? data.credits : 0);
+            setUsedCredits(typeof data.usedCredits === 'number' ? data.usedCredits : 0);
+            window.localStorage.setItem('emlak_credits', String(typeof data.credits === 'number' ? data.credits : 0));
+            window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                detail: { credits: typeof data.credits === 'number' ? data.credits : 0 }
+            }));
+            setResultNote(
+                `Abonelik iptal edildi. Kullanılan kredi: ${typeof data.usedCredits === 'number' ? data.usedCredits : 0}, ` +
+                `kaldırılan bakiye: ${typeof data.removedCredits === 'number' ? data.removedCredits : 0}.`
+            );
+        } catch {
+            setError('İptal işlemi sırasında bir hata oluştu.');
+        } finally {
+            setProcessingCancel(false);
+        }
+    };
+
+    if (!mounted) {
+        return <div className={styles.pageContainer}>Yükleniyor...</div>;
+    }
+
+    return (
+        <div className={styles.pageContainer}>
+            <div className={styles.container}>
+                <div className={styles.headerRow}>
+                    <h1 className={styles.title}>Paketleri Görüntüle / Aboneliği Yönet</h1>
+                    <Link href="/pricing" className={styles.linkBtn}>Paketleri Gör</Link>
+                </div>
+                <p className={styles.subtitle}>Abonelik durumunuz, kredi kullanımı ve iptal işlemini bu ekrandan yönetebilirsiniz.</p>
+
+                {loading ? (
+                    <div className={styles.card}>Yükleniyor...</div>
+                ) : (
+                    <>
+                        {error ? <div className={styles.error}>{error}</div> : null}
+                        {resultNote ? <div className={styles.success}>{resultNote}</div> : null}
+
+                        <div className={styles.card}>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Paket</span>
+                                <span className={styles.value}>{subscription?.planName ?? '-'}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Durum</span>
+                                <span className={styles.value}>{statusText}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Aylık Ücret</span>
+                                <span className={styles.value}>₺{subscription?.monthlyPrice?.toLocaleString('tr-TR') ?? '-'}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Aylık Kredi</span>
+                                <span className={styles.value}>{subscription?.monthlyCredits ?? 0}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Kullanılan Kredi</span>
+                                <span className={styles.value}>{usedCredits}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Kalan Kredi</span>
+                                <span className={styles.value}>{credits}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Başlangıç</span>
+                                <span className={styles.value}>{subscription?.startDate ? formatDate(subscription.startDate) : '-'}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.label}>Sonraki Fatura</span>
+                                <span className={styles.value}>{subscription?.nextBillingDate ? formatDate(subscription.nextBillingDate) : '-'}</span>
+                            </div>
+                        </div>
+
+                        <div className={styles.actions}>
+                            <button
+                                type="button"
+                                className={styles.cancelBtn}
+                                onClick={handleCancelSubscription}
+                                disabled={processingCancel || !subscription || subscription.status === 'cancelled'}
+                            >
+                                {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
+                            </button>
+                            <p className={styles.warning}>
+                                Üyelik iptalinde kullanılan krediler düşülür, kullanılmamış kredi bakiyesi sıfırlanır.
+                            </p>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+

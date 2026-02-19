@@ -83,7 +83,7 @@ export default function SettingsClient() {
                         <p className={styles.accountNote} style={{ marginTop: 0 }}>
                             Aboneliğinizi iptal etmek veya planınızı değiştirmek için aşağıdaki bağlantıyı kullanın.
                         </p>
-                        <Link href="/pricing" className={styles.accountBtn} style={{ marginTop: '1.25rem' }}>
+                        <Link href="/dashboard/subscription" className={styles.accountBtn} style={{ marginTop: '1.25rem' }}>
                             Paketleri görüntüle / Aboneliği yönet
                         </Link>
                     </div>
