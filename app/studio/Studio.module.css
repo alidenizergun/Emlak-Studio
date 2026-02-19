@@ -258,55 +258,67 @@
         flex: 0 0 35%;
         min-height: 35%;
         max-height: 35%;
-        overflow-y: auto;
+        overflow: hidden;
         border-right: none;
         border-bottom: 1px solid #e2e8f0;
         background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+        display: flex;
+        flex-direction: column;
     }
 
     .sidebarTop {
-        padding: 0.8rem 0.9rem 0.7rem;
-        gap: 0.55rem;
+        padding: 0.55rem 0.7rem 0.45rem;
+        gap: 0.4rem;
+        flex-shrink: 0;
     }
 
     .sidebarTitle {
-        font-size: 1.02rem;
+        font-size: 0.92rem;
     }
 
     .sidebarCreditRow {
-        display: grid;
-        grid-template-columns: 1fr auto;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 0.45rem;
-        padding: 0.58rem 0.68rem;
+        gap: 0.35rem;
+        padding: 0.44rem 0.55rem;
+        border-radius: 10px;
     }
 
     .sidebarCreditLabel {
-        font-size: 0.68rem;
+        font-size: 0.62rem;
     }
 
     .sidebarCreditValue {
-        font-size: 1.04rem;
+        font-size: 0.92rem;
     }
 
-    .sidebarCta,
-    .sidebarSettings {
-        width: 100%;
+    .sidebarTop .sidebarCta,
+    .sidebarTop .sidebarSettings {
+        width: calc(50% - 0.15rem);
         justify-content: center;
-        padding: 0.55rem 0.7rem;
-        font-size: 0.82rem;
-        border-radius: 10px;
+        padding: 0.44rem 0.5rem;
+        font-size: 0.72rem;
+        border-radius: 9px;
+        display: inline-flex;
+    }
+
+    .sidebarTop .sidebarSettings {
+        margin-left: 0.3rem;
     }
 
     .toolNav {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.45rem;
-        padding: 0.6rem 0.75rem 0.75rem;
-        align-content: start;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.35rem;
+        padding: 0.45rem 0.6rem 0.6rem;
+        align-content: stretch;
+        grid-auto-rows: 1fr;
+        flex: 1 1 auto;
+        min-height: 0;
     }
 
     .toolItem {
@@ -314,11 +326,14 @@
         min-width: 0;
         max-width: none;
         margin: 0;
-        padding: 0.62rem 0.68rem;
+        padding: 0.42rem 0.38rem;
         border: 1px solid #e2e8f0;
         background: #ffffff;
-        border-radius: 12px;
-        gap: 0.5rem;
+        border-radius: 10px;
+        gap: 0.3rem;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
     }
 
     .toolItemActive {
@@ -327,30 +342,31 @@
     }
 
     .toolItemIcon {
-        width: 20px;
-        height: 20px;
+        width: 17px;
+        height: 17px;
     }
 
     .toolItemIcon svg {
-        width: 17px;
-        height: 17px;
+        width: 15px;
+        height: 15px;
     }
 
     .toolItemTitle {
         white-space: normal;
         overflow: hidden;
         text-overflow: clip;
-        line-height: 1.2;
-        font-size: 0.8rem;
+        line-height: 1.1;
+        font-size: 0.66rem;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
+        text-align: center;
     }
 
     .toolBadge {
-        font-size: 0.58rem;
-        padding: 0.14rem 0.4rem;
-        justify-self: end;
+        font-size: 0.52rem;
+        padding: 0.1rem 0.3rem;
+        justify-self: center;
     }
 
     .workspace {
