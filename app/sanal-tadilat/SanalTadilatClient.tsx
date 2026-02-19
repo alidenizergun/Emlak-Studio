@@ -88,7 +88,6 @@ export default function SanalTadilatClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Sanal Tadilat</h1>
-                    <div className={styles.costBadge}>2 kredi</div>
                     <p className={styles.description}>
                         Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
                     </p>
@@ -141,6 +140,10 @@ export default function SanalTadilatClient() {
 
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
+                        <div className={styles.panelTitleRow}>
+                            <div className={styles.panelTitle}>Sanal tadilat</div>
+                            <span className={styles.inlineCost}>2 kredi</span>
+                        </div>
                         <div className={styles.tadilatQuestionBlock}>
                             <label className={styles.tadilatQuestionLabel} htmlFor="sanal-tadilat-instructions">
                                 Ne tür tadilat istiyorsunuz?

@@ -2,7 +2,6 @@
 .header { text-align: center; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto; padding: 0 1.5rem; }
 .headerContent { display: contents; }
 .title { font-size: 2.25rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.75rem; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #0f172a; }
-.costBadge { display: inline-block; margin-bottom: 0.6rem; padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; color: #64748b; background: #f1f5f9; border: 1px solid #e2e8f0; }
 .description { color: #64748b; line-height: 1.5; font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
 .workspace { display: flex; gap: 1rem; padding: 0 1.5rem; align-items: stretch; min-height: 400px; }
 .gallerySection { flex: 1; min-height: 450px; background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
@@ -15,6 +14,8 @@
 .controlsSidebar { width: 320px; min-height: 450px; position: sticky; top: 90px; display: flex; flex-direction: column; gap: 0; flex-shrink: 0; }
 .panel { flex: 1; min-height: 0; display: flex; flex-direction: column; background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
 .panelTitle { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+.panelTitleRow { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.inlineCost { font-size: 0.75rem; font-weight: 600; color: #94a3b8; white-space: nowrap; }
 .tadilatQuestionBlock { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
 .tadilatQuestionLabel { display: block; font-size: 0.9rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem; }
 .formGroup { margin-bottom: 1rem; }
