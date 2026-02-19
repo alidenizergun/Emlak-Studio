@@ -88,6 +88,7 @@ export default function SanalTadilatClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Sanal Tadilat</h1>
+                    <div className={styles.costBadge}>2 kredi</div>
                     <p className={styles.description}>
                         Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
                     </p>
