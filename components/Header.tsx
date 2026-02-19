@@ -40,7 +40,7 @@ const Icons = {
 
 const Header = () => {
     const pathname = usePathname();
-    const isBillingPage = pathname?.startsWith('/checkout') || pathname?.startsWith('/dashboard/subscription');
+    const isBillingPage = pathname?.startsWith('/checkout');
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
