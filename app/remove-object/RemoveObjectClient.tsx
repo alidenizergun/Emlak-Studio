@@ -183,7 +183,10 @@ export default function RemoveObjectClient() {
                                     checked={mode === 'all'}
                                     onChange={() => setMode('all')}
                                 />
-                                <span>Tüm eşyaları sil</span>
+                                <span className={styles.modeText}>
+                                    <span>Tüm eşyaları sil</span>
+                                    <span className={styles.modeCost}>2 kredi</span>
+                                </span>
                             </label>
                             <label
                                 className={`${styles.modeOption} ${
@@ -197,7 +200,10 @@ export default function RemoveObjectClient() {
                                     checked={mode === 'prompt'}
                                     onChange={() => setMode('prompt')}
                                 />
-                                <span>Belirli eşyaları metne göre sil</span>
+                                <span className={styles.modeText}>
+                                    <span>Belirli eşyaları metne göre sil</span>
+                                    <span className={styles.modeCost}>2 kredi</span>
+                                </span>
                             </label>
                         </div>
 
