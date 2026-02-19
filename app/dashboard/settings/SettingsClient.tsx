@@ -17,6 +17,10 @@ export default function SettingsClient() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [phoneDisplay, setPhoneDisplay] = useState<string>('');
+    const [fullName, setFullName] = useState('');
+    const [officeName, setOfficeName] = useState('');
+    const [email, setEmail] = useState('');
+    const [saveNote, setSaveNote] = useState('');
     const redirectDone = useRef(false);
 
     useEffect(() => {
@@ -30,11 +34,28 @@ export default function SettingsClient() {
             return;
         }
         const phone = window.localStorage.getItem('emlak_user_phone');
+        const storedFullName = window.localStorage.getItem('emlak_profile_full_name') || '';
+        const storedOfficeName = window.localStorage.getItem('emlak_profile_office_name') || '';
+        const storedEmail = window.localStorage.getItem('emlak_profile_email') || '';
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setPhoneDisplay(phone ? maskPhone(phone) : '—');
         // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFullName(storedFullName);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setOfficeName(storedOfficeName);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setEmail(storedEmail);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, [router]);
+
+    const handleSaveProfile = () => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('emlak_profile_full_name', fullName.trim());
+        window.localStorage.setItem('emlak_profile_office_name', officeName.trim());
+        window.localStorage.setItem('emlak_profile_email', email.trim());
+        setSaveNote('Profil bilgileri kaydedildi.');
+    };
 
     const handleLogout = () => {
         if (typeof window === 'undefined') return;
@@ -63,11 +84,55 @@ export default function SettingsClient() {
 
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
                         <h2 className={styles.settingsSectionTitle}>Hesap</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            <span className={styles.krediLabel}>Telefon</span>
-                            <span className={styles.krediValue} style={{ fontSize: '1.1rem' }}>{phoneDisplay}</span>
+                        <div className={styles.settingsForm}>
+                            <label className={styles.settingsField}>
+                                <span className={styles.krediLabel}>Ad Soyad</span>
+                                <input
+                                    className={styles.settingsInput}
+                                    type="text"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    placeholder="Ad soyad girin"
+                                />
+                            </label>
+                            <label className={styles.settingsField}>
+                                <span className={styles.krediLabel}>Emlak Ofisi</span>
+                                <input
+                                    className={styles.settingsInput}
+                                    type="text"
+                                    value={officeName}
+                                    onChange={(e) => setOfficeName(e.target.value)}
+                                    placeholder="Ofis adını girin"
+                                />
+                            </label>
+                            <label className={styles.settingsField}>
+                                <span className={styles.krediLabel}>E-posta</span>
+                                <input
+                                    className={styles.settingsInput}
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="ornek@eposta.com"
+                                />
+                            </label>
+                            <label className={styles.settingsField}>
+                                <span className={styles.krediLabel}>Telefon (değiştirilemez)</span>
+                                <input
+                                    className={styles.settingsInputReadOnly}
+                                    type="text"
+                                    value={phoneDisplay}
+                                    readOnly
+                                />
+                            </label>
                         </div>
-                        <div style={{ marginTop: '1rem' }}>
+                        <div className={styles.accountActions} style={{ marginTop: '1rem' }}>
+                            <button
+                                type="button"
+                                className={styles.accountBtn}
+                                onClick={handleSaveProfile}
+                            >
+                                Bilgileri Kaydet
+                            </button>
                             <button
                                 type="button"
                                 className={styles.accountBtnDanger}
@@ -76,6 +141,7 @@ export default function SettingsClient() {
                                 Çıkış yap
                             </button>
                         </div>
+                        {saveNote ? <p className={styles.accountNote}>{saveNote}</p> : null}
                     </div>
 
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
