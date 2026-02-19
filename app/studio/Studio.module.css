@@ -376,13 +376,14 @@
         white-space: normal;
         overflow: hidden;
         text-overflow: clip;
-        line-height: 1.08;
-        font-size: 0.53rem;
+        line-height: 1.14;
+        font-size: 0.6rem;
+        font-weight: 500;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         text-align: center;
-        min-height: 1.1em;
+        min-height: 1.25em;
     }
 
     .toolBadge {
