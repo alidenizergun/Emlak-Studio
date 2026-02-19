@@ -106,7 +106,6 @@ export default function IlanMetniClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
-                    <div className={styles.costBadge}>1 kredi</div>
                     <p className={styles.description}>
                         Fotoğrafları yükleyin ve ilan bilgilerini girin; yapay zeka profesyonel ilan metni üretsin.
                     </p>
@@ -157,7 +156,10 @@ export default function IlanMetniClient() {
 
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
-                        <div className={styles.panelTitle}>İlan bilgileri</div>
+                        <div className={styles.panelTitleRow}>
+                            <div className={styles.panelTitle}>İlan bilgileri</div>
+                            <span className={styles.inlineCost}>1 kredi</span>
+                        </div>
                         <div className={styles.formSection}>
                             <div className={styles.formGroup}>
                                 <label className={styles.formLabel}>Lokasyon / Adres *</label>
