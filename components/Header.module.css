@@ -430,9 +430,9 @@
 }
 
 .megaMenuItem:hover {
-    background: #f8fafc;
+    background: rgba(15, 23, 42, 0.04);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
 }
 
 .menuIcon {
@@ -448,8 +448,8 @@
 }
 
 .megaMenuItem:hover .menuIcon {
-    background: #0d9488;
-    color: white;
+    background: rgba(13, 148, 136, 0.2);
+    color: #0f766e;
 }
 
 .megaMenuItemDisabled {
