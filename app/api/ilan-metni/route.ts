@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { deductCredits } from '@/lib/credits';
 
 interface IlanBilgileri {
     lokasyon?: string;
@@ -22,6 +23,7 @@ const GOOGLE_API_KEY =
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
+const LISTING_TEXT_COST = 1;
 
 function buildListingPrompt(info: IlanBilgileri): string {
     const kullanimLabel = info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
@@ -125,11 +127,18 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const image = formData.get('image') as File;
         const ilanBilgileriRaw = formData.get('ilanBilgileri') as string | null;
+        const phone = String(formData.get('phone') || '');
 
         if (!image) {
             return NextResponse.json(
                 { success: false, error: 'Görsel gerekli' },
                 { status: 400 }
+            );
+        }
+        if (!phone) {
+            return NextResponse.json(
+                { success: false, error: 'İşlem için giriş yapmanız gerekiyor' },
+                { status: 401 }
             );
         }
 
@@ -183,7 +192,21 @@ export async function POST(request: NextRequest) {
             provider = 'fallback';
         }
 
-        return NextResponse.json({ success: true, text, provider });
+        const creditResult = await deductCredits(phone, LISTING_TEXT_COST);
+        if (!creditResult.ok) {
+            return NextResponse.json(
+                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
+                { status: 402 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            text,
+            provider,
+            credits: creditResult.credits,
+            usedCredits: LISTING_TEXT_COST
+        });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });

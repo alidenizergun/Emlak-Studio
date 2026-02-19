@@ -66,14 +66,27 @@ export default function IlanMetniClient() {
         setIsProcessing(true);
         setResultText(null);
         try {
+            const phone = window.localStorage.getItem('emlak_user_phone') || '';
             const formData = new FormData();
             formData.append('image', file);
             formData.append('ilanBilgileri', JSON.stringify(form));
+            formData.append('phone', phone);
             const response = await fetch('/api/ilan-metni', { method: 'POST', body: formData });
             const data = await response.json();
             if (data.success && data.text) {
+                if (typeof data.credits === 'number' && typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                    window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                        detail: { credits: data.credits }
+                    }));
+                }
                 setResultText(data.text);
             } else {
+                if (data?.code === 'INSUFFICIENT_CREDITS') {
+                    setResultText(null);
+                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    return;
+                }
                 setResultText(data.error || 'Metin oluşturulamadı. Lütfen tekrar deneyin.');
             }
         } catch {

@@ -37,13 +37,30 @@ export default function AiTourGuideClient() {
         setIsProcessing(true);
         setSubmitted(false);
         try {
+            const phone = window.localStorage.getItem('emlak_user_phone') || '';
             const formData = new FormData();
             formData.append('image', file);
             formData.append('script', scriptText.trim().slice(0, SCRIPT_MAX_LENGTH));
-            await fetch('/api/ai-tour-guide', { method: 'POST', body: formData });
-            setSubmitted(true);
+            formData.append('phone', phone);
+            const response = await fetch('/api/ai-tour-guide', { method: 'POST', body: formData });
+            const data = await response.json();
+            if (data.success) {
+                if (typeof data.credits === 'number' && typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                    window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                        detail: { credits: data.credits }
+                    }));
+                }
+                setSubmitted(true);
+            } else {
+                if (data?.code === 'INSUFFICIENT_CREDITS') {
+                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    return;
+                }
+                alert(data.error || 'İşlem başarısız. Lütfen tekrar deneyin.');
+            }
         } catch {
-            setSubmitted(true);
+            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
         } finally {
             setIsProcessing(false);
         }

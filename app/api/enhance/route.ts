@@ -37,14 +37,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const creditResult = await deductCredits(phone, cost);
-        if (!creditResult.ok) {
-            return NextResponse.json(
-                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
-                { status: 402 }
-            );
-        }
-
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
@@ -78,6 +70,14 @@ export async function POST(request: NextRequest) {
                     finalImageUrl = String(output); // Fallback
                 } else {
                     throw new Error('Unexpected Replicate output format');
+                }
+
+                const creditResult = await deductCredits(phone, cost);
+                if (!creditResult.ok) {
+                    return NextResponse.json(
+                        { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
+                        { status: 402 }
+                    );
                 }
 
                 return NextResponse.json({
@@ -114,6 +114,14 @@ export async function POST(request: NextRequest) {
 
         const outputBuffer = await jimpImage.getBuffer("image/jpeg");
         finalImageUrl = `data:image/jpeg;base64,${outputBuffer.toString('base64')}`;
+
+        const creditResult = await deductCredits(phone, cost);
+        if (!creditResult.ok) {
+            return NextResponse.json(
+                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
+                { status: 402 }
+            );
+        }
 
         return NextResponse.json({
             success: true,

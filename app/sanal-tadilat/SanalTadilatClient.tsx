@@ -37,15 +37,27 @@ export default function SanalTadilatClient() {
         setIsProcessing(true);
         setResult(null);
         try {
+            const phone = window.localStorage.getItem('emlak_user_phone') || '';
             const formData = new FormData();
             formData.append('image', file);
             if (instructions.trim()) formData.append('instructions', instructions.trim());
+            formData.append('phone', phone);
             const response = await fetch('/api/sanal-tadilat', { method: 'POST', body: formData });
             const data = await response.json();
             if (data.success && data.imageUrl) {
+                if (typeof data.credits === 'number' && typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                    window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                        detail: { credits: data.credits }
+                    }));
+                }
                 const beforeUrl = URL.createObjectURL(file);
                 setResult({ before: beforeUrl, after: data.imageUrl });
             } else {
+                if (data?.code === 'INSUFFICIENT_CREDITS') {
+                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    return;
+                }
                 alert(data.error || 'İşlem başarısız. Lütfen tekrar deneyin.');
             }
         } catch (err) {

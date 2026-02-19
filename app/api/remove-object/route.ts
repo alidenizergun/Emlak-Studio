@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/prompts';
+import { deductCredits } from '@/lib/credits';
+
+const REMOVE_OBJECT_COST = 2;
 
 /**
  * Placeholder API: returns the same image as "processed" until a real
@@ -12,11 +15,18 @@ export async function POST(request: NextRequest) {
         const mode = ((formData.get('mode') as string) || 'all') as RemoveMode;
         const userPrompt = ((formData.get('userPrompt') as string) || '').trim();
         const clientPrompt = ((formData.get('prompt') as string) || '').trim();
+        const phone = String(formData.get('phone') || '');
 
         if (!image) {
             return NextResponse.json(
                 { success: false, error: 'Görsel gerekli' },
                 { status: 400 }
+            );
+        }
+        if (!phone) {
+            return NextResponse.json(
+                { success: false, error: 'İşlem için giriş yapmanız gerekiyor' },
+                { status: 401 }
             );
         }
 
@@ -35,12 +45,22 @@ export async function POST(request: NextRequest) {
         const mime = image.type || 'image/jpeg';
         const imageUrl = `data:${mime};base64,${base64}`;
 
+        const creditResult = await deductCredits(phone, REMOVE_OBJECT_COST);
+        if (!creditResult.ok) {
+            return NextResponse.json(
+                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
+                { status: 402 }
+            );
+        }
+
         return NextResponse.json({
             success: true,
             imageUrl,
             mode,
             prompt,
             userPrompt: userPrompt || undefined,
+            credits: creditResult.credits,
+            usedCredits: REMOVE_OBJECT_COST,
             note: 'Object removal AI will be integrated here. Currently returning original image.',
         });
     } catch (error: unknown) {
