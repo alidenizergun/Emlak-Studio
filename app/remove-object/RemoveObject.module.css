@@ -195,7 +195,7 @@
 
 .modeOption:hover {
     border-color: #cbd5e1;
-    background: #f8fafc;
+    background: #ffffff;
 }
 
 .modeOptionActive {
@@ -203,6 +203,11 @@
     background: #f0fdf4;
     color: #0f172a;
     font-weight: 500;
+}
+
+.modeOptionActive:hover {
+    border-color: #10b981;
+    background: #f0fdf4;
 }
 
 .modeOption input {
