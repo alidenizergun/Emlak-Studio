@@ -127,16 +127,16 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    border: 2px dashed #e2e8f0;
+    border: 2px dashed #dbe7f4;
     border-radius: 16px;
-    background: #f8fafc;
+    background: #f7faff;
     transition: all 0.2s;
     height: 100%;
 }
 
 .emptyState:hover {
-    border-color: #cbd5e1;
-    background: #f1f5f9;
+    border-color: #c6d8ee;
+    background: #eff5ff;
 }
 
 /* Grid Layout */
@@ -269,9 +269,9 @@
 
 /* Upload Card (Add More) */
 .uploadCard {
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed #d4e2f2;
     border-radius: 16px;
-    background: #f8fafc;
+    background: #f7faff;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -284,9 +284,9 @@
 }
 
 .uploadCard:hover {
-    border-color: #10b981;
-    color: #059669;
-    background: rgba(16, 185, 129, 0.06);
+    border-color: #c6d8ee;
+    color: #5d7ea6;
+    background: #eff5ff;
 }
 
 /* Sidebar Controls */
