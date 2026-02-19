@@ -30,13 +30,16 @@ export default function SubscriptionClient() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [processingCancel, setProcessingCancel] = useState(false);
+    const [processingPurchase, setProcessingPurchase] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [purchaseAmount, setPurchaseAmount] = useState<number>(100);
     const [phone, setPhone] = useState('');
     const [credits, setCredits] = useState<number>(0);
     const [usedCredits, setUsedCredits] = useState<number>(0);
     const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
     const [error, setError] = useState<string>('');
     const [resultNote, setResultNote] = useState<string>('');
+    const [purchaseNote, setPurchaseNote] = useState<string>('');
 
     useEffect(() => {
         setMounted(true);
@@ -116,6 +119,43 @@ export default function SubscriptionClient() {
         }
     };
 
+    const handlePurchaseCredits = async () => {
+        if (!phone) return;
+        const amount = Math.floor(Number(purchaseAmount) || 0);
+        if (amount <= 0) {
+            setError('Lütfen 0’dan büyük bir kredi adedi girin.');
+            return;
+        }
+
+        setProcessingPurchase(true);
+        setError('');
+        setPurchaseNote('');
+        try {
+            const response = await fetch('/api/credits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, amount }),
+            });
+            const data = await response.json();
+            if (!data.success) {
+                setError(data.error || 'Kredi satın alma işlemi başarısız oldu.');
+                return;
+            }
+
+            const nextCredits = typeof data.credits === 'number' ? data.credits : credits + amount;
+            setCredits(nextCredits);
+            window.localStorage.setItem('emlak_credits', String(nextCredits));
+            window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                detail: { credits: nextCredits }
+            }));
+            setPurchaseNote(`${amount} kredi hesabınıza eklendi.`);
+        } catch {
+            setError('Kredi satın alma sırasında bir hata oluştu.');
+        } finally {
+            setProcessingPurchase(false);
+        }
+    };
+
     if (!mounted) {
         return <div className={styles.pageContainer}>Yükleniyor...</div>;
     }
@@ -135,6 +175,7 @@ export default function SubscriptionClient() {
                     <>
                         {error ? <div className={styles.error}>{error}</div> : null}
                         {resultNote ? <div className={styles.success}>{resultNote}</div> : null}
+                        {purchaseNote ? <div className={styles.success}>{purchaseNote}</div> : null}
 
                         <div className={styles.card}>
                             <div className={styles.row}>
@@ -172,11 +213,34 @@ export default function SubscriptionClient() {
                         </div>
 
                         <div className={styles.actions}>
+                            <div className={styles.purchaseBlock}>
+                                <h3 className={styles.purchaseTitle}>Ek kredi satın al</h3>
+                                <p className={styles.purchaseText}>İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.</p>
+                                <div className={styles.purchaseRow}>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        step={1}
+                                        value={purchaseAmount}
+                                        onChange={(e) => setPurchaseAmount(Number(e.target.value))}
+                                        className={styles.purchaseInput}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={styles.purchaseBtn}
+                                        onClick={handlePurchaseCredits}
+                                        disabled={processingPurchase}
+                                    >
+                                        {processingPurchase ? 'Ekleniyor...' : 'Kredi Satın Al'}
+                                    </button>
+                                </div>
+                            </div>
+
                             <button
                                 type="button"
                                 className={styles.cancelBtn}
                                 onClick={() => setShowCancelModal(true)}
-                                disabled={processingCancel || !subscription || subscription.status === 'cancelled'}
+                                disabled={processingCancel || processingPurchase || !subscription || subscription.status === 'cancelled'}
                             >
                                 {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
                             </button>
