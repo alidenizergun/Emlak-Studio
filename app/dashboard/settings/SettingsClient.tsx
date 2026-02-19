@@ -139,8 +139,8 @@ export default function SettingsClient() {
     }
 
     return (
-        <div className={styles.pageContainer}>
-            <section className={styles.topSection}>
+        <div className={`${styles.pageContainer} ${styles.settingsPageContainer}`}>
+            <section className={`${styles.topSection} ${styles.settingsTopSection}`}>
                 <div className={styles.topInner}>
                     <header className={styles.header}>
                         <h1 className={styles.title}>Ayarlar</h1>

@@ -6,6 +6,10 @@
     padding-bottom: 0;
 }
 
+.settingsPageContainer {
+    background: #f8fafc;
+}
+
 .loading {
     text-align: center;
     color: #64748b;
@@ -19,6 +23,11 @@
     background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
     border-bottom: 1px solid #e2e8f0;
     padding: 1.5rem 1.5rem 2.5rem;
+}
+
+.settingsTopSection {
+    background: transparent;
+    border-bottom: none;
 }
 
 .topInner {
