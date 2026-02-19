@@ -7,10 +7,10 @@ import dynamic from 'next/dynamic';
 import { TOOLS } from '@/app/tools/toolsData';
 import styles from './Studio.module.css';
 
-const VALID_TOOL_IDS = new Set(['tools', ...TOOLS.map((t) => t.id)]);
+const VALID_TOOL_IDS = new Set(TOOLS.map((t) => t.id));
 function getToolIdFromParam(param: string | null): string {
     if (param && VALID_TOOL_IDS.has(param)) return param;
-    return 'tools';
+    return TOOLS[0]?.id ?? 'enhance';
 }
 
 /** Aynı bileşenler standalone sayfalarda da kullanılıyor; enhance/stage vb. sayfalardaki değişiklikler Studio'da otomatik yansır. */
@@ -20,10 +20,8 @@ const RemoveObjectClient = dynamic(() => import('@/app/remove-object/RemoveObjec
 const IlanMetniClient = dynamic(() => import('@/app/ilan-metni/IlanMetniClient'), { ssr: false });
 const SanalTadilatClient = dynamic(() => import('@/app/sanal-tadilat/SanalTadilatClient'), { ssr: false });
 const AiTourGuideClient = dynamic(() => import('@/app/ai-tour-guide/AiTourGuideClient'), { ssr: false });
-const ToolsPanelClient = dynamic(() => import('@/app/tools/ToolsPanelClient'), { ssr: false });
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
-    'tools': ToolsPanelClient,
     'enhance': EnhanceClient,
     'stage': StageClient,
     'remove-object': RemoveObjectClient,
