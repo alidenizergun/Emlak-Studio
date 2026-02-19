@@ -6,6 +6,7 @@ import styles from './Checkout.module.css';
 import { readPendingCheckoutSelection, savePendingCheckoutSelection, type BillingCycle } from '@/lib/checkout';
 
 type PlanId = 'danisman' | 'ofis' | 'kurumsal';
+type CheckoutMode = 'subscription' | 'topup';
 
 const PLAN_MAP: Record<PlanId, { name: string; monthlyPrice: number; monthlyCredits: number }> = {
     danisman: { name: 'Danışman', monthlyPrice: 1999, monthlyCredits: 200 },
@@ -20,6 +21,10 @@ function parsePlanId(value: string | null): PlanId | null {
 
 function parseBilling(value: string | null): BillingCycle {
     return value === 'yearly' ? 'yearly' : 'monthly';
+}
+
+function parseCheckoutMode(value: string | null): CheckoutMode {
+    return value === 'topup' ? 'topup' : 'subscription';
 }
 
 function normalizeCardName(value: string): string {
@@ -56,11 +61,16 @@ export default function CheckoutClient() {
     const [mounted, setMounted] = useState(false);
     const [planId, setPlanId] = useState<PlanId>('danisman');
     const [billing, setBilling] = useState<BillingCycle>('monthly');
+    const [mode, setMode] = useState<CheckoutMode>('subscription');
+    const [phone, setPhone] = useState('');
+    const [topupCredits, setTopupCredits] = useState(0);
+    const [topupTotal, setTopupTotal] = useState(0);
     const [cardNumber, setCardNumber] = useState('');
     const [cardName, setCardName] = useState('');
     const [expiry, setExpiry] = useState('');
     const [cvv, setCvv] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
@@ -68,18 +78,27 @@ export default function CheckoutClient() {
         if (typeof window === 'undefined') return;
 
         const authed = window.localStorage.getItem('emlak_authed') === '1';
+        const currentPhone = window.localStorage.getItem('emlak_user_phone') || '';
+        setPhone(currentPhone);
         const params = new URLSearchParams(window.location.search);
+        const queryMode = parseCheckoutMode(params.get('mode'));
         const queryPlan = parsePlanId(params.get('plan'));
         const queryBilling = parseBilling(params.get('billing'));
+        const queryTopupCredits = Math.max(0, Math.floor(Number(params.get('credits') || 0)));
+        const queryTopupTotal = Math.max(0, Math.floor(Number(params.get('total') || 0)));
         const pending = readPendingCheckoutSelection();
         const pendingPlan = parsePlanId(pending?.planId ?? null);
 
         const effectivePlan: PlanId = queryPlan ?? pendingPlan ?? 'danisman';
         const effectiveBilling = (queryPlan ? queryBilling : pending?.billing) ?? 'monthly';
+        const calculatedTopupTotal = Math.round((PLAN_MAP[effectivePlan].monthlyPrice / Math.max(PLAN_MAP[effectivePlan].monthlyCredits, 1)) * queryTopupCredits);
 
         savePendingCheckoutSelection({ planId: effectivePlan, billing: effectiveBilling });
         setPlanId(effectivePlan);
         setBilling(effectiveBilling);
+        setMode(queryMode);
+        setTopupCredits(queryTopupCredits);
+        setTopupTotal(queryTopupTotal > 0 ? queryTopupTotal : calculatedTopupTotal);
 
         if (!authed) {
             router.replace(`/login?next=checkout&plan=${effectivePlan}&billing=${effectiveBilling}`);
@@ -89,20 +108,21 @@ export default function CheckoutClient() {
     const plan = PLAN_MAP[planId];
 
     const displayPrice = useMemo(() => {
+        if (mode === 'topup') return topupTotal;
         if (billing === 'yearly') {
             return Math.round(plan.monthlyPrice * 0.8 * 12);
         }
         return plan.monthlyPrice;
-    }, [billing, plan.monthlyPrice]);
+    }, [billing, mode, plan.monthlyPrice, topupTotal]);
 
-    const displayPeriod = billing === 'yearly' ? '/yıl' : '/ay';
+    const displayPeriod = mode === 'topup' ? '' : billing === 'yearly' ? '/yıl' : '/ay';
     const isFormReady =
         cardName.trim().length >= 3 &&
         cardNumber.replace(/\s/g, '').length === 16 &&
         isValidExpiry(expiry) &&
         cvv.length === 3;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const nextErrors: Record<string, string> = {};
 
@@ -125,6 +145,41 @@ export default function CheckoutClient() {
             return;
         }
 
+        if (mode === 'topup') {
+            if (!phone || topupCredits <= 0) {
+                setErrors({ form: 'Ek kredi bilgisi eksik. Lütfen abonelik ekranından tekrar deneyin.' });
+                setSubmitted(false);
+                return;
+            }
+
+            setIsSubmitting(true);
+            try {
+                const response = await fetch('/api/credits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, amount: topupCredits }),
+                });
+                const data = await response.json();
+                if (!data.success || typeof data.credits !== 'number') {
+                    setErrors({ form: data.error || 'Ödeme sonrası kredi ekleme başarısız oldu.' });
+                    setSubmitted(false);
+                    return;
+                }
+
+                window.localStorage.setItem('emlak_credits', String(data.credits));
+                window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                    detail: { credits: data.credits }
+                }));
+                setSubmitted(true);
+            } catch {
+                setErrors({ form: 'Ödeme işlemi sırasında bir hata oluştu.' });
+                setSubmitted(false);
+            } finally {
+                setIsSubmitting(false);
+            }
+            return;
+        }
+
         setSubmitted(true);
     };
 
@@ -137,12 +192,17 @@ export default function CheckoutClient() {
             <div className={styles.container}>
                 <div className={styles.hero}>
                     <div>
-                        <h1 className={styles.title}>Kredi Kartı Ödeme</h1>
-                        <p className={styles.subtitle}>Ödemeyi hızlıca tamamlayın. Kart bilgileriniz güvenli ve şifreli biçimde işlenir.</p>
+                        <h1 className={styles.title}>{mode === 'topup' ? 'Ek Kredi Ödeme' : 'Kredi Kartı Ödeme'}</h1>
+                        <p className={styles.subtitle}>
+                            {mode === 'topup'
+                                ? `Bulunduğunuz ${plan.name} paketine göre ${topupCredits} ek kredi satın alıyorsunuz.`
+                                : 'Ödemeyi hızlıca tamamlayın. Kart bilgileriniz güvenli ve şifreli biçimde işlenir.'}
+                        </p>
                     </div>
                     <div className={styles.heroBadges}>
                         <span className={styles.heroBadge}>Paket: {plan.name}</span>
                         <span className={styles.heroBadge}>Plan: {billing === 'yearly' ? 'Yıllık' : 'Aylık'}</span>
+                        {mode === 'topup' ? <span className={styles.heroBadge}>Ek Kredi: {topupCredits}</span> : null}
                     </div>
                 </div>
 
@@ -220,13 +280,18 @@ export default function CheckoutClient() {
                             </label>
                         </div>
 
-                        <button className={styles.payBtn} type="submit" disabled={!isFormReady}>
-                            ₺{displayPrice.toLocaleString('tr-TR')} ile Ödemeyi Tamamla
+                        <button className={styles.payBtn} type="submit" disabled={!isFormReady || isSubmitting}>
+                            {isSubmitting
+                                ? 'Ödeme İşleniyor...'
+                                : `₺${displayPrice.toLocaleString('tr-TR')} ile Ödemeyi Tamamla`}
                         </button>
                         <p className={styles.paySubtext}>Toplam: ₺{displayPrice.toLocaleString('tr-TR')}{displayPeriod}</p>
+                        {errors.form ? <p className={styles.errorText}>{errors.form}</p> : null}
                         {submitted ? (
                             <p className={styles.success}>
-                                Ödeme talebi başarıyla alındı. Canlı ödeme sağlayıcısında bu adım doğrudan tahsilata yönlenecek.
+                                {mode === 'topup'
+                                    ? `${topupCredits} kredi hesabınıza eklendi.`
+                                    : 'Ödeme talebi başarıyla alındı. Canlı ödeme sağlayıcısında bu adım doğrudan tahsilata yönlenecek.'}
                             </p>
                         ) : null}
                     </form>
@@ -234,17 +299,30 @@ export default function CheckoutClient() {
                     <aside className={styles.summary}>
                         <h3 className={styles.sectionTitle}>Sipariş Özeti</h3>
                         <div className={styles.summaryRow}>
-                            <span>Paket</span>
-                            <strong>{plan.name}</strong>
+                            <span>{mode === 'topup' ? 'İşlem' : 'Paket'}</span>
+                            <strong>{mode === 'topup' ? 'Ek Kredi Satın Alma' : plan.name}</strong>
                         </div>
                         <div className={styles.summaryRow}>
                             <span>Plan</span>
                             <strong>{billing === 'yearly' ? 'Yıllık' : 'Aylık'}</strong>
                         </div>
-                        <div className={styles.summaryRow}>
-                            <span>Aylık kredi</span>
-                            <strong>{plan.monthlyCredits}</strong>
-                        </div>
+                        {mode === 'topup' ? (
+                            <>
+                                <div className={styles.summaryRow}>
+                                    <span>Satın Alınacak Kredi</span>
+                                    <strong>{topupCredits}</strong>
+                                </div>
+                                <div className={styles.summaryRow}>
+                                    <span>Paket Bazlı Tutar</span>
+                                    <strong>₺{displayPrice.toLocaleString('tr-TR')}</strong>
+                                </div>
+                            </>
+                        ) : (
+                            <div className={styles.summaryRow}>
+                                <span>Aylık kredi</span>
+                                <strong>{plan.monthlyCredits}</strong>
+                            </div>
+                        )}
                         <div className={styles.totalRow}>
                             <span>Toplam</span>
                             <strong>₺{displayPrice.toLocaleString('tr-TR')}{displayPeriod}</strong>

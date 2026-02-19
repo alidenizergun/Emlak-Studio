@@ -80,6 +80,14 @@ export default function SubscriptionClient() {
         return subscription.status === 'active' ? 'Aktif' : 'İptal edildi';
     }, [subscription]);
 
+    const purchaseQuote = useMemo(() => {
+        const amount = Math.floor(Number(purchaseAmount) || 0);
+        if (!subscription || amount <= 0) return { amount: 0, total: 0 };
+        const perCreditPrice = subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1);
+        const total = Math.round(perCreditPrice * amount);
+        return { amount, total };
+    }, [purchaseAmount, subscription]);
+
     const handleCancelSubscription = async () => {
         if (!phone || !subscription || subscription.status === 'cancelled') return;
 
@@ -120,8 +128,8 @@ export default function SubscriptionClient() {
     };
 
     const handlePurchaseCredits = async () => {
-        if (!phone) return;
-        const amount = Math.floor(Number(purchaseAmount) || 0);
+        if (!phone || !subscription) return;
+        const amount = purchaseQuote.amount;
         if (amount <= 0) {
             setError('Lütfen 0’dan büyük bir kredi adedi girin.');
             return;
@@ -131,24 +139,14 @@ export default function SubscriptionClient() {
         setError('');
         setPurchaseNote('');
         try {
-            const response = await fetch('/api/credits', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, amount }),
+            const params = new URLSearchParams({
+                mode: 'topup',
+                plan: subscription.planId,
+                billing: 'monthly',
+                credits: String(amount),
+                total: String(purchaseQuote.total),
             });
-            const data = await response.json();
-            if (!data.success) {
-                setError(data.error || 'Kredi satın alma işlemi başarısız oldu.');
-                return;
-            }
-
-            const nextCredits = typeof data.credits === 'number' ? data.credits : credits + amount;
-            setCredits(nextCredits);
-            window.localStorage.setItem('emlak_credits', String(nextCredits));
-            window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
-                detail: { credits: nextCredits }
-            }));
-            setPurchaseNote(`${amount} kredi hesabınıza eklendi.`);
+            router.push(`/checkout?${params.toString()}`);
         } catch {
             setError('Kredi satın alma sırasında bir hata oluştu.');
         } finally {
@@ -230,9 +228,12 @@ export default function SubscriptionClient() {
                                         onClick={handlePurchaseCredits}
                                         disabled={processingPurchase}
                                     >
-                                        {processingPurchase ? 'Ekleniyor...' : 'Kredi Satın Al'}
+                                        {processingPurchase ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
                                     </button>
                                 </div>
+                                <p className={styles.purchaseText}>
+                                    Toplam ödeme: ₺{purchaseQuote.total.toLocaleString('tr-TR')}
+                                </p>
                             </div>
 
                         </div>
