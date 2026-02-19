@@ -183,9 +183,13 @@
 
 .panelTitleRow {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
     gap: 0.5rem;
+}
+
+.panelTitleRow .panelTitle {
+    margin-bottom: 0;
 }
 
 .inlineCost {
