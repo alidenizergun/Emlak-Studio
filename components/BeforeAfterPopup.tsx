@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import type { CSSProperties } from 'react';
 import styles from './BeforeAfterPopup.module.css';
 
 export type BeforeAfterPopupProps = {
@@ -19,6 +20,8 @@ export type BeforeAfterPopupProps = {
     hintText?: string;
     /** SVG gradient id prefix (farklı sayfalarda çakışmayı önlemek için) */
     gradientIdPrefix?: string;
+    /** Popup yüksekliği ölçeği (1.1 = üst/alt toplam %10 daha yüksek) */
+    heightScale?: number;
 };
 
 const CLOSE_SVG = (
@@ -71,10 +74,12 @@ export function BeforeAfterPopup({
     ctaHref = '/register',
     hintText,
     gradientIdPrefix = 'popup_ai',
+    heightScale = 1,
 }: BeforeAfterPopupProps) {
     if (!open) return null;
 
     const gradientId = `${gradientIdPrefix}_gradient`;
+    const popupStyle = { ['--popup-height-scale' as const]: heightScale } as CSSProperties;
 
     return (
         <div
@@ -84,7 +89,7 @@ export function BeforeAfterPopup({
             aria-modal="true"
             aria-label="Önce ve sonra karşılaştırması"
         >
-            <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.popup} style={popupStyle} onClick={(e) => e.stopPropagation()}>
                 <button type="button" className={styles.popupClose} onClick={onClose} aria-label="Kapat">
                     {CLOSE_SVG}
                 </button>

@@ -160,6 +160,7 @@ export function ExamplesContent() {
                     ctaHref="/register"
                     hintText={POPUP_HINT_SENTENCES[ctaHintIndex]}
                     gradientIdPrefix="examples_popup_ai"
+                    heightScale={1.1}
                 />
             )}
 

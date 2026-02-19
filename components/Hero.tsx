@@ -198,6 +198,7 @@ const Hero = () => {
                 ctaHref="/register"
                 hintText={POPUP_HINT_SENTENCES[popupHintIndex]}
                 gradientIdPrefix="hero_popup_ai"
+                heightScale={1.1}
             />
         </section>
     );
