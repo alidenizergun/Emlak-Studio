@@ -23,6 +23,35 @@ function parseBilling(value: string | null): BillingCycle {
     return value === 'yearly' ? 'yearly' : 'monthly';
 }
 
+function normalizeCardName(value: string): string {
+    return value
+        .replace(/[^A-Za-zÇĞİÖŞÜçğıöşü\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trimStart()
+        .slice(0, 40);
+}
+
+function normalizeCardNumber(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(0, 16);
+    return digits.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function normalizeExpiry(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+
+function normalizeCvv(value: string): string {
+    return value.replace(/\D/g, '').slice(0, 3);
+}
+
+function isValidExpiry(value: string): boolean {
+    if (!/^\d{2}\/\d{2}$/.test(value)) return false;
+    const month = Number(value.slice(0, 2));
+    return month >= 1 && month <= 12;
+}
+
 export default function CheckoutClient() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
@@ -33,6 +62,7 @@ export default function CheckoutClient() {
     const [expiry, setExpiry] = useState('');
     const [cvv, setCvv] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         setMounted(true);
@@ -70,6 +100,27 @@ export default function CheckoutClient() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const nextErrors: Record<string, string> = {};
+
+        if (cardName.trim().length < 3) {
+            nextErrors.cardName = 'Kart üzerindeki isim en az 3 karakter olmalı.';
+        }
+        if (cardNumber.replace(/\s/g, '').length !== 16) {
+            nextErrors.cardNumber = 'Kart numarası 16 haneli olmalı.';
+        }
+        if (!isValidExpiry(expiry)) {
+            nextErrors.expiry = 'Son kullanma tarihi AA/YY formatında olmalı.';
+        }
+        if (cvv.length !== 3) {
+            nextErrors.cvv = 'CVV 3 haneli olmalı.';
+        }
+
+        setErrors(nextErrors);
+        if (Object.keys(nextErrors).length > 0) {
+            setSubmitted(false);
+            return;
+        }
+
         setSubmitted(true);
     };
 
@@ -91,20 +142,32 @@ export default function CheckoutClient() {
                             <span>Kart Üzerindeki İsim</span>
                             <input
                                 value={cardName}
-                                onChange={(e) => setCardName(e.target.value)}
+                                onChange={(e) => {
+                                    setCardName(normalizeCardName(e.target.value));
+                                    if (errors.cardName) setErrors((prev) => ({ ...prev, cardName: '' }));
+                                }}
                                 placeholder="Ad Soyad"
+                                autoComplete="cc-name"
                                 required
                             />
+                            {errors.cardName ? <span className={styles.errorText}>{errors.cardName}</span> : null}
                         </label>
 
                         <label className={styles.field}>
                             <span>Kart Numarası</span>
                             <input
                                 value={cardNumber}
-                                onChange={(e) => setCardNumber(e.target.value)}
+                                onChange={(e) => {
+                                    setCardNumber(normalizeCardNumber(e.target.value));
+                                    if (errors.cardNumber) setErrors((prev) => ({ ...prev, cardNumber: '' }));
+                                }}
                                 placeholder="0000 0000 0000 0000"
+                                inputMode="numeric"
+                                autoComplete="cc-number"
+                                maxLength={19}
                                 required
                             />
+                            {errors.cardNumber ? <span className={styles.errorText}>{errors.cardNumber}</span> : null}
                         </label>
 
                         <div className={styles.row}>
@@ -112,19 +175,33 @@ export default function CheckoutClient() {
                                 <span>Son Kullanma</span>
                                 <input
                                     value={expiry}
-                                    onChange={(e) => setExpiry(e.target.value)}
+                                    onChange={(e) => {
+                                        setExpiry(normalizeExpiry(e.target.value));
+                                        if (errors.expiry) setErrors((prev) => ({ ...prev, expiry: '' }));
+                                    }}
                                     placeholder="AA/YY"
+                                    inputMode="numeric"
+                                    autoComplete="cc-exp"
+                                    maxLength={5}
                                     required
                                 />
+                                {errors.expiry ? <span className={styles.errorText}>{errors.expiry}</span> : null}
                             </label>
                             <label className={styles.field}>
                                 <span>CVV</span>
                                 <input
                                     value={cvv}
-                                    onChange={(e) => setCvv(e.target.value)}
+                                    onChange={(e) => {
+                                        setCvv(normalizeCvv(e.target.value));
+                                        if (errors.cvv) setErrors((prev) => ({ ...prev, cvv: '' }));
+                                    }}
                                     placeholder="123"
+                                    inputMode="numeric"
+                                    autoComplete="cc-csc"
+                                    maxLength={3}
                                     required
                                 />
+                                {errors.cvv ? <span className={styles.errorText}>{errors.cvv}</span> : null}
                             </label>
                         </div>
 

@@ -53,6 +53,12 @@
     font-weight: 600;
 }
 
+.errorText {
+    color: #b91c1c;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
 .field input {
     width: 100%;
     border: 1px solid #e2e8f0;
@@ -132,4 +138,3 @@
         grid-template-columns: 1fr;
     }
 }
-
