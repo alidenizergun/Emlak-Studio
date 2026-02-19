@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/prompts';
 
 /**
  * Placeholder API: returns the same image as "processed" until a real
@@ -8,7 +9,9 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const image = formData.get('image') as File;
-        const prompt = (formData.get('prompt') as string) || '';
+        const mode = ((formData.get('mode') as string) || 'all') as RemoveMode;
+        const userPrompt = ((formData.get('userPrompt') as string) || '').trim();
+        const clientPrompt = ((formData.get('prompt') as string) || '').trim();
 
         if (!image) {
             return NextResponse.json(
@@ -16,6 +19,15 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        if (mode === 'prompt' && !userPrompt) {
+            return NextResponse.json(
+                { success: false, error: 'Belirli eşya silme için açıklama gerekli' },
+                { status: 400 }
+            );
+        }
+
+        const prompt = clientPrompt || buildRemoveObjectPrompt(mode, userPrompt);
 
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
@@ -26,7 +38,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             imageUrl,
-            prompt: prompt || undefined,
+            mode,
+            prompt,
+            userPrompt: userPrompt || undefined,
             note: 'Object removal AI will be integrated here. Currently returning original image.',
         });
     } catch (error: unknown) {

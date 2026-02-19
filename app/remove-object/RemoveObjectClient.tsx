@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import styles from './RemoveObject.module.css';
+import { buildRemoveObjectPrompt, type RemoveMode } from './prompts';
 
 export default function RemoveObjectClient() {
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [removePrompt, setRemovePrompt] = useState('');
-    const [mode, setMode] = useState<'all' | 'prompt'>('all');
+    const [mode, setMode] = useState<RemoveMode>('all');
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -33,7 +34,7 @@ export default function RemoveObjectClient() {
         setResult(null);
     };
 
-    const callRemoveApi = async (prompt: string) => {
+    const callRemoveApi = async (payload: { mode: RemoveMode; userPrompt?: string }) => {
         if (!file) return;
         setIsProcessing(true);
         setResult(null);
@@ -41,7 +42,9 @@ export default function RemoveObjectClient() {
         try {
             const formData = new FormData();
             formData.append('image', file);
-            if (prompt) formData.append('prompt', prompt);
+            formData.append('mode', payload.mode);
+            if (payload.userPrompt) formData.append('userPrompt', payload.userPrompt);
+            formData.append('prompt', buildRemoveObjectPrompt(payload.mode, payload.userPrompt));
 
             const response = await fetch('/api/remove-object', {
                 method: 'POST',
@@ -67,8 +70,8 @@ export default function RemoveObjectClient() {
         }
     };
 
-    const handleRemoveAll = () => callRemoveApi('tüm eşyaları sil');
-    const handleRemoveWithPrompt = () => callRemoveApi(removePrompt.trim());
+    const handleRemoveAll = () => callRemoveApi({ mode: 'all' });
+    const handleRemoveWithPrompt = () => callRemoveApi({ mode: 'prompt', userPrompt: removePrompt.trim() });
     const handleProcess = () => {
         if (mode === 'all') {
             handleRemoveAll();
