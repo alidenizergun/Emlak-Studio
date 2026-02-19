@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './Checkout.module.css';
 import { readPendingCheckoutSelection, savePendingCheckoutSelection, type BillingCycle } from '@/lib/checkout';
@@ -232,7 +231,6 @@ export default function CheckoutClient() {
                             <strong>₺{displayPrice.toLocaleString('tr-TR')}{displayPeriod}</strong>
                         </div>
 
-                        <Link href="/pricing" className={styles.backLink}>Paketlere geri dön</Link>
                     </aside>
                 </div>
             </div>
