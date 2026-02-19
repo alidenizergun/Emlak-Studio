@@ -246,9 +246,6 @@ export default function SubscriptionClient() {
                                 </div>
                             </div>
 
-                            <p className={styles.warning}>
-                                Üyelik iptalinde kullanılan krediler düşülür, kullanılmamış kredi bakiyesi sıfırlanır.
-                            </p>
                         </div>
 
                         {showCancelModal ? (
