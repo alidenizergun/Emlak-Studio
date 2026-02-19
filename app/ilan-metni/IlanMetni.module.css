@@ -366,6 +366,51 @@
     color: #0f172a;
 }
 
+@media (min-width: 1025px) {
+    .panel {
+        padding: 1rem;
+    }
+
+    .panelTitle {
+        margin-bottom: 0.55rem;
+        font-size: 0.9rem;
+    }
+
+    .formSection {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .formGroup {
+        margin-bottom: 0.5rem;
+    }
+
+    .formRow {
+        gap: 0.42rem;
+    }
+
+    .formRow .formGroup {
+        margin-bottom: 0.5rem;
+    }
+
+    .formLabel {
+        font-size: 0.7rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .formInput,
+    .formSelect,
+    .formTextarea {
+        padding: 0.43rem 0.58rem;
+        font-size: 0.84rem;
+        border-radius: 7px;
+    }
+
+    .formTextarea {
+        min-height: 48px;
+    }
+}
+
 @media (max-width: 640px) {
     .formRow {
         grid-template-columns: 1fr;
