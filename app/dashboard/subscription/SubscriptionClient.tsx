@@ -167,17 +167,6 @@ export default function SubscriptionClient() {
                     <h1 className={styles.title}>Paketleri Görüntüle / Aboneliği Yönet</h1>
                 </div>
                 <p className={styles.subtitle}>Abonelik durumunuz, kredi kullanımı ve iptal işlemini bu ekrandan yönetebilirsiniz.</p>
-                <div className={styles.headerActions}>
-                    <Link href="/pricing" className={styles.linkBtn}>Paketleri Gör</Link>
-                    <button
-                        type="button"
-                        className={styles.linkBtn}
-                        onClick={() => setShowCancelModal(true)}
-                        disabled={processingCancel || processingPurchase || !subscription || subscription.status === 'cancelled'}
-                    >
-                        {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
-                    </button>
-                </div>
 
                 {loading ? (
                     <div className={styles.card}>Yükleniyor...</div>
@@ -246,6 +235,17 @@ export default function SubscriptionClient() {
                                 </div>
                             </div>
 
+                        </div>
+                        <div className={styles.headerActions}>
+                            <Link href="/pricing" className={styles.linkBtn}>Paketleri Gör</Link>
+                            <button
+                                type="button"
+                                className={styles.linkBtn}
+                                onClick={() => setShowCancelModal(true)}
+                                disabled={processingCancel || processingPurchase || !subscription || subscription.status === 'cancelled'}
+                            >
+                                {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
+                            </button>
                         </div>
 
                         {showCancelModal ? (
