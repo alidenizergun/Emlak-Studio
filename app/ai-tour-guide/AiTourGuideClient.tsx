@@ -70,6 +70,7 @@ export default function AiTourGuideClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Yapay Zeka Sunucusu</h1>
+                    <div className={styles.costBadge}>10 kredi</div>
                     <p className={styles.description}>
                         Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, yukarıda girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
                     </p>
