@@ -42,6 +42,8 @@ export default function SettingsClient() {
     const [email, setEmail] = useState('');
     const [saveNote, setSaveNote] = useState('');
     const [saveNoteType, setSaveNoteType] = useState<'success' | 'error'>('success');
+    const [needsCorrectionAttempt, setNeedsCorrectionAttempt] = useState(false);
+    const [bonusEligibilityLocked, setBonusEligibilityLocked] = useState(false);
     const redirectDone = useRef(false);
 
     useEffect(() => {
@@ -76,19 +78,47 @@ export default function SettingsClient() {
         const normalizedOffice = officeName.trim().replace(/\s+/g, ' ');
         const normalizedEmail = email.trim().toLowerCase();
 
-        if (!isValidFullName(normalizedName)) {
-            setSaveNoteType('error');
-            setSaveNote('Lütfen gerçek bir ad soyad girin.');
-            return;
+        const isNameValid = isValidFullName(normalizedName);
+        const isOfficeValid = isValidOfficeName(normalizedOffice);
+        const isEmailValid = isValidEmail(normalizedEmail);
+
+        if (isNameValid) {
+            window.localStorage.setItem('emlak_profile_full_name', normalizedName);
         }
-        if (!isValidOfficeName(normalizedOffice)) {
-            setSaveNoteType('error');
-            setSaveNote('Lütfen geçerli bir emlak ofisi adı girin.');
-            return;
+        if (isOfficeValid) {
+            window.localStorage.setItem('emlak_profile_office_name', normalizedOffice);
         }
-        if (!isValidEmail(normalizedEmail)) {
+        if (isEmailValid) {
+            window.localStorage.setItem('emlak_profile_email', normalizedEmail);
+        }
+
+        const invalidFields: string[] = [];
+        if (!isNameValid) invalidFields.push('Ad Soyad');
+        if (!isOfficeValid) invalidFields.push('Emlak Ofisi');
+        if (!isEmailValid) invalidFields.push('E-posta');
+
+        if (invalidFields.length > 0) {
+            const invalidText = invalidFields.join(', ');
             setSaveNoteType('error');
-            setSaveNote('Lütfen geçerli bir e-posta adresi girin.');
+
+            if (!needsCorrectionAttempt && !bonusEligibilityLocked) {
+                setNeedsCorrectionAttempt(true);
+                setSaveNote(
+                    `Şu alanları düzeltin: ${invalidText}. Doğru alanlar kaydedildi, hediye kredi için 1 düzeltme hakkınız var.`
+                );
+                return;
+            }
+
+            if (needsCorrectionAttempt && !bonusEligibilityLocked) {
+                setNeedsCorrectionAttempt(false);
+                setBonusEligibilityLocked(true);
+                setSaveNote(
+                    `Şu alanlar hâlâ hatalı: ${invalidText}. Düzeltme hakkınız kullanıldı; bilgiler kaydedilebilir ancak hediye kredi verilemez.`
+                );
+                return;
+            }
+
+            setSaveNote(`Şu alanları geçerli girin: ${invalidText}.`);
             return;
         }
 
@@ -99,8 +129,11 @@ export default function SettingsClient() {
         const phone = (window.localStorage.getItem('emlak_user_phone') || '').replace(/\D/g, '');
         const bonusKey = `emlak_profile_bonus_awarded_${phone}`;
         const bonusAlreadyAwarded = phone ? window.localStorage.getItem(bonusKey) === '1' : true;
+        const bonusBlocked = bonusEligibilityLocked;
 
-        if (!phone || bonusAlreadyAwarded) {
+        setNeedsCorrectionAttempt(false);
+
+        if (!phone || bonusAlreadyAwarded || bonusBlocked) {
             setSaveNoteType('success');
             setSaveNote('Bilgiler kaydedildi.');
             return;
