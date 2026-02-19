@@ -30,6 +30,7 @@ export default function SubscriptionClient() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [processingCancel, setProcessingCancel] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [phone, setPhone] = useState('');
     const [credits, setCredits] = useState<number>(0);
     const [usedCredits, setUsedCredits] = useState<number>(0);
@@ -78,10 +79,6 @@ export default function SubscriptionClient() {
 
     const handleCancelSubscription = async () => {
         if (!phone || !subscription || subscription.status === 'cancelled') return;
-        const approved = window.confirm(
-            'Aboneliğiniz iptal edilecek. Kullanılmamış kredileriniz sıfırlanır. Devam etmek istiyor musunuz?'
-        );
-        if (!approved) return;
 
         setProcessingCancel(true);
         setError('');
@@ -111,6 +108,7 @@ export default function SubscriptionClient() {
                 `Abonelik iptal edildi. Kullanılan kredi: ${typeof data.usedCredits === 'number' ? data.usedCredits : 0}, ` +
                 `kaldırılan bakiye: ${typeof data.removedCredits === 'number' ? data.removedCredits : 0}.`
             );
+            setShowCancelModal(false);
         } catch {
             setError('İptal işlemi sırasında bir hata oluştu.');
         } finally {
@@ -177,7 +175,7 @@ export default function SubscriptionClient() {
                             <button
                                 type="button"
                                 className={styles.cancelBtn}
-                                onClick={handleCancelSubscription}
+                                onClick={() => setShowCancelModal(true)}
                                 disabled={processingCancel || !subscription || subscription.status === 'cancelled'}
                             >
                                 {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
@@ -186,10 +184,49 @@ export default function SubscriptionClient() {
                                 Üyelik iptalinde kullanılan krediler düşülür, kullanılmamış kredi bakiyesi sıfırlanır.
                             </p>
                         </div>
+
+                        {showCancelModal ? (
+                            <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Abonelik iptali">
+                                <div className={styles.modalCard}>
+                                    <h3 className={styles.modalTitle}>Gitmeden önce birlikte çözelim</h3>
+                                    <p className={styles.modalText}>
+                                        Aboneliğinizi iptal etmek yerine maliyeti düşürmek ve kredinizi daha verimli kullanmak için şu seçenekleri deneyebilirsiniz:
+                                    </p>
+                                    <div className={styles.modalActions}>
+                                        <Link href="/pricing" className={styles.modalSecondaryBtn}>
+                                            Daha Uygun Pakete Geç
+                                        </Link>
+                                        <Link href="/help" className={styles.modalSecondaryBtn}>
+                                            Kullanım Rehberini Aç
+                                        </Link>
+                                        <Link href="/contact" className={styles.modalSecondaryBtn}>
+                                            Destek ile Görüş
+                                        </Link>
+                                    </div>
+                                    <div className={styles.modalFooter}>
+                                        <button
+                                            type="button"
+                                            className={styles.modalCloseBtn}
+                                            onClick={() => setShowCancelModal(false)}
+                                            disabled={processingCancel}
+                                        >
+                                            Vazgeç
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.modalDangerBtn}
+                                            onClick={handleCancelSubscription}
+                                            disabled={processingCancel}
+                                        >
+                                            {processingCancel ? 'İptal Ediliyor...' : 'Yine de İptal Et'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
                     </>
                 )}
             </div>
         </div>
     );
 }
-
