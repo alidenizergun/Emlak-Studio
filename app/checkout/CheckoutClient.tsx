@@ -96,6 +96,11 @@ export default function CheckoutClient() {
     }, [billing, plan.monthlyPrice]);
 
     const displayPeriod = billing === 'yearly' ? '/yıl' : '/ay';
+    const isFormReady =
+        cardName.trim().length >= 3 &&
+        cardNumber.replace(/\s/g, '').length === 16 &&
+        isValidExpiry(expiry) &&
+        cvv.length === 3;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -130,12 +135,23 @@ export default function CheckoutClient() {
     return (
         <div className={styles.pageContainer}>
             <div className={styles.container}>
-                <h1 className={styles.title}>Kredi Kartı Ödeme</h1>
-                <p className={styles.subtitle}>Seçtiğiniz paket: <strong>{plan.name}</strong> ({billing === 'yearly' ? 'Yıllık' : 'Aylık'})</p>
+                <div className={styles.hero}>
+                    <div>
+                        <h1 className={styles.title}>Kredi Kartı Ödeme</h1>
+                        <p className={styles.subtitle}>Ödemeyi hızlıca tamamlayın. Kart bilgileriniz güvenli ve şifreli biçimde işlenir.</p>
+                    </div>
+                    <div className={styles.heroBadges}>
+                        <span className={styles.heroBadge}>Paket: {plan.name}</span>
+                        <span className={styles.heroBadge}>Plan: {billing === 'yearly' ? 'Yıllık' : 'Aylık'}</span>
+                    </div>
+                </div>
 
                 <div className={styles.layout}>
                     <form className={styles.card} onSubmit={handleSubmit}>
-                        <h2 className={styles.sectionTitle}>Kart Bilgileri</h2>
+                        <div className={styles.sectionHeader}>
+                            <h2 className={styles.sectionTitle}>Kart Bilgileri</h2>
+                            <span className={styles.secureNote}>Güvenli Ödeme</span>
+                        </div>
 
                         <label className={styles.field}>
                             <span>Kart Üzerindeki İsim</span>
@@ -204,10 +220,13 @@ export default function CheckoutClient() {
                             </label>
                         </div>
 
-                        <button className={styles.payBtn} type="submit">Ödemeyi Tamamla</button>
+                        <button className={styles.payBtn} type="submit" disabled={!isFormReady}>
+                            ₺{displayPrice.toLocaleString('tr-TR')} ile Ödemeyi Tamamla
+                        </button>
+                        <p className={styles.paySubtext}>Toplam: ₺{displayPrice.toLocaleString('tr-TR')}{displayPeriod}</p>
                         {submitted ? (
                             <p className={styles.success}>
-                                Ödeme talebi alındı. Ödeme sağlayıcısı entegrasyonunda bu adım gerçek kart tahsiline yönlenecek.
+                                Ödeme talebi başarıyla alındı. Canlı ödeme sağlayıcısında bu adım doğrudan tahsilata yönlenecek.
                             </p>
                         ) : null}
                     </form>
@@ -230,7 +249,11 @@ export default function CheckoutClient() {
                             <span>Toplam</span>
                             <strong>₺{displayPrice.toLocaleString('tr-TR')}{displayPeriod}</strong>
                         </div>
-
+                        <div className={styles.trustList}>
+                            <span>SSL ile şifreli ödeme</span>
+                            <span>3D Secure uyumlu işlem</span>
+                            <span>Anında kredi tanımlama</span>
+                        </div>
                     </aside>
                 </div>
             </div>
