@@ -106,6 +106,7 @@ export default function IlanMetniClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
+                    <div className={styles.costBadge}>1 kredi</div>
                     <p className={styles.description}>
                         Fotoğrafları yükleyin ve ilan bilgilerini girin; yapay zeka profesyonel ilan metni üretsin.
                     </p>
