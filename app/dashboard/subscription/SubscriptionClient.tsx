@@ -274,7 +274,7 @@ export default function SubscriptionClient() {
                                             onClick={() => setShowCancelModal(false)}
                                             disabled={processingCancel}
                                         >
-                                            Vazgeç
+                                            İptalden Vazgeç
                                         </button>
                                         <button
                                             type="button"
