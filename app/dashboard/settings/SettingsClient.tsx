@@ -13,6 +13,26 @@ function maskPhone(raw: string): string {
     return `${first} *** ** ${last}`;
 }
 
+function isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+}
+
+function isValidFullName(value: string): boolean {
+    const cleaned = value.trim().replace(/\s+/g, ' ');
+    const parts = cleaned.split(' ').filter(Boolean);
+    if (parts.length < 2) return false;
+    return parts.every((part) => /^[A-Za-zCÇĞIİÖŞÜcçğıiöşü'-]{2,}$/.test(part));
+}
+
+function isValidOfficeName(value: string): boolean {
+    const cleaned = value.trim().replace(/\s+/g, ' ');
+    if (cleaned.length < 3) return false;
+    if (!/[A-Za-zCÇĞIİÖŞÜcçğıiöşü]/.test(cleaned)) return false;
+    if (!/^[A-Za-z0-9CÇĞIİÖŞÜcçğıiöşü\s&.'-]+$/.test(cleaned)) return false;
+    if (/(.)\1{4,}/.test(cleaned)) return false;
+    return true;
+}
+
 export default function SettingsClient() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
@@ -21,6 +41,7 @@ export default function SettingsClient() {
     const [officeName, setOfficeName] = useState('');
     const [email, setEmail] = useState('');
     const [saveNote, setSaveNote] = useState('');
+    const [saveNoteType, setSaveNoteType] = useState<'success' | 'error'>('success');
     const redirectDone = useRef(false);
 
     useEffect(() => {
@@ -49,12 +70,64 @@ export default function SettingsClient() {
         setMounted(true);
     }, [router]);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (typeof window === 'undefined') return;
-        window.localStorage.setItem('emlak_profile_full_name', fullName.trim());
-        window.localStorage.setItem('emlak_profile_office_name', officeName.trim());
-        window.localStorage.setItem('emlak_profile_email', email.trim());
-        setSaveNote('Bilgiler kaydedildi.');
+        const normalizedName = fullName.trim().replace(/\s+/g, ' ');
+        const normalizedOffice = officeName.trim().replace(/\s+/g, ' ');
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!isValidFullName(normalizedName)) {
+            setSaveNoteType('error');
+            setSaveNote('Lütfen gerçek bir ad soyad girin.');
+            return;
+        }
+        if (!isValidOfficeName(normalizedOffice)) {
+            setSaveNoteType('error');
+            setSaveNote('Lütfen geçerli bir emlak ofisi adı girin.');
+            return;
+        }
+        if (!isValidEmail(normalizedEmail)) {
+            setSaveNoteType('error');
+            setSaveNote('Lütfen geçerli bir e-posta adresi girin.');
+            return;
+        }
+
+        window.localStorage.setItem('emlak_profile_full_name', normalizedName);
+        window.localStorage.setItem('emlak_profile_office_name', normalizedOffice);
+        window.localStorage.setItem('emlak_profile_email', normalizedEmail);
+
+        const phone = (window.localStorage.getItem('emlak_user_phone') || '').replace(/\D/g, '');
+        const bonusKey = `emlak_profile_bonus_awarded_${phone}`;
+        const bonusAlreadyAwarded = phone ? window.localStorage.getItem(bonusKey) === '1' : true;
+
+        if (!phone || bonusAlreadyAwarded) {
+            setSaveNoteType('success');
+            setSaveNote('Bilgiler kaydedildi.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/credits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, amount: 5 })
+            });
+            const data = await response.json();
+            if (!data.success || typeof data.credits !== 'number') {
+                setSaveNoteType('error');
+                setSaveNote('Bilgiler kaydedildi. Hediye kredi eklenemedi.');
+                return;
+            }
+
+            window.localStorage.setItem(bonusKey, '1');
+            window.localStorage.setItem('emlak_credits', String(data.credits));
+            window.dispatchEvent(new CustomEvent('emlak:credits-updated', { detail: { credits: data.credits } }));
+            setSaveNoteType('success');
+            setSaveNote('Bilgiler kaydedildi. 5 kredi hesabınıza eklendi.');
+        } catch {
+            setSaveNoteType('error');
+            setSaveNote('Bilgiler kaydedildi. Hediye kredi eklenemedi.');
+        }
     };
 
     if (!mounted) {
@@ -122,7 +195,8 @@ export default function SettingsClient() {
                                 Kaydet
                             </button>
                         </div>
-                        {saveNote ? <p className={styles.accountNote}>{saveNote}</p> : null}
+                        <p className={styles.accountHint}>Bilgilerinizi girin, 5 kredi hediye kazanın.</p>
+                        {saveNote ? <p className={`${styles.accountNote} ${saveNoteType === 'error' ? styles.accountNoteError : ''}`}>{saveNote}</p> : null}
                     </div>
 
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
