@@ -8,15 +8,10 @@ import styles from './Dashboard.module.css';
 
 export default function DashboardClient() {
     const router = useRouter();
-    const [mounted, setMounted] = useState(false);
     const [credits, setCredits] = useState<number | null>(null);
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (!mounted || typeof window === 'undefined') return;
+        if (typeof window === 'undefined') return;
         const authed = window.localStorage.getItem('emlak_authed') === '1';
         if (!authed) {
             router.replace('/login');
@@ -34,15 +29,7 @@ export default function DashboardClient() {
                 })
                 .catch(() => {});
         }
-    }, [mounted, router]);
-
-    if (!mounted) {
-        return (
-            <div className={styles.pageContainer}>
-                <div className={styles.loading}>Yükleniyor...</div>
-            </div>
-        );
-    }
+    }, [router]);
 
     return (
         <div className={styles.pageContainer}>

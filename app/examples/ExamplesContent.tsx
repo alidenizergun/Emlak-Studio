@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import BeforeAfterPopup from '@/components/BeforeAfterPopup';
@@ -19,14 +18,9 @@ const CATEGORIES = [
 ];
 
 export function ExamplesContent() {
-    const [isMounted, setIsMounted] = useState(false);
     const [activeCategory, setActiveCategory] = useState('all');
     const [popupExample, setPopupExample] = useState<ExampleItem | null>(null);
     const [ctaHintIndex, setCtaHintIndex] = useState(0);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
 
     // Filter examples based on active category (memoized to avoid new ref every render)
     const filteredExamples = useMemo(
@@ -35,7 +29,9 @@ export function ExamplesContent() {
     );
 
     const filteredExamplesRef = useRef(filteredExamples);
-    filteredExamplesRef.current = filteredExamples;
+    useEffect(() => {
+        filteredExamplesRef.current = filteredExamples;
+    }, [filteredExamples]);
 
     // Rotate CTA hint sentences
     useEffect(() => {
@@ -95,21 +91,16 @@ export function ExamplesContent() {
 
                 {/* Categories Tabs - render as non-interactive placeholders until mount to avoid hydration mismatch */}
                 <div className={styles.tabsContainer}>
-                    {isMounted
-                        ? CATEGORIES.map((cat) => (
-                            <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => setActiveCategory(cat.id)}
-                                className={`${styles.tabButton} ${activeCategory === cat.id ? styles.tabButtonActive : ''}`}
-                            >
-                                {cat.label}
-                            </button>
-                          ))
-                        : CATEGORIES.map((cat) => (
-                            <span key={cat.id} className={styles.tabButton} aria-hidden>{cat.label}</span>
-                          ))
-                    }
+                    {CATEGORIES.map((cat) => (
+                        <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setActiveCategory(cat.id)}
+                            className={`${styles.tabButton} ${activeCategory === cat.id ? styles.tabButtonActive : ''}`}
+                        >
+                            {cat.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 

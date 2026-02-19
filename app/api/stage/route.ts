@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. FALLBACK - Apply some photographic enhancement to original image using Jimp
-        const jimpImage = await Jimp.read(buffer as any);
+        const jimpImage = await Jimp.read(buffer);
         jimpImage.brightness(0.1).contrast(0.1);
 
         const outputBuffer = await jimpImage.getBuffer("image/jpeg");

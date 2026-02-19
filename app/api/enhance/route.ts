@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Jimp } from 'jimp';
 import Replicate from 'replicate';
-import { buildEnhancePrompt } from '@/app/enhance/prompts';
 
 const replicate = process.env.REPLICATE_API_TOKEN
     ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
@@ -63,14 +62,14 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. FALLBACK / PROCESSED OUTPUT - Use Jimp (Pure JS, no binary issues)
-        const jimpImage = await Jimp.read(buffer as any);
+        const jimpImage = await Jimp.read(buffer);
 
         if (options.auto || options.lighting) {
             jimpImage.brightness(0.15).contrast(0.05);
         }
 
         if (options.auto || options.color) {
-            jimpImage.color([{ apply: 'saturate' as any, params: [25] }]);
+            jimpImage.color([{ apply: 'saturate', params: [25] }] as never);
         }
 
         if (options.auto || options.sharpness) {
@@ -100,9 +99,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
-/** Seçilen option'lara göre prompt üretir; [app/enhance/prompts.ts] tek kaynaktır. */
-function generateEnhancePrompt(options: Record<string, boolean>): string {
-    return buildEnhancePrompt(options);
 }

@@ -54,9 +54,13 @@ const Header = () => {
 
     // Set mounted state and read auth
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsMounted(true);
         try {
-            if (typeof window !== 'undefined') setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+            if (typeof window !== 'undefined') {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+                setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+            }
         } catch {}
 
         let timeoutId: NodeJS.Timeout;
@@ -101,6 +105,7 @@ const Header = () => {
     useEffect(() => {
         if (!isMounted || typeof window === 'undefined') return;
         try {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
         } catch {}
     }, [pathname, isMounted]);

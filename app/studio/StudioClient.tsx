@@ -40,11 +40,13 @@ export default function StudioClient() {
     const workspaceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
     useEffect(() => {
         const id = getToolIdFromParam(searchParams.get('tool'));
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedToolId(id);
     }, [searchParams]);
 

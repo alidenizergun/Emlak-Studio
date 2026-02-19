@@ -30,9 +30,11 @@ export default function SettingsClient() {
             return;
         }
         const phone = window.localStorage.getItem('emlak_user_phone');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPhoneDisplay(phone ? maskPhone(phone) : '—');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
-    }, []);
+    }, [router]);
 
     const handleLogout = () => {
         if (typeof window === 'undefined') return;

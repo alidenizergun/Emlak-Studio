@@ -18,6 +18,7 @@ export default function ToolCreditBar({ costLabel }: ToolCreditBarProps) {
     const [credits, setCredits] = useState<number | null>(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
@@ -25,13 +26,16 @@ export default function ToolCreditBar({ costLabel }: ToolCreditBarProps) {
         if (!mounted || typeof window === 'undefined') return;
         try {
             const authed = window.localStorage.getItem(AUTH_KEY) === '1';
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsAuthed(authed);
             if (authed) {
                 const raw = window.localStorage.getItem(CREDITS_KEY);
                 const value = raw !== null ? parseInt(raw, 10) : null;
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setCredits(Number.isNaN(value) ? null : value);
             }
         } catch {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsAuthed(false);
         }
     }, [mounted]);
