@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -58,6 +58,21 @@ export default function StudioClient() {
         workspace.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }, [selectedToolId]);
 
+    const refreshCredits = useCallback(() => {
+        const phone = window.localStorage.getItem('emlak_user_phone');
+        if (!phone) return;
+
+        fetch(`/api/credits?phone=${encodeURIComponent(phone)}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success && typeof data.credits === 'number') {
+                    setCredits(data.credits);
+                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                }
+            })
+            .catch(() => {});
+    }, []);
+
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
         const authed = window.localStorage.getItem('emlak_authed') === '1';
@@ -65,34 +80,8 @@ export default function StudioClient() {
             router.replace('/login');
             return;
         }
-        const phone = window.localStorage.getItem('emlak_user_phone');
-        if (phone) {
-            fetch(`/api/credits?phone=${encodeURIComponent(phone)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success && typeof data.credits === 'number') {
-                        setCredits(data.credits);
-                        window.localStorage.setItem('emlak_credits', String(data.credits));
-                    }
-                })
-                .catch(() => {});
-        }
-    }, [mounted, router]);
-
-    const refreshCredits = () => {
-        const phone = window.localStorage.getItem('emlak_user_phone');
-        if (phone) {
-            fetch(`/api/credits?phone=${encodeURIComponent(phone)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success && typeof data.credits === 'number') {
-                        setCredits(data.credits);
-                        window.localStorage.setItem('emlak_credits', String(data.credits));
-                    }
-                })
-                .catch(() => {});
-        }
-    };
+        refreshCredits();
+    }, [mounted, refreshCredits, router]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
@@ -112,7 +101,29 @@ export default function StudioClient() {
         return () => {
             window.removeEventListener('emlak:credits-updated', onCreditsUpdated);
         };
-    }, [mounted]);
+    }, [mounted, refreshCredits]);
+
+    useEffect(() => {
+        if (!mounted || typeof window === 'undefined') return;
+
+        const intervalId = window.setInterval(() => {
+            refreshCredits();
+        }, 10000);
+
+        const onFocus = () => refreshCredits();
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'visible') refreshCredits();
+        };
+
+        window.addEventListener('focus', onFocus);
+        document.addEventListener('visibilitychange', onVisibilityChange);
+
+        return () => {
+            window.clearInterval(intervalId);
+            window.removeEventListener('focus', onFocus);
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+        };
+    }, [mounted, refreshCredits]);
 
     if (!mounted) {
         return (
@@ -133,11 +144,6 @@ export default function StudioClient() {
                         <div className={styles.sidebarCreditRow}>
                             <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
                             <span className={styles.sidebarCreditValue}>{credits !== null ? credits : '—'}</span>
-                            <button type="button" className={styles.sidebarRefreshBtn} onClick={refreshCredits} aria-label="Krediyi yenile">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                                </svg>
-                            </button>
                         </div>
                         <Link href="/pricing" className={styles.sidebarCta}>Kredi al</Link>
                         <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>

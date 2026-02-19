@@ -52,28 +52,6 @@
     letter-spacing: -0.02em;
 }
 
-.sidebarRefreshBtn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    margin-left: auto;
-    background: transparent;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    color: #64748b;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background 0.2s;
-}
-
-.sidebarRefreshBtn:hover {
-    border-color: #0d9488;
-    color: #0d9488;
-    background: #f0fdf4;
-}
-
 .sidebarCta {
     display: inline-flex;
     align-items: center;
