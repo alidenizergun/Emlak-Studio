@@ -94,6 +94,26 @@ export default function StudioClient() {
         }
     };
 
+    useEffect(() => {
+        if (!mounted || typeof window === 'undefined') return;
+
+        const onCreditsUpdated = (event: Event) => {
+            const customEvent = event as CustomEvent<{ credits?: number }>;
+            const nextCredits = customEvent.detail?.credits;
+            if (typeof nextCredits === 'number') {
+                setCredits(nextCredits);
+                window.localStorage.setItem('emlak_credits', String(nextCredits));
+                return;
+            }
+            refreshCredits();
+        };
+
+        window.addEventListener('emlak:credits-updated', onCreditsUpdated);
+        return () => {
+            window.removeEventListener('emlak:credits-updated', onCreditsUpdated);
+        };
+    }, [mounted]);
+
     if (!mounted) {
         return (
             <div className={styles.pageContainer}>

@@ -6,77 +6,100 @@ export const metadata = {
     description: 'Emlak YZ müşteri hizmetleri ile iletişime geçin. Telefon ve e-posta desteği ile yanınızdayız.',
 };
 
+const CHANNELS = [
+    {
+        key: 'phone',
+        label: 'Telefon Hattı',
+        title: '0850 123 45 67',
+        desc: 'Acil destek ve satış öncesi sorular için doğrudan bağlanın.',
+        href: 'tel:08501234567',
+        meta: 'Hafta içi 09:00 - 18:00',
+        icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.11-2.12a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+        ),
+    },
+    {
+        key: 'mail',
+        label: 'E-posta',
+        title: 'destek@emlak-yz.com',
+        desc: 'Teknik detaylar ve kurumsal talepler için yazılı destek alın.',
+        href: 'mailto:destek@emlak-yz.com',
+        meta: 'Ortalama 2 saat içinde yanıt',
+        icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
+                <path d="m22 7-10 6L2 7" />
+            </svg>
+        ),
+    },
+    {
+        key: 'help',
+        label: 'Yardım Merkezi',
+        title: 'Hızlı Çözüm Kütüphanesi',
+        desc: 'En çok sorulan konulara adım adım rehberlerden anında yanıt bulun.',
+        href: '/help',
+        meta: '7/24 erişim',
+        icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+        ),
+    },
+];
+
 export default function ContactPage() {
     return (
-        <div className={`container ${styles.page}`}>
-            <header className={styles.header}>
-                <span className={styles.badge}>Bize Ulaşın</span>
-                <h1 className={styles.title}>Size Nasıl Yardımcı Olabiliriz?</h1>
-                <p className={styles.subtitle}>
-                    Emlak görselleştirme süreçlerinizle ilgili teknik destek, paket önerileri veya iş birliği fırsatları için ekibimizle dilediğiniz kanaldan iletişime geçebilirsiniz.
-                </p>
-            </header>
+        <div className={styles.page}>
+            <div className={`container ${styles.container}`}>
+                <section className={styles.hero}>
+                    <p className={styles.kicker}>Contact Desk</p>
+                    <h1 className={styles.title}>Sizin için doğru destek kanalını seçelim</h1>
+                    <p className={styles.subtitle}>
+                        Teknik destekten kurumsal iş birliğine kadar tüm iletişim noktaları tek yerde.
+                        Hızlı, net ve takip edilebilir bir destek akışı sunuyoruz.
+                    </p>
 
-            <div className={styles.content}>
-                <div className={styles.contactGrid}>
-                    {/* Phone Card */}
-                    <div className={styles.contactCard}>
-                        <div className={`${styles.cardIcon} ${styles.iconPhone}`}>
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.11-2.12a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                            </svg>
+                    <div className={styles.heroStats}>
+                        <div>
+                            <strong>&lt; 2 saat</strong>
+                            <span>Ortalama e-posta yanıtı</span>
                         </div>
-                        <div className={styles.cardInfo}>
-                            <h3 className={styles.cardTitle}>Müşteri Hizmetleri</h3>
-                            <p className={styles.cardDesc}>
-                                Satış öncesi sorularınız ve teknik destek konuları için bizi arayın.
-                            </p>
-                            <a href="tel:08501234567" className={styles.contactLink}>
-                                0850 123 45 67
-                            </a>
-                            <div className={styles.hoursBadge}>
-                                <span className={styles.dot}></span> Hafta içi 09:00 - 18:00
+                        <div>
+                            <strong>09:00-18:00</strong>
+                            <span>Canlı telefon desteği</span>
+                        </div>
+                        <div>
+                            <strong>7/24</strong>
+                            <span>Yardım merkezi erişimi</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section className={styles.grid}>
+                    {CHANNELS.map((channel) => (
+                        <article key={channel.key} className={styles.card}>
+                            <div className={styles.cardTop}>
+                                <span className={styles.icon}>{channel.icon}</span>
+                                <span className={styles.label}>{channel.label}</span>
                             </div>
-                        </div>
-                    </div>
+                            <h2 className={styles.cardTitle}>{channel.title}</h2>
+                            <p className={styles.cardDesc}>{channel.desc}</p>
+                            <p className={styles.cardMeta}>{channel.meta}</p>
+                            <Link href={channel.href} className={styles.cardCta}>
+                                Hemen Ulaş
+                            </Link>
+                        </article>
+                    ))}
+                </section>
 
-                    {/* Email Card */}
-                    <div className={styles.contactCard}>
-                        <div className={`${styles.cardIcon} ${styles.iconEmail}`}>
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                <polyline points="22,6 12,13 2,6" />
-                            </svg>
-                        </div>
-                        <div className={styles.cardInfo}>
-                            <h3 className={styles.cardTitle}>E-posta Desteği</h3>
-                            <p className={styles.cardDesc}>
-                                Detaylı sorularınız ve kurumsal iş ortaklığı talepleriniz için bize yazın.
-                            </p>
-                            <a href="mailto:destek@emlak-yz.com" className={styles.contactLink}>
-                                destek@emlak-yz.com
-                            </a>
-                            <div className={styles.responseBadge}>
-                                ⚡️ Ortalama 2 saat içinde yanıt
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* FAQ Link Section */}
-                <div className={styles.faqSection}>
-                    <div className={styles.faqContent}>
-                        <h3>Sıkça Sorulan Sorular</h3>
-                        <p>Kredi kullanımı, faturalandırma ve teknik detaylarla ilgili yanıtları hızlıca bulun.</p>
-                    </div>
-                    <Link href="/help" className={styles.faqButton}>
-                        Yardım Merkezine Git
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M5 12h14" />
-                            <path d="m12 5 7 7-7 7" />
-                        </svg>
-                    </Link>
-                </div>
+                <section className={styles.bottomStrip}>
+                    <p>Çözüm bulamadınız mı?</p>
+                    <Link href="/help" className={styles.stripBtn}>Yardım Merkezine Git</Link>
+                </section>
             </div>
         </div>
     );

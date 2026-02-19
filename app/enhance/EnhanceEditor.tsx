@@ -86,9 +86,11 @@ export default function EnhanceClient() {
         setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'processing' } : i));
 
         try {
+            const phone = window.localStorage.getItem('emlak_user_phone') || '';
             const formData = new FormData();
             formData.append('image', item.file);
             formData.append('options', JSON.stringify(selectedOptions));
+            formData.append('phone', phone);
 
             const response = await fetch('/api/enhance', {
                 method: 'POST',
@@ -98,12 +100,21 @@ export default function EnhanceClient() {
             const data = await response.json();
 
             if (data.success) {
+                if (typeof data.credits === 'number' && typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                    window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                        detail: { credits: data.credits }
+                    }));
+                }
                 setItems(prev => prev.map(i => i.id === item.id ? {
                     ...i,
                     status: 'success',
                     resultUrl: data.imageUrl
                 } : i));
             } else {
+                if (data?.code === 'INSUFFICIENT_CREDITS') {
+                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                }
                 setItems(prev => prev.map(i => i.id === item.id ? {
                     ...i,
                     status: 'error',
@@ -125,16 +136,10 @@ export default function EnhanceClient() {
         if (pending.length === 0) return;
 
         setIsGlobalProcessing(true);
-        // Process in parallel with limit of 3 to be nice to server
-        const chunk = (arr: EnhancedItem[], size: number) =>
-            Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-                arr.slice(i * size, i * size + size)
-            );
-
-        const chunks = chunk(pending, 3);
-
-        for (const batch of chunks) {
-            await Promise.all(batch.map(item => processItem(item)));
+        // Kredi kesintisi istek başına yapıldığı için yarış durumunu önlemek adına sıralı işleme.
+        for (const item of pending) {
+            // eslint-disable-next-line no-await-in-loop
+            await processItem(item);
         }
 
         setIsGlobalProcessing(false);
@@ -151,6 +156,7 @@ export default function EnhanceClient() {
     };
 
     const hasItems = items.length > 0;
+    const selectedOptionCount = Object.values(selectedOptions).filter(Boolean).length;
     const allDone = hasItems && items.every(i => i.status === 'success' || i.status === 'error');
     const pendingCount = items.filter(i => i.status === 'pending').length;
 
@@ -266,7 +272,10 @@ export default function EnhanceClient() {
                                         )}
                                     </div>
                                     <div className={styles.optionText}>
-                                        <span className={styles.optionName}>{opt.label}</span>
+                                        <div className={styles.optionNameRow}>
+                                            <span className={styles.optionName}>{opt.label}</span>
+                                            <span className={styles.optionCost}>{opt.creditCost}</span>
+                                        </div>
                                         <span className={styles.optionDesc}>{opt.desc}</span>
                                     </div>
                                     <div className={styles.optionIcon}>{opt.icon}</div>
@@ -285,7 +294,10 @@ export default function EnhanceClient() {
                                     )}
                                 </div>
                                 <div className={styles.optionText}>
-                                    <span className={styles.optionName}>Yapay Zeka Seçsin</span>
+                                    <div className={styles.optionNameRow}>
+                                        <span className={styles.optionName}>Yapay Zeka Seçsin</span>
+                                        <span className={styles.optionCost}>5 kredi</span>
+                                    </div>
                                     <span className={styles.optionDesc}>Yapay zeka en iyi ayarları seçsin</span>
                                 </div>
                                 <div className={styles.optionIcon}>
@@ -306,7 +318,7 @@ export default function EnhanceClient() {
                         <button
                             className={styles.processBtn}
                             onClick={handleProcessAll}
-                            disabled={isGlobalProcessing || !hasItems || (pendingCount === 0 && !items.some(i => i.status === 'error'))}
+                            disabled={isGlobalProcessing || !hasItems || selectedOptionCount === 0 || (pendingCount === 0 && !items.some(i => i.status === 'error'))}
                         >
                             {isGlobalProcessing ? (
                                 <>
@@ -338,24 +350,28 @@ const OPTIONS = [
     {
         id: 'lighting',
         label: 'Işık Düzeltme',
+        creditCost: '1 kredi',
         desc: 'Karanlık alanları aydınlatır',
         icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="12" cy="12" r="5" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>
     },
     {
         id: 'color',
         label: 'Renk Canlandırma',
+        creditCost: '1 kredi',
         desc: 'Solgun renkleri düzeltir',
         icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M12 2.69l5.74 5.74c3.04 3.04 3.04 7.96 0 11a7.8 7.8 0 0 1-11.48 0c-3.04-3.04-3.04-7.96 0-11L12 2.69z" /></svg>
     },
     {
         id: 'sharpness',
         label: 'Ultra Netlik',
+        creditCost: '1 kredi',
         desc: 'Bulanıklığı giderir',
         icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
     },
     {
         id: 'clean',
         label: 'Oda Temizliği',
+        creditCost: '1 kredi',
         desc: 'Leke ve kirleri temizler',
         icon: (
             <svg
@@ -383,6 +399,7 @@ const OPTIONS = [
     {
         id: 'privacy',
         label: 'Gizlilik Mozaiği',
+        creditCost: '1 kredi',
         desc: 'Özel fotoğraflar ve yüzleri blurlar',
         icon: (
             <svg
@@ -406,12 +423,14 @@ const OPTIONS = [
     {
         id: 'sky',
         label: 'Mavi Gökyüzü',
+        creditCost: '1 kredi',
         desc: 'Bulutlu havayı güneşe çevirir',
         icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M17.5 19c0-1.7-1.3-3-3-3c-.4 0-.7.1-1 .3c-.4-2.2-2.3-3.8-4.5-3.8c-2.5 0-4.5 2-4.5 4.5c0 .2 0 .4.1.6c-1.6.4-2.6 1.9-2.6 3.4" /><circle cx="12" cy="5" r="3" /></svg>
     },
     {
         id: 'twilight',
         label: 'Gün Batımı Modu',
+        creditCost: '1 kredi',
         desc: 'Büyüleyici akşam ışıkları',
         icon: (
             <svg

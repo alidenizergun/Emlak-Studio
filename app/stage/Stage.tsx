@@ -8,6 +8,15 @@ import styles from './Stage.module.css';
 
 const ROOM_TYPES = [
     {
+        id: 'salon',
+        label: 'Salon',
+        icon: (
+            <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M8 20V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v12M3 20h18M12 6V4M6 20v-6a2 2 0 0 1 2-2M18 20v-6a2 2 0 0 0-2-2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        )
+    },
+    {
         id: 'living_room',
         label: 'Oturma Odası',
         icon: (
@@ -37,20 +46,41 @@ const ROOM_TYPES = [
         )
     },
     {
-        id: 'dining_room',
-        label: 'Yemek Odası',
+        id: 'guest_room',
+        label: 'Misafir Odası',
         icon: (
             <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M8 20V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v12M3 20h18M12 6V4M6 20v-6a2 2 0 0 1 2-2M18 20v-6a2 2 0 0 0-2-2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 19h20M4 19v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M7 9h10M9 9V7h6v2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        )
+    },
+    {
+        id: 'dressing_room',
+        label: 'Giyinme Odası',
+        icon: (
+            <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M3 21h18M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 8h6M9 12h6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
         )
     },
     {
         id: 'office',
-        label: 'Çalışma',
+        label: 'Çalışma Odası',
         icon: (
             <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M21 20H3M15 20V8a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v12M19 20v-4a2 2 0 0 0-2-2h-2M11 12h.01M11 16h.01M7 12h.01" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        )
+    },
+    {
+        id: 'game_room',
+        label: 'Oyun Odası',
+        icon: (
+            <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M7 9h10a4 4 0 0 1 4 4v1a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5v-1a4 4 0 0 1 4-4z" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 14h4M11 12v4M15.5 13.5h.01M17.5 15.5h.01" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
         )
     },
@@ -73,8 +103,18 @@ const ROOM_TYPES = [
         )
     },
     {
+        id: 'entryway',
+        label: 'Antre',
+        icon: (
+            <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4 21h16M11 12h.01" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        )
+    },
+    {
         id: 'balcony',
-        label: 'Balkon / Teras',
+        label: 'Balkon Teras',
         icon: (
             <svg className={styles.roomIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M4 14h16v4h-16z" strokeLinecap="round" strokeLinejoin="round" />
@@ -174,9 +214,7 @@ export default function StageClient() {
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isDetectingRoom, setIsDetectingRoom] = useState(false);
     const [isSelectingStyle, setIsSelectingStyle] = useState(false);
-    const [isAiRoom, setIsAiRoom] = useState(false);
     const [isAiStyle, setIsAiStyle] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
@@ -199,10 +237,12 @@ export default function StageClient() {
         setIsProcessing(true);
 
         try {
+            const phone = window.localStorage.getItem('emlak_user_phone') || '';
             const formData = new FormData();
             formData.append('image', file);
             formData.append('roomType', selectedRoom!);
             formData.append('style', selectedStyle!);
+            formData.append('phone', phone);
 
             const response = await fetch('/api/stage', {
                 method: 'POST',
@@ -212,12 +252,21 @@ export default function StageClient() {
             const data = await response.json();
 
             if (data.success) {
+                if (typeof data.credits === 'number' && typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                    window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                        detail: { credits: data.credits }
+                    }));
+                }
                 const objectUrl = URL.createObjectURL(file);
                 setResult({
                     before: objectUrl,
                     after: data.imageUrl
                 });
             } else {
+                if (data?.code === 'INSUFFICIENT_CREDITS') {
+                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                }
                 alert('İşlem başarısız: ' + (data.error || 'Bilinmeyen hata'));
             }
         } catch (error) {
@@ -234,20 +283,6 @@ export default function StageClient() {
         setResult(null);
         setSelectedRoom(null);
         setSelectedStyle(null);
-    };
-
-    const handleAIDetectRoom = () => {
-        setIsDetectingRoom(true);
-        setIsAiRoom(true); // Enable AI mode for room
-        const otherRooms = ROOM_TYPES.filter(r => r.id !== selectedRoom);
-        const randomRoom = otherRooms.length > 0
-            ? otherRooms[Math.floor(Math.random() * otherRooms.length)]
-            : ROOM_TYPES[Math.floor(Math.random() * ROOM_TYPES.length)];
-
-        setTimeout(() => {
-            setSelectedRoom(randomRoom.id);
-            setIsDetectingRoom(false);
-        }, 500);
     };
 
     const handleAISelectStyle = () => {
@@ -281,7 +316,8 @@ export default function StageClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Dekorasyon Stüdyosu</h1>
                     <p className={styles.description}>
-                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
+                        Boş odaları saniyeler içinde mobilyalandırın.
+                        <span className={styles.descriptionSub}>Fotoğrafı yükleyin, oda tipini ve tarzını seçin.</span>
                     </p>
                 </div>
             </header>
@@ -347,43 +383,15 @@ export default function StageClient() {
                                         {ROOM_TYPES.map((room) => (
                                             <button
                                                 key={room.id}
-                                                className={`${styles.roomBtn} ${selectedRoom === room.id && !isAiRoom ? styles.selected : ''}`}
+                                                className={`${styles.roomBtn} ${selectedRoom === room.id ? styles.selected : ''}`}
                                                 onClick={() => {
                                                     setSelectedRoom(room.id);
-                                                    setIsAiRoom(false);
                                                 }}
                                             >
                                                 <div className={styles.roomIcon}>{room.icon}</div>
                                                 <span>{room.label}</span>
                                             </button>
                                         ))}
-                                        <button
-                                            className={`${styles.aiButton} ${isAiRoom ? styles.selected : ''}`}
-                                            onClick={handleAIDetectRoom}
-                                            disabled={isDetectingRoom}
-                                        >
-                                            <div className={styles.checkbox}>
-                                                {isAiRoom && (
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                                )}
-                                            </div>
-                                            <div className={styles.aiText}>
-                                                <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
-                                                <span className={styles.aiDesc}>Oda tipini otomatik algıla</span>
-                                            </div>
-                                            <div className={styles.aiSparkle}>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <defs>
-                                                        <linearGradient id="yzSparkleGradientStage" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                            <stop offset="0%" stopColor="#10b981" />
-                                                            <stop offset="100%" stopColor="#059669" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                    <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStage)" />
-                                                    <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStage)" />
-                                                </svg>
-                                            </div>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -392,6 +400,7 @@ export default function StageClient() {
                                 <div className={styles.stepHeader}>
                                     <span className={styles.stepNumber}>2</span>
                                     <label className={styles.label}>Tasarım Tarzı</label>
+                                    <span className={styles.stepCost}>2 Kredi</span>
                                 </div>
                                 <div className={styles.controlGroup}>
                                     <div className={styles.styleGrid}>
@@ -443,7 +452,7 @@ export default function StageClient() {
                         <button
                             className={styles.processBtn}
                             onClick={handleGenerate}
-                            disabled={!file || isProcessing || (!selectedRoom && !isAiRoom) || (!selectedStyle && !isAiStyle)}
+                            disabled={!file || isProcessing || !selectedRoom || (!selectedStyle && !isAiStyle)}
                         >
                             {isProcessing ? (
                                 <>

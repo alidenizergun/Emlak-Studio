@@ -49,6 +49,11 @@
     margin: 0 auto;
 }
 
+.descriptionSub {
+    display: block;
+    margin-top: 0.3rem;
+}
+
 /* Main Workspace Layout */
 .workspace {
     display: flex;
@@ -188,6 +193,15 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
+}
+
+.stepCost {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #94a3b8;
+    opacity: 0.9;
+    letter-spacing: 0.01em;
 }
 
 .stepNumber {

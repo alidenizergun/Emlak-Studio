@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Jimp } from 'jimp';
 import Replicate from 'replicate';
+import { deductCredits } from '@/lib/credits';
 
 const replicate = process.env.REPLICATE_API_TOKEN
     ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
@@ -11,6 +12,7 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const image = formData.get('image') as File;
         const optionsStr = formData.get('options') as string;
+        const phone = String(formData.get('phone') || '');
 
         if (!image) {
             return NextResponse.json(
@@ -19,7 +21,30 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        if (!phone) {
+            return NextResponse.json(
+                { success: false, error: 'İşlem için giriş yapmanız gerekiyor' },
+                { status: 401 }
+            );
+        }
+
         const options = JSON.parse(optionsStr || '{}');
+        const cost = getEnhanceCreditCost(options);
+        if (cost <= 0) {
+            return NextResponse.json(
+                { success: false, error: 'Lütfen en az bir geliştirme seçeneği seçin' },
+                { status: 400 }
+            );
+        }
+
+        const creditResult = await deductCredits(phone, cost);
+        if (!creditResult.ok) {
+            return NextResponse.json(
+                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
+                { status: 402 }
+            );
+        }
+
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
@@ -55,7 +80,12 @@ export async function POST(request: NextRequest) {
                     throw new Error('Unexpected Replicate output format');
                 }
 
-                return NextResponse.json({ success: true, imageUrl: finalImageUrl });
+                return NextResponse.json({
+                    success: true,
+                    imageUrl: finalImageUrl,
+                    credits: creditResult.credits,
+                    usedCredits: cost
+                });
             } catch (aiError) {
                 console.error('Replicate AI Error, falling back to Jimp:', aiError);
             }
@@ -88,7 +118,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             imageUrl: finalImageUrl,
-            processed: true
+            processed: true,
+            credits: creditResult.credits,
+            usedCredits: cost
         });
 
     } catch (error: unknown) {
@@ -99,4 +131,12 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
+}
+
+function getEnhanceCreditCost(options: Record<string, boolean>): number {
+    if (options?.auto) return 5;
+
+    const manualOptionIds = ['lighting', 'color', 'sharpness', 'clean', 'privacy', 'sky', 'twilight'];
+    const selectedCount = manualOptionIds.reduce((acc, key) => acc + (options?.[key] ? 1 : 0), 0);
+    return selectedCount;
 }
