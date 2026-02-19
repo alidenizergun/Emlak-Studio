@@ -88,7 +88,7 @@ export default function AiTourGuideClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Yapay Zeka Sunucusu</h1>
                     <p className={styles.description}>
-                        Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, yukarıda girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
+                        Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
                     </p>
                 </div>
             </header>
@@ -176,7 +176,7 @@ export default function AiTourGuideClient() {
                         </button>
                         <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, yukarıda girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
+                            <p>Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
                         </div>
                     </div>
                 </div>
