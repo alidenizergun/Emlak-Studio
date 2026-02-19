@@ -16,6 +16,13 @@
     gap: 0.75rem;
 }
 
+.headerActions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+}
+
 .title {
     margin: 0;
     font-size: 1.45rem;
@@ -42,6 +49,12 @@
     text-decoration: none;
     font-size: 0.85rem;
     font-weight: 600;
+    cursor: pointer;
+}
+
+.linkBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .card {
@@ -140,23 +153,6 @@
 }
 
 .purchaseBtn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.cancelBtn {
-    width: 100%;
-    border: 1px solid #fecaca;
-    background: #fff1f2;
-    color: #b91c1c;
-    border-radius: 10px;
-    padding: 0.7rem 0.8rem;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.cancelBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }

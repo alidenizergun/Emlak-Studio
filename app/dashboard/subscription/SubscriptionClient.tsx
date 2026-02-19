@@ -165,7 +165,17 @@ export default function SubscriptionClient() {
             <div className={styles.container}>
                 <div className={styles.headerRow}>
                     <h1 className={styles.title}>Paketleri Görüntüle / Aboneliği Yönet</h1>
-                    <Link href="/pricing" className={styles.linkBtn}>Paketleri Gör</Link>
+                    <div className={styles.headerActions}>
+                        <Link href="/pricing" className={styles.linkBtn}>Paketleri Gör</Link>
+                        <button
+                            type="button"
+                            className={styles.linkBtn}
+                            onClick={() => setShowCancelModal(true)}
+                            disabled={processingCancel || processingPurchase || !subscription || subscription.status === 'cancelled'}
+                        >
+                            {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
+                        </button>
+                    </div>
                 </div>
                 <p className={styles.subtitle}>Abonelik durumunuz, kredi kullanımı ve iptal işlemini bu ekrandan yönetebilirsiniz.</p>
 
@@ -236,14 +246,6 @@ export default function SubscriptionClient() {
                                 </div>
                             </div>
 
-                            <button
-                                type="button"
-                                className={styles.cancelBtn}
-                                onClick={() => setShowCancelModal(true)}
-                                disabled={processingCancel || processingPurchase || !subscription || subscription.status === 'cancelled'}
-                            >
-                                {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
-                            </button>
                             <p className={styles.warning}>
                                 Üyelik iptalinde kullanılan krediler düşülür, kullanılmamış kredi bakiyesi sıfırlanır.
                             </p>
