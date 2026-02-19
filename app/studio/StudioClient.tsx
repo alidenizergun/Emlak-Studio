@@ -1,36 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { TOOLS } from '@/app/tools/toolsData';
 import styles from './Studio.module.css';
 
-type StudioNavItem = {
-    id: string;
-    title: string;
-    icon: ReactNode;
-    status?: string;
-};
-
-const STUDIO_NAV_ITEMS: StudioNavItem[] = [
-    {
-        id: 'tools',
-        title: 'Tüm Araçlar',
-        icon: (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
-        ),
-    },
-    ...TOOLS,
-];
-
-const VALID_TOOL_IDS = new Set(STUDIO_NAV_ITEMS.map((t) => t.id));
+const VALID_TOOL_IDS = new Set(['tools', ...TOOLS.map((t) => t.id)]);
 function getToolIdFromParam(param: string | null): string {
     if (param && VALID_TOOL_IDS.has(param)) return param;
     return 'tools';
@@ -174,7 +151,7 @@ export default function StudioClient() {
                         <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>
                     </div>
                     <nav className={styles.toolNav} aria-label="Araçlar">
-                        {STUDIO_NAV_ITEMS.map((tool) => {
+                        {TOOLS.map((tool) => {
                             const isDisabled = !!tool.status;
                             const isActive = selectedToolId === tool.id;
                             return (

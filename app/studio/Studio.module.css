@@ -244,15 +244,19 @@
 
     .mainLayout {
         flex-direction: column;
-        overflow: visible;
+        overflow: hidden;
+        min-height: calc(100dvh - 76px);
+        height: calc(100dvh - 76px);
     }
 
     .sidebar {
-        position: sticky;
-        top: 64px;
-        z-index: 20;
-        flex: 0 0 auto;
-        max-height: none;
+        position: relative;
+        top: auto;
+        z-index: 1;
+        flex: 0 0 35%;
+        min-height: 35%;
+        max-height: 35%;
+        overflow-y: auto;
         border-right: none;
         border-bottom: 1px solid #e2e8f0;
         background: rgba(255, 255, 255, 0.92);
@@ -300,6 +304,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 0.45rem;
         padding: 0.6rem 0.75rem 0.75rem;
+        align-content: start;
     }
 
     .toolItem {
@@ -347,7 +352,9 @@
     }
 
     .workspace {
-        min-height: calc(100vh - 210px);
+        flex: 1 1 65%;
+        min-height: 65%;
+        max-height: 65%;
     }
 
     .workspaceToolWrap {
