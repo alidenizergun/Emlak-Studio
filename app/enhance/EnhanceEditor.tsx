@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import EnhanceResultModal from '@/components/EnhanceResultModal';
 import styles from './Enhance.module.css';
@@ -19,6 +19,8 @@ const MAX_FILES = 2;
 
 export default function EnhanceClient() {
     const router = useRouter();
+    const pathname = usePathname();
+    const isInStudio = pathname === '/studio';
     const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({}); // Yapay Zeka Seçsin varsayılan kapalı
     const [items, setItems] = useState<EnhancedItem[]>([]);
     const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
@@ -316,7 +318,7 @@ export default function EnhanceClient() {
                         </div>
 
                         <button
-                            className={styles.processBtn}
+                            className={`${styles.processBtn} ${isInStudio ? styles.processBtnInStudio : ''}`}
                             onClick={handleProcessAll}
                             disabled={isGlobalProcessing || !hasItems || selectedOptionCount === 0 || (pendingCount === 0 && !items.some(i => i.status === 'error'))}
                         >

@@ -452,6 +452,12 @@
     margin-top: 1rem;
 }
 
+.processBtnInStudio {
+    position: static !important;
+    bottom: auto !important;
+    z-index: auto !important;
+}
+
 .processBtn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
