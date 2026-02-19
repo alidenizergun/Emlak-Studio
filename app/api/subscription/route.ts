@@ -97,8 +97,6 @@ export async function GET(request: NextRequest) {
         const subscription = getOrCreateSubscription(phone, currentCredits, subscriptionsData);
         const usedCredits = Math.max(0, subscription.monthlyCredits - Math.min(currentCredits, subscription.monthlyCredits));
 
-        await writeJsonFile(SUBSCRIPTIONS_FILE, subscriptionsData);
-
         return NextResponse.json({
             success: true,
             subscription,
@@ -151,10 +149,26 @@ export async function POST(request: NextRequest) {
         // İptalde kullanılmamış kredileri sıfırla.
         creditsData[phone] = 0;
 
-        await Promise.all([
-            writeJsonFile(SUBSCRIPTIONS_FILE, subscriptionsData),
-            writeJsonFile(CREDITS_FILE, creditsData)
-        ]);
+        try {
+            await Promise.all([
+                writeJsonFile(SUBSCRIPTIONS_FILE, subscriptionsData),
+                writeJsonFile(CREDITS_FILE, creditsData)
+            ]);
+        } catch (writeError: unknown) {
+            const isReadonlyFs = writeError instanceof Error && 'code' in writeError && String((writeError as { code?: string }).code) === 'EROFS';
+            if (!isReadonlyFs) throw writeError;
+            // Read-only ortamlarda (örn. serverless) kalıcı yazma yapılamaz.
+            // Bu durumda isteği düşürmeyip durumu kullanıcıya bildir.
+            return NextResponse.json({
+                success: true,
+                message: 'Abonelik iptal edildi (geçici oturum).',
+                subscription: subscriptionsData[phone],
+                credits: 0,
+                usedCredits,
+                removedCredits: remainingCredits,
+                persistence: 'ephemeral'
+            });
+        }
 
         return NextResponse.json({
             success: true,
@@ -169,4 +183,3 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
 }
-
