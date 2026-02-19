@@ -316,8 +316,7 @@ export default function StageClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Dekorasyon Stüdyosu</h1>
                     <p className={styles.description}>
-                        Boş odaları saniyeler içinde mobilyalandırın.
-                        <span className={styles.descriptionSub}>Fotoğrafı yükleyin, oda tipini ve tarzını seçin.</span>
+                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
                     </p>
                 </div>
             </header>
