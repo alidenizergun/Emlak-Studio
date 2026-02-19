@@ -79,7 +79,7 @@
 .submitBtn {
     align-self: flex-start;
     padding: 0.85rem 2rem;
-    background: var(--primary);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -91,9 +91,9 @@
 }
 
 .submitBtn:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: linear-gradient(135deg, #0ea572 0%, #047857 100%);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 10px 20px rgba(5, 150, 105, 0.25);
 }
 
 .submitBtn:disabled {
