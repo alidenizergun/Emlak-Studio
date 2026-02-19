@@ -315,17 +315,18 @@
     }
 
     .sidebarQuickActions {
-        gap: 0.3rem;
+        gap: 0.36rem;
     }
 
     .sidebarTop .sidebarCta,
     .sidebarTop .sidebarSettings {
         width: 100%;
         justify-content: center;
-        padding: 0.34rem 0.42rem;
-        font-size: 0.64rem;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.68rem;
         border-radius: 8px;
         display: inline-flex;
+        line-height: 1.1;
     }
 
     .toolNav {
@@ -340,18 +341,20 @@
     }
 
     .toolItem {
+        position: relative;
         width: 100%;
         min-width: 0;
         max-width: none;
         margin: 0;
-        padding: 0.36rem 0.3rem;
+        padding: 0.4rem 0.34rem 0.34rem;
         border: 1px solid #e2e8f0;
         background: #ffffff;
         border-radius: 9px;
-        gap: 0.22rem;
+        gap: 0.24rem;
         flex-direction: column;
         justify-content: center;
         text-align: center;
+        min-height: 0;
     }
 
     .toolItemActive {
@@ -373,18 +376,23 @@
         white-space: normal;
         overflow: hidden;
         text-overflow: clip;
-        line-height: 1.05;
-        font-size: 0.58rem;
+        line-height: 1.08;
+        font-size: 0.61rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         text-align: center;
+        min-height: 1.32em;
     }
 
     .toolBadge {
-        font-size: 0.48rem;
-        padding: 0.08rem 0.24rem;
-        justify-self: center;
+        position: absolute;
+        top: 0.2rem;
+        right: 0.2rem;
+        font-size: 0.45rem;
+        padding: 0.06rem 0.2rem;
+        line-height: 1;
+        border-radius: 5px;
     }
 
     .workspace {
