@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import styles from '../../components/Pricing.module.css';
 import { savePendingCheckoutSelection, setPostAuthRedirect } from '@/lib/checkout';
 
@@ -97,19 +97,18 @@ const CheckIcon = () => (
 );
 
 export default function PricingClient() {
-    const router = useRouter();
     const [isYearly, setIsYearly] = useState(false);
+    const [isAuthed, setIsAuthed] = useState(false);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+    }, []);
 
     const handleSelectPlan = (planId: string) => {
         const billing = isYearly ? 'yearly' : 'monthly';
         savePendingCheckoutSelection({ planId, billing });
         setPostAuthRedirect('/checkout');
-
-        if (typeof window !== 'undefined' && window.localStorage.getItem('emlak_authed') === '1') {
-            router.push(`/checkout?plan=${encodeURIComponent(planId)}&billing=${billing}`);
-            return;
-        }
-        router.push(`/register?next=checkout&plan=${encodeURIComponent(planId)}&billing=${billing}`);
     };
 
     return (
@@ -192,13 +191,17 @@ export default function PricingClient() {
                                     </div>
                                 )}
 
-                                <button
-                                    type="button"
+                                <Link
+                                    href={
+                                        isAuthed
+                                            ? `/checkout?plan=${encodeURIComponent(tier.id)}&billing=${isYearly ? 'yearly' : 'monthly'}`
+                                            : `/register?next=checkout&plan=${encodeURIComponent(tier.id)}&billing=${isYearly ? 'yearly' : 'monthly'}`
+                                    }
                                     onClick={() => handleSelectPlan(tier.id)}
                                     className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}
                                 >
                                     {tier.cta}
-                                </button>
+                                </Link>
 
                                 <div className={styles.features}>
                                     <p className={styles.featuresTitle}>Neler Dahil?</p>
