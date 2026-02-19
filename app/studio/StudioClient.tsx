@@ -1,16 +1,39 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { TOOLS } from '@/app/tools/toolsData';
 import styles from './Studio.module.css';
 
-const VALID_TOOL_IDS = new Set(TOOLS.map((t) => t.id));
+type StudioNavItem = {
+    id: string;
+    title: string;
+    icon: ReactNode;
+    status?: string;
+};
+
+const STUDIO_NAV_ITEMS: StudioNavItem[] = [
+    {
+        id: 'tools',
+        title: 'Tüm Araçlar',
+        icon: (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+        ),
+    },
+    ...TOOLS,
+];
+
+const VALID_TOOL_IDS = new Set(STUDIO_NAV_ITEMS.map((t) => t.id));
 function getToolIdFromParam(param: string | null): string {
     if (param && VALID_TOOL_IDS.has(param)) return param;
-    return TOOLS[0]?.id ?? 'enhance';
+    return 'tools';
 }
 
 /** Aynı bileşenler standalone sayfalarda da kullanılıyor; enhance/stage vb. sayfalardaki değişiklikler Studio'da otomatik yansır. */
@@ -20,8 +43,10 @@ const RemoveObjectClient = dynamic(() => import('@/app/remove-object/RemoveObjec
 const IlanMetniClient = dynamic(() => import('@/app/ilan-metni/IlanMetniClient'), { ssr: false });
 const SanalTadilatClient = dynamic(() => import('@/app/sanal-tadilat/SanalTadilatClient'), { ssr: false });
 const AiTourGuideClient = dynamic(() => import('@/app/ai-tour-guide/AiTourGuideClient'), { ssr: false });
+const ToolsPanelClient = dynamic(() => import('@/app/tools/ToolsPanelClient'), { ssr: false });
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
+    'tools': ToolsPanelClient,
     'enhance': EnhanceClient,
     'stage': StageClient,
     'remove-object': RemoveObjectClient,
@@ -149,7 +174,7 @@ export default function StudioClient() {
                         <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>
                     </div>
                     <nav className={styles.toolNav} aria-label="Araçlar">
-                        {TOOLS.map((tool) => {
+                        {STUDIO_NAV_ITEMS.map((tool) => {
                             const isDisabled = !!tool.status;
                             const isActive = selectedToolId === tool.id;
                             return (
@@ -158,10 +183,10 @@ export default function StudioClient() {
                                     type="button"
                                     className={`${styles.toolItem} ${isActive ? styles.toolItemActive : ''} ${isDisabled ? styles.toolItemDisabled : ''}`}
                                     onClick={() => {
-                                    if (isDisabled) return;
-                                    setSelectedToolId(tool.id);
-                                    router.replace(`/studio?tool=${encodeURIComponent(tool.id)}`, { scroll: false });
-                                }}
+                                        if (isDisabled) return;
+                                        setSelectedToolId(tool.id);
+                                        router.replace(`/studio?tool=${encodeURIComponent(tool.id)}`, { scroll: false });
+                                    }}
                                     disabled={isDisabled}
                                 >
                                     <span className={styles.toolItemIcon}>{tool.icon}</span>
