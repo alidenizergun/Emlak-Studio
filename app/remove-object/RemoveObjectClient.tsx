@@ -216,7 +216,7 @@ export default function RemoveObjectClient() {
                                     onChange={() => setMode('prompt')}
                                 />
                                 <span className={styles.modeText}>
-                                    <span>Belirli eşyaları metne göre sil</span>
+                                    <span>Belirli eşyaları aşağıdaki metne göre sil</span>
                                     <span className={styles.modeCost}>2 kredi</span>
                                 </span>
                             </label>
