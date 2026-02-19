@@ -1,8 +1,46 @@
-.pageContainer { padding-top: 120px; padding-bottom: 40px; background: #f8fafc; max-width: 1400px; margin: 0 auto; font-family: var(--font-sans); }
-.header { text-align: center; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto; padding: 0 1.5rem; }
-.headerContent { display: contents; }
-.title { font-size: 2.25rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.75rem; background: linear-gradient(135deg, #0f172a 0%, #334155 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: #0f172a; }
-.description { color: #64748b; line-height: 1.5; font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+.pageContainer {
+    padding-top: 104px;
+    padding-bottom: 40px;
+    background: #f8fafc;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: var(--font-sans);
+}
+.header {
+    text-align: left;
+    margin-bottom: 1.1rem;
+    max-width: 940px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem;
+}
+
+.headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.95rem 1.1rem;
+    border: 1px solid #dbe7f4;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f8fcff 0%, #f3f8ff 100%);
+}
+
+.title {
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: #0f172a;
+}
+
+.description {
+    color: #475569;
+    line-height: 1.45;
+    font-size: 0.95rem;
+    max-width: none;
+    margin: 0;
+}
 .workspace { display: flex; gap: 1rem; padding: 0 1.5rem; align-items: stretch; min-height: 400px; }
 .gallerySection { flex: 1; min-height: 450px; height: 450px; background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
 .emptyState { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 2px dashed #dbe7f4; border-radius: 16px; background: #f7faff; height: 100%; }
@@ -36,5 +74,5 @@
 .downloadBtn:hover { transform: translateY(-2px); }
 .resetBtn { background: white; border: 1px solid #e2e8f0; color: #475569; padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; }
 .resetBtn:hover { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
-@media (max-width: 1024px) { .pageContainer { padding-top: 80px; padding-bottom: 20px; } .header { padding: 0 1rem; margin-bottom: 1rem; } .title { font-size: 1.5rem; } .description { font-size: 0.9rem; } .workspace { flex-direction: column; gap: 1.25rem; padding: 0 1rem; } .gallerySection { width: 100%; min-height: 350px; height: 350px; padding: 1rem; border-radius: 16px; } .controlsSidebar { width: 100%; position: static; } }
+@media (max-width: 1024px) { .pageContainer { padding-top: 80px; padding-bottom: 20px; } .header { padding: 0 1rem; margin-bottom: 0.85rem; } .headerContent { padding: 0.75rem 0.85rem; border-radius: 12px; } .title { font-size: 1.25rem; } .description { font-size: 0.86rem; } .workspace { flex-direction: column; gap: 1.25rem; padding: 0 1rem; } .gallerySection { width: 100%; min-height: 350px; height: 350px; padding: 1rem; border-radius: 16px; } .controlsSidebar { width: 100%; position: static; } }
 @media (max-width: 640px) { .gallerySection { min-height: 280px; height: 280px; } .processBtn { padding: 1rem; font-size: 1rem; } }

@@ -1,5 +1,5 @@
 .pageContainer {
-    padding-top: 120px;
+    padding-top: 104px;
     padding-bottom: 40px;
     background: #f8fafc;
     max-width: 1400px;
@@ -8,37 +8,39 @@
 }
 
 .header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    max-width: 700px;
+    text-align: left;
+    margin-bottom: 1.1rem;
+    max-width: 940px;
     margin-left: auto;
     margin-right: auto;
     padding: 0 1.5rem;
 }
 
 .headerContent {
-    display: contents;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.95rem 1.1rem;
+    border: 1px solid #dbe7f4;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f8fcff 0%, #f3f8ff 100%);
 }
 
 .title {
-    font-size: 2.25rem;
+    font-size: 1.65rem;
     font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.75rem;
-    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+    margin: 0;
     color: #0f172a;
 }
 
 .description {
-    color: #64748b;
-    line-height: 1.5;
-    font-size: 1.05rem;
-    max-width: 600px;
-    margin: 0 auto;
+    color: #475569;
+    line-height: 1.45;
+    font-size: 0.95rem;
+    max-width: none;
+    margin: 0;
 }
 
 .workspace {
@@ -378,15 +380,20 @@
 
     .header {
         padding: 0 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .headerContent {
+        padding: 0.75rem 0.85rem;
+        border-radius: 12px;
     }
 
     .title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .description {
-        font-size: 0.9rem;
+        font-size: 0.86rem;
     }
 
     .workspace {
