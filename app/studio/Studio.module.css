@@ -237,7 +237,7 @@
     font-size: 1rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .pageContainer {
         padding-top: 76px;
     }
@@ -245,7 +245,9 @@
     .mainLayout {
         flex-direction: column;
         overflow: hidden;
+        min-height: calc(100vh - 76px);
         min-height: calc(100dvh - 76px);
+        height: calc(100vh - 76px);
         height: calc(100dvh - 76px);
     }
 
@@ -355,6 +357,7 @@
         flex: 1 1 65%;
         min-height: 65%;
         max-height: 65%;
+        overflow: auto;
     }
 
     .workspaceToolWrap {
