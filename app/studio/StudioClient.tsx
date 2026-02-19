@@ -140,13 +140,17 @@ export default function StudioClient() {
             <div className={styles.mainLayout}>
                 <aside className={styles.sidebar}>
                     <div className={styles.sidebarTop}>
-                        <h1 className={styles.sidebarTitle}>Stüdyo</h1>
-                        <div className={styles.sidebarCreditRow}>
-                            <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
-                            <span className={styles.sidebarCreditValue}>{credits !== null ? credits : '—'}</span>
+                        <div className={styles.sidebarMetaRow}>
+                            <h1 className={styles.sidebarTitle}>Stüdyo</h1>
+                            <div className={styles.sidebarCreditRow}>
+                                <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
+                                <span className={styles.sidebarCreditValue}>{credits !== null ? credits : '—'}</span>
+                            </div>
                         </div>
-                        <Link href="/pricing" className={styles.sidebarCta}>Kredi al</Link>
-                        <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>
+                        <div className={styles.sidebarQuickActions}>
+                            <Link href="/pricing" className={styles.sidebarCta}>Kredi al</Link>
+                            <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>
+                        </div>
                     </div>
                     <nav className={styles.toolNav} aria-label="Araçlar">
                         {TOOLS.map((tool) => {

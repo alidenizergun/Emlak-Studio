@@ -26,6 +26,19 @@
         linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
+.sidebarMetaRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+}
+
+.sidebarQuickActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+}
+
 .sidebarTitle {
     font-size: 1.18rem;
     font-weight: 800;
@@ -256,8 +269,8 @@
         top: auto;
         z-index: 1;
         flex: 0 0 35%;
-        min-height: 35%;
-        max-height: 35%;
+        min-height: calc((100dvh - 76px) * 0.35);
+        max-height: calc((100dvh - 76px) * 0.35);
         overflow: hidden;
         border-right: none;
         border-bottom: 1px solid #e2e8f0;
@@ -270,51 +283,56 @@
     }
 
     .sidebarTop {
-        padding: 0.55rem 0.7rem 0.45rem;
-        gap: 0.4rem;
+        padding: 0.45rem 0.55rem 0.35rem;
+        gap: 0.3rem;
         flex-shrink: 0;
     }
 
+    .sidebarMetaRow {
+        gap: 0.4rem;
+    }
+
     .sidebarTitle {
-        font-size: 0.92rem;
+        font-size: 0.78rem;
+        letter-spacing: -0.01em;
     }
 
     .sidebarCreditRow {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 0.35rem;
-        padding: 0.44rem 0.55rem;
-        border-radius: 10px;
+        gap: 0.3rem;
+        padding: 0.32rem 0.42rem;
+        border-radius: 8px;
     }
 
     .sidebarCreditLabel {
-        font-size: 0.62rem;
+        font-size: 0.56rem;
     }
 
     .sidebarCreditValue {
-        font-size: 0.92rem;
+        font-size: 0.78rem;
+    }
+
+    .sidebarQuickActions {
+        gap: 0.3rem;
     }
 
     .sidebarTop .sidebarCta,
     .sidebarTop .sidebarSettings {
-        width: calc(50% - 0.15rem);
+        width: 100%;
         justify-content: center;
-        padding: 0.44rem 0.5rem;
-        font-size: 0.72rem;
-        border-radius: 9px;
+        padding: 0.34rem 0.42rem;
+        font-size: 0.64rem;
+        border-radius: 8px;
         display: inline-flex;
-    }
-
-    .sidebarTop .sidebarSettings {
-        margin-left: 0.3rem;
     }
 
     .toolNav {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.35rem;
-        padding: 0.45rem 0.6rem 0.6rem;
+        gap: 0.3rem;
+        padding: 0.35rem 0.5rem 0.5rem;
         align-content: stretch;
         grid-auto-rows: 1fr;
         flex: 1 1 auto;
@@ -326,11 +344,11 @@
         min-width: 0;
         max-width: none;
         margin: 0;
-        padding: 0.42rem 0.38rem;
+        padding: 0.36rem 0.3rem;
         border: 1px solid #e2e8f0;
         background: #ffffff;
-        border-radius: 10px;
-        gap: 0.3rem;
+        border-radius: 9px;
+        gap: 0.22rem;
         flex-direction: column;
         justify-content: center;
         text-align: center;
@@ -342,30 +360,30 @@
     }
 
     .toolItemIcon {
-        width: 17px;
-        height: 17px;
+        width: 15px;
+        height: 15px;
     }
 
     .toolItemIcon svg {
-        width: 15px;
-        height: 15px;
+        width: 13px;
+        height: 13px;
     }
 
     .toolItemTitle {
         white-space: normal;
         overflow: hidden;
         text-overflow: clip;
-        line-height: 1.1;
-        font-size: 0.66rem;
+        line-height: 1.05;
+        font-size: 0.58rem;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         text-align: center;
     }
 
     .toolBadge {
-        font-size: 0.52rem;
-        padding: 0.1rem 0.3rem;
+        font-size: 0.48rem;
+        padding: 0.08rem 0.24rem;
         justify-self: center;
     }
 
