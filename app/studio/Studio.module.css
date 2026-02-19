@@ -268,9 +268,9 @@
         position: relative;
         top: auto;
         z-index: 1;
-        flex: 0 0 35%;
-        min-height: calc((100dvh - 76px) * 0.35);
-        max-height: calc((100dvh - 76px) * 0.35);
+        flex: 0 0 25%;
+        min-height: calc((100dvh - 76px) * 0.25);
+        max-height: calc((100dvh - 76px) * 0.25);
         overflow: hidden;
         border-right: none;
         border-bottom: 1px solid #e2e8f0;
@@ -283,8 +283,8 @@
     }
 
     .sidebarTop {
-        padding: 0.45rem 0.55rem 0.35rem;
-        gap: 0.3rem;
+        padding: 0.34rem 0.45rem 0.24rem;
+        gap: 0.22rem;
         flex-shrink: 0;
     }
 
@@ -293,7 +293,7 @@
     }
 
     .sidebarTitle {
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         letter-spacing: -0.01em;
     }
 
@@ -302,28 +302,28 @@
         justify-content: space-between;
         align-items: center;
         gap: 0.3rem;
-        padding: 0.32rem 0.42rem;
+        padding: 0.24rem 0.32rem;
         border-radius: 8px;
     }
 
     .sidebarCreditLabel {
-        font-size: 0.56rem;
+        font-size: 0.52rem;
     }
 
     .sidebarCreditValue {
-        font-size: 0.78rem;
+        font-size: 0.72rem;
     }
 
     .sidebarQuickActions {
-        gap: 0.36rem;
+        gap: 0.24rem;
     }
 
     .sidebarTop .sidebarCta,
     .sidebarTop .sidebarSettings {
         width: 100%;
         justify-content: center;
-        padding: 0.4rem 0.5rem;
-        font-size: 0.68rem;
+        padding: 0.28rem 0.35rem;
+        font-size: 0.6rem;
         border-radius: 8px;
         display: inline-flex;
         line-height: 1.1;
@@ -332,8 +332,8 @@
     .toolNav {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.3rem;
-        padding: 0.35rem 0.5rem 0.5rem;
+        gap: 0.24rem;
+        padding: 0.24rem 0.42rem 0.35rem;
         align-content: stretch;
         grid-auto-rows: 1fr;
         flex: 1 1 auto;
@@ -346,11 +346,11 @@
         min-width: 0;
         max-width: none;
         margin: 0;
-        padding: 0.4rem 0.34rem 0.34rem;
+        padding: 0.24rem 0.22rem 0.2rem;
         border: 1px solid #e2e8f0;
         background: #ffffff;
         border-radius: 9px;
-        gap: 0.24rem;
+        gap: 0.14rem;
         flex-direction: column;
         justify-content: center;
         text-align: center;
@@ -363,13 +363,13 @@
     }
 
     .toolItemIcon {
-        width: 15px;
-        height: 15px;
+        width: 12px;
+        height: 12px;
     }
 
     .toolItemIcon svg {
-        width: 13px;
-        height: 13px;
+        width: 11px;
+        height: 11px;
     }
 
     .toolItemTitle {
@@ -377,28 +377,28 @@
         overflow: hidden;
         text-overflow: clip;
         line-height: 1.08;
-        font-size: 0.61rem;
+        font-size: 0.53rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         text-align: center;
-        min-height: 1.32em;
+        min-height: 1.1em;
     }
 
     .toolBadge {
         position: absolute;
         top: 0.2rem;
         right: 0.2rem;
-        font-size: 0.45rem;
-        padding: 0.06rem 0.2rem;
+        font-size: 0.4rem;
+        padding: 0.05rem 0.14rem;
         line-height: 1;
         border-radius: 5px;
     }
 
     .workspace {
-        flex: 1 1 65%;
-        min-height: 65%;
-        max-height: 65%;
+        flex: 1 1 75%;
+        min-height: 75%;
+        max-height: 75%;
         overflow: auto;
     }
 
