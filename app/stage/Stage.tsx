@@ -375,7 +375,6 @@ export default function StageClient() {
                         <div className={styles.optionsArea} style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             <div className={styles.functionalStep}>
                                 <div className={styles.stepHeader}>
-                                    <span className={styles.stepNumber}>1</span>
                                     <label className={styles.label}>Oda Tipi</label>
                                 </div>
                                 <div className={styles.controlGroup}>
@@ -398,7 +397,6 @@ export default function StageClient() {
 
                             <div className={styles.functionalStep}>
                                 <div className={styles.stepHeader}>
-                                    <span className={styles.stepNumber}>2</span>
                                     <label className={styles.label}>Tasarım Tarzı</label>
                                     <span className={styles.stepCost}>2 Kredi</span>
                                 </div>
