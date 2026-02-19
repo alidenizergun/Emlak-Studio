@@ -250,8 +250,14 @@ export default function SubscriptionClient() {
                         </div>
 
                         {showCancelModal ? (
-                            <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Abonelik iptali">
-                                <div className={styles.modalCard}>
+                            <div
+                                className={styles.modalOverlay}
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label="Abonelik iptali"
+                                onClick={() => setShowCancelModal(false)}
+                            >
+                                <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
                                     <h3 className={styles.modalTitle}>Gitmeden önce birlikte çözelim</h3>
                                     <p className={styles.modalText}>
                                         Aboneliğinizi iptal etmek yerine maliyeti düşürmek ve kredinizi daha verimli kullanmak için şu seçenekleri deneyebilirsiniz:
