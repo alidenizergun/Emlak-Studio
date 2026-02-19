@@ -286,9 +286,8 @@ export default function EnhanceClient() {
 
                             {/* Auto Option Last */}
                             <div
-                                className={`${styles.optionItem} ${selectedOptions['auto'] ? styles.activeAi : ''}`}
+                                className={`${styles.optionItem} ${selectedOptions['auto'] ? styles.active : ''}`}
                                 onClick={() => toggleOption('auto')}
-                                style={{ border: '2px solid rgba(16, 185, 129, 0.2)' }}
                             >
                                 <div className={styles.checkbox}>
                                     {selectedOptions['auto'] && (
