@@ -258,6 +258,15 @@ export default function SubscriptionClient() {
                                 onClick={() => setShowCancelModal(false)}
                             >
                                 <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        type="button"
+                                        className={styles.modalXBtn}
+                                        aria-label="Popup kapat"
+                                        onClick={() => setShowCancelModal(false)}
+                                        disabled={processingCancel}
+                                    >
+                                        ×
+                                    </button>
                                     <h3 className={styles.modalTitle}>Gitmeden önce birlikte çözelim</h3>
                                     <p className={styles.modalText}>
                                         Aboneliğinizi iptal etmek yerine maliyeti düşürmek ve kredinizi daha verimli kullanmak için şu seçenekleri deneyebilirsiniz:
