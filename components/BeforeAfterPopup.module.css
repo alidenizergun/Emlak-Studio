@@ -28,10 +28,10 @@
     --popup-height-scale: 1;
     background: var(--card-bg);
     border-radius: 24px;
-    width: min(1080px, calc(100vw - 3rem));
-    width: min(1080px, calc(100dvw - 3rem));
-    height: calc((100vh - var(--app-header-height) - 3rem) * 0.6 * var(--popup-height-scale));
-    height: calc((100dvh - var(--app-header-height) - 3rem) * 0.6 * var(--popup-height-scale));
+    width: min(1620px, calc(100vw - 3rem));
+    width: min(1620px, calc(100dvw - 3rem));
+    height: calc((100vh - var(--app-header-height) - 3rem) * 0.9 * var(--popup-height-scale));
+    height: calc((100dvh - var(--app-header-height) - 3rem) * 0.9 * var(--popup-height-scale));
     max-height: calc(100vh - var(--app-header-height) - 3rem);
     max-height: calc(100dvh - var(--app-header-height) - 3rem);
     overflow-x: hidden;
@@ -53,10 +53,10 @@
     }
 
     .popup {
-        width: min(1080px, calc(100vw - 1.5rem));
-        width: min(1080px, calc(100dvw - 1.5rem));
-        height: calc((100vh - var(--app-header-height) - 1.5rem) * 0.6 * var(--popup-height-scale));
-        height: calc((100dvh - var(--app-header-height) - 1.5rem) * 0.6 * var(--popup-height-scale));
+        width: min(1620px, calc(100vw - 1.5rem));
+        width: min(1620px, calc(100dvw - 1.5rem));
+        height: calc((100vh - var(--app-header-height) - 1.5rem) * 0.9 * var(--popup-height-scale));
+        height: calc((100dvh - var(--app-header-height) - 1.5rem) * 0.9 * var(--popup-height-scale));
         max-height: calc(100vh - var(--app-header-height) - 1.5rem);
         max-height: calc(100dvh - var(--app-header-height) - 1.5rem);
     }
