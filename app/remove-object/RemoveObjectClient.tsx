@@ -20,6 +20,12 @@ export default function RemoveObjectClient() {
 
     useEffect(() => {
         setMounted(true);
+        setRemovePrompt((prev) => {
+            const trimmed = prev.trim();
+            if (!trimmed) return defaultRemovePrompt;
+            if (trimmed.startsWith('Örnek:') && trimmed !== defaultRemovePrompt) return defaultRemovePrompt;
+            return prev;
+        });
     }, []);
 
     useEffect(() => {
