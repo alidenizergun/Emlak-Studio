@@ -29,6 +29,8 @@ interface ComparisonSliderProps {
     hintFullRange?: boolean;
     /** true ise "sonra" (dekore edilmiş) görseli %2 daha parlak gösterilir (örn. Hero) */
     brightenAfter?: boolean;
+    /** true ise desktop'ta mouse görsel alanında gezerken slider takip eder */
+    followOnHover?: boolean;
 }
 
 const ComparisonSlider = ({
@@ -41,7 +43,8 @@ const ComparisonSlider = ({
     hintSlide = false,
     preserveAspect = false,
     hintFullRange = false,
-    brightenAfter = false
+    brightenAfter = false,
+    followOnHover = false
 }: ComparisonSliderProps) => {
     const [isResizing, setIsResizing] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -64,26 +67,32 @@ const ComparisonSlider = ({
         onPositionChange?.(clamped);
     };
 
-    const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isResizing || !sliderRef.current) return;
-
+    const updatePositionFromClientX = (clientX: number) => {
+        if (!sliderRef.current) return;
         const sliderRect = sliderRef.current.getBoundingClientRect();
-        let clientX;
-
-        if ('touches' in e) {
-            clientX = e.touches[0].clientX;
-        } else {
-            clientX = (e as React.MouseEvent).clientX;
-        }
-
         const newPosition = ((clientX - sliderRect.left) / sliderRect.width) * 100;
         const clampedPosition = Math.min(100, Math.max(0, newPosition));
         setSliderPosition(clampedPosition);
+        onPositionChange?.(clampedPosition);
+    };
 
-        // Notify parent of position change
-        if (onPositionChange) {
-            onPositionChange(clampedPosition);
+    const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+        // Touch only while actively dragging.
+        if ('touches' in e) {
+            if (!isResizing) return;
+            updatePositionFromClientX(e.touches[0].clientX);
+            return;
         }
+
+        // Desktop: if enabled, follow hover without click/drag.
+        if (followOnHover && typeof window !== 'undefined' && window.innerWidth >= 1025) {
+            updatePositionFromClientX(e.clientX);
+            return;
+        }
+
+        // Default behavior: requires drag.
+        if (!isResizing) return;
+        updatePositionFromClientX(e.clientX);
     };
 
     useEffect(() => {
