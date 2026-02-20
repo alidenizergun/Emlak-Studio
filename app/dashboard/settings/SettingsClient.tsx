@@ -5,6 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../Dashboard.module.css';
 
+const MIN_TOPUP_CREDITS = 10;
+const MAX_TOPUP_CREDITS = 10000;
+
+interface SubscriptionInfo {
+    planId: 'danisman' | 'ofis' | 'kurumsal';
+    monthlyCredits: number;
+    monthlyPrice: number;
+    status: 'active' | 'cancelled';
+}
+
 function maskPhone(raw: string): string {
     const digits = raw.replace(/\D/g, '');
     if (digits.length < 5) return '*** ** **';
@@ -44,6 +54,11 @@ export default function SettingsClient() {
     const [saveNoteType, setSaveNoteType] = useState<'success' | 'error'>('success');
     const [needsCorrectionAttempt, setNeedsCorrectionAttempt] = useState(false);
     const [bonusEligibilityLocked, setBonusEligibilityLocked] = useState(false);
+    const [rawPhone, setRawPhone] = useState('');
+    const [purchaseAmountInput, setPurchaseAmountInput] = useState('100');
+    const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+    const [topupLoading, setTopupLoading] = useState(false);
+    const [topupProcessing, setTopupProcessing] = useState(false);
     const redirectDone = useRef(false);
 
     useEffect(() => {
@@ -63,6 +78,8 @@ export default function SettingsClient() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setPhoneDisplay(phone ? maskPhone(phone) : '—');
         // eslint-disable-next-line react-hooks/set-state-in-effect
+        setRawPhone(phone || '');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFullName(storedFullName);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setOfficeName(storedOfficeName);
@@ -71,6 +88,21 @@ export default function SettingsClient() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, [router]);
+
+    useEffect(() => {
+        if (!rawPhone) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTopupLoading(true);
+        fetch(`/api/subscription?phone=${encodeURIComponent(rawPhone)}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success && data.subscription) {
+                    setSubscription(data.subscription as SubscriptionInfo);
+                }
+            })
+            .catch(() => {})
+            .finally(() => setTopupLoading(false));
+    }, [rawPhone]);
 
     const handleSave = async () => {
         if (typeof window === 'undefined') return;
@@ -163,6 +195,25 @@ export default function SettingsClient() {
         }
     };
 
+    const purchaseAmount = Math.floor(Number(purchaseAmountInput) || 0);
+    const perCreditPrice = subscription
+        ? subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1)
+        : 0;
+    const totalTopupPrice = Math.round(perCreditPrice * purchaseAmount);
+
+    const handleTopupPurchase = () => {
+        if (!subscription || !rawPhone || subscription.status === 'cancelled') return;
+        const params = new URLSearchParams({
+            mode: 'topup',
+            plan: subscription.planId,
+            billing: 'monthly',
+            credits: String(purchaseAmount),
+            total: String(totalTopupPrice),
+        });
+        setTopupProcessing(true);
+        router.push(`/checkout?${params.toString()}`);
+    };
+
     if (!mounted) {
         return (
             <div className={styles.pageContainer}>
@@ -240,6 +291,44 @@ export default function SettingsClient() {
                         <Link href="/dashboard/subscription" className={styles.accountBtn} style={{ marginTop: '1.25rem' }}>
                             Paketleri görüntüle / Aboneliği yönet
                         </Link>
+
+                        <div className={styles.topupPanel}>
+                            <h3 className={styles.topupTitle}>Ek kredi satın al</h3>
+                            <p className={styles.topupText}>
+                                İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.
+                            </p>
+                            <div className={styles.topupRow}>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={purchaseAmountInput}
+                                    onChange={(e) => {
+                                        const digitsOnly = e.target.value.replace(/\D/g, '');
+                                        if (!digitsOnly) return;
+                                        const numericValue = Number(digitsOnly);
+                                        if (numericValue < MIN_TOPUP_CREDITS || numericValue > MAX_TOPUP_CREDITS) return;
+                                        setPurchaseAmountInput(String(numericValue));
+                                    }}
+                                    className={styles.topupInput}
+                                />
+                                <button
+                                    type="button"
+                                    className={styles.accountBtn}
+                                    onClick={handleTopupPurchase}
+                                    disabled={topupLoading || topupProcessing || !subscription || subscription.status === 'cancelled'}
+                                >
+                                    {topupProcessing ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
+                                </button>
+                            </div>
+                            <p className={styles.topupText}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
+                            <p className={styles.topupNote}>
+                                Tutar, paketinize özel kredi birim fiyatına göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
+                            </p>
+                            <p className={styles.topupNote}>
+                                Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS}, maksimum {MAX_TOPUP_CREDITS} kredi girebilirsiniz.
+                            </p>
+                        </div>
                     </div>
 
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>

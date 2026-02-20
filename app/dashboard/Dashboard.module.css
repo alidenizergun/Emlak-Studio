@@ -216,6 +216,56 @@
     margin: 0.55rem 0 0;
 }
 
+.topupPanel {
+    border: 1px solid #dbeafe;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.85rem;
+    margin-top: 1rem;
+}
+
+.topupTitle {
+    margin: 0;
+    font-size: 0.96rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.topupText {
+    margin: 0.35rem 0 0.6rem;
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.topupRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+}
+
+.topupInput {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.58rem 0.7rem;
+    font-size: 0.9rem;
+    color: #0f172a;
+    background: #fff;
+}
+
+.topupInput:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.12);
+}
+
+.topupNote {
+    margin: 0.3rem 0 0;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
 /* ----- Alt bölüm: Tüm araçlar ----- */
 .bottomSection {
     flex: 1 1 auto;
