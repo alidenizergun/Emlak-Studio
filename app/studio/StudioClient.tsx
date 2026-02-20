@@ -143,7 +143,6 @@ export default function StudioClient() {
                         <div className={styles.sidebarMetaRow}>
                             <div className={styles.sidebarTitleRow}>
                                 <h1 className={styles.sidebarTitle}>Stüdyo</h1>
-                                <span className={styles.sidebarStatusDot} aria-hidden="true" />
                             </div>
                             <div className={styles.sidebarCreditRow}>
                                 <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
