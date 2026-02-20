@@ -141,9 +141,6 @@ export default function StudioClient() {
                 <aside className={styles.sidebar}>
                     <div className={styles.sidebarTop}>
                         <div className={styles.sidebarMetaRow}>
-                            <div className={styles.sidebarTitleRow}>
-                                <h1 className={styles.sidebarTitle}>Stüdyo</h1>
-                            </div>
                             <div className={styles.sidebarCreditRow}>
                                 <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
                                 <span className={styles.sidebarCreditValue}>{credits !== null ? credits : '—'}</span>

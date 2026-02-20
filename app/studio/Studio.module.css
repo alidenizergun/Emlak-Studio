@@ -33,30 +33,10 @@
     gap: 0.36rem;
 }
 
-.sidebarTitleRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
-
 .sidebarQuickActions {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.4rem;
-}
-
-.sidebarTitle {
-    display: block;
-    font-size: 1.02rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-    letter-spacing: -0.01em;
-    text-transform: none;
-    padding: 0;
-    border: none;
-    background: transparent;
 }
 
 .sidebarCreditRow {
@@ -318,23 +298,6 @@
 
     .sidebarMetaRow {
         gap: 0.4rem;
-    }
-
-    .sidebarTitle {
-        display: block;
-        align-self: auto;
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: #0d9488;
-        letter-spacing: -0.01em;
-        text-transform: none;
-        padding: 0;
-        border: none;
-        background: transparent;
-    }
-
-    .sidebarTitleRow {
-        gap: 0.3rem;
     }
 
     .sidebarCreditRow {
