@@ -86,7 +86,7 @@
 }
 
 .sidebarCreditValue {
-    font-size: 2rem;
+    font-size: 0.72rem;
     line-height: 1;
     font-weight: 800;
     color: #0f172a;
@@ -359,7 +359,7 @@
     }
 
     .sidebarCreditValue {
-        font-size: 0.72rem;
+        font-size: 0.52rem;
     }
 
     .sidebarHelper {
