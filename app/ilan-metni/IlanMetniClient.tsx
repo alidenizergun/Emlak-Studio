@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
+import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './IlanMetni.module.css';
 
 export interface IlanBilgileri {
@@ -37,6 +38,7 @@ export default function IlanMetniClient() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [resultText, setResultText] = useState<string | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [isExampleOpen, setIsExampleOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -119,9 +121,14 @@ export default function IlanMetniClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
-                    <p className={styles.description}>
-                        Fotoğrafları yükleyin ve ilan bilgilerini girin; yapay zeka profesyonel ilan metni üretsin.
-                    </p>
+                    <div className={styles.descriptionRow}>
+                        <p className={styles.description}>
+                            Fotoğrafları yükleyin ve ilan bilgilerini girin; yapay zeka profesyonel ilan metni üretsin.
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            Örnek Gör
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -310,6 +317,14 @@ export default function IlanMetniClient() {
                     </div>
                 </div>
             </div>
+            <ToolExamplePopup
+                isOpen={isExampleOpen}
+                onClose={() => setIsExampleOpen(false)}
+                title="İlan Metni Örneği"
+                summary="Girilen ilan bilgilerine göre satışa hazır, akıcı ve profesyonel bir metin üretilir."
+                singleSrc="/images/examples/living-furnished.png"
+                sampleText={`Örnek metin:\\nKadıköy'ün merkezinde, 95 m² kullanım alanına sahip ferah 2+1 daire...`}
+            />
         </div>
     );
 }

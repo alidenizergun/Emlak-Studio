@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
+import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './AiTourGuide.module.css';
 
 export default function AiTourGuideClient() {
@@ -13,6 +14,7 @@ export default function AiTourGuideClient() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [isExampleOpen, setIsExampleOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -87,9 +89,14 @@ export default function AiTourGuideClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Yapay Zeka Sunucusu</h1>
-                    <p className={styles.description}>
-                        Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
-                    </p>
+                    <div className={styles.descriptionRow}>
+                        <p className={styles.description}>
+                            Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            Örnek Gör
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -181,6 +188,14 @@ export default function AiTourGuideClient() {
                     </div>
                 </div>
             </div>
+            <ToolExamplePopup
+                isOpen={isExampleOpen}
+                onClose={() => setIsExampleOpen(false)}
+                title="Yapay Zeka Sunucusu Örneği"
+                summary="Yüklenen görsel üzerinde kısa bir tur metni oluşturulur ve video anlatım için hazır hale getirilir."
+                singleSrc="/images/examples/living-furnished.png"
+                sampleText={`Örnek anlatım:\\nMerhaba, şimdi geniş salon ve doğal ışık alan oturma bölümünü geziyoruz...`}
+            />
         </div>
     );
 }

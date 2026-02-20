@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
+import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './SanalTadilat.module.css';
 
 export default function SanalTadilatClient() {
@@ -12,6 +13,7 @@ export default function SanalTadilatClient() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [isExampleOpen, setIsExampleOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -100,9 +102,14 @@ export default function SanalTadilatClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Sanal Tadilat</h1>
-                    <p className={styles.description}>
-                        Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
-                    </p>
+                    <div className={styles.descriptionRow}>
+                        <p className={styles.description}>
+                            Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            Örnek Gör
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -196,6 +203,14 @@ export default function SanalTadilatClient() {
                     </div>
                 </div>
             </div>
+            <ToolExamplePopup
+                isOpen={isExampleOpen}
+                onClose={() => setIsExampleOpen(false)}
+                title="Sanal Tadilat Örneği"
+                summary="Eski görünümlü alanlar, yeni malzeme ve modern yüzeylerle tadilat sonrası hale dönüştürülür."
+                beforeSrc="/images/examples/kitchen-empty.png"
+                afterSrc="/images/examples/kitchen-furnished.png"
+            />
         </div>
     );
 }

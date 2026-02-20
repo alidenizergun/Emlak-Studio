@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
+import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './RemoveObject.module.css';
 import { buildRemoveObjectPrompt, type RemoveMode } from './prompts';
 
@@ -14,6 +15,7 @@ export default function RemoveObjectClient() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [isExampleOpen, setIsExampleOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -125,9 +127,14 @@ export default function RemoveObjectClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Akıllı Eşya Silme</h1>
-                    <p className={styles.description}>
-                        İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, yapay zeka seçtiğiniz alanları temizlesin.
-                    </p>
+                    <div className={styles.descriptionRow}>
+                        <p className={styles.description}>
+                            İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, yapay zeka seçtiğiniz alanları temizlesin.
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            Örnek Gör
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -279,6 +286,14 @@ export default function RemoveObjectClient() {
                     </div>
                 </div>
             </div>
+            <ToolExamplePopup
+                isOpen={isExampleOpen}
+                onClose={() => setIsExampleOpen(false)}
+                title="Akıllı Eşya Silme Örneği"
+                summary="Fotoğraftaki dağınıklık ve istenmeyen objeler korunacak alanlara zarar vermeden temizlenir."
+                beforeSrc="/images/examples/pantry-before.png"
+                afterSrc="/images/examples/pantry-after.png"
+            />
         </div>
     );
 }

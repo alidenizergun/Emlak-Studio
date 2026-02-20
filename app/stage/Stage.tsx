@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
+import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './Stage.module.css';
 
 const ROOM_TYPES = [
@@ -218,6 +219,7 @@ export default function StageClient() {
     const [isAiStyle, setIsAiStyle] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [isExampleOpen, setIsExampleOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -315,9 +317,14 @@ export default function StageClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Dekorasyon Stüdyosu</h1>
-                    <p className={styles.description}>
-                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
-                    </p>
+                    <div className={styles.descriptionRow}>
+                        <p className={styles.description}>
+                            Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            Örnek Gör
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -468,6 +475,14 @@ export default function StageClient() {
                     </div>
                 </div>
             </div>
+            <ToolExamplePopup
+                isOpen={isExampleOpen}
+                onClose={() => setIsExampleOpen(false)}
+                title="Dekorasyon Stüdyosu Örneği"
+                summary="Boş oda fotoğrafına seçtiğiniz oda tipi ve tarz doğrultusunda sanal mobilyalama uygulanır."
+                beforeSrc="/images/examples/bedroom-empty.png"
+                afterSrc="/images/examples/bedroom-furnished.png"
+            />
         </div>
     );
 }

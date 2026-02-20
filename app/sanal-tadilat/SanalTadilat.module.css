@@ -41,6 +41,47 @@
     max-width: none;
     margin: 0;
 }
+
+.descriptionRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.exampleLink {
+    border: 1px solid #dbe5ef;
+    background: #ffffff;
+    color: #0f766e;
+    border-radius: 8px;
+    padding: 0.4rem 0.62rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.exampleLink:hover {
+    border-color: #99f6e4;
+    background: #f0fdfa;
+    color: #0f766e;
+}
+@media (max-width: 1024px) {
+    .descriptionRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.45rem;
+    }
+
+    .exampleLink {
+        padding: 0.34rem 0.56rem;
+        font-size: 0.72rem;
+    }
+}
+
+
 .workspace { display: flex; gap: 1rem; padding: 0 1.5rem; align-items: stretch; min-height: 400px; }
 .gallerySection { flex: 1; min-height: 450px; background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
 .emptyState { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 2px dashed #dbe7f4; border-radius: 16px; background: #f7faff; height: 100%; }

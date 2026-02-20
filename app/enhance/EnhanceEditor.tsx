@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import EnhanceResultModal from '@/components/EnhanceResultModal';
+import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './Enhance.module.css';
 
 interface EnhancedItem {
@@ -24,6 +25,7 @@ export default function EnhanceClient() {
     const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({}); // Yapay Zeka Seçsin varsayılan kapalı
     const [items, setItems] = useState<EnhancedItem[]>([]);
     const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
+    const [isExampleOpen, setIsExampleOpen] = useState(false);
 
     // Modal State
     const [modalState, setModalState] = useState<{
@@ -167,10 +169,15 @@ export default function EnhanceClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Fotoğraf Geliştirme Stüdyosu</h1>
-                    <p className={styles.description}>
-                        Yapay zeka ile fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar,
-                        çözünürlüğü 4K kaliteye yükseltir.
-                    </p>
+                    <div className={styles.descriptionRow}>
+                        <p className={styles.description}>
+                            Yapay zeka ile fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar,
+                            çözünürlüğü 4K kaliteye yükseltir.
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            Örnek Gör
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -342,6 +349,14 @@ export default function EnhanceClient() {
                 onClose={() => setModalState(s => ({ ...s, isOpen: false }))}
                 beforeImage={modalState.before}
                 afterImage={modalState.after}
+            />
+            <ToolExamplePopup
+                isOpen={isExampleOpen}
+                onClose={() => setIsExampleOpen(false)}
+                title="Fotoğraf Geliştirme Örneği"
+                summary="Işık, renk dengesi ve netlik yapay zeka ile optimize edilir."
+                beforeSrc="/images/examples/living-empty.png"
+                afterSrc="/images/examples/living-furnished.png"
             />
         </div>
     );
