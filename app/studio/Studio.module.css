@@ -16,23 +16,28 @@
 
 /* ----- Sol menü (sidebar) üst: Stüdyo, kredi, Kredi al, Ayarlar ----- */
 .sidebarTop {
-    padding: 0.82rem 0.82rem 0.9rem;
-    margin: 0.55rem 0.55rem 0.45rem;
+    padding: 0.75rem 0.75rem 0.72rem;
+    margin: 0.5rem 0.5rem 0.4rem;
     border: 1px solid #99f6e4;
-    border-bottom: 1px solid #99f6e4;
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.5rem;
     background: #f0fdfa;
-    box-shadow: inset 0 0 0 1px rgba(167, 243, 208, 0.35);
 }
 
 .sidebarMetaRow {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.42rem;
+    gap: 0.36rem;
+}
+
+.sidebarTitleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .sidebarQuickActions {
@@ -43,28 +48,22 @@
 
 .sidebarTitle {
     display: block;
-    font-size: 0.98rem;
+    font-size: 1.02rem;
     font-weight: 700;
-    color: #0d9488;
+    color: #0f172a;
     margin: 0;
     letter-spacing: -0.01em;
     text-transform: none;
     padding: 0;
     border: none;
     background: transparent;
-    position: relative;
-    padding-left: 0.8rem;
 }
 
-.sidebarTitle::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.18rem;
-    bottom: 0.18rem;
-    width: 4px;
+.sidebarStatusDot {
+    width: 8px;
+    height: 8px;
     border-radius: 999px;
-    background: #14b8a6;
+    background: #0d9488;
 }
 
 .sidebarCreditRow {
@@ -87,11 +86,18 @@
 }
 
 .sidebarCreditValue {
-    font-size: 1.3rem;
+    font-size: 2rem;
     line-height: 1;
     font-weight: 800;
     color: #0f172a;
     letter-spacing: -0.01em;
+}
+
+.sidebarHelper {
+    margin: 0;
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.35;
 }
 
 .sidebarCta {
@@ -328,6 +334,15 @@
         background: transparent;
     }
 
+    .sidebarTitleRow {
+        gap: 0.3rem;
+    }
+
+    .sidebarStatusDot {
+        width: 6px;
+        height: 6px;
+    }
+
     .sidebarCreditRow {
         display: flex;
         justify-content: space-between;
@@ -345,6 +360,11 @@
 
     .sidebarCreditValue {
         font-size: 0.72rem;
+    }
+
+    .sidebarHelper {
+        font-size: 0.52rem;
+        line-height: 1.2;
     }
 
     .sidebarQuickActions {
