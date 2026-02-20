@@ -180,7 +180,7 @@ export default function SubscriptionClient() {
         <div className={styles.pageContainer}>
             <div className={styles.container}>
                 <div className={styles.headerRow}>
-                    <h1 className={styles.title}>Paketleri Görüntüle / Aboneliği Yönet</h1>
+                    <h1 className={styles.title}>Abonetliği Yönet</h1>
                 </div>
                 <p className={styles.subtitle}>Abonelik durumunuz, kredi kullanımı ve ek kredi satın alma işlemlerinizi bu ekrandan yönetebilirsiniz.</p>
 

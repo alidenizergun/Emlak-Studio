@@ -142,7 +142,6 @@ const Hero = () => {
                             hintSlide
                             hintFullRange
                             brightenAfter
-                            followOnHover
                         />
                         <button
                             type="button"
