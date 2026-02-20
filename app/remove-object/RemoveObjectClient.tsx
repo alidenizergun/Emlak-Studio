@@ -7,6 +7,12 @@ import ToolExamplePopup from '@/components/ToolExamplePopup';
 import styles from './RemoveObject.module.css';
 import { buildRemoveObjectPrompt, type RemoveMode } from './prompts';
 
+const LEGACY_REMOVE_PROMPTS = new Set([
+    'halıyı sil',
+    'Örnek: halıyı sil',
+    'Örnek: koltuğu sil, televizyonu sil',
+]);
+
 export default function RemoveObjectClient() {
     const defaultRemovePrompt = 'Örnek: koltuğu sil, televizyonu sil, halıyı sil';
     const [file, setFile] = useState<File | null>(null);
@@ -23,6 +29,7 @@ export default function RemoveObjectClient() {
         setRemovePrompt((prev) => {
             const trimmed = prev.trim();
             if (!trimmed) return defaultRemovePrompt;
+            if (LEGACY_REMOVE_PROMPTS.has(trimmed)) return defaultRemovePrompt;
             if (trimmed.startsWith('Örnek:') && trimmed !== defaultRemovePrompt) return defaultRemovePrompt;
             return prev;
         });
