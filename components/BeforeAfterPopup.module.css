@@ -267,10 +267,10 @@
     align-items: center;
     justify-content: center;
     /* %25 küçültülmüş buton boyutu ve iç boşluklar */
-    padding: 0.55rem 1.1rem;
+    padding: 0.66rem 1.32rem;
     /* 1 satıra yakın yukarı almak için marj azaltıldı */
     margin-top: 0.25rem;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #fff;
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -311,8 +311,7 @@
 }
 
 .popupCtaHint {
-    /* Yazı boyutu da %25 küçüldü */
-    font-size: 0.6rem;
+    font-size: 0.72rem;
     color: #64748b;
     text-align: center;
     animation: popupCtaHintIn 0.5s ease forwards;
