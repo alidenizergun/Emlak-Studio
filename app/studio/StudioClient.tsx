@@ -259,7 +259,7 @@ export default function StudioClient() {
                                 </div>
                                 <p className={styles.topupText}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
                                 <p className={styles.topupNote}>
-                                    Tutar, paketinize özel kredi birim fiyatına göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
+                                    Ödeme tutarı, paketinize özel kredi birim maliyetine göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
                                 </p>
                                 <p className={styles.topupNote}>
                                     Ek kredi satın alımı için minimum {STUDIO_MIN_TOPUP_CREDITS}, maksimum {STUDIO_MAX_TOPUP_CREDITS} kredi girebilirsiniz.
