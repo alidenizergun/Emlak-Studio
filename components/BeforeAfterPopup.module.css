@@ -45,6 +45,19 @@
     box-sizing: border-box;
 }
 
+@media (min-width: 769px) {
+    .popupOverlay {
+        padding: 0.75rem;
+    }
+
+    .popup {
+        max-width: calc(100vw - 1.5rem);
+        max-width: calc(100dvw - 1.5rem);
+        max-height: calc((100vh - var(--app-header-height) - 1.5rem) * 0.98 * var(--popup-height-scale));
+        max-height: calc((100dvh - var(--app-header-height) - 1.5rem) * 0.98 * var(--popup-height-scale));
+    }
+}
+
 .popupInner {
     flex: 1;
     min-height: 0;

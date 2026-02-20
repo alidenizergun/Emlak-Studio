@@ -25,6 +25,28 @@
     box-shadow: 0 24px 50px -24px rgba(15, 23, 42, 0.45);
 }
 
+@media (min-width: 769px) {
+    .overlay {
+        padding: 0.75rem;
+    }
+
+    .modal {
+        width: min(1600px, calc(100vw - 1.5rem));
+        max-height: calc(100vh - var(--app-header-height) - 1.5rem);
+        max-height: calc(100dvh - var(--app-header-height) - 1.5rem);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .body {
+        overflow: auto;
+    }
+
+    .image {
+        height: min(60vh, 620px);
+    }
+}
+
 .header {
     display: flex;
     align-items: flex-start;
