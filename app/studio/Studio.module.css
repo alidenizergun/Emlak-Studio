@@ -17,11 +17,15 @@
 /* ----- Sol menü (sidebar) üst: Stüdyo, kredi, Kredi al, Ayarlar ----- */
 .sidebarTop {
     padding: 0.82rem 0.82rem 0.9rem;
+    margin: 0.55rem 0.55rem 0.45rem;
+    border: 1px solid #99f6e4;
     border-bottom: 1px solid #99f6e4;
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
     background: #f0fdfa;
+    box-shadow: inset 0 0 0 1px rgba(167, 243, 208, 0.35);
 }
 
 .sidebarMetaRow {
@@ -48,6 +52,19 @@
     padding: 0;
     border: none;
     background: transparent;
+    position: relative;
+    padding-left: 0.8rem;
+}
+
+.sidebarTitle::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.18rem;
+    bottom: 0.18rem;
+    width: 4px;
+    border-radius: 999px;
+    background: #14b8a6;
 }
 
 .sidebarCreditRow {
@@ -288,6 +305,9 @@
     .sidebarTop {
         padding: 0.34rem 0.45rem 0.24rem;
         gap: 0.22rem;
+        margin: 0.34rem 0.34rem 0.24rem;
+        border: 1px solid #99f6e4;
+        border-radius: 10px;
         flex-shrink: 0;
     }
 
