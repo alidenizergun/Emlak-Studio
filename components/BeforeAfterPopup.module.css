@@ -306,7 +306,7 @@
 
 /* Buton ile alt yazı arasında ~yarım satır, sonrasında ~2 satır boşluk */
 .popupCtaHintWrap {
-    margin-top: 0.75rem;
+    margin-top: 1.25rem;
     margin-bottom: 1.5rem;
 }
 
