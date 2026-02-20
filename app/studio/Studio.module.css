@@ -52,7 +52,7 @@
 
 .sidebarCreditLabel {
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #475569;
     letter-spacing: 0.01em;
     text-transform: none;
@@ -61,7 +61,7 @@
 .sidebarCreditValue {
     font-size: 0.8rem;
     line-height: 1;
-    font-weight: 800;
+    font-weight: 500;
     color: #0f172a;
     letter-spacing: -0.01em;
 }
