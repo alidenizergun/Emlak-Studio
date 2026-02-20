@@ -1,7 +1,11 @@
 /* Tek şablon: Hero + Examples aynı popup */
 .popupOverlay {
+    --app-header-height: 100px;
     position: fixed;
-    inset: 0;
+    left: 0;
+    right: 0;
+    top: var(--app-header-height);
+    bottom: 0;
     z-index: 10000;
     background: rgba(248, 250, 252, 0.5);
     backdrop-filter: blur(50px);
@@ -9,11 +13,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: calc(80px + 1.5rem) 1.5rem 1.5rem;
+    padding: 1.5rem;
     animation: popupOverlayIn 0.25s ease;
     overflow: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
     box-sizing: border-box;
 }
 
@@ -27,8 +29,8 @@
     background: var(--card-bg);
     border-radius: 24px;
     max-width: min(1218px, calc((100vw - 3rem) * 0.84));
-    max-height: calc((100vh - 80px - 3rem) * 0.88 * var(--popup-height-scale));
-    max-height: calc((100dvh - 80px - 3rem) * 0.88 * var(--popup-height-scale));
+    max-height: calc((100vh - var(--app-header-height) - 3rem) * 0.88 * var(--popup-height-scale));
+    max-height: calc((100dvh - var(--app-header-height) - 3rem) * 0.88 * var(--popup-height-scale));
     width: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
@@ -311,11 +313,9 @@
 /* Mobile */
 @media (max-width: 768px) {
     .popupOverlay {
-        height: 100svh;
-        height: 100dvh;
-        min-height: 100vh;
-        padding: max(80px, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.25rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
-        align-items: flex-start;
+        --app-header-height: 76px;
+        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        align-items: center;
         justify-content: center;
         box-sizing: border-box;
         overflow-y: auto;
@@ -325,9 +325,8 @@
     .popup {
         border-radius: 20px;
         max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-        /* ~4 satır aşağı uzat (6.65rem - 4rem ≈ 2.65rem) */
-        max-height: calc(100vh - 2.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 2.65rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100vh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         width: 100%;
         overflow-y: hidden;
         overflow-x: hidden;
