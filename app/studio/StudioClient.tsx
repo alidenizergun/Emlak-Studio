@@ -149,7 +149,7 @@ export default function StudioClient() {
                                 <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
                                 <span className={styles.sidebarCreditValue}>{credits !== null ? credits : '—'}</span>
                             </div>
-                            <p className={styles.sidebarHelper}>Kredi anlık olarak senkronize edilir.</p>
+                            <p className={styles.sidebarHelper}>Krediler anlık olarak senkronize edilir.</p>
                         </div>
                         <div className={styles.sidebarQuickActions}>
                             <Link href="/pricing" className={styles.sidebarCta}>Kredi al</Link>
