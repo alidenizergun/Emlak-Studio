@@ -127,14 +127,12 @@ export default function RemoveObjectClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Akıllı Eşya Silme</h1>
-                    <div className={styles.descriptionRow}>
-                        <p className={styles.description}>
-                            İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, yapay zeka seçtiğiniz alanları temizlesin.
-                        </p>
+                    <p className={styles.description}>
+                        İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, yapay zeka seçtiğiniz alanları temizlesin.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
-                    </div>
+                    </p>
                 </div>
             </header>
 

@@ -317,14 +317,12 @@ export default function StageClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Dekorasyon Stüdyosu</h1>
-                    <div className={styles.descriptionRow}>
-                        <p className={styles.description}>
-                            Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
-                        </p>
+                    <p className={styles.description}>
+                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
-                    </div>
+                    </p>
                 </div>
             </header>
 

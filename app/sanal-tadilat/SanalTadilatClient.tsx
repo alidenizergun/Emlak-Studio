@@ -102,14 +102,12 @@ export default function SanalTadilatClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Sanal Tadilat</h1>
-                    <div className={styles.descriptionRow}>
-                        <p className={styles.description}>
-                            Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
-                        </p>
+                    <p className={styles.description}>
+                        Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
-                    </div>
+                    </p>
                 </div>
             </header>
 

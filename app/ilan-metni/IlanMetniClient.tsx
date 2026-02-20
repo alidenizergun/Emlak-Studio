@@ -121,14 +121,12 @@ export default function IlanMetniClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
-                    <div className={styles.descriptionRow}>
-                        <p className={styles.description}>
-                            Fotoğrafları yükleyin ve ilan bilgilerini girin; yapay zeka profesyonel ilan metni üretsin.
-                        </p>
+                    <p className={styles.description}>
+                        Fotoğrafları yükleyin ve ilan bilgilerini girin; yapay zeka profesyonel ilan metni üretsin.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
-                    </div>
+                    </p>
                 </div>
             </header>
 

@@ -52,6 +52,10 @@
 }
 
 .exampleLink {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-left: 0.5rem;
     border: 1px solid #dbe5ef;
     background: #ffffff;
     color: #0f766e;

@@ -169,15 +169,13 @@ export default function EnhanceClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Fotoğraf Geliştirme Stüdyosu</h1>
-                    <div className={styles.descriptionRow}>
-                        <p className={styles.description}>
-                            Yapay zeka ile fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar,
-                            çözünürlüğü 4K kaliteye yükseltir.
-                        </p>
+                    <p className={styles.description}>
+                        Yapay zeka ile fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar,
+                        çözünürlüğü 4K kaliteye yükseltir.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
-                    </div>
+                    </p>
                 </div>
             </header>
 

@@ -1,0 +1,385 @@
+.page {
+  min-height: 100vh;
+  padding: 104px 20px 36px;
+  background: #f8fafc;
+  font-family: var(--font-sans);
+}
+
+.header {
+  max-width: 1240px;
+  margin: 0 auto 14px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.42rem;
+  color: #0f172a;
+}
+
+.header p {
+  margin: 7px 0 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.variantCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.variantMeta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.variantId {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.variantName {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.variantNote {
+  margin: 2px 0 0;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.mock {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.mockTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #10b981;
+}
+
+.creditBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 7px 9px;
+}
+
+.creditLabel {
+  font-size: 0.67rem;
+  color: #64748b;
+}
+
+.creditValue {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.helper {
+  margin: 6px 0 8px;
+  font-size: 0.65rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  width: 100%;
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.primaryBtn {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.secondaryBtn {
+  background: #ffffff;
+  color: #334155;
+  border-color: #dbe5ef;
+}
+
+.v1 .mock { border-left: 4px solid #16a34a; background: #ffffff; }
+.v1 .creditBox { background: #f8fafc; border-color: #e2e8f0; }
+
+.v2 .mock { background: #f8fafc; }
+.v2 .creditBox { background: #ffffff; border-color: #bfdbfe; }
+.v2 .creditValue { font-size: 1.35rem; color: #0369a1; }
+.v2 .actions { grid-template-columns: 2fr 1fr; }
+
+.v3 .mock {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'top'
+    'actions'
+    'credit'
+    'helper';
+}
+.v3 .mockTop { grid-area: top; }
+.v3 .actions { grid-area: actions; margin-bottom: 7px; }
+.v3 .creditBox { grid-area: credit; background: #f0fdfa; border-color: #99f6e4; }
+.v3 .helper { grid-area: helper; margin-bottom: 0; }
+
+.v4 .mockTop { margin-bottom: 5px; }
+.v4 .title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #047857;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid #bbf7d0;
+  background: #ecfdf5;
+}
+.v4 .dot { display: none; }
+.v4 .creditBox { background: #ffffff; border: 1px dashed #cbd5e1; }
+
+.v5 .mock { background: #ffffff; border-color: #e2e8f0; }
+.v5 .actions { grid-template-columns: 1fr; }
+.v5 .primaryBtn { background: #0f172a; border-color: #0f172a; }
+.v5 .secondaryBtn { border-color: #cbd5e1; }
+.v5 .helper { display: none; }
+
+.v6 .mock { text-align: center; background: #f8fafc; }
+.v6 .mockTop { justify-content: center; }
+.v6 .dot { display: none; }
+.v6 .creditBox {
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+.v6 .actions { grid-template-columns: 1fr; }
+
+.v7 .mock {
+  background: linear-gradient(90deg, #ecfeff 0 10px, #ffffff 10px 100%);
+  border-color: #bae6fd;
+}
+.v7 .creditBox { background: #eff6ff; border-color: #bfdbfe; }
+.v7 .primaryBtn { background: #2563eb; }
+
+.v8 .mock {
+  border: 2px solid #0f172a;
+  border-radius: 6px;
+}
+.v8 .creditBox {
+  border: 2px solid #0f172a;
+  border-radius: 6px;
+  background: #ffffff;
+}
+.v8 .secondaryBtn {
+  border: 2px solid #0f172a;
+  border-radius: 6px;
+  color: #0f172a;
+}
+.v8 .primaryBtn { background: #0f172a; border-radius: 6px; }
+
+.v9 .mock { padding: 8px; }
+.v9 .title { font-size: 0.85rem; }
+.v9 .creditBox { padding: 5px 7px; border-color: #e2e8f0; background: #f8fafc; }
+.v9 .creditValue { font-size: 0.95rem; }
+.v9 .primaryBtn, .v9 .secondaryBtn { padding: 5px 6px; font-size: 0.64rem; }
+
+.v10 .mock { background: #ffffff; }
+.v10 .creditBox { background: #ffffff; border-color: #e2e8f0; }
+.v10 .actions { grid-template-columns: 1fr; }
+.v10 .secondaryBtn { background: #f1f5f9; border-color: #e2e8f0; }
+
+.v11 .mock { background: #f8fafc; }
+.v11 .actions { grid-template-columns: 1fr; margin-bottom: 6px; }
+.v11 .primaryBtn { background: #16a34a; padding-top: 9px; padding-bottom: 9px; }
+.v11 .secondaryBtn { order: 2; }
+.v11 .creditBox { order: 3; background: #ffffff; border-color: #dbeafe; }
+
+.v12 .mock { background: #111827; border-color: #1f2937; }
+.v12 .title, .v12 .creditValue { color: #f8fafc; }
+.v12 .creditLabel, .v12 .helper { color: #94a3b8; }
+.v12 .creditBox { background: #0f172a; border-color: #334155; }
+.v12 .primaryBtn { background: #22c55e; color: #052e16; }
+.v12 .secondaryBtn { background: transparent; color: #e2e8f0; border-color: #334155; }
+
+.v13 .mock { background: #ffffff; border-color: #e2e8f0; }
+.v13 .actions {
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid #dbe5ef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.v13 .primaryBtn, .v13 .secondaryBtn { border-radius: 0; border: none; }
+.v13 .secondaryBtn { border-left: 1px solid #dbe5ef; }
+
+.v14 .mock { background: #f0fdfa; border-color: #99f6e4; }
+.v14 .creditBox { background: #ffffff; border-color: #a7f3d0; }
+.v14 .dot { background: #0d9488; }
+.v14 .secondaryBtn { background: #ecfeff; border-color: #99f6e4; color: #0f766e; }
+
+.v15 .mock { background: #ffffff; }
+.v15 .creditLabel {
+  text-transform: uppercase;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+.v15 .creditBox { border-color: #e2e8f0; background: #ffffff; }
+.v15 .helper { border-top: 1px solid #eef2f7; padding-top: 6px; }
+
+.v16 .mock {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'top top'
+    'credit credit'
+    'helper helper'
+    'primary secondary';
+  gap: 6px;
+}
+.v16 .mockTop { grid-area: top; margin-bottom: 0; }
+.v16 .creditBox { grid-area: credit; background: #f8fafc; border-color: #e2e8f0; }
+.v16 .helper { grid-area: helper; margin: 0; }
+.v16 .actions { grid-area: primary / primary / secondary / secondary; grid-template-columns: 1fr 1fr; }
+
+.v17 .mock { background: #ffffff; }
+.v17 .actions { grid-template-columns: 1fr; }
+.v17 .primaryBtn {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+}
+.v17 .secondaryBtn {
+  background: #ffffff;
+  border-style: dashed;
+  border-color: #cbd5e1;
+}
+
+.v18 .mock {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+.v18 .creditBox {
+  position: relative;
+  padding-left: 16px;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+.v18 .creditBox::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 999px;
+  background: #16a34a;
+}
+
+.v19 .mock { background: #ffffff; }
+.v19 .mockTop {
+  border-bottom: 1px solid #eef2f7;
+  padding-bottom: 6px;
+}
+.v19 .actions {
+  grid-template-columns: 1fr 1fr;
+}
+.v19 .primaryBtn {
+  background: #ffffff;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+.v19 .secondaryBtn {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.v20 .mock {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: inset 0 0 0 1px #eef2f7;
+}
+.v20 .creditBox {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  border-radius: 6px;
+}
+.v20 .primaryBtn {
+  background: #0f172a;
+  border-radius: 6px;
+}
+.v20 .secondaryBtn {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  border-radius: 6px;
+}
+
+@media (max-width: 1150px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
