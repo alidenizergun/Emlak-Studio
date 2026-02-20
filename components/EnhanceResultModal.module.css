@@ -4,9 +4,9 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: transparent !important;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background-color: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
     z-index: 1000;
     display: flex;
     align-items: center;

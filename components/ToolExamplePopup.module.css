@@ -6,9 +6,9 @@
     top: var(--app-header-height);
     bottom: 0;
     z-index: 1200;
-    background: transparent !important;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,9 +35,9 @@
 @media (min-width: 769px) {
     .overlay {
         padding: 0.25rem;
-        background: transparent !important;
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+        background: rgba(255, 255, 255, 0.88) !important;
+        backdrop-filter: blur(32px);
+        -webkit-backdrop-filter: blur(32px);
     }
 
     .modal {
