@@ -256,7 +256,7 @@ export default function StudioClient() {
                                         {topupProcessing ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
                                     </button>
                                 </div>
-                                <p className={styles.topupText}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
+                                <p className={`${styles.topupText} ${styles.topupTotalText}`}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
                                 <p className={styles.topupNote}>
                                     Ödeme tutarı, paketinize özel kredi birim maliyetine göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
                                 </p>

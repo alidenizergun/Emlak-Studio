@@ -112,6 +112,10 @@
     color: #64748b;
 }
 
+.topupTotalText {
+    margin-top: 0.95rem;
+}
+
 .topupRow {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -425,6 +429,10 @@
     .topupText,
     .topupNote {
         font-size: 0.54rem;
+    }
+
+    .topupTotalText {
+        margin-top: 0.75rem;
     }
 
     .topupNoteSpaced {
