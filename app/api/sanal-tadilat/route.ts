@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deductCredits } from '@/lib/credits';
-
-const RENOVATION_COST = 2;
+import { getCredits } from '@/lib/credits';
 
 /** Placeholder: returns same image until renovation AI is integrated */
 export async function POST(request: NextRequest) {
@@ -29,20 +27,14 @@ export async function POST(request: NextRequest) {
         const imageUrl = `data:${mime};base64,${base64}`;
         if (instructions) console.log('Sanal tadilat talimatı:', instructions);
 
-        const creditResult = await deductCredits(phone, RENOVATION_COST);
-        if (!creditResult.ok) {
-            return NextResponse.json(
-                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
-                { status: 402 }
-            );
-        }
+        const credits = await getCredits(phone);
 
         return NextResponse.json({
             success: true,
             imageUrl,
-            credits: creditResult.credits,
-            usedCredits: RENOVATION_COST,
-            note: 'Sanal tadilat AI entegrasyonu yakında eklenecek.',
+            credits,
+            usedCredits: 0,
+            note: 'Sanal tadilat AI entegrasyonu yakında eklenecek. Bu placeholder işlem kredi düşmez.',
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';

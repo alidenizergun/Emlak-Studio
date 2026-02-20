@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/prompts';
-import { deductCredits } from '@/lib/credits';
-
-const REMOVE_OBJECT_COST = 2;
+import { getCredits } from '@/lib/credits';
 
 /**
  * Placeholder API: returns the same image as "processed" until a real
@@ -45,13 +43,7 @@ export async function POST(request: NextRequest) {
         const mime = image.type || 'image/jpeg';
         const imageUrl = `data:${mime};base64,${base64}`;
 
-        const creditResult = await deductCredits(phone, REMOVE_OBJECT_COST);
-        if (!creditResult.ok) {
-            return NextResponse.json(
-                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
-                { status: 402 }
-            );
-        }
+        const credits = await getCredits(phone);
 
         return NextResponse.json({
             success: true,
@@ -59,9 +51,9 @@ export async function POST(request: NextRequest) {
             mode,
             prompt,
             userPrompt: userPrompt || undefined,
-            credits: creditResult.credits,
-            usedCredits: REMOVE_OBJECT_COST,
-            note: 'Object removal AI will be integrated here. Currently returning original image.',
+            credits,
+            usedCredits: 0,
+            note: 'Object removal AI will be integrated here. Currently returning original image and does not consume credits.',
         });
     } catch (error: unknown) {
         console.error('Remove-object API error:', error);

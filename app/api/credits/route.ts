@@ -1,36 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile, writeFile } from 'fs/promises';
-import path from 'path';
-
-const CREDITS_FILE = path.join(process.cwd(), 'data', 'credits.json');
-
-async function getCreditsData(): Promise<Record<string, number>> {
-    try {
-        const raw = await readFile(CREDITS_FILE, 'utf-8');
-        const data = JSON.parse(raw);
-        return typeof data === 'object' && data !== null ? data : {};
-    } catch {
-        return {};
-    }
-}
-
-async function setCreditsData(data: Record<string, number>): Promise<void> {
-    await writeFile(CREDITS_FILE, JSON.stringify(data, null, 2), 'utf-8');
-}
+import { addCredits, getCredits, setCredits } from '@/lib/credits';
+import { normalizePhone } from '@/lib/db';
 
 /** GET: Kredi sorgula. ?phone=5322168292 */
 export async function GET(request: NextRequest) {
     try {
-        const phone = request.nextUrl.searchParams.get('phone');
-        const normalized = phone ? String(phone).replace(/\D/g, '') : '';
+        const normalized = normalizePhone(request.nextUrl.searchParams.get('phone'));
         if (!normalized) {
             return NextResponse.json(
                 { success: false, error: 'Telefon numarası gerekli' },
                 { status: 400 }
             );
         }
-        const data = await getCreditsData();
-        const credits = data[normalized] ?? 0;
+        const credits = await getCredits(normalized);
         return NextResponse.json({ success: true, credits });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Sunucu hatası';
@@ -42,7 +24,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}));
-        const phone = body.phone ? String(body.phone).replace(/\D/g, '') : '';
+        const phone = normalizePhone(body.phone);
         const amount = typeof body.amount === 'number' ? body.amount : 0;
         const set = typeof body.set === 'number' ? body.set : null;
         if (!phone) {
@@ -51,14 +33,13 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        const data = await getCreditsData();
+        let credits = 0;
         if (set !== null) {
-            data[phone] = set;
+            credits = await setCredits(phone, set, 'admin_set');
         } else {
-            data[phone] = (data[phone] ?? 0) + amount;
+            credits = await addCredits(phone, amount, 'manual_add');
         }
-        await setCreditsData(data);
-        return NextResponse.json({ success: true, credits: data[phone] });
+        return NextResponse.json({ success: true, credits });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Sunucu hatası';
         return NextResponse.json({ success: false, error: message }, { status: 500 });

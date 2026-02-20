@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile, writeFile } from 'fs/promises';
-import path from 'path';
+import { getDb, normalizePhone } from '@/lib/db';
+import { getCredits, setCredits } from '@/lib/credits';
 
 type PlanId = 'danisman' | 'ofis' | 'kurumsal';
 
@@ -16,27 +16,6 @@ interface SubscriptionInfo {
     lastUsedCredits?: number;
 }
 
-const CREDITS_FILE = path.join(process.cwd(), 'data', 'credits.json');
-const SUBSCRIPTIONS_FILE = path.join(process.cwd(), 'data', 'subscriptions.json');
-
-async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
-    try {
-        const raw = await readFile(filePath, 'utf-8');
-        const parsed = JSON.parse(raw);
-        return (parsed ?? fallback) as T;
-    } catch {
-        return fallback;
-    }
-}
-
-async function writeJsonFile(filePath: string, value: unknown): Promise<void> {
-    await writeFile(filePath, JSON.stringify(value, null, 2), 'utf-8');
-}
-
-function normalizePhone(phoneRaw: string | null): string {
-    return String(phoneRaw || '').replace(/\D/g, '');
-}
-
 function addOneMonthIso(date: Date): string {
     const next = new Date(date);
     next.setMonth(next.getMonth() + 1);
@@ -45,32 +24,32 @@ function addOneMonthIso(date: Date): string {
 
 function defaultPlanFromCredits(currentCredits: number): Omit<SubscriptionInfo, 'status' | 'startDate' | 'nextBillingDate'> {
     if (currentCredits >= 1000) {
-        return {
-            planId: 'kurumsal',
-            planName: 'Kurumsal',
-            monthlyCredits: 1000,
-            monthlyPrice: 4999
-        };
+        return { planId: 'kurumsal', planName: 'Kurumsal', monthlyCredits: 1000, monthlyPrice: 4999 };
     }
     if (currentCredits >= 400) {
-        return {
-            planId: 'ofis',
-            planName: 'Ofis',
-            monthlyCredits: 400,
-            monthlyPrice: 2499
-        };
+        return { planId: 'ofis', planName: 'Ofis', monthlyCredits: 400, monthlyPrice: 2499 };
     }
+    return { planId: 'danisman', planName: 'Danışman', monthlyCredits: 200, monthlyPrice: 1999 };
+}
+
+function mapSubscriptionRow(row: Record<string, unknown>): SubscriptionInfo {
     return {
-        planId: 'danisman',
-        planName: 'Danışman',
-        monthlyCredits: 200,
-        monthlyPrice: 1999
+        planId: String(row.plan_id) as PlanId,
+        planName: String(row.plan_name),
+        monthlyCredits: Number(row.monthly_credits || 0),
+        monthlyPrice: Number(row.monthly_price || 0),
+        status: String(row.status) === 'cancelled' ? 'cancelled' : 'active',
+        startDate: String(row.start_date),
+        nextBillingDate: String(row.next_billing_date),
+        cancelledAt: row.cancelled_at ? String(row.cancelled_at) : undefined,
+        lastUsedCredits: typeof row.last_used_credits === 'number' ? Number(row.last_used_credits) : undefined,
     };
 }
 
-function getOrCreateSubscription(phone: string, currentCredits: number, all: Record<string, SubscriptionInfo>): SubscriptionInfo {
-    const existing = all[phone];
-    if (existing) return existing;
+function getOrCreateSubscription(phone: string, currentCredits: number): SubscriptionInfo {
+    const db = getDb();
+    const existing = db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(phone) as Record<string, unknown> | undefined;
+    if (existing) return mapSubscriptionRow(existing);
 
     const now = new Date();
     const plan = defaultPlanFromCredits(currentCredits);
@@ -78,9 +57,24 @@ function getOrCreateSubscription(phone: string, currentCredits: number, all: Rec
         ...plan,
         status: 'active',
         startDate: now.toISOString(),
-        nextBillingDate: addOneMonthIso(now)
+        nextBillingDate: addOneMonthIso(now),
     };
-    all[phone] = created;
+
+    db.prepare(`
+        INSERT INTO subscriptions (
+            phone, plan_id, plan_name, monthly_credits, monthly_price, status, start_date, next_billing_date, cancelled_at, last_used_credits
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)
+    `).run(
+        phone,
+        created.planId,
+        created.planName,
+        created.monthlyCredits,
+        created.monthlyPrice,
+        created.status,
+        created.startDate,
+        created.nextBillingDate
+    );
+
     return created;
 }
 
@@ -91,17 +85,15 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Telefon numarası gerekli' }, { status: 400 });
         }
 
-        const creditsData = await readJsonFile<Record<string, number>>(CREDITS_FILE, {});
-        const subscriptionsData = await readJsonFile<Record<string, SubscriptionInfo>>(SUBSCRIPTIONS_FILE, {});
-        const currentCredits = Math.max(0, creditsData[phone] ?? 0);
-        const subscription = getOrCreateSubscription(phone, currentCredits, subscriptionsData);
+        const currentCredits = Math.max(0, await getCredits(phone));
+        const subscription = getOrCreateSubscription(phone, currentCredits);
         const usedCredits = Math.max(0, subscription.monthlyCredits - Math.min(currentCredits, subscription.monthlyCredits));
 
         return NextResponse.json({
             success: true,
             subscription,
             credits: currentCredits,
-            usedCredits
+            usedCredits,
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Sunucu hatası';
@@ -122,61 +114,39 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Geçersiz işlem' }, { status: 400 });
         }
 
-        const creditsData = await readJsonFile<Record<string, number>>(CREDITS_FILE, {});
-        const subscriptionsData = await readJsonFile<Record<string, SubscriptionInfo>>(SUBSCRIPTIONS_FILE, {});
-        const currentCredits = Math.max(0, creditsData[phone] ?? 0);
-        const subscription = getOrCreateSubscription(phone, currentCredits, subscriptionsData);
+        const db = getDb();
+        const currentCredits = Math.max(0, await getCredits(phone));
+        const subscription = getOrCreateSubscription(phone, currentCredits);
 
         if (subscription.status === 'cancelled') {
             return NextResponse.json({
                 success: true,
                 alreadyCancelled: true,
                 subscription,
-                credits: currentCredits
+                credits: currentCredits,
             });
         }
 
         const usedCredits = Math.max(0, subscription.monthlyCredits - Math.min(currentCredits, subscription.monthlyCredits));
         const remainingCredits = currentCredits;
+        const cancelledAt = new Date().toISOString();
 
-        subscriptionsData[phone] = {
-            ...subscription,
-            status: 'cancelled',
-            cancelledAt: new Date().toISOString(),
-            lastUsedCredits: usedCredits
-        };
+        db.prepare(`
+            UPDATE subscriptions
+            SET status = 'cancelled', cancelled_at = ?, last_used_credits = ?
+            WHERE phone = ?
+        `).run(cancelledAt, usedCredits, phone);
 
-        // İptalde kullanılmamış kredileri sıfırla.
-        creditsData[phone] = 0;
+        await setCredits(phone, 0, 'subscription_cancel_reset');
 
-        try {
-            await Promise.all([
-                writeJsonFile(SUBSCRIPTIONS_FILE, subscriptionsData),
-                writeJsonFile(CREDITS_FILE, creditsData)
-            ]);
-        } catch (writeError: unknown) {
-            const isReadonlyFs = writeError instanceof Error && 'code' in writeError && String((writeError as { code?: string }).code) === 'EROFS';
-            if (!isReadonlyFs) throw writeError;
-            // Read-only ortamlarda (örn. serverless) kalıcı yazma yapılamaz.
-            // Bu durumda isteği düşürmeyip durumu kullanıcıya bildir.
-            return NextResponse.json({
-                success: true,
-                message: 'Abonelik iptal edildi (geçici oturum).',
-                subscription: subscriptionsData[phone],
-                credits: 0,
-                usedCredits,
-                removedCredits: remainingCredits,
-                persistence: 'ephemeral'
-            });
-        }
-
+        const updated = db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(phone) as Record<string, unknown>;
         return NextResponse.json({
             success: true,
             message: 'Abonelik iptal edildi',
-            subscription: subscriptionsData[phone],
+            subscription: mapSubscriptionRow(updated),
             credits: 0,
             usedCredits,
-            removedCredits: remainingCredits
+            removedCredits: remainingCredits,
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Sunucu hatası';
