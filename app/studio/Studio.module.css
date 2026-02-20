@@ -105,13 +105,6 @@
     margin-top: 0.1rem;
 }
 
-.topupTitle {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #0f172a;
-    font-weight: 700;
-}
-
 .topupText {
     margin: 0.3rem 0 0.48rem;
     font-size: 0.74rem;
@@ -427,10 +420,6 @@
 
     .topupPanel {
         padding: 0.42rem;
-    }
-
-    .topupTitle {
-        font-size: 0.65rem;
     }
 
     .topupText,

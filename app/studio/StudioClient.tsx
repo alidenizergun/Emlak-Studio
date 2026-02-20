@@ -230,7 +230,6 @@ export default function StudioClient() {
                         </div>
                         {showTopupPanel ? (
                             <div className={styles.topupPanel}>
-                                <h3 className={styles.topupTitle}>Ek kredi satın al</h3>
                                 <p className={styles.topupText}>
                                     İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.
                                 </p>
