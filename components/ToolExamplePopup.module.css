@@ -7,8 +7,8 @@
     bottom: 0;
     z-index: 1200;
     background: transparent !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -36,8 +36,8 @@
     .overlay {
         padding: 0.25rem;
         background: transparent !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
     }
 
     .modal {
