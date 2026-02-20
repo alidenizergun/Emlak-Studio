@@ -30,8 +30,8 @@
     border-radius: 24px;
     width: min(1620px, calc(100vw - 3rem));
     width: min(1620px, calc(100dvw - 3rem));
-    height: calc((100vh - var(--app-header-height) - 3rem) * 0.66 * var(--popup-height-scale));
-    height: calc((100dvh - var(--app-header-height) - 3rem) * 0.66 * var(--popup-height-scale));
+    height: calc((100vh - var(--app-header-height) - 3rem) * 0.825 * var(--popup-height-scale));
+    height: calc((100dvh - var(--app-header-height) - 3rem) * 0.825 * var(--popup-height-scale));
     max-height: calc(100vh - var(--app-header-height) - 3rem);
     max-height: calc(100dvh - var(--app-header-height) - 3rem);
     overflow-x: hidden;
@@ -55,8 +55,8 @@
     .popup {
         width: min(1620px, calc(100vw - 1.5rem));
         width: min(1620px, calc(100dvw - 1.5rem));
-        height: calc((100vh - var(--app-header-height) - 1.5rem) * 0.66 * var(--popup-height-scale));
-        height: calc((100dvh - var(--app-header-height) - 1.5rem) * 0.66 * var(--popup-height-scale));
+        height: calc((100vh - var(--app-header-height) - 1.5rem) * 0.825 * var(--popup-height-scale));
+        height: calc((100dvh - var(--app-header-height) - 1.5rem) * 0.825 * var(--popup-height-scale));
         max-height: calc(100vh - var(--app-header-height) - 1.5rem);
         max-height: calc(100dvh - var(--app-header-height) - 1.5rem);
     }
@@ -213,7 +213,7 @@
     width: 100%;
     aspect-ratio: 16/9;
     min-height: 120px;
-    max-height: 75vh;
+    max-height: 94vh;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -379,7 +379,7 @@
 
     .popupImageWrap {
         min-height: 50px;
-        max-height: min(26vh, 200px);
+        max-height: min(32.5vh, 250px);
     }
 
     .popupFooter {
@@ -422,7 +422,7 @@
         max-height: calc(100svh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     }
 
-    .popupImageWrap { max-height: min(22vh, 160px); }
+    .popupImageWrap { max-height: min(27.5vh, 200px); }
     .popupImages { padding: 0.25rem 0.4rem; }
     .popupFooter { padding: 0.4rem 0.6rem 0.6rem; }
     .popupBadge { font-size: 0.65rem; padding: 0.25rem 0.4rem; }

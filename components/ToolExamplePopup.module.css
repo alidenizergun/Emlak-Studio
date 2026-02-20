@@ -19,8 +19,8 @@
 .modal {
     width: min(1350px, calc(100vw - 2rem));
     width: min(1350px, calc(100dvw - 2rem));
-    height: calc((100vh - var(--app-header-height) - 2rem) * 0.66);
-    height: calc((100dvh - var(--app-header-height) - 2rem) * 0.66);
+    height: calc((100vh - var(--app-header-height) - 2rem) * 0.825);
+    height: calc((100dvh - var(--app-header-height) - 2rem) * 0.825);
     max-height: calc(100vh - var(--app-header-height) - 2rem);
     max-height: calc(100dvh - var(--app-header-height) - 2rem);
     background: #ffffff;
@@ -43,14 +43,14 @@
     .modal {
         width: min(1350px, calc(100vw - 1rem));
         width: min(1350px, calc(100dvw - 1rem));
-        height: calc((100vh - var(--app-header-height) - 1rem) * 0.66);
-        height: calc((100dvh - var(--app-header-height) - 1rem) * 0.66);
+        height: calc((100vh - var(--app-header-height) - 1rem) * 0.825);
+        height: calc((100dvh - var(--app-header-height) - 1rem) * 0.825);
         max-height: calc(100vh - var(--app-header-height) - 1rem);
         max-height: calc(100dvh - var(--app-header-height) - 1rem);
     }
 
     .image {
-        height: min(68vh, 760px);
+        height: min(85vh, 950px);
     }
 }
 
@@ -125,7 +125,7 @@
 
 .image {
     width: 100%;
-    height: min(38vh, 300px);
+    height: min(47.5vh, 375px);
     object-fit: cover;
     display: block;
 }
@@ -149,6 +149,6 @@
     }
 
     .image {
-        height: min(32vh, 230px);
+        height: min(40vh, 288px);
     }
 }
