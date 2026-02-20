@@ -251,7 +251,7 @@ const Header = () => {
                 <div className={`${styles.cta} ${styles.desktopCta}`}>
                     {isAuthed ? (
                         <>
-                            <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.loginBtn : styles.registerBtn}>Bana Özel</Link>
+                            <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.loginBtn : styles.registerBtn}>Stüdyo</Link>
                             <button type="button" className={styles.loginBtn} onClick={handleLogout}>
                                 Çıkış Yap
                             </button>
@@ -353,7 +353,7 @@ const Header = () => {
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
                                         <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.mobileLoginBtn : styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
-                                            Bana Özel
+                                            Stüdyo
                                         </Link>
                                     </div>
                                     <button type="button" className={styles.mobileLoginBtn} onClick={handleLogout}>
