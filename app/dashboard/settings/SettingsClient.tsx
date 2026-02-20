@@ -214,6 +214,24 @@ export default function SettingsClient() {
         router.push(`/checkout?${params.toString()}`);
     };
 
+    const normalizeTopupAmount = () => {
+        const raw = purchaseAmountInput.replace(/\D/g, '');
+        if (!raw) {
+            setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
+            return;
+        }
+        const numericValue = Number(raw);
+        if (numericValue <= MIN_TOPUP_CREDITS) {
+            setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
+            return;
+        }
+        if (numericValue > MAX_TOPUP_CREDITS) {
+            setPurchaseAmountInput(String(MAX_TOPUP_CREDITS));
+            return;
+        }
+        setPurchaseAmountInput(String(numericValue));
+    };
+
     if (!mounted) {
         return (
             <div className={styles.pageContainer}>
@@ -305,11 +323,9 @@ export default function SettingsClient() {
                                     value={purchaseAmountInput}
                                     onChange={(e) => {
                                         const digitsOnly = e.target.value.replace(/\D/g, '');
-                                        if (!digitsOnly) return;
-                                        const numericValue = Number(digitsOnly);
-                                        if (numericValue < MIN_TOPUP_CREDITS || numericValue > MAX_TOPUP_CREDITS) return;
-                                        setPurchaseAmountInput(String(numericValue));
+                                        setPurchaseAmountInput(digitsOnly);
                                     }}
+                                    onBlur={normalizeTopupAmount}
                                     className={styles.topupInput}
                                 />
                                 <button
