@@ -224,16 +224,10 @@ export default function StudioClient() {
                                         value={purchaseAmountInput}
                                         onChange={(e) => {
                                             const digitsOnly = e.target.value.replace(/\D/g, '');
-                                            if (!digitsOnly) {
-                                                setPurchaseAmountInput('');
-                                                return;
-                                            }
+                                            if (!digitsOnly) return;
                                             const numericValue = Number(digitsOnly);
-                                            const boundedValue = Math.max(
-                                                MIN_TOPUP_CREDITS,
-                                                Math.min(numericValue, MAX_TOPUP_CREDITS)
-                                            );
-                                            setPurchaseAmountInput(String(boundedValue));
+                                            if (numericValue < MIN_TOPUP_CREDITS || numericValue > MAX_TOPUP_CREDITS) return;
+                                            setPurchaseAmountInput(String(numericValue));
                                         }}
                                         className={styles.topupInput}
                                     />
