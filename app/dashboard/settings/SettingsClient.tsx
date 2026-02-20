@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../Dashboard.module.css';
 
-const MIN_TOPUP_CREDITS = 10;
+const MIN_TOPUP_CREDITS = 1;
 const MAX_TOPUP_CREDITS = 10000;
 
 interface SubscriptionInfo {
