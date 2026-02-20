@@ -32,7 +32,7 @@ export default function SubscriptionClient() {
     const [processingCancel, setProcessingCancel] = useState(false);
     const [processingPurchase, setProcessingPurchase] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [purchaseAmount, setPurchaseAmount] = useState<number>(100);
+    const [purchaseAmountInput, setPurchaseAmountInput] = useState<string>('100');
     const [phone, setPhone] = useState('');
     const [credits, setCredits] = useState<number>(0);
     const [usedCredits, setUsedCredits] = useState<number>(0);
@@ -81,12 +81,12 @@ export default function SubscriptionClient() {
     }, [subscription]);
 
     const purchaseQuote = useMemo(() => {
-        const amount = Math.floor(Number(purchaseAmount) || 0);
-        if (!subscription || amount <= 0) return { amount: 0, total: 0 };
+        const amount = Math.floor(Number(purchaseAmountInput) || 0);
+        if (!subscription || amount <= 0) return { amount: 0, total: 0, perCreditPrice: 0 };
         const perCreditPrice = subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1);
         const total = Math.round(perCreditPrice * amount);
-        return { amount, total };
-    }, [purchaseAmount, subscription]);
+        return { amount, total, perCreditPrice };
+    }, [purchaseAmountInput, subscription]);
 
     const handleCancelSubscription = async () => {
         if (!phone || !subscription || subscription.status === 'cancelled') return;
@@ -215,12 +215,17 @@ export default function SubscriptionClient() {
                                 <p className={styles.purchaseText}>İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.</p>
                                 <div className={styles.purchaseRow}>
                                     <input
-                                        type="number"
-                                        min={1}
-                                        step={1}
-                                        value={purchaseAmount}
-                                        onChange={(e) => setPurchaseAmount(Number(e.target.value))}
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={purchaseAmountInput}
+                                        onChange={(e) => {
+                                            const digitsOnly = e.target.value.replace(/\D/g, '');
+                                            setPurchaseAmountInput(digitsOnly);
+                                        }}
                                         className={styles.purchaseInput}
+                                        placeholder="100"
+                                        aria-label="Satın alınacak kredi adedi"
                                     />
                                     <button
                                         type="button"
@@ -233,6 +238,10 @@ export default function SubscriptionClient() {
                                 </div>
                                 <p className={styles.purchaseText}>
                                     Toplam ödeme: ₺{purchaseQuote.total.toLocaleString('tr-TR')}
+                                </p>
+                                <p className={styles.warning}>
+                                    Tutar, paketinize özel kredi birim fiyatına göre hesaplanır:
+                                    ₺{Math.round(purchaseQuote.perCreditPrice ?? 0).toLocaleString('tr-TR')} x {purchaseQuote.amount} kredi.
                                 </p>
                             </div>
 
