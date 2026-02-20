@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import styles from '../../components/Pricing.module.css';
-import { savePendingCheckoutSelection, setPostAuthRedirect } from '@/lib/checkout';
+import {
+    clearCheckoutSource,
+    savePendingCheckoutSelection,
+    setCheckoutSource,
+    setPostAuthRedirect
+} from '@/lib/checkout';
 
 const PRICING_TIERS = [
     {
@@ -98,16 +103,18 @@ const CheckIcon = () => (
 
 export default function PricingClient() {
     const [isYearly, setIsYearly] = useState(false);
-    const [isAuthed, setIsAuthed] = useState(false);
-
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
-    }, []);
+    const [isAuthed] = useState(() => (
+        typeof window !== 'undefined' && window.localStorage.getItem('emlak_authed') === '1'
+    ));
 
     const handleSelectPlan = (planId: string) => {
+        if (!isAuthed) {
+            clearCheckoutSource();
+            return;
+        }
         const billing = isYearly ? 'yearly' : 'monthly';
         savePendingCheckoutSelection({ planId, billing });
+        setCheckoutSource('pricing');
         setPostAuthRedirect('/checkout');
     };
 
@@ -195,7 +202,7 @@ export default function PricingClient() {
                                     href={
                                         isAuthed
                                             ? `/checkout?plan=${encodeURIComponent(tier.id)}&billing=${isYearly ? 'yearly' : 'monthly'}`
-                                            : `/register?next=checkout&plan=${encodeURIComponent(tier.id)}&billing=${isYearly ? 'yearly' : 'monthly'}`
+                                            : '/studio'
                                     }
                                     onClick={() => handleSelectPlan(tier.id)}
                                     className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}

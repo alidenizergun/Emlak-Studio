@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './Checkout.module.css';
-import { readPendingCheckoutSelection, savePendingCheckoutSelection, type BillingCycle } from '@/lib/checkout';
+import {
+    readCheckoutSource,
+    readPendingCheckoutSelection,
+    savePendingCheckoutSelection,
+    type BillingCycle
+} from '@/lib/checkout';
 
 type PlanId = 'danisman' | 'ofis' | 'kurumsal';
 type CheckoutMode = 'subscription' | 'topup';
@@ -21,6 +26,10 @@ function parsePlanId(value: string | null): PlanId | null {
 
 function parseBilling(value: string | null): BillingCycle {
     return value === 'yearly' ? 'yearly' : 'monthly';
+}
+
+function isBillingCycle(value: string | null): value is BillingCycle {
+    return value === 'monthly' || value === 'yearly';
 }
 
 function parseCheckoutMode(value: string | null): CheckoutMode {
@@ -82,12 +91,26 @@ export default function CheckoutClient() {
         setPhone(currentPhone);
         const params = new URLSearchParams(window.location.search);
         const queryMode = parseCheckoutMode(params.get('mode'));
-        const queryPlan = parsePlanId(params.get('plan'));
-        const queryBilling = parseBilling(params.get('billing'));
+        const rawPlan = params.get('plan');
+        const rawBilling = params.get('billing');
+        const queryPlan = parsePlanId(rawPlan);
+        const queryBilling = parseBilling(rawBilling);
+        const hasValidPricingSelection = queryPlan !== null && isBillingCycle(rawBilling);
         const queryTopupCredits = Math.max(0, Math.floor(Number(params.get('credits') || 0)));
         const queryTopupTotal = Math.max(0, Math.floor(Number(params.get('total') || 0)));
         const pending = readPendingCheckoutSelection();
+        const source = readCheckoutSource();
         const pendingPlan = parsePlanId(pending?.planId ?? null);
+
+        if (!authed) {
+            router.replace('/studio');
+            return;
+        }
+
+        if (queryMode !== 'topup' && (!hasValidPricingSelection || source !== 'pricing')) {
+            router.replace('/studio');
+            return;
+        }
 
         const effectivePlan: PlanId = queryPlan ?? pendingPlan ?? 'danisman';
         const effectiveBilling = (queryPlan ? queryBilling : pending?.billing) ?? 'monthly';
@@ -99,10 +122,6 @@ export default function CheckoutClient() {
         setMode(queryMode);
         setTopupCredits(queryTopupCredits);
         setTopupTotal(queryTopupTotal > 0 ? queryTopupTotal : calculatedTopupTotal);
-
-        if (!authed) {
-            router.replace(`/login?next=checkout&plan=${effectivePlan}&billing=${effectiveBilling}`);
-        }
     }, [router]);
 
     const plan = PLAN_MAP[planId];
