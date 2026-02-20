@@ -234,7 +234,7 @@ export default function RemoveObjectClient() {
                             <textarea
                                 id="remove-prompt"
                                 className={styles.promptInput}
-                                placeholder="Örnek: koltuğu sil, televizyonu sil"
+                                placeholder="Örnek: halıyı sil"
                                 value={removePrompt}
                                 onChange={(e) => {
                                     const value = e.target.value;
