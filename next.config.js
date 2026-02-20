@@ -21,6 +21,31 @@ const nextConfig = {
         removeConsole: process.env.NODE_ENV === 'production',
     },
 
+    webpack: (config, { dev }) => {
+        if (!dev) return config;
+
+        const ignoredPaths = [
+            '**/node_modules/**',
+            '**/.git/**',
+            '**/.next/**',
+            '**/data/credits.json',
+            '**/data/subscriptions.json',
+        ];
+
+        const currentWatchOptions = config.watchOptions || {};
+        const currentIgnored = currentWatchOptions.ignored;
+        const ignored = Array.isArray(currentIgnored)
+            ? [...currentIgnored, ...ignoredPaths]
+            : ignoredPaths;
+
+        config.watchOptions = {
+            ...currentWatchOptions,
+            ignored,
+        };
+
+        return config;
+    },
+
     // Headers for security and performance
     async headers() {
         return [
