@@ -54,6 +54,7 @@ export default function SettingsClient() {
     const [saveNoteType, setSaveNoteType] = useState<'success' | 'error'>('success');
     const [needsCorrectionAttempt, setNeedsCorrectionAttempt] = useState(false);
     const [bonusEligibilityLocked, setBonusEligibilityLocked] = useState(false);
+    const [showProfileBonusHint, setShowProfileBonusHint] = useState(true);
     const [rawPhone, setRawPhone] = useState('');
     const [purchaseAmountInput, setPurchaseAmountInput] = useState('100');
     const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
@@ -75,6 +76,9 @@ export default function SettingsClient() {
         const storedFullName = window.localStorage.getItem('emlak_profile_full_name') || '';
         const storedOfficeName = window.localStorage.getItem('emlak_profile_office_name') || '';
         const storedEmail = window.localStorage.getItem('emlak_profile_email') || '';
+        const normalizedPhone = (phone || '').replace(/\D/g, '');
+        const bonusKey = `emlak_profile_bonus_awarded_${normalizedPhone}`;
+        const bonusAlreadyAwarded = normalizedPhone ? window.localStorage.getItem(bonusKey) === '1' : false;
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setPhoneDisplay(phone ? maskPhone(phone) : '—');
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -85,6 +89,8 @@ export default function SettingsClient() {
         setOfficeName(storedOfficeName);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setEmail(storedEmail);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setShowProfileBonusHint(!bonusAlreadyAwarded);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, [router]);
@@ -187,6 +193,7 @@ export default function SettingsClient() {
             window.localStorage.setItem(bonusKey, '1');
             window.localStorage.setItem('emlak_credits', String(data.credits));
             window.dispatchEvent(new CustomEvent('emlak:credits-updated', { detail: { credits: data.credits } }));
+            setShowProfileBonusHint(false);
             setSaveNoteType('success');
             setSaveNote('Bilgiler kaydedildi. 5 kredi hesabınıza eklendi.');
         } catch {
@@ -297,7 +304,7 @@ export default function SettingsClient() {
                                 Kaydet
                             </button>
                         </div>
-                        <p className={styles.accountHint}>Bilgilerinizi girin, 5 kredi hediye kazanın.</p>
+                        {showProfileBonusHint ? <p className={styles.accountHint}>Bilgilerinizi girin, 5 kredi hediye kazanın.</p> : null}
                         {saveNote ? <p className={`${styles.accountNote} ${saveNoteType === 'error' ? styles.accountNoteError : ''}`}>{saveNote}</p> : null}
                     </div>
 
