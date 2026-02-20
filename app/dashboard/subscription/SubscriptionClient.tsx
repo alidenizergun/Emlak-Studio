@@ -154,6 +154,24 @@ export default function SubscriptionClient() {
         }
     };
 
+    const normalizeTopupAmount = () => {
+        const raw = purchaseAmountInput.replace(/\D/g, '');
+        if (!raw) {
+            setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
+            return;
+        }
+        const numericValue = Number(raw);
+        if (numericValue < MIN_TOPUP_CREDITS) {
+            setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
+            return;
+        }
+        if (numericValue > MAX_TOPUP_CREDITS) {
+            setPurchaseAmountInput(String(MAX_TOPUP_CREDITS));
+            return;
+        }
+        setPurchaseAmountInput(String(numericValue));
+    };
+
     if (!mounted) {
         return <div className={styles.pageContainer}>Yükleniyor...</div>;
     }
@@ -211,8 +229,7 @@ export default function SubscriptionClient() {
 
                         <div className={styles.actions}>
                             <div className={styles.purchaseBlock}>
-                                <h3 className={styles.purchaseTitle}>Ek kredi satın al</h3>
-                                <p className={styles.purchaseText}>İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.</p>
+                                <p className={styles.purchaseText}>İhtiyacınıza göre kredi adedini girin ve hesabınıza anında ekleyin.</p>
                                 <div className={styles.purchaseRow}>
                                     <input
                                         type="text"
@@ -221,17 +238,10 @@ export default function SubscriptionClient() {
                                         value={purchaseAmountInput}
                                         onChange={(e) => {
                                             const digitsOnly = e.target.value.replace(/\D/g, '');
-                                            if (!digitsOnly) {
-                                                setPurchaseAmountInput('');
-                                                return;
-                                            }
-                                            const numericValue = Number(digitsOnly);
-                                            const boundedValue = Math.max(
-                                                MIN_TOPUP_CREDITS,
-                                                Math.min(numericValue, MAX_TOPUP_CREDITS)
-                                            );
-                                            setPurchaseAmountInput(String(boundedValue));
+                                            setPurchaseAmountInput(digitsOnly);
                                         }}
+                                        onFocus={(e) => e.currentTarget.select()}
+                                        onBlur={normalizeTopupAmount}
                                         className={styles.purchaseInput}
                                         placeholder="100"
                                         aria-label="Satın alınacak kredi adedi"
@@ -245,15 +255,15 @@ export default function SubscriptionClient() {
                                         {processingPurchase ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
                                     </button>
                                 </div>
-                                <p className={styles.purchaseText}>
+                                <p className={`${styles.purchaseText} ${styles.purchaseTotalText}`}>
                                     Toplam ödeme: ₺{purchaseQuote.total.toLocaleString('tr-TR')}
                                 </p>
-                                <p className={styles.warning}>
-                                    Tutar, paketinize özel kredi birim fiyatına göre hesaplanır:
+                                <p className={`${styles.warning} ${styles.purchasePricingNote}`}>
+                                    Ödeme tutarı, paketinize özel kredi birim maliyetine göre hesaplanır:
                                     ₺{Math.round(purchaseQuote.perCreditPrice ?? 0).toLocaleString('tr-TR')} x {purchaseQuote.amount} kredi.
                                 </p>
                                 <p className={styles.warning}>
-                                    Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS}, maksimum {MAX_TOPUP_CREDITS} kredi girebilirsiniz.
+                                    Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS.toLocaleString('tr-TR')}, maksimum {MAX_TOPUP_CREDITS.toLocaleString('tr-TR')} kredi girebilirsiniz.
                                 </p>
                             </div>
 

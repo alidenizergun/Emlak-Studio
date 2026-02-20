@@ -107,17 +107,14 @@
     margin-bottom: 0.85rem;
 }
 
-.purchaseTitle {
-    margin: 0;
-    font-size: 0.96rem;
-    color: #0f172a;
-    font-weight: 700;
-}
-
 .purchaseText {
     margin: 0.35rem 0 0.6rem;
     color: #64748b;
     font-size: 0.84rem;
+}
+
+.purchaseTotalText {
+    margin-top: 0.95rem;
 }
 
 .purchaseRow {
@@ -163,6 +160,10 @@
     color: #64748b;
     font-size: 0.82rem;
     line-height: 1.45;
+}
+
+.purchasePricingNote {
+    margin-bottom: 0.85rem;
 }
 
 .error {
