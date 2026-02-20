@@ -17,6 +17,9 @@ interface SubscriptionInfo {
     lastUsedCredits?: number;
 }
 
+const MIN_TOPUP_CREDITS = 10;
+const MAX_TOPUP_CREDITS = 10000;
+
 function formatDate(iso: string): string {
     try {
         return new Date(iso).toLocaleDateString('tr-TR');
@@ -130,8 +133,8 @@ export default function SubscriptionClient() {
     const handlePurchaseCredits = async () => {
         if (!phone || !subscription) return;
         const amount = purchaseQuote.amount;
-        if (amount <= 0) {
-            setError('Lütfen 0’dan büyük bir kredi adedi girin.');
+        if (amount < MIN_TOPUP_CREDITS || amount > MAX_TOPUP_CREDITS) {
+            setError(`Lütfen ${MIN_TOPUP_CREDITS} ile ${MAX_TOPUP_CREDITS} arasında kredi adedi girin.`);
             return;
         }
 
@@ -221,7 +224,12 @@ export default function SubscriptionClient() {
                                         value={purchaseAmountInput}
                                         onChange={(e) => {
                                             const digitsOnly = e.target.value.replace(/\D/g, '');
-                                            setPurchaseAmountInput(digitsOnly);
+                                            if (!digitsOnly) {
+                                                setPurchaseAmountInput('');
+                                                return;
+                                            }
+                                            const boundedValue = Math.min(Number(digitsOnly), MAX_TOPUP_CREDITS);
+                                            setPurchaseAmountInput(String(boundedValue));
                                         }}
                                         className={styles.purchaseInput}
                                         placeholder="100"
@@ -242,6 +250,9 @@ export default function SubscriptionClient() {
                                 <p className={styles.warning}>
                                     Tutar, paketinize özel kredi birim fiyatına göre hesaplanır:
                                     ₺{Math.round(purchaseQuote.perCreditPrice ?? 0).toLocaleString('tr-TR')} x {purchaseQuote.amount} kredi.
+                                </p>
+                                <p className={styles.warning}>
+                                    Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS}, maksimum {MAX_TOPUP_CREDITS} kredi girebilirsiniz.
                                 </p>
                             </div>
 
