@@ -133,10 +133,7 @@ export default function SubscriptionClient() {
     const handlePurchaseCredits = async () => {
         if (!phone || !subscription) return;
         const amount = purchaseQuote.amount;
-        if (amount < MIN_TOPUP_CREDITS || amount > MAX_TOPUP_CREDITS) {
-            setError(`Lütfen ${MIN_TOPUP_CREDITS} ile ${MAX_TOPUP_CREDITS} arasında kredi adedi girin.`);
-            return;
-        }
+        if (amount < MIN_TOPUP_CREDITS || amount > MAX_TOPUP_CREDITS) return;
 
         setProcessingPurchase(true);
         setError('');
@@ -228,7 +225,11 @@ export default function SubscriptionClient() {
                                                 setPurchaseAmountInput('');
                                                 return;
                                             }
-                                            const boundedValue = Math.min(Number(digitsOnly), MAX_TOPUP_CREDITS);
+                                            const numericValue = Number(digitsOnly);
+                                            const boundedValue = Math.max(
+                                                MIN_TOPUP_CREDITS,
+                                                Math.min(numericValue, MAX_TOPUP_CREDITS)
+                                            );
                                             setPurchaseAmountInput(String(boundedValue));
                                         }}
                                         className={styles.purchaseInput}
