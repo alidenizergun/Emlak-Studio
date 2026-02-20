@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb, normalizePhone } from '@/lib/db';
 import { getCredits, setCredits } from '@/lib/credits';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 type PlanId = 'danisman' | 'ofis' | 'kurumsal';
 
@@ -84,6 +85,8 @@ export async function GET(request: NextRequest) {
         if (!phone) {
             return NextResponse.json({ success: false, error: 'Telefon numarası gerekli' }, { status: 400 });
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
 
         const currentCredits = Math.max(0, await getCredits(phone));
         const subscription = getOrCreateSubscription(phone, currentCredits);
@@ -110,6 +113,8 @@ export async function POST(request: NextRequest) {
         if (!phone) {
             return NextResponse.json({ success: false, error: 'Telefon numarası gerekli' }, { status: 400 });
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
         if (action !== 'cancel') {
             return NextResponse.json({ success: false, error: 'Geçersiz işlem' }, { status: 400 });
         }

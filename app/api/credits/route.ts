@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addCredits, getCredits, setCredits } from '@/lib/credits';
 import { normalizePhone } from '@/lib/db';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 /** GET: Kredi sorgula. ?phone=5322168292 */
 export async function GET(request: NextRequest) {
@@ -12,6 +13,8 @@ export async function GET(request: NextRequest) {
                 { status: 400 }
             );
         }
+        const authError = requireAuthPhone(request, normalized);
+        if (authError) return authError;
         const credits = await getCredits(normalized);
         return NextResponse.json({ success: true, credits });
     } catch (error: unknown) {
@@ -33,6 +36,9 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
+
         let credits = 0;
         if (set !== null) {
             credits = await setCredits(phone, set, 'admin_set');

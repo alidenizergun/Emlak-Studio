@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/prompts';
 import { getCredits } from '@/lib/credits';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 /**
  * Placeholder API: returns the same image as "processed" until a real
@@ -27,6 +28,8 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
 
         if (mode === 'prompt' && !userPrompt) {
             return NextResponse.json(

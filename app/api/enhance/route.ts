@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Jimp } from 'jimp';
 import Replicate from 'replicate';
 import { deductCredits } from '@/lib/credits';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 const replicate = process.env.REPLICATE_API_TOKEN
     ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
@@ -27,6 +28,8 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
 
         const options = JSON.parse(optionsStr || '{}');
         const cost = getEnhanceCreditCost(options);

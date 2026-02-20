@@ -147,8 +147,9 @@ const Header = () => {
         return () => ro.disconnect();
     }, [isMounted, isMenuOpen]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         try {
+            await fetch('/api/auth/logout', { method: 'POST' });
             if (typeof window !== 'undefined') {
                 window.localStorage.removeItem('emlak_authed');
                 window.localStorage.removeItem('emlak_user_phone');

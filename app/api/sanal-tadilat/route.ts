@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCredits } from '@/lib/credits';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 /** Placeholder: returns same image until renovation AI is integrated */
 export async function POST(request: NextRequest) {
@@ -20,6 +21,8 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
         const bytes = await image.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const base64 = buffer.toString('base64');

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCredits } from '@/lib/credits';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 /** Placeholder: accepts upload, returns success until video/tour AI is integrated */
 export async function POST(request: NextRequest) {
@@ -20,6 +21,8 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
         const credits = await getCredits(phone);
         // script: kullanıcının girdiği metin (max 150 karakter), 8 sn videoda yapay zeka sunucusu tarafından söylenecek
         return NextResponse.json({

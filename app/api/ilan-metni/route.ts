@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { deductCredits } from '@/lib/credits';
+import { requireAuthPhone } from '@/lib/auth-guard';
 
 interface IlanBilgileri {
     lokasyon?: string;
@@ -141,6 +142,8 @@ export async function POST(request: NextRequest) {
                 { status: 401 }
             );
         }
+        const authError = requireAuthPhone(request, phone);
+        if (authError) return authError;
 
         let info: IlanBilgileri = {};
         if (ilanBilgileriRaw) {

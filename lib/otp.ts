@@ -6,6 +6,15 @@ const OTP_RESEND_SECONDS = 60;
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_SECRET = process.env.OTP_SECRET || 'dev-otp-secret-change-me';
 
+function xmlEscape(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
 function hashOtp(phone: string, code: string): string {
     return crypto
         .createHash('sha256')
@@ -17,48 +26,69 @@ function generateOtpCode(): string {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-async function sendTwilioSms(toPhone: string, message: string): Promise<void> {
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    const fromPhone = process.env.TWILIO_FROM_PHONE;
+async function sendPostaGuverciniSms(toPhone: string, message: string): Promise<void> {
+    const username = process.env.POSTAGUVERCINI_USERNAME;
+    const password = process.env.POSTAGUVERCINI_PASSWORD;
+    const endpoint = process.env.POSTAGUVERCINI_ENDPOINT || 'https://www.postaguvercini.com/api_ws/smsservice.asmx';
 
-    if (!accountSid || !authToken || !fromPhone) {
-        throw new Error('SMS sağlayıcısı yapılandırılmamış');
+    if (!username || !password) {
+        throw new Error('POSTAGUVERCINI_USERNAME ve POSTAGUVERCINI_PASSWORD gerekli');
     }
 
-    const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
-    const body = new URLSearchParams({
-        To: `+90${toPhone}`,
-        From: fromPhone,
-        Body: message,
-    });
+    const now = new Date();
+    const expire = new Date(now.getTime() + 5 * 60 * 1000);
 
-    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+    const xml = `<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <SmsInsert_1_N xmlns="http://83.66.137.24/PgApiWs">
+      <Username>${xmlEscape(username)}</Username>
+      <Password>${xmlEscape(password)}</Password>
+      <SendDate>${now.toISOString()}</SendDate>
+      <ExpireDate>${expire.toISOString()}</ExpireDate>
+      <Recepients>
+        <string>90${toPhone}</string>
+      </Recepients>
+      <Message>${xmlEscape(message)}</Message>
+    </SmsInsert_1_N>
+  </soap:Body>
+</soap:Envelope>`;
+
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-            Authorization: `Basic ${auth}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'text/xml; charset=utf-8',
+            SOAPAction: '"http://83.66.137.24/PgApiWs/SmsInsert_1_N"',
         },
-        body,
+        body: xml,
     });
 
     if (!response.ok) {
         const text = await response.text().catch(() => '');
         throw new Error(text || 'SMS gönderimi başarısız');
     }
+
+    const responseXml = await response.text();
+    if (responseXml.includes('<soap:Fault') || responseXml.includes('<faultcode>')) {
+        throw new Error('Posta Güvercini SOAP fault döndürdü');
+    }
+
+    const match = responseXml.match(/<string>(.*?)<\/string>/);
+    if (!match) {
+        throw new Error('Posta Güvercini cevabı doğrulanamadı');
+    }
 }
 
 async function sendOtpSms(phone: string, code: string): Promise<void> {
     const message = `Emlak YZ doğrulama kodunuz: ${code}. Kod 5 dakika geçerlidir.`;
-    const hasTwilio = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_PHONE);
 
-    if (hasTwilio) {
-        await sendTwilioSms(phone, message);
+    if (process.env.POSTAGUVERCINI_USERNAME && process.env.POSTAGUVERCINI_PASSWORD) {
+        await sendPostaGuverciniSms(phone, message);
         return;
     }
 
     if (process.env.NODE_ENV === 'production') {
-        throw new Error('SMS sağlayıcısı eksik: TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN/TWILIO_FROM_PHONE');
+        throw new Error('Posta Güvercini yapılandırması eksik: POSTAGUVERCINI_USERNAME/POSTAGUVERCINI_PASSWORD');
     }
 
     // Local/dev fallback: gerçek doğrulama sürer, kod terminale yazdırılır.
