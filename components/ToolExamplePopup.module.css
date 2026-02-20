@@ -1,6 +1,10 @@
 .overlay {
+    --app-header-height: 100px;
     position: fixed;
-    inset: 0;
+    left: 0;
+    right: 0;
+    top: var(--app-header-height);
+    bottom: 0;
     z-index: 1200;
     background: rgba(15, 23, 42, 0.35);
     backdrop-filter: blur(26px) saturate(120%);
@@ -9,6 +13,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    overflow: auto;
 }
 
 .modal {
@@ -104,6 +109,10 @@
 }
 
 @media (max-width: 768px) {
+    .overlay {
+        --app-header-height: 76px;
+    }
+
     .compareGrid {
         grid-template-columns: 1fr;
     }
