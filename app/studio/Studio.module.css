@@ -170,21 +170,21 @@
     justify-content: center;
     flex: 1 1 auto;
     min-width: 0;
-    padding: 0.52rem 0.64rem;
+    padding: 0.58rem 0.7rem;
     background: #d9f4f1;
     color: #0f766e;
     border: 1px solid #8de6dd;
-    border-radius: 10px;
+    border-radius: 11px;
     font-weight: 500;
-    font-size: 0.79rem;
+    font-size: 0.82rem;
     text-decoration: none;
-    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    transition: background 0.2s, border-color 0.2s;
 }
 
 .sidebarSettings:hover {
+    background: #cdeeea;
     border-color: #5bd4c8;
     color: #0f766e;
-    background: #cdeeea;
 }
 
 /* ----- Ana layout: sidebar + workspace ----- */
