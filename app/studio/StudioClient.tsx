@@ -7,6 +7,16 @@ import dynamic from 'next/dynamic';
 import { TOOLS } from '@/app/tools/toolsData';
 import styles from './Studio.module.css';
 
+const STUDIO_MIN_TOPUP_CREDITS = 10;
+const STUDIO_MAX_TOPUP_CREDITS = 10000;
+
+interface SubscriptionInfo {
+    planId: 'danisman' | 'ofis' | 'kurumsal';
+    monthlyCredits: number;
+    monthlyPrice: number;
+    status: 'active' | 'cancelled';
+}
+
 const VALID_TOOL_IDS = new Set(TOOLS.map((t) => t.id));
 function getToolIdFromParam(param: string | null): string {
     if (param && VALID_TOOL_IDS.has(param)) return param;
@@ -36,7 +46,13 @@ export default function StudioClient() {
     const toolParam = searchParams.get('tool');
     const [mounted, setMounted] = useState(false);
     const [credits, setCredits] = useState<number | null>(null);
+    const [phone, setPhone] = useState('');
     const [selectedToolId, setSelectedToolId] = useState<string>(() => getToolIdFromParam(toolParam));
+    const [showTopupPanel, setShowTopupPanel] = useState(false);
+    const [purchaseAmountInput, setPurchaseAmountInput] = useState('100');
+    const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
+    const [topupLoading, setTopupLoading] = useState(false);
+    const [topupProcessing, setTopupProcessing] = useState(false);
     const workspaceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -80,8 +96,26 @@ export default function StudioClient() {
             router.replace('/login');
             return;
         }
+        const currentPhone = window.localStorage.getItem('emlak_user_phone') || '';
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setPhone(currentPhone);
         refreshCredits();
     }, [mounted, refreshCredits, router]);
+
+    useEffect(() => {
+        if (!showTopupPanel || !phone) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTopupLoading(true);
+        fetch(`/api/subscription?phone=${encodeURIComponent(phone)}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success && data.subscription) {
+                    setSubscription(data.subscription as SubscriptionInfo);
+                }
+            })
+            .catch(() => {})
+            .finally(() => setTopupLoading(false));
+    }, [showTopupPanel, phone]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
@@ -134,6 +168,44 @@ export default function StudioClient() {
     }
 
     const ToolComponent = TOOL_COMPONENTS[selectedToolId];
+    const purchaseAmount = Math.floor(Number(purchaseAmountInput) || 0);
+    const perCreditPrice = subscription
+        ? subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1)
+        : 0;
+    const totalTopupPrice = Math.round(perCreditPrice * purchaseAmount);
+
+    const normalizeTopupAmount = () => {
+        const raw = purchaseAmountInput.replace(/\D/g, '');
+        if (!raw) {
+            setPurchaseAmountInput(String(STUDIO_MIN_TOPUP_CREDITS));
+            return;
+        }
+        const numericValue = Number(raw);
+        if (numericValue < STUDIO_MIN_TOPUP_CREDITS) {
+            setPurchaseAmountInput(String(STUDIO_MIN_TOPUP_CREDITS));
+            return;
+        }
+        if (numericValue > STUDIO_MAX_TOPUP_CREDITS) {
+            setPurchaseAmountInput(String(STUDIO_MAX_TOPUP_CREDITS));
+            return;
+        }
+        setPurchaseAmountInput(String(numericValue));
+    };
+
+    const handleTopupPurchase = () => {
+        if (!subscription || !phone || subscription.status === 'cancelled') return;
+        const amount = Math.max(STUDIO_MIN_TOPUP_CREDITS, Math.min(purchaseAmount, STUDIO_MAX_TOPUP_CREDITS));
+        const params = new URLSearchParams({
+            mode: 'topup',
+            plan: subscription.planId,
+            billing: 'monthly',
+            credits: String(amount),
+            total: String(Math.round(perCreditPrice * amount)),
+        });
+        setTopupProcessing(true);
+        router.push(`/checkout?${params.toString()}`);
+    };
+
     return (
         <div className={styles.pageContainer}>
             <div className={styles.mainLayout}>
@@ -147,9 +219,53 @@ export default function StudioClient() {
                             <p className={styles.sidebarHelper}>Krediler anlık olarak senkronize edilir.</p>
                         </div>
                         <div className={styles.sidebarQuickActions}>
-                            <Link href="/dashboard/settings" className={styles.sidebarCta}>Kredi al</Link>
+                            <button
+                                type="button"
+                                className={styles.sidebarCta}
+                                onClick={() => setShowTopupPanel((prev) => !prev)}
+                            >
+                                Kredi Satın Al
+                            </button>
                             <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>
                         </div>
+                        {showTopupPanel ? (
+                            <div className={styles.topupPanel}>
+                                <h3 className={styles.topupTitle}>Ek kredi satın al</h3>
+                                <p className={styles.topupText}>
+                                    İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.
+                                </p>
+                                <div className={styles.topupRow}>
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={purchaseAmountInput}
+                                        onChange={(e) => {
+                                            const digitsOnly = e.target.value.replace(/\D/g, '');
+                                            setPurchaseAmountInput(digitsOnly);
+                                        }}
+                                        onFocus={(e) => e.currentTarget.select()}
+                                        onBlur={normalizeTopupAmount}
+                                        className={styles.topupInput}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={styles.topupButton}
+                                        onClick={handleTopupPurchase}
+                                        disabled={topupLoading || topupProcessing || !subscription || subscription.status === 'cancelled'}
+                                    >
+                                        {topupProcessing ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
+                                    </button>
+                                </div>
+                                <p className={styles.topupText}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
+                                <p className={styles.topupNote}>
+                                    Tutar, paketinize özel kredi birim fiyatına göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
+                                </p>
+                                <p className={styles.topupNote}>
+                                    Ek kredi satın alımı için minimum {STUDIO_MIN_TOPUP_CREDITS}, maksimum {STUDIO_MAX_TOPUP_CREDITS} kredi girebilirsiniz.
+                                </p>
+                            </div>
+                        ) : null}
                     </div>
                     <nav className={styles.toolNav} aria-label="Araçlar">
                         {TOOLS.map((tool) => {
