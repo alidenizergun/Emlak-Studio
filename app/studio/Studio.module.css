@@ -179,30 +179,34 @@
     margin: 0 0.5rem;
     border: none;
     border-radius: 10px;
-    background: transparent;
-    color: #334155;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+    color: #0f766e;
     font-size: 0.9rem;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    border: 1px solid #d9f5ee;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
     position: relative;
 }
 
 .toolItem:hover:not(.toolItemDisabled) {
-    background: #f0fdf4;
-    color: #0d9488;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%);
+    border-color: #93e5d4;
+    color: #0f6fa4;
 }
 
 .toolItemActive {
-    background: #ccfbf1;
-    color: #0d9488;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+    border-color: #5fd7bb;
+    color: #2563eb;
     font-weight: 600;
 }
 
 .toolItemActive:hover {
-    background: #99f6e4;
-    color: #0f766e;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.24) 0%, rgba(59, 130, 246, 0.24) 100%);
+    border-color: #43cda9;
+    color: #1d4ed8;
 }
 
 .toolItemDisabled {
@@ -217,6 +221,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: inherit;
 }
 
 .toolItemIcon svg {
@@ -415,8 +420,8 @@
         max-width: none;
         margin: 0;
         padding: 0.24rem 0.22rem 0.2rem;
-        border: 1px solid #e2e8f0;
-        background: #ffffff;
+        border: 1px solid #cceee4;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(59, 130, 246, 0.06) 100%);
         border-radius: 9px;
         gap: 0.14rem;
         flex-direction: column;
@@ -426,8 +431,8 @@
     }
 
     .toolItemActive {
-        border-color: #14b8a6;
-        background: #f0fdfa;
+        border-color: #5fd7bb;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(59, 130, 246, 0.22) 100%);
     }
 
     .toolItemIcon {
