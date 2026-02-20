@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "WATCHPACK_POLLING=true next dev --hostname localhost --webpack",
+    "dev:fresh": "rm -rf .next && WATCHPACK_POLLING=true next dev --hostname 127.0.0.1 --port 3010 --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
