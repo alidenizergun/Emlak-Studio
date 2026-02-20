@@ -88,12 +88,80 @@
     text-decoration: none;
     border: 1px solid #8de6dd;
     transition: background 0.2s, border-color 0.2s;
+    cursor: pointer;
 }
 
 .sidebarCta:hover {
     background: #cdeeea;
     border-color: #5bd4c8;
     color: #0f766e;
+}
+
+.topupPanel {
+    border: 1px solid #99f6e4;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 0.62rem;
+    margin-top: 0.1rem;
+}
+
+.topupTitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.topupText {
+    margin: 0.3rem 0 0.48rem;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    color: #64748b;
+}
+
+.topupRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
+}
+
+.topupInput {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.48rem 0.56rem;
+    font-size: 0.85rem;
+    color: #0f172a;
+    background: #ffffff;
+}
+
+.topupInput:focus {
+    outline: none;
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.12);
+}
+
+.topupButton {
+    border: 1px solid #14b8a6;
+    background: #0d9488;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 0.48rem 0.62rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.topupButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.topupNote {
+    margin: 0.3rem 0 0;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    color: #64748b;
 }
 
 .sidebarSettings {
@@ -430,5 +498,30 @@
     .workspaceToolWrap {
         padding-top: 0.75rem;
         padding-bottom: 1rem;
+    }
+
+    .topupPanel {
+        padding: 0.42rem;
+    }
+
+    .topupTitle {
+        font-size: 0.65rem;
+    }
+
+    .topupText,
+    .topupNote {
+        font-size: 0.54rem;
+    }
+
+    .topupInput {
+        font-size: 0.6rem;
+        padding: 0.3rem 0.35rem;
+        border-radius: 8px;
+    }
+
+    .topupButton {
+        font-size: 0.58rem;
+        padding: 0.3rem 0.36rem;
+        border-radius: 8px;
     }
 }
