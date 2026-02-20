@@ -9,7 +9,7 @@
     "dev:fresh": "npm run dev:stable",
     "dev:reset": "pkill -f \"next dev\" || true; rm -rf .next",
     "dev:doctor": "node -e \"console.log('cwd:', process.cwd());\" && git rev-parse --short HEAD && curl -s -I http://127.0.0.1:3000 | rg -n 'HTTP/|Cache-Control' || true",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "github-push": "node scripts/github-push.mjs",
@@ -26,6 +26,7 @@
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
