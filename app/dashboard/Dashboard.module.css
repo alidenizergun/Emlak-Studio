@@ -112,6 +112,24 @@
     transform: translateY(-1px);
 }
 
+.settingsActionBtn {
+    padding: 0.58rem 0.7rem;
+    background: #d9f4f1;
+    color: #0f766e;
+    border: 1px solid #8de6dd;
+    border-radius: 11px;
+    font-weight: 500;
+    font-size: 0.82rem;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.settingsActionBtn:hover {
+    background: #cdeeea;
+    border-color: #5bd4c8;
+    color: #0f766e;
+    transform: none;
+}
+
 .accountBtnSecondary {
     display: inline-flex;
     align-items: center;
