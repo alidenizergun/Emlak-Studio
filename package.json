@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run dev:stable",
-    "dev:stable": "rm -rf .next && WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=120 next dev --hostname 127.0.0.1 --port 3010 --webpack",
+    "dev:stable": "rm -rf .next && WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=80 next dev --hostname 127.0.0.1 --port 3010 --webpack",
     "dev:fresh": "npm run dev:stable",
     "dev:reset": "pkill -f \"next dev\" || true; rm -rf .next",
     "dev:doctor": "node -e \"console.log('cwd:', process.cwd());\" && git rev-parse --short HEAD && curl -s -I http://127.0.0.1:3010 | rg -n 'HTTP/|Cache-Control' || true",

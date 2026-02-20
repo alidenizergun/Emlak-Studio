@@ -38,6 +38,9 @@ const nextConfig: NextConfig = {
     config.watchOptions = {
       ...currentWatchOptions,
       ignored,
+      // Faster and more reliable change detection on local macOS volumes.
+      poll: 100,
+      aggregateTimeout: 50,
     };
 
     return config;
