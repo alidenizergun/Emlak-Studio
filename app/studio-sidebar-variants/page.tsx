@@ -53,11 +53,6 @@ export default function StudioSidebarVariantsPage() {
             </div>
 
             <div className={styles.mock}>
-              <div className={styles.mockTop}>
-                <h3 className={styles.title}>Stüdyo</h3>
-                <span className={styles.dot} />
-              </div>
-
               <div className={styles.creditBox}>
                 <span className={styles.creditLabel}>Kalan kredi</span>
                 <span className={styles.creditValue}>250</span>
