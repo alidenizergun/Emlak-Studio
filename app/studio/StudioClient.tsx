@@ -257,7 +257,7 @@ export default function StudioClient() {
                                     </button>
                                 </div>
                                 <p className={`${styles.topupText} ${styles.topupTotalText}`}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
-                                <p className={styles.topupNote}>
+                                <p className={`${styles.topupNote} ${styles.topupPricingNote}`}>
                                     Ödeme tutarı, paketinize özel kredi birim maliyetine göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
                                 </p>
                                 <p className={`${styles.topupNote} ${styles.topupNoteSpaced}`}>

@@ -161,6 +161,10 @@
     color: #64748b;
 }
 
+.topupPricingNote {
+    margin-bottom: 0.85rem;
+}
+
 .topupNoteSpaced {
     margin-top: 0.95rem;
 }
@@ -429,6 +433,10 @@
     .topupText,
     .topupNote {
         font-size: 0.54rem;
+    }
+
+    .topupPricingNote {
+        margin-bottom: 0.65rem;
     }
 
     .topupTotalText {
