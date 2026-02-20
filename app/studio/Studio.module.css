@@ -107,19 +107,19 @@
     flex: 1 1 auto;
     min-width: 0;
     padding: 0.58rem 0.7rem;
-    background: #0f172a;
+    background: #16a34a;
     color: #fff;
     border-radius: 11px;
     font-weight: 600;
     font-size: 0.82rem;
     text-decoration: none;
-    border: 1px solid #0f172a;
+    border: 1px solid #15803d;
     transition: background 0.2s, border-color 0.2s;
 }
 
 .sidebarCta:hover {
-    background: #1f2937;
-    border-color: #1f2937;
+    background: #15803d;
+    border-color: #166534;
 }
 
 .sidebarSettings {
@@ -129,9 +129,9 @@
     flex: 1 1 auto;
     min-width: 0;
     padding: 0.52rem 0.64rem;
-    background: #ecfeff;
+    background: #d9f4f1;
     color: #0f766e;
-    border: 1px solid #99f6e4;
+    border: 1px solid #8de6dd;
     border-radius: 10px;
     font-weight: 500;
     font-size: 0.79rem;
@@ -140,9 +140,9 @@
 }
 
 .sidebarSettings:hover {
-    border-color: #5eead4;
+    border-color: #5bd4c8;
     color: #0f766e;
-    background: #d1fae5;
+    background: #cdeeea;
 }
 
 /* ----- Ana layout: sidebar + workspace ----- */
