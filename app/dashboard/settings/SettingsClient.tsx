@@ -304,7 +304,7 @@ export default function SettingsClient() {
                                 Kaydet
                             </button>
                         </div>
-                        {showProfileBonusHint ? <p className={styles.accountHint}>Bilgilerinizi girin, 5 kredi hediye kazanın.</p> : null}
+                        {showProfileBonusHint ? <p className={styles.accountHint}>Bilgilerinizi girin, 5 kredi hediye kazanın. 🎁</p> : null}
                         {saveNote ? <p className={`${styles.accountNote} ${saveNoteType === 'error' ? styles.accountNoteError : ''}`}>{saveNote}</p> : null}
                     </div>
 
