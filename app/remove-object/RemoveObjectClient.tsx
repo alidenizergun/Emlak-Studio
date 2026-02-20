@@ -8,9 +8,10 @@ import styles from './RemoveObject.module.css';
 import { buildRemoveObjectPrompt, type RemoveMode } from './prompts';
 
 export default function RemoveObjectClient() {
+    const defaultRemovePrompt = 'halıyı sil';
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
-    const [removePrompt, setRemovePrompt] = useState('');
+    const [removePrompt, setRemovePrompt] = useState(defaultRemovePrompt);
     const [mode, setMode] = useState<RemoveMode>('all');
     const [isProcessing, setIsProcessing] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
@@ -99,7 +100,7 @@ export default function RemoveObjectClient() {
         if (result?.before) URL.revokeObjectURL(result.before);
         setFile(null);
         setFileUrl(null);
-        setRemovePrompt('');
+        setRemovePrompt(defaultRemovePrompt);
         setMode('all');
         setResult(null);
     };
