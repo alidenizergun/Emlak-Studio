@@ -6,7 +6,7 @@
     top: var(--app-header-height);
     bottom: 0;
     z-index: 1200;
-    background: transparent;
+    background: transparent !important;
     backdrop-filter: blur(52px) saturate(125%);
     -webkit-backdrop-filter: blur(52px) saturate(125%);
     display: flex;
@@ -35,7 +35,7 @@
 @media (min-width: 769px) {
     .overlay {
         padding: 0.25rem;
-        background: transparent;
+        background: transparent !important;
         backdrop-filter: blur(52px) saturate(125%);
         -webkit-backdrop-filter: blur(52px) saturate(125%);
     }
