@@ -221,7 +221,7 @@ export default function SettingsClient() {
             return;
         }
         const numericValue = Number(raw);
-        if (numericValue <= MIN_TOPUP_CREDITS) {
+        if (numericValue < MIN_TOPUP_CREDITS) {
             setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
             return;
         }
@@ -325,6 +325,7 @@ export default function SettingsClient() {
                                         const digitsOnly = e.target.value.replace(/\D/g, '');
                                         setPurchaseAmountInput(digitsOnly);
                                     }}
+                                    onFocus={(e) => e.currentTarget.select()}
                                     onBlur={normalizeTopupAmount}
                                     className={styles.topupInput}
                                 />
