@@ -28,8 +28,17 @@ function sign(data: string): string {
     return base64UrlEncode(crypto.createHmac('sha256', SESSION_SECRET).update(data).digest());
 }
 
+function normalizePhone(phoneRaw: string): string {
+    const digits = String(phoneRaw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.length === 12 && digits.startsWith('90')) return digits.slice(2);
+    if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+    if (digits.length > 10) return digits.slice(-10);
+    return digits;
+}
+
 export function createSessionToken(phoneRaw: string): string {
-    const phone = String(phoneRaw || '').replace(/\D/g, '');
+    const phone = normalizePhone(phoneRaw);
     const payload: SessionPayload = {
         phone,
         exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
@@ -58,7 +67,7 @@ export function verifySessionToken(token: string | undefined): SessionPayload | 
 export function getSessionPhone(request: NextRequest): string | null {
     const payload = verifySessionToken(request.cookies.get(SESSION_COOKIE_NAME)?.value);
     if (!payload?.phone) return null;
-    return payload.phone.replace(/\D/g, '');
+    return normalizePhone(payload.phone);
 }
 
 export function getSessionCookieName(): string {

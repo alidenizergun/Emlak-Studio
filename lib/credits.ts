@@ -5,11 +5,39 @@ function toPositiveInt(value: number): number {
     return Math.max(0, Math.ceil(Number(value) || 0));
 }
 
+function phoneVariants(phone: string): string[] {
+    const variants = [phone, `90${phone}`, `0${phone}`];
+    return Array.from(new Set(variants.filter(Boolean)));
+}
+
 function getCreditsFromSqlite(phone: string): number {
-    ensureUser(phone);
     const db = getDb();
-    const row = db.prepare(`SELECT balance FROM credits WHERE phone = ?`).get(phone) as { balance: number } | undefined;
-    return Math.max(0, row?.balance ?? 0);
+    const variants = phoneVariants(phone);
+    for (const candidate of variants) {
+        ensureUser(candidate);
+        const row = db.prepare(`SELECT balance FROM credits WHERE phone = ?`).get(candidate) as { balance: number } | undefined;
+        if (row && typeof row.balance === 'number') {
+            const balance = Math.max(0, row.balance);
+            if (candidate !== phone) {
+                const now = Date.now();
+                ensureUser(phone);
+                db.prepare(`
+                    INSERT INTO credits (phone, balance, updated_at)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(phone) DO UPDATE SET
+                        balance = excluded.balance,
+                        updated_at = excluded.updated_at
+                `).run(phone, balance, now);
+                db.prepare(`
+                    INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                    VALUES (?, ?, ?, ?)
+                `).run(phone, 0, `phone_format_migration_from_${candidate}`, now);
+            }
+            return balance;
+        }
+    }
+    ensureUser(phone);
+    return 0;
 }
 
 export async function getCredits(phoneRaw: string): Promise<number> {
@@ -20,11 +48,31 @@ export async function getCredits(phoneRaw: string): Promise<number> {
         await ensurePersistentSchema();
         await ensurePersistentUser(phone);
         const sql = getPersistentSql();
-        const rows = await sql`
-            SELECT balance FROM credits WHERE phone = ${phone}
-        ` as Array<{ balance: number }>;
+        const variants = phoneVariants(phone);
+        const rows = await sql<{ phone: string; balance: number }[]>`
+            SELECT phone, balance
+            FROM credits
+            WHERE phone = ANY(${sql.array(variants)})
+            ORDER BY CASE WHEN phone = ${phone} THEN 0 ELSE 1 END
+            LIMIT 1
+        `;
         if (rows[0]) {
-            return Math.max(0, Number(rows[0].balance ?? 0));
+            const balance = Math.max(0, Number(rows[0].balance ?? 0));
+            const foundPhone = String(rows[0].phone || '');
+            if (foundPhone && foundPhone !== phone) {
+                await sql`
+                    INSERT INTO credits (phone, balance, updated_at)
+                    VALUES (${phone}, ${balance}, ${Date.now()})
+                    ON CONFLICT (phone) DO UPDATE SET
+                        balance = EXCLUDED.balance,
+                        updated_at = EXCLUDED.updated_at
+                `;
+                await sql`
+                    INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                    VALUES (${phone}, ${0}, ${`phone_format_migration_from_${foundPhone}`}, ${Date.now()})
+                `;
+            }
+            return balance;
         }
 
         // One-time soft migration: if user has old SQLite credits, seed Postgres on first read.

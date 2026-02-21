@@ -23,7 +23,12 @@ let dbPath = resolvePreferredDbPath();
 let dbInstance: Database.Database | null = null;
 
 export function normalizePhone(phoneRaw: string | null | undefined): string {
-    return String(phoneRaw || '').replace(/\D/g, '');
+    const digits = String(phoneRaw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.length === 12 && digits.startsWith('90')) return digits.slice(2);
+    if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+    if (digits.length > 10) return digits.slice(-10);
+    return digits;
 }
 
 function initDb(db: Database.Database): void {
