@@ -61,6 +61,17 @@ export default function StudioClient() {
     }, []);
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const cachedCredits = window.localStorage.getItem('emlak_credits');
+        if (!cachedCredits) return;
+        const parsed = Number(cachedCredits);
+        if (Number.isFinite(parsed) && parsed >= 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setCredits(Math.floor(parsed));
+        }
+    }, []);
+
+    useEffect(() => {
         const id = getToolIdFromParam(searchParams.get('tool'));
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedToolId(id);
@@ -74,34 +85,18 @@ export default function StudioClient() {
         workspace.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }, [selectedToolId]);
 
-    const syncPhoneFromSession = useCallback(async (): Promise<string | null> => {
-        const cached = window.localStorage.getItem('emlak_user_phone');
-        if (cached) return cached;
-
-        try {
-            const res = await fetch('/api/auth/me');
-            const data = await res.json().catch(() => ({}));
-            if (res.ok && data?.success && typeof data.phone === 'string' && data.phone) {
-                window.localStorage.setItem('emlak_user_phone', data.phone);
-                return data.phone;
-            }
-        } catch {
-            // no-op
-        }
-        return null;
-    }, []);
-
     const refreshCredits = useCallback(async () => {
-        const phone = await syncPhoneFromSession();
-        if (!phone) return;
-
         try {
-            const res = await fetch(`/api/credits?phone=${encodeURIComponent(phone)}`);
+            const res = await fetch('/api/credits');
             const data = await res.json().catch(() => ({}));
 
             if (res.ok && data?.success && typeof data.credits === 'number') {
                 setCredits(data.credits);
                 window.localStorage.setItem('emlak_credits', String(data.credits));
+                if (typeof data.phone === 'string' && data.phone) {
+                    setPhone(data.phone);
+                    window.localStorage.setItem('emlak_user_phone', data.phone);
+                }
                 return;
             }
 
@@ -114,7 +109,7 @@ export default function StudioClient() {
         } catch {
             // no-op
         }
-    }, [router, syncPhoneFromSession]);
+    }, [router]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
@@ -123,17 +118,8 @@ export default function StudioClient() {
             router.replace('/login');
             return;
         }
-        syncPhoneFromSession().then((currentPhone) => {
-            if (!currentPhone) {
-                window.localStorage.removeItem('emlak_authed');
-                router.replace('/login');
-                return;
-            }
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setPhone(currentPhone);
-            refreshCredits();
-        });
-    }, [mounted, refreshCredits, router, syncPhoneFromSession]);
+        refreshCredits();
+    }, [mounted, refreshCredits, router]);
 
     useEffect(() => {
         if (!showTopupPanel || !phone) return;
