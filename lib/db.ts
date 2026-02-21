@@ -2,7 +2,23 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import { mkdirSync } from 'fs';
 
-const DB_PATH = process.env.APP_DB_PATH || path.join(process.cwd(), 'data', 'app.db');
+function isReadonlyFsError(error: unknown): boolean {
+    return (
+        error instanceof Error &&
+        'code' in error &&
+        (String((error as { code?: string }).code) === 'EROFS' ||
+            String((error as { code?: string }).code) === 'ENOENT')
+    );
+}
+
+function resolvePreferredDbPath(): string {
+    if (process.env.APP_DB_PATH) return process.env.APP_DB_PATH;
+    // Vercel/Serverless runtime uses read-only /var/task, so default to /tmp.
+    if (process.env.VERCEL) return '/tmp/emlak-studio/app.db';
+    return path.join(process.cwd(), 'data', 'app.db');
+}
+
+let dbPath = resolvePreferredDbPath();
 
 let dbInstance: Database.Database | null = null;
 
@@ -62,8 +78,17 @@ function initDb(db: Database.Database): void {
 export function getDb(): Database.Database {
     if (dbInstance) return dbInstance;
 
-    mkdirSync(path.dirname(DB_PATH), { recursive: true });
-    dbInstance = new Database(DB_PATH);
+    try {
+        mkdirSync(path.dirname(dbPath), { recursive: true });
+        dbInstance = new Database(dbPath);
+    } catch (error: unknown) {
+        if (!isReadonlyFsError(error) || dbPath.startsWith('/tmp/')) {
+            throw error;
+        }
+        dbPath = '/tmp/emlak-studio/app.db';
+        mkdirSync(path.dirname(dbPath), { recursive: true });
+        dbInstance = new Database(dbPath);
+    }
     initDb(dbInstance);
     return dbInstance;
 }
