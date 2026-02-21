@@ -418,8 +418,8 @@
     }
 
     .popup {
-        max-height: calc(100vh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100vh - var(--app-header-height) - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - var(--app-header-height) - 0.6rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     }
 
     .popupImageWrap { max-height: min(27.5vh, 200px); }
