@@ -13,31 +13,39 @@ function phoneVariants(phone: string): string[] {
 function getCreditsFromSqlite(phone: string): number {
     const db = getDb();
     const variants = phoneVariants(phone);
+    let bestBalance = 0;
+    let bestPhone = phone;
+
     for (const candidate of variants) {
         ensureUser(candidate);
         const row = db.prepare(`SELECT balance FROM credits WHERE phone = ?`).get(candidate) as { balance: number } | undefined;
         if (row && typeof row.balance === 'number') {
-            const balance = Math.max(0, row.balance);
-            if (candidate !== phone) {
-                const now = Date.now();
-                ensureUser(phone);
-                db.prepare(`
-                    INSERT INTO credits (phone, balance, updated_at)
-                    VALUES (?, ?, ?)
-                    ON CONFLICT(phone) DO UPDATE SET
-                        balance = excluded.balance,
-                        updated_at = excluded.updated_at
-                `).run(phone, balance, now);
-                db.prepare(`
-                    INSERT INTO credit_ledger (phone, delta, reason, created_at)
-                    VALUES (?, ?, ?, ?)
-                `).run(phone, 0, `phone_format_migration_from_${candidate}`, now);
+            const balance = Math.max(0, Number(row.balance || 0));
+            if (balance > bestBalance) {
+                bestBalance = balance;
+                bestPhone = candidate;
             }
-            return balance;
         }
     }
+
+    if (bestBalance > 0 && bestPhone !== phone) {
+        const now = Date.now();
+        ensureUser(phone);
+        db.prepare(`
+            INSERT INTO credits (phone, balance, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(phone) DO UPDATE SET
+                balance = excluded.balance,
+                updated_at = excluded.updated_at
+        `).run(phone, bestBalance, now);
+        db.prepare(`
+            INSERT INTO credit_ledger (phone, delta, reason, created_at)
+            VALUES (?, ?, ?, ?)
+        `).run(phone, 0, `phone_format_migration_from_${bestPhone}`, now);
+    }
+
     ensureUser(phone);
-    return 0;
+    return bestBalance;
 }
 
 export async function getCredits(phoneRaw: string): Promise<number> {
@@ -53,13 +61,16 @@ export async function getCredits(phoneRaw: string): Promise<number> {
             SELECT phone, balance
             FROM credits
             WHERE phone = ANY(${sql.array(variants)})
-            ORDER BY CASE WHEN phone = ${phone} THEN 0 ELSE 1 END
-            LIMIT 1
+            ORDER BY balance DESC, CASE WHEN phone = ${phone} THEN 0 ELSE 1 END
         `;
         if (rows[0]) {
-            const balance = Math.max(0, Number(rows[0].balance ?? 0));
-            const foundPhone = String(rows[0].phone || '');
-            if (foundPhone && foundPhone !== phone) {
+            const bestRow = rows[0];
+            const balance = Math.max(0, Number(bestRow.balance ?? 0));
+            const foundPhone = String(bestRow.phone || '');
+            const exactRow = rows.find((r) => String(r.phone || '') === phone);
+            const exactBalance = Math.max(0, Number(exactRow?.balance ?? 0));
+
+            if (balance > exactBalance || (foundPhone && foundPhone !== phone)) {
                 await sql`
                     INSERT INTO credits (phone, balance, updated_at)
                     VALUES (${phone}, ${balance}, ${Date.now()})
