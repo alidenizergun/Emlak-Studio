@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb, normalizePhone } from '@/lib/db';
 import { getCredits, setCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
+import { ensurePersistentSchema, ensurePersistentUser, getPersistentSql, hasPersistentDb } from '@/lib/persistent-db';
 
 type PlanId = 'danisman' | 'ofis' | 'kurumsal';
 
@@ -47,7 +48,42 @@ function mapSubscriptionRow(row: Record<string, unknown>): SubscriptionInfo {
     };
 }
 
-function getOrCreateSubscription(phone: string, currentCredits: number): SubscriptionInfo {
+async function getOrCreateSubscription(phone: string, currentCredits: number): Promise<SubscriptionInfo> {
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+        const sql = getPersistentSql();
+        const existingRows = await sql<Record<string, unknown>[]>`
+            SELECT * FROM subscriptions WHERE phone = ${phone}
+        `;
+        if (existingRows[0]) return mapSubscriptionRow(existingRows[0]);
+
+        const now = new Date();
+        const plan = defaultPlanFromCredits(currentCredits);
+        const created: SubscriptionInfo = {
+            ...plan,
+            status: 'active',
+            startDate: now.toISOString(),
+            nextBillingDate: addOneMonthIso(now),
+        };
+
+        await sql`
+            INSERT INTO subscriptions (
+                phone, plan_id, plan_name, monthly_credits, monthly_price, status, start_date, next_billing_date, cancelled_at, last_used_credits
+            ) VALUES (
+                ${phone}, ${created.planId}, ${created.planName}, ${created.monthlyCredits}, ${created.monthlyPrice},
+                ${created.status}, ${created.startDate}, ${created.nextBillingDate}, NULL, NULL
+            )
+            ON CONFLICT (phone) DO NOTHING
+        `;
+
+        const insertedRows = await sql<Record<string, unknown>[]>`
+            SELECT * FROM subscriptions WHERE phone = ${phone}
+        `;
+        if (insertedRows[0]) return mapSubscriptionRow(insertedRows[0]);
+        return created;
+    }
+
     const db = getDb();
     const existing = db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(phone) as Record<string, unknown> | undefined;
     if (existing) return mapSubscriptionRow(existing);
@@ -89,7 +125,7 @@ export async function GET(request: NextRequest) {
         if (authError) return authError;
 
         const currentCredits = Math.max(0, await getCredits(phone));
-        const subscription = getOrCreateSubscription(phone, currentCredits);
+        const subscription = await getOrCreateSubscription(phone, currentCredits);
         const usedCredits = Math.max(0, subscription.monthlyCredits - Math.min(currentCredits, subscription.monthlyCredits));
 
         return NextResponse.json({
@@ -119,9 +155,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Geçersiz işlem' }, { status: 400 });
         }
 
-        const db = getDb();
         const currentCredits = Math.max(0, await getCredits(phone));
-        const subscription = getOrCreateSubscription(phone, currentCredits);
+        const subscription = await getOrCreateSubscription(phone, currentCredits);
 
         if (subscription.status === 'cancelled') {
             return NextResponse.json({
@@ -136,15 +171,37 @@ export async function POST(request: NextRequest) {
         const remainingCredits = currentCredits;
         const cancelledAt = new Date().toISOString();
 
-        db.prepare(`
-            UPDATE subscriptions
-            SET status = 'cancelled', cancelled_at = ?, last_used_credits = ?
-            WHERE phone = ?
-        `).run(cancelledAt, usedCredits, phone);
+        if (hasPersistentDb()) {
+            await ensurePersistentSchema();
+            await ensurePersistentUser(phone);
+            const sql = getPersistentSql();
+            await sql`
+                UPDATE subscriptions
+                SET status = 'cancelled', cancelled_at = ${cancelledAt}, last_used_credits = ${usedCredits}
+                WHERE phone = ${phone}
+            `;
+        } else {
+            const db = getDb();
+            db.prepare(`
+                UPDATE subscriptions
+                SET status = 'cancelled', cancelled_at = ?, last_used_credits = ?
+                WHERE phone = ?
+            `).run(cancelledAt, usedCredits, phone);
+        }
 
         await setCredits(phone, 0, 'subscription_cancel_reset');
 
-        const updated = db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(phone) as Record<string, unknown>;
+        let updated: Record<string, unknown>;
+        if (hasPersistentDb()) {
+            const sql = getPersistentSql();
+            const rows = await sql<Record<string, unknown>[]>`
+                SELECT * FROM subscriptions WHERE phone = ${phone}
+            `;
+            updated = rows[0] || {};
+        } else {
+            const db = getDb();
+            updated = (db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(phone) as Record<string, unknown>) || {};
+        }
         return NextResponse.json({
             success: true,
             message: 'Abonelik iptal edildi',

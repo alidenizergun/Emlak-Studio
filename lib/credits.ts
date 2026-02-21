@@ -1,4 +1,5 @@
 import { ensureUser, getDb, normalizePhone } from '@/lib/db';
+import { ensurePersistentSchema, ensurePersistentUser, getPersistentSql, hasPersistentDb } from '@/lib/persistent-db';
 
 function toPositiveInt(value: number): number {
     return Math.max(0, Math.ceil(Number(value) || 0));
@@ -7,6 +8,16 @@ function toPositiveInt(value: number): number {
 export async function getCredits(phoneRaw: string): Promise<number> {
     const phone = normalizePhone(phoneRaw);
     if (!phone) return 0;
+
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+        const sql = getPersistentSql();
+        const rows = await sql`
+            SELECT balance FROM credits WHERE phone = ${phone}
+        ` as Array<{ balance: number }>;
+        return Math.max(0, Number(rows[0]?.balance ?? 0));
+    }
 
     ensureUser(phone);
     const db = getDb();
@@ -18,6 +29,43 @@ export async function setCredits(phoneRaw: string, targetRaw: number, reason = '
     const phone = normalizePhone(phoneRaw);
     const target = Math.max(0, Math.floor(Number(targetRaw) || 0));
     if (!phone) return 0;
+
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+        const sql = getPersistentSql();
+        const reserved = await sql.reserve();
+        try {
+            await reserved`BEGIN`;
+            const currentRows = await reserved`
+                SELECT balance FROM credits WHERE phone = ${phone}
+            ` as Array<{ balance: number }>;
+            const current = Math.max(0, Number(currentRows[0]?.balance ?? 0));
+            const delta = target - current;
+
+            await reserved`
+                INSERT INTO credits (phone, balance, updated_at)
+                VALUES (${phone}, ${target}, ${Date.now()})
+                ON CONFLICT (phone) DO UPDATE SET
+                    balance = EXCLUDED.balance,
+                    updated_at = EXCLUDED.updated_at
+            `;
+
+            if (delta !== 0) {
+                await reserved`
+                    INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                    VALUES (${phone}, ${delta}, ${reason}, ${Date.now()})
+                `;
+            }
+            await reserved`COMMIT`;
+        } catch (error: unknown) {
+            await reserved`ROLLBACK`;
+            throw error;
+        } finally {
+            reserved.release();
+        }
+        return target;
+    }
 
     const db = getDb();
     const tx = db.transaction(() => {
@@ -51,6 +99,40 @@ export async function addCredits(phoneRaw: string, amountRaw: number, reason = '
     const phone = normalizePhone(phoneRaw);
     const amount = toPositiveInt(amountRaw);
     if (!phone || amount <= 0) return await getCredits(phoneRaw);
+
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+        const sql = getPersistentSql();
+        const reserved = await sql.reserve();
+        try {
+            await reserved`BEGIN`;
+            const currentRows = await reserved`
+                SELECT balance FROM credits WHERE phone = ${phone}
+            ` as Array<{ balance: number }>;
+            const current = Math.max(0, Number(currentRows[0]?.balance ?? 0));
+            const updated = current + amount;
+
+            await reserved`
+                INSERT INTO credits (phone, balance, updated_at)
+                VALUES (${phone}, ${updated}, ${Date.now()})
+                ON CONFLICT (phone) DO UPDATE SET
+                    balance = EXCLUDED.balance,
+                    updated_at = EXCLUDED.updated_at
+            `;
+            await reserved`
+                INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                VALUES (${phone}, ${amount}, ${reason}, ${Date.now()})
+            `;
+            await reserved`COMMIT`;
+            return updated;
+        } catch (error: unknown) {
+            await reserved`ROLLBACK`;
+            throw error;
+        } finally {
+            reserved.release();
+        }
+    }
 
     const db = getDb();
     const tx = db.transaction(() => {
@@ -87,6 +169,45 @@ export async function deductCredits(phoneRaw: string, amountRaw: number): Promis
 
     if (!phone || amount <= 0) {
         return { ok: false, credits: await getCredits(phoneRaw) };
+    }
+
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+        const sql = getPersistentSql();
+        const reserved = await sql.reserve();
+        try {
+            await reserved`BEGIN`;
+            const rows = await reserved`
+                SELECT balance FROM credits WHERE phone = ${phone}
+            ` as Array<{ balance: number }>;
+            const current = Math.max(0, Number(rows[0]?.balance ?? 0));
+            if (current < amount) {
+                await reserved`COMMIT`;
+                return { ok: false, credits: current };
+            }
+            const next = current - amount;
+
+            await reserved`
+                INSERT INTO credits (phone, balance, updated_at)
+                VALUES (${phone}, ${next}, ${Date.now()})
+                ON CONFLICT (phone) DO UPDATE SET
+                    balance = EXCLUDED.balance,
+                    updated_at = EXCLUDED.updated_at
+            `;
+            await reserved`
+                INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                VALUES (${phone}, ${-amount}, ${'usage'}, ${Date.now()})
+            `;
+            await reserved`COMMIT`;
+
+            return { ok: true, credits: next };
+        } catch (error: unknown) {
+            await reserved`ROLLBACK`;
+            throw error;
+        } finally {
+            reserved.release();
+        }
     }
 
     const db = getDb();
