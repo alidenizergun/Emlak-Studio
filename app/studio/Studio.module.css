@@ -311,32 +311,6 @@
     min-height: 100%;
 }
 
-.creditBanner {
-    position: sticky;
-    top: 0;
-    z-index: 9;
-    margin: 0 0.9rem 0.8rem;
-    border: 1px solid #a7f3d0;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 0.6rem 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-}
-
-.creditBannerLabel {
-    color: #475569;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.creditBannerValue {
-    color: #0f172a;
-    font-size: 1.1rem;
-    font-weight: 700;
-}
 
 /* Tek kaynak: araç kökünün üst padding'ini sıfırla (tool CSS'deki pageContainer override). */
 .workspaceToolWrap > * {
@@ -563,20 +537,6 @@
     .workspaceToolWrap {
         padding-top: 0.75rem;
         padding-bottom: 1rem;
-    }
-
-    .creditBanner {
-        margin: 0 0.5rem 0.7rem;
-        padding: 0.5rem 0.6rem;
-        border-radius: 10px;
-    }
-
-    .creditBannerLabel {
-        font-size: 0.82rem;
-    }
-
-    .creditBannerValue {
-        font-size: 1rem;
     }
 
 }

@@ -313,10 +313,6 @@ export default function StudioClient() {
                 <main className={styles.workspace} ref={workspaceRef}>
                     {ToolComponent ? (
                         <div className={styles.workspaceToolWrap}>
-                            <div className={styles.creditBanner}>
-                                <span className={styles.creditBannerLabel}>Kalan kredi</span>
-                                <strong className={styles.creditBannerValue}>{credits.toLocaleString('tr-TR')}</strong>
-                            </div>
                             <ToolComponent />
                         </div>
                     ) : (
