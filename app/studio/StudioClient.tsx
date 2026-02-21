@@ -45,7 +45,7 @@ export default function StudioClient() {
     const searchParams = useSearchParams();
     const toolParam = searchParams.get('tool');
     const [mounted, setMounted] = useState(false);
-    const [credits, setCredits] = useState<number | null>(null);
+    const [credits, setCredits] = useState<number>(0);
     const [phone, setPhone] = useState('');
     const [selectedToolId, setSelectedToolId] = useState<string>(() => getToolIdFromParam(toolParam));
     const [showTopupPanel, setShowTopupPanel] = useState(false);
@@ -233,7 +233,7 @@ export default function StudioClient() {
                         <div className={styles.sidebarMetaRow}>
                             <div className={styles.sidebarCreditRow}>
                                 <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
-                                <span className={styles.sidebarCreditValue}>{credits !== null ? credits : '—'}</span>
+                                <span className={styles.sidebarCreditValue}>{credits.toLocaleString('tr-TR')}</span>
                             </div>
                             <p className={styles.sidebarHelper}>Krediler anlık olarak senkronize edilir.</p>
                         </div>
@@ -313,6 +313,10 @@ export default function StudioClient() {
                 <main className={styles.workspace} ref={workspaceRef}>
                     {ToolComponent ? (
                         <div className={styles.workspaceToolWrap}>
+                            <div className={styles.creditBanner}>
+                                <span className={styles.creditBannerLabel}>Kalan kredi</span>
+                                <strong className={styles.creditBannerValue}>{credits.toLocaleString('tr-TR')}</strong>
+                            </div>
                             <ToolComponent />
                         </div>
                     ) : (
