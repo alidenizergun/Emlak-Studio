@@ -79,15 +79,26 @@ export default function StudioClient() {
         if (!phone) return;
 
         fetch(`/api/credits?phone=${encodeURIComponent(phone)}`)
-            .then((res) => res.json())
+            .then(async (res) => {
+                const data = await res.json().catch(() => ({}));
+                return { ok: res.ok, status: res.status, data };
+            })
             .then((data) => {
-                if (data.success && typeof data.credits === 'number') {
-                    setCredits(data.credits);
-                    window.localStorage.setItem('emlak_credits', String(data.credits));
+                if (data.ok && data.data?.success && typeof data.data.credits === 'number') {
+                    setCredits(data.data.credits);
+                    window.localStorage.setItem('emlak_credits', String(data.data.credits));
+                    return;
+                }
+
+                if (data.status === 401 || data.status === 403) {
+                    window.localStorage.removeItem('emlak_authed');
+                    window.localStorage.removeItem('emlak_user_phone');
+                    window.localStorage.removeItem('emlak_credits');
+                    router.replace('/login');
                 }
             })
             .catch(() => {});
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;

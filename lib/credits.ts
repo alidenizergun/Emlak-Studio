@@ -5,6 +5,13 @@ function toPositiveInt(value: number): number {
     return Math.max(0, Math.ceil(Number(value) || 0));
 }
 
+function getCreditsFromSqlite(phone: string): number {
+    ensureUser(phone);
+    const db = getDb();
+    const row = db.prepare(`SELECT balance FROM credits WHERE phone = ?`).get(phone) as { balance: number } | undefined;
+    return Math.max(0, row?.balance ?? 0);
+}
+
 export async function getCredits(phoneRaw: string): Promise<number> {
     const phone = normalizePhone(phoneRaw);
     if (!phone) return 0;
@@ -16,13 +23,29 @@ export async function getCredits(phoneRaw: string): Promise<number> {
         const rows = await sql`
             SELECT balance FROM credits WHERE phone = ${phone}
         ` as Array<{ balance: number }>;
-        return Math.max(0, Number(rows[0]?.balance ?? 0));
+        if (rows[0]) {
+            return Math.max(0, Number(rows[0].balance ?? 0));
+        }
+
+        // One-time soft migration: if user has old SQLite credits, seed Postgres on first read.
+        const sqliteCredits = getCreditsFromSqlite(phone);
+        if (sqliteCredits > 0) {
+            await sql`
+                INSERT INTO credits (phone, balance, updated_at)
+                VALUES (${phone}, ${sqliteCredits}, ${Date.now()})
+                ON CONFLICT (phone) DO UPDATE SET
+                    balance = EXCLUDED.balance,
+                    updated_at = EXCLUDED.updated_at
+            `;
+            await sql`
+                INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                VALUES (${phone}, ${sqliteCredits}, ${'sqlite_migration_seed'}, ${Date.now()})
+            `;
+        }
+        return sqliteCredits;
     }
 
-    ensureUser(phone);
-    const db = getDb();
-    const row = db.prepare(`SELECT balance FROM credits WHERE phone = ?`).get(phone) as { balance: number } | undefined;
-    return Math.max(0, row?.balance ?? 0);
+    return getCreditsFromSqlite(phone);
 }
 
 export async function setCredits(phoneRaw: string, targetRaw: number, reason = 'set'): Promise<number> {
