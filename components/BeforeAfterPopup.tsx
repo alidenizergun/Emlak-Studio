@@ -130,7 +130,7 @@ export function BeforeAfterPopup({
                                     src={beforeSrc}
                                     alt={beforeAlt}
                                     fill
-                                    sizes="(max-width: 1200px) 100vw, 1920px"
+                                    sizes="(max-width: 1200px) 100vw, 3840px"
                                     className={styles.popupImage}
                                     priority
                                     quality={100}
@@ -149,7 +149,7 @@ export function BeforeAfterPopup({
                                     src={afterSrc}
                                     alt={afterAlt}
                                     fill
-                                    sizes="(max-width: 1200px) 100vw, 1920px"
+                                    sizes="(max-width: 1200px) 100vw, 3840px"
                                     className={styles.popupImage}
                                     priority
                                     quality={100}
