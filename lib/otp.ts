@@ -1,5 +1,12 @@
 import crypto from 'crypto';
 import { ensureUser, getDb, normalizePhone } from '@/lib/db';
+import {
+    ensurePersistentSchema,
+    ensurePersistentUser,
+    getPersistentSql,
+    hasPersistentDb,
+    isSqliteDevFallbackEnabled
+} from '@/lib/persistent-db';
 
 const OTP_TTL_MS = 5 * 60 * 1000;
 const OTP_RESEND_SECONDS = 60;
@@ -104,8 +111,47 @@ export async function createAndSendOtp(phoneRaw: string): Promise<void> {
         throw new Error('OTP_SECRET yapılandırılmamış');
     }
 
-    const db = getDb();
     const now = Date.now();
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+
+        const sql = getPersistentSql();
+        const existingRows = await sql<{ last_sent_at: number }[]>`
+            SELECT last_sent_at FROM otp_codes WHERE phone = ${phone}
+        `;
+        const existing = existingRows[0];
+        if (existing) {
+            const nextAllowedAt = Number(existing.last_sent_at || 0) + OTP_RESEND_SECONDS * 1000;
+            if (now < nextAllowedAt) {
+                throw new Error(`Lütfen ${Math.ceil((nextAllowedAt - now) / 1000)} sn bekleyin`);
+            }
+        }
+
+        const code = generateOtpCode();
+        const codeHash = hashOtp(phone, code);
+        const expiresAt = now + OTP_TTL_MS;
+
+        await sql`
+            INSERT INTO otp_codes (phone, code_hash, expires_at, attempts, created_at, last_sent_at, resend_count)
+            VALUES (${phone}, ${codeHash}, ${expiresAt}, 0, ${now}, ${now}, 1)
+            ON CONFLICT(phone) DO UPDATE SET
+                code_hash = excluded.code_hash,
+                expires_at = excluded.expires_at,
+                attempts = 0,
+                created_at = excluded.created_at,
+                last_sent_at = excluded.last_sent_at,
+                resend_count = otp_codes.resend_count + 1
+        `;
+        await sendOtpSms(phone, code);
+        return;
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
+    }
+
+    const db = getDb();
     ensureUser(phone);
 
     const existing = db.prepare(`SELECT last_sent_at FROM otp_codes WHERE phone = ?`).get(phone) as { last_sent_at: number } | undefined;
@@ -140,6 +186,43 @@ export async function verifyOtp(phoneRaw: string, codeRaw: string): Promise<{ ok
     const code = String(codeRaw || '').replace(/\D/g, '');
     if (phone.length !== 10 || code.length !== 6) {
         return { ok: false, error: 'Geçersiz kod' };
+    }
+
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        await ensurePersistentUser(phone);
+
+        const sql = getPersistentSql();
+        const rows = await sql<{ code_hash: string; expires_at: number; attempts: number }[]>`
+            SELECT code_hash, expires_at, attempts
+            FROM otp_codes
+            WHERE phone = ${phone}
+        `;
+        const row = rows[0];
+        if (!row) return { ok: false, error: 'Kod bulunamadı veya süresi doldu' };
+
+        const now = Date.now();
+        if (now > Number(row.expires_at || 0)) {
+            await sql`DELETE FROM otp_codes WHERE phone = ${phone}`;
+            return { ok: false, error: 'Kod süresi doldu' };
+        }
+
+        if (Number(row.attempts || 0) >= OTP_MAX_ATTEMPTS) {
+            return { ok: false, error: 'Çok fazla hatalı deneme. Yeni kod isteyin' };
+        }
+
+        const expectedHash = hashOtp(phone, code);
+        if (expectedHash !== row.code_hash) {
+            await sql`UPDATE otp_codes SET attempts = attempts + 1 WHERE phone = ${phone}`;
+            return { ok: false, error: 'Kod geçersiz' };
+        }
+
+        await sql`DELETE FROM otp_codes WHERE phone = ${phone}`;
+        return { ok: true };
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        return { ok: false, error: 'Doğrulama altyapısı hazır değil' };
     }
 
     const db = getDb();

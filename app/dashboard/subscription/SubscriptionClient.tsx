@@ -144,7 +144,6 @@ export default function SubscriptionClient() {
                 plan: subscription.planId,
                 billing: 'monthly',
                 credits: String(amount),
-                total: String(purchaseQuote.total),
             });
             router.push(`/checkout?${params.toString()}`);
         } catch {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
+import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 
 interface IlanBilgileri {
     lokasyon?: string;
@@ -24,7 +25,7 @@ const GOOGLE_API_KEY =
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
-const LISTING_TEXT_COST = 1;
+const LISTING_TEXT_COST = TOOL_CREDIT_COSTS.listingText;
 
 function buildListingPrompt(info: IlanBilgileri): string {
     const kullanimLabel = info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
             provider = 'fallback';
         }
 
-        const creditResult = await deductCredits(phone, LISTING_TEXT_COST);
+        const creditResult = await deductCredits(phone, LISTING_TEXT_COST, 'tool_listing_text');
         if (!creditResult.ok) {
             return NextResponse.json(
                 { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },

@@ -3,7 +3,17 @@ import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'emlak_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
-const SESSION_SECRET = process.env.SESSION_SECRET || process.env.OTP_SECRET || 'dev-session-secret-change-me';
+
+function getSessionSecret(): string {
+    const explicitSecret = process.env.SESSION_SECRET?.trim() || '';
+    if (explicitSecret) return explicitSecret;
+
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('SESSION_SECRET tanımlı olmalı');
+    }
+
+    return process.env.OTP_SECRET || 'dev-session-secret-change-me';
+}
 
 interface SessionPayload {
     phone: string;
@@ -25,7 +35,7 @@ function base64UrlDecode(input: string): Buffer {
 }
 
 function sign(data: string): string {
-    return base64UrlEncode(crypto.createHmac('sha256', SESSION_SECRET).update(data).digest());
+    return base64UrlEncode(crypto.createHmac('sha256', getSessionSecret()).update(data).digest());
 }
 
 function normalizePhone(phoneRaw: string): string {

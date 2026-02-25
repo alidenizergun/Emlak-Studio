@@ -9,28 +9,15 @@ import {
     savePendingCheckoutSelection,
     type BillingCycle
 } from '@/lib/checkout';
+import {
+    type PlanId,
+    parsePlanId,
+    parseBillingCycle,
+    isBillingCycle,
+    getPlanDefinition
+} from '@/lib/pricing-policy';
 
-type PlanId = 'danisman' | 'ofis' | 'kurumsal';
 type CheckoutMode = 'subscription' | 'topup';
-
-const PLAN_MAP: Record<PlanId, { name: string; monthlyPrice: number; monthlyCredits: number }> = {
-    danisman: { name: 'Danışman', monthlyPrice: 1999, monthlyCredits: 200 },
-    ofis: { name: 'Ofis', monthlyPrice: 2499, monthlyCredits: 400 },
-    kurumsal: { name: 'Kurumsal', monthlyPrice: 4999, monthlyCredits: 1000 },
-};
-
-function parsePlanId(value: string | null): PlanId | null {
-    if (value === 'danisman' || value === 'ofis' || value === 'kurumsal') return value;
-    return null;
-}
-
-function parseBilling(value: string | null): BillingCycle {
-    return value === 'yearly' ? 'yearly' : 'monthly';
-}
-
-function isBillingCycle(value: string | null): value is BillingCycle {
-    return value === 'monthly' || value === 'yearly';
-}
 
 function parseCheckoutMode(value: string | null): CheckoutMode {
     return value === 'topup' ? 'topup' : 'subscription';
@@ -73,7 +60,7 @@ export default function CheckoutClient() {
     const [mode, setMode] = useState<CheckoutMode>('subscription');
     const [phone, setPhone] = useState('');
     const [topupCredits, setTopupCredits] = useState(0);
-    const [topupTotal, setTopupTotal] = useState(0);
+    const [serverTotal, setServerTotal] = useState(0);
     const [cardNumber, setCardNumber] = useState('');
     const [cardName, setCardName] = useState('');
     const [expiry, setExpiry] = useState('');
@@ -94,10 +81,9 @@ export default function CheckoutClient() {
         const rawPlan = params.get('plan');
         const rawBilling = params.get('billing');
         const queryPlan = parsePlanId(rawPlan);
-        const queryBilling = parseBilling(rawBilling);
+        const queryBilling = parseBillingCycle(rawBilling);
         const hasValidPricingSelection = queryPlan !== null && isBillingCycle(rawBilling);
         const queryTopupCredits = Math.max(0, Math.floor(Number(params.get('credits') || 0)));
-        const queryTopupTotal = Math.max(0, Math.floor(Number(params.get('total') || 0)));
         const pending = readPendingCheckoutSelection();
         const source = readCheckoutSource();
         const pendingPlan = parsePlanId(pending?.planId ?? null);
@@ -114,25 +100,24 @@ export default function CheckoutClient() {
 
         const effectivePlan: PlanId = queryPlan ?? pendingPlan ?? 'danisman';
         const effectiveBilling = (queryPlan ? queryBilling : pending?.billing) ?? 'monthly';
-        const calculatedTopupTotal = Math.round((PLAN_MAP[effectivePlan].monthlyPrice / Math.max(PLAN_MAP[effectivePlan].monthlyCredits, 1)) * queryTopupCredits);
 
         savePendingCheckoutSelection({ planId: effectivePlan, billing: effectiveBilling });
         setPlanId(effectivePlan);
         setBilling(effectiveBilling);
         setMode(queryMode);
         setTopupCredits(queryTopupCredits);
-        setTopupTotal(queryTopupTotal > 0 ? queryTopupTotal : calculatedTopupTotal);
+        setServerTotal(0);
     }, [router]);
 
-    const plan = PLAN_MAP[planId];
+    const plan = getPlanDefinition(planId);
 
     const displayPrice = useMemo(() => {
-        if (mode === 'topup') return topupTotal;
+        if (mode === 'topup') return serverTotal;
         if (billing === 'yearly') {
             return Math.round(plan.monthlyPrice * 0.8 * 12);
         }
         return plan.monthlyPrice;
-    }, [billing, mode, plan.monthlyPrice, topupTotal]);
+    }, [billing, mode, plan.monthlyPrice, serverTotal]);
 
     const displayPeriod = mode === 'topup' ? '' : billing === 'yearly' ? '/yıl' : '/ay';
     const isFormReady =
@@ -163,43 +148,65 @@ export default function CheckoutClient() {
             setSubmitted(false);
             return;
         }
+        if (mode === 'topup' && topupCredits <= 0) {
+            setErrors({ form: 'Ek kredi bilgisi eksik. Lütfen abonelik ekranından tekrar deneyin.' });
+            setSubmitted(false);
+            return;
+        }
 
-        if (mode === 'topup') {
-            if (!phone || topupCredits <= 0) {
-                setErrors({ form: 'Ek kredi bilgisi eksik. Lütfen abonelik ekranından tekrar deneyin.' });
+        setIsSubmitting(true);
+        try {
+            const checkoutIdempotencyKey = crypto.randomUUID();
+            const checkoutResponse = await fetch('/api/payments/mock/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-idempotency-key': checkoutIdempotencyKey,
+                },
+                body: JSON.stringify({
+                    mode,
+                    planId,
+                    billing,
+                    credits: mode === 'topup' ? topupCredits : undefined,
+                    phone,
+                }),
+            });
+            const checkoutData = await checkoutResponse.json();
+            if (!checkoutResponse.ok || !checkoutData.success || !checkoutData.checkoutId) {
+                setErrors({ form: checkoutData.error || 'Ödeme başlatılamadı.' });
                 setSubmitted(false);
                 return;
             }
 
-            setIsSubmitting(true);
-            try {
-                const response = await fetch('/api/credits', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, amount: topupCredits }),
-                });
-                const data = await response.json();
-                if (!data.success || typeof data.credits !== 'number') {
-                    setErrors({ form: data.error || 'Ödeme sonrası kredi ekleme başarısız oldu.' });
-                    setSubmitted(false);
-                    return;
-                }
+            setServerTotal(Number(checkoutData.total || 0));
 
-                window.localStorage.setItem('emlak_credits', String(data.credits));
-                window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
-                    detail: { credits: data.credits }
-                }));
-                setSubmitted(true);
-            } catch {
-                setErrors({ form: 'Ödeme işlemi sırasında bir hata oluştu.' });
+            const confirmIdempotencyKey = crypto.randomUUID();
+            const confirmResponse = await fetch('/api/payments/mock/confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-idempotency-key': confirmIdempotencyKey,
+                },
+                body: JSON.stringify({ checkoutId: checkoutData.checkoutId, phone }),
+            });
+            const confirmData = await confirmResponse.json();
+            if (!confirmResponse.ok || !confirmData.success || typeof confirmData.creditsBalance !== 'number') {
+                setErrors({ form: confirmData.error || 'Ödeme onayı başarısız oldu.' });
                 setSubmitted(false);
-            } finally {
-                setIsSubmitting(false);
+                return;
             }
-            return;
-        }
 
-        setSubmitted(true);
+            window.localStorage.setItem('emlak_credits', String(confirmData.creditsBalance));
+            window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                detail: { credits: confirmData.creditsBalance }
+            }));
+            setSubmitted(true);
+        } catch {
+            setErrors({ form: 'Ödeme işlemi sırasında bir hata oluştu.' });
+            setSubmitted(false);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!mounted) {
@@ -304,7 +311,7 @@ export default function CheckoutClient() {
                             <p className={styles.success}>
                                 {mode === 'topup'
                                     ? `${topupCredits} kredi hesabınıza eklendi.`
-                                    : 'Ödeme talebi başarıyla alındı. Canlı ödeme sağlayıcısında bu adım doğrudan tahsilata yönlenecek.'}
+                                    : 'Paket ödemeniz alındı ve krediniz hesabınıza tanımlandı.'}
                             </p>
                         ) : null}
                     </form>

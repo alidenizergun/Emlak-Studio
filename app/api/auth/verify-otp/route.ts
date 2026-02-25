@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyOtp } from '@/lib/otp';
 import { createSessionToken, getSessionCookieName, getSessionTtlSeconds } from '@/lib/session';
 
+function allowDevOtpBypass(): boolean {
+    return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_OTP_BYPASS === '1';
+}
+
 export async function POST(request: NextRequest) {
     try {
         const { phone, code } = await request.json();
@@ -12,7 +16,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Geçersiz kod' }, { status: 400 });
         }
 
-        const bypassLogin = normalizedPhone === '5322168292' && normalizedCode === '000000';
+        const bypassLogin = allowDevOtpBypass() && normalizedPhone === '5322168292' && normalizedCode === '000000';
         if (!bypassLogin) {
             const result = await verifyOtp(normalizedPhone, normalizedCode);
             if (!result.ok) {
@@ -26,7 +30,7 @@ export async function POST(request: NextRequest) {
             name: getSessionCookieName(),
             value: token,
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
             secure: process.env.NODE_ENV === 'production',
             path: '/',
             maxAge: getSessionTtlSeconds(),

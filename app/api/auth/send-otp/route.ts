@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAndSendOtp } from '@/lib/otp';
 
+function allowDevOtpBypass(): boolean {
+    return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_OTP_BYPASS === '1';
+}
+
 export async function POST(request: NextRequest) {
     try {
         const { phone } = await request.json();
@@ -10,7 +14,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Geçersiz telefon' }, { status: 400 });
         }
 
-        if (normalizedPhone === '5322168292') {
+        if (allowDevOtpBypass() && normalizedPhone === '5322168292') {
             return NextResponse.json({ success: true });
         }
 

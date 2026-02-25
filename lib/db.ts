@@ -77,6 +77,22 @@ function initDb(db: Database.Database): void {
             last_sent_at INTEGER NOT NULL,
             resend_count INTEGER NOT NULL DEFAULT 1
         );
+
+        CREATE TABLE IF NOT EXISTS mock_payment_checkouts (
+            checkout_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            mode TEXT NOT NULL CHECK(mode IN ('topup', 'subscription')),
+            plan_id TEXT NOT NULL,
+            billing TEXT NOT NULL CHECK(billing IN ('monthly', 'yearly')),
+            credits INTEGER NOT NULL CHECK(credits >= 0),
+            amount INTEGER NOT NULL CHECK(amount >= 0),
+            status TEXT NOT NULL CHECK(status IN ('pending', 'paid', 'failed')),
+            idempotency_key TEXT UNIQUE,
+            confirm_idempotency_key TEXT UNIQUE,
+            ledger_id INTEGER,
+            created_at INTEGER NOT NULL,
+            paid_at INTEGER
+        );
     `);
 }
 

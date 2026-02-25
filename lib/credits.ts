@@ -1,5 +1,11 @@
 import { ensureUser, getDb, normalizePhone } from '@/lib/db';
-import { ensurePersistentSchema, ensurePersistentUser, getPersistentSql, hasPersistentDb } from '@/lib/persistent-db';
+import {
+    ensurePersistentSchema,
+    ensurePersistentUser,
+    getPersistentSql,
+    hasPersistentDb,
+    isSqliteDevFallbackEnabled
+} from '@/lib/persistent-db';
 
 function toPositiveInt(value: number): number {
     return Math.max(0, Math.ceil(Number(value) || 0));
@@ -86,22 +92,29 @@ export async function getCredits(phoneRaw: string): Promise<number> {
             return balance;
         }
 
-        // One-time soft migration: if user has old SQLite credits, seed Postgres on first read.
-        const sqliteCredits = getCreditsFromSqlite(phone);
-        if (sqliteCredits > 0) {
-            await sql`
-                INSERT INTO credits (phone, balance, updated_at)
-                VALUES (${phone}, ${sqliteCredits}, ${Date.now()})
-                ON CONFLICT (phone) DO UPDATE SET
-                    balance = EXCLUDED.balance,
-                    updated_at = EXCLUDED.updated_at
-            `;
-            await sql`
-                INSERT INTO credit_ledger (phone, delta, reason, created_at)
-                VALUES (${phone}, ${sqliteCredits}, ${'sqlite_migration_seed'}, ${Date.now()})
-            `;
+        if (isSqliteDevFallbackEnabled()) {
+            // Optional local migration path from SQLite into Postgres for development.
+            const sqliteCredits = getCreditsFromSqlite(phone);
+            if (sqliteCredits > 0) {
+                await sql`
+                    INSERT INTO credits (phone, balance, updated_at)
+                    VALUES (${phone}, ${sqliteCredits}, ${Date.now()})
+                    ON CONFLICT (phone) DO UPDATE SET
+                        balance = EXCLUDED.balance,
+                        updated_at = EXCLUDED.updated_at
+                `;
+                await sql`
+                    INSERT INTO credit_ledger (phone, delta, reason, created_at)
+                    VALUES (${phone}, ${sqliteCredits}, ${'sqlite_migration_seed'}, ${Date.now()})
+                `;
+            }
+            return sqliteCredits;
         }
-        return sqliteCredits;
+        return 0;
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
     }
 
     return getCreditsFromSqlite(phone);
@@ -120,7 +133,7 @@ export async function setCredits(phoneRaw: string, targetRaw: number, reason = '
         try {
             await reserved`BEGIN`;
             const currentRows = await reserved`
-                SELECT balance FROM credits WHERE phone = ${phone}
+                SELECT balance FROM credits WHERE phone = ${phone} FOR UPDATE
             ` as Array<{ balance: number }>;
             const current = Math.max(0, Number(currentRows[0]?.balance ?? 0));
             const delta = target - current;
@@ -147,6 +160,10 @@ export async function setCredits(phoneRaw: string, targetRaw: number, reason = '
             reserved.release();
         }
         return target;
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
     }
 
     const db = getDb();
@@ -190,7 +207,7 @@ export async function addCredits(phoneRaw: string, amountRaw: number, reason = '
         try {
             await reserved`BEGIN`;
             const currentRows = await reserved`
-                SELECT balance FROM credits WHERE phone = ${phone}
+                SELECT balance FROM credits WHERE phone = ${phone} FOR UPDATE
             ` as Array<{ balance: number }>;
             const current = Math.max(0, Number(currentRows[0]?.balance ?? 0));
             const updated = current + amount;
@@ -214,6 +231,10 @@ export async function addCredits(phoneRaw: string, amountRaw: number, reason = '
         } finally {
             reserved.release();
         }
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
     }
 
     const db = getDb();
@@ -242,7 +263,7 @@ export async function addCredits(phoneRaw: string, amountRaw: number, reason = '
     return tx();
 }
 
-export async function deductCredits(phoneRaw: string, amountRaw: number): Promise<{
+export async function deductCredits(phoneRaw: string, amountRaw: number, reason = 'usage'): Promise<{
     ok: boolean;
     credits: number;
 }> {
@@ -261,7 +282,7 @@ export async function deductCredits(phoneRaw: string, amountRaw: number): Promis
         try {
             await reserved`BEGIN`;
             const rows = await reserved`
-                SELECT balance FROM credits WHERE phone = ${phone}
+                SELECT balance FROM credits WHERE phone = ${phone} FOR UPDATE
             ` as Array<{ balance: number }>;
             const current = Math.max(0, Number(rows[0]?.balance ?? 0));
             if (current < amount) {
@@ -279,7 +300,7 @@ export async function deductCredits(phoneRaw: string, amountRaw: number): Promis
             `;
             await reserved`
                 INSERT INTO credit_ledger (phone, delta, reason, created_at)
-                VALUES (${phone}, ${-amount}, ${'usage'}, ${Date.now()})
+                VALUES (${phone}, ${-amount}, ${reason}, ${Date.now()})
             `;
             await reserved`COMMIT`;
 
@@ -290,6 +311,10 @@ export async function deductCredits(phoneRaw: string, amountRaw: number): Promis
         } finally {
             reserved.release();
         }
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
     }
 
     const db = getDb();
@@ -313,7 +338,7 @@ export async function deductCredits(phoneRaw: string, amountRaw: number): Promis
         db.prepare(`
             INSERT INTO credit_ledger (phone, delta, reason, created_at)
             VALUES (?, ?, ?, ?)
-        `).run(phone, -amount, 'usage', Date.now());
+        `).run(phone, -amount, reason, Date.now());
 
         return { ok: true, credits: next };
     });

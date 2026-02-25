@@ -215,7 +215,6 @@ export default function SettingsClient() {
             plan: subscription.planId,
             billing: 'monthly',
             credits: String(purchaseAmount),
-            total: String(totalTopupPrice),
         });
         setTopupProcessing(true);
         router.push(`/checkout?${params.toString()}`);

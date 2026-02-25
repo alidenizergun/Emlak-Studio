@@ -3,11 +3,12 @@ import { Jimp } from 'jimp';
 import Replicate from 'replicate';
 import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
+import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 
 const replicate = process.env.REPLICATE_API_TOKEN
     ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
     : null;
-const STAGE_COST = 2;
+const STAGE_COST = TOOL_CREDIT_COSTS.stage;
 
 export async function POST(request: NextRequest) {
     try {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
                     throw new Error('Unexpected Replicate output format');
                 }
 
-                const creditResult = await deductCredits(phone, STAGE_COST);
+                const creditResult = await deductCredits(phone, STAGE_COST, 'tool_stage');
                 if (!creditResult.ok) {
                     return NextResponse.json(
                         { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
         const outputBuffer = await jimpImage.getBuffer("image/jpeg");
         finalImageUrl = `data:image/jpeg;base64,${outputBuffer.toString('base64')}`;
 
-        const creditResult = await deductCredits(phone, STAGE_COST);
+        const creditResult = await deductCredits(phone, STAGE_COST, 'tool_stage');
         if (!creditResult.ok) {
             return NextResponse.json(
                 { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },

@@ -3,6 +3,7 @@ import { Jimp } from 'jimp';
 import Replicate from 'replicate';
 import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
+import { getEnhanceCreditCost } from '@/lib/tool-credit-costs';
 
 const replicate = process.env.REPLICATE_API_TOKEN
     ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
                     throw new Error('Unexpected Replicate output format');
                 }
 
-                const creditResult = await deductCredits(phone, cost);
+                const creditResult = await deductCredits(phone, cost, 'tool_enhance');
                 if (!creditResult.ok) {
                     return NextResponse.json(
                         { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
         const outputBuffer = await jimpImage.getBuffer("image/jpeg");
         finalImageUrl = `data:image/jpeg;base64,${outputBuffer.toString('base64')}`;
 
-        const creditResult = await deductCredits(phone, cost);
+        const creditResult = await deductCredits(phone, cost, 'tool_enhance');
         if (!creditResult.ok) {
             return NextResponse.json(
                 { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
@@ -142,12 +143,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-}
-
-function getEnhanceCreditCost(options: Record<string, boolean>): number {
-    if (options?.auto) return 5;
-
-    const manualOptionIds = ['lighting', 'color', 'sharpness', 'clean', 'privacy', 'sky', 'twilight'];
-    const selectedCount = manualOptionIds.reduce((acc, key) => acc + (options?.[key] ? 1 : 0), 0);
-    return selectedCount;
 }

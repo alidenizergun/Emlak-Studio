@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCredits } from '@/lib/credits';
+import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
+import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 
 /** Placeholder: accepts upload, returns success until video/tour AI is integrated */
 export async function POST(request: NextRequest) {
@@ -23,14 +24,20 @@ export async function POST(request: NextRequest) {
         }
         const authError = requireAuthPhone(request, phone);
         if (authError) return authError;
-        const credits = await getCredits(phone);
+        const creditResult = await deductCredits(phone, TOOL_CREDIT_COSTS.aiTourGuide, 'tool_ai_tour_guide');
+        if (!creditResult.ok) {
+            return NextResponse.json(
+                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
+                { status: 402 }
+            );
+        }
         // script: kullanıcının girdiği metin (max 150 karakter), 8 sn videoda yapay zeka sunucusu tarafından söylenecek
         return NextResponse.json({
             success: true,
             message: 'Yapay zeka sunucusu tur oluşturma yakında eklenecek.',
             script: script.slice(0, 150),
-            credits,
-            usedCredits: 0,
+            credits: creditResult.credits,
+            usedCredits: TOOL_CREDIT_COSTS.aiTourGuide,
         });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';

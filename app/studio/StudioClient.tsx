@@ -219,7 +219,6 @@ export default function StudioClient() {
             plan: subscription.planId,
             billing: 'monthly',
             credits: String(amount),
-            total: String(Math.round(perCreditPrice * amount)),
         });
         setTopupProcessing(true);
         router.push(`/checkout?${params.toString()}`);
