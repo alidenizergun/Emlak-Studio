@@ -88,7 +88,28 @@ export default function RegisterClient() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: phone.replace(/\D/g, '') }),
             });
-            if (!res.ok) throw new Error('Gönderilemedi');
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) throw new Error('Gönderilemedi');
+            if (data.directLogin) {
+                const normalized = phone.replace(/\D/g, '');
+                if (typeof window !== 'undefined') {
+                    window.localStorage.setItem('emlak_authed', '1');
+                    window.localStorage.setItem('emlak_user_phone', normalized);
+                }
+                const redirect = readPostAuthRedirect();
+                if (redirect === '/checkout') {
+                    const pending = readPendingCheckoutSelection();
+                    clearPostAuthRedirect();
+                    if (pending) {
+                        router.push(`/checkout?plan=${encodeURIComponent(pending.planId)}&billing=${pending.billing}`);
+                        return;
+                    }
+                    router.push('/checkout');
+                    return;
+                }
+                router.push('/studio');
+                return;
+            }
             setOtpSent(true);
             setResendCooldown(60);
         } catch {
@@ -277,7 +298,7 @@ export default function RegisterClient() {
                         <li className={styles.benefitItem}>
                             <div className={styles.benefitIcon}>✨</div>
                             <div>
-                                <h3>Fotoğraf Geliştirme & Dekorasyon Stüdyosu</h3>
+                                <h3>Fotoğraf Geliştirme & Dekorasyon</h3>
                                 <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları yapay zeka ile modern mobilyalarla döşeyin.</p>
                             </div>
                         </li>

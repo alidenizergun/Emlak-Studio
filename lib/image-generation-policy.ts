@@ -14,6 +14,9 @@ GLOBAL IMAGE POLICY (zorunlu):
 ${architectureRules}
 - Kamera açısı, perspektif, kadraj ve lens karakteri korunmalı.
 - Mimari sabitlik zorunlu: kolon, kiriş, duvar, pencere, kapı, tavan çizgileri ve oda oranları birebir korunmalı.
+- Mevcut pencerelere dekoratif perde/tul/jaluzi eklenebilir; ancak pencere dogramasi, boyutu, konumu ve geometri asla degistirilmez.
+- Duvarlara dekorasyon tarzina uygun, olculu sayida tablo/cerceve ve sade bir duvar saati eklenebilir.
+- Duvar dekoru asiri yogun olmayacak; olcek ve yerlestim oda boyutuna gore dengeli olacak.
 - Zemin temizliği zorunlu: kir, leke, iz, toz ve yüzeydeki dağınık görsel kirler temizlenmeli; zemin malzemesi ve derz yapısı korunmalı.
 - Işık, pozlama, beyaz ayarı, netlik ve keskinliği üst seviye emlak fotoğrafı kalitesine getir.
 - Temizlik ve kalite iyileştirmesi yaparken geometriyi bozma, geniş açı etkisi üretme veya odanın boyut algısını değiştirme.

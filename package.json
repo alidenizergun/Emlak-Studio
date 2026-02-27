@@ -13,10 +13,14 @@
     "start": "next start",
     "lint": "eslint",
     "github-push": "node scripts/github-push.mjs",
-    "test:slider": "node scripts/test-slider-hint.mjs"
+    "test:slider": "node scripts/test-slider-hint.mjs",
+    "test:stage-regression": "node scripts/stage-regression.mjs",
+    "test:enhance-regression": "node scripts/enhance-regression.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@img/sharp-darwin-arm64": "^0.34.5",
+    "@img/sharp-libvips-darwin-arm64": "^1.2.4",
     "better-sqlite3": "^12.6.2",
     "jimp": "^1.6.0",
     "next": "16.1.6",
@@ -33,6 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pm2": "^6.0.14",
     "typescript": "^5"
   }
 }

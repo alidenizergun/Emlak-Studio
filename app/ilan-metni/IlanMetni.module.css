@@ -158,6 +158,20 @@
     padding: 0.5rem 0;
 }
 
+.qualityBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border: 1px solid #a7f3d0;
+    background: #ecfdf5;
+    border-radius: 10px;
+    color: #065f46;
+    font-size: 0.82rem;
+}
+
 .resultText {
     width: 100%;
     flex: 1;
@@ -170,6 +184,13 @@
     color: #334155;
     resize: none;
     background: #fff;
+}
+
+.qualityIssues {
+    margin-top: 8px;
+    color: #b45309;
+    font-size: 0.8rem;
+    line-height: 1.45;
 }
 
 .changeImageBtn {
@@ -392,6 +413,28 @@
     gap: 1rem;
     justify-content: center;
     width: 100%;
+}
+
+.downloadBtn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.downloadBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.24);
+}
+
+.feedbackHint {
+    margin-top: 8px;
+    color: #047857;
+    font-size: 0.82rem;
 }
 
 .resetBtn {

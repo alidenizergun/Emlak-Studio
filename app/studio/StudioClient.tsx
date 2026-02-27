@@ -54,6 +54,7 @@ export default function StudioClient() {
     const [topupLoading, setTopupLoading] = useState(false);
     const [topupProcessing, setTopupProcessing] = useState(false);
     const workspaceRef = useRef<HTMLDivElement>(null);
+    const stageTabParam = searchParams.get('stageTab');
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -118,7 +119,10 @@ export default function StudioClient() {
             router.replace('/login');
             return;
         }
-        refreshCredits();
+        const frameId = window.requestAnimationFrame(() => {
+            refreshCredits();
+        });
+        return () => window.cancelAnimationFrame(frameId);
     }, [mounted, refreshCredits, router]);
 
     useEffect(() => {
@@ -187,6 +191,7 @@ export default function StudioClient() {
     }
 
     const ToolComponent = TOOL_COMPONENTS[selectedToolId];
+    const isMyPhotosActive = selectedToolId === 'stage' && stageTabParam === 'photos';
     const purchaseAmount = Math.floor(Number(purchaseAmountInput) || 0);
     const perCreditPrice = subscription
         ? subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1)
@@ -275,9 +280,6 @@ export default function StudioClient() {
                                     </button>
                                 </div>
                                 <p className={`${styles.topupText} ${styles.topupTotalText}`}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
-                                <p className={`${styles.topupNote} ${styles.topupPricingNote}`}>
-                                    Ödeme tutarı, paketinize özel kredi birim maliyetine göre hesaplanır: ₺{Math.round(perCreditPrice).toLocaleString('tr-TR')} x {purchaseAmount} kredi.
-                                </p>
                                 <p className={`${styles.topupNote} ${styles.topupNoteSpaced}`}>
                                     Ek kredi satın alımı için minimum {STUDIO_MIN_TOPUP_CREDITS.toLocaleString('tr-TR')}, maksimum {STUDIO_MAX_TOPUP_CREDITS.toLocaleString('tr-TR')} kredi girebilirsiniz.
                                 </p>
@@ -287,23 +289,48 @@ export default function StudioClient() {
                     <nav className={styles.toolNav} aria-label="Araçlar">
                         {TOOLS.map((tool) => {
                             const isDisabled = !!tool.status;
-                            const isActive = selectedToolId === tool.id;
+                            const isActive = selectedToolId === tool.id && !(tool.id === 'stage' && stageTabParam === 'photos');
                             return (
-                                <button
-                                    key={tool.id}
-                                    type="button"
-                                    className={`${styles.toolItem} ${isActive ? styles.toolItemActive : ''} ${isDisabled ? styles.toolItemDisabled : ''}`}
-                                    onClick={() => {
-                                        if (isDisabled) return;
-                                        setSelectedToolId(tool.id);
-                                        router.replace(`/studio?tool=${encodeURIComponent(tool.id)}`, { scroll: false });
-                                    }}
-                                    disabled={isDisabled}
-                                >
-                                    <span className={styles.toolItemIcon}>{tool.icon}</span>
-                                    <span className={styles.toolItemTitle}>{tool.title}</span>
-                                    {tool.status && <span className={styles.toolBadge}>{tool.status}</span>}
-                                </button>
+                                <div key={tool.id} className={styles.toolGroup}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.toolItem} ${isActive ? styles.toolItemActive : ''} ${isDisabled ? styles.toolItemDisabled : ''}`}
+                                        onClick={() => {
+                                            if (isDisabled) return;
+                                            setSelectedToolId(tool.id);
+                                            const params = new URLSearchParams();
+                                            params.set('tool', tool.id);
+                                            if (tool.id === 'stage') {
+                                                params.set('stageTab', 'editor');
+                                            }
+                                            router.replace(`/studio?${params.toString()}`, { scroll: false });
+                                        }}
+                                        disabled={isDisabled}
+                                    >
+                                        <span className={styles.toolItemIcon}>{tool.icon}</span>
+                                        <span className={styles.toolItemTitle}>{tool.title}</span>
+                                        {tool.status && <span className={styles.toolBadge}>{tool.status}</span>}
+                                    </button>
+                                    {tool.id === 'ai-tour-guide' ? (
+                                        <button
+                                            type="button"
+                                            className={`${styles.myPhotosItem} ${isMyPhotosActive ? styles.myPhotosItemActive : ''}`}
+                                            onClick={() => {
+                                                setSelectedToolId('stage');
+                                                router.replace('/studio?tool=stage&stageTab=photos', { scroll: false });
+                                            }}
+                                        >
+                                            <span className={styles.myPhotosIcon} aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                                                    <path d="M3 14l5-4 4 3 3-2 6 5" />
+                                                    <circle cx="9" cy="9" r="1.2" />
+                                                </svg>
+                                            </span>
+                                            <span className={styles.myPhotosTitle}>Tüm Fotoğraflarım</span>
+                                        </button>
+                                    ) : null}
+                                </div>
                             );
                         })}
                     </nav>

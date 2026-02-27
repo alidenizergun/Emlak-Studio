@@ -1,7 +1,7 @@
 import SanalTadilatClient from './SanalTadilatClient';
 
 export const metadata = {
-    title: 'Sanal Tadilat - Emlak YZ',
+    title: 'Tadilat - Emlak Stüdyosu',
     description: 'Duvarları, zeminleri veya mutfakları tamamen yenileyerek potansiyeli gösterin.',
 };
 

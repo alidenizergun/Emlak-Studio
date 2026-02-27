@@ -40,7 +40,7 @@ export default function SuggestionsPage() {
             <div className={styles.header}>
                 <h1 className={styles.title}>Öneride Bulunun</h1>
                 <p className={styles.description}>
-                    Emlak YZ&apos;yi geliştirmemiz için fikirlerinizi bizimle paylaşın. Eksik gördüğünüz bir özellik veya yeni bir araç öneriniz mi var?
+                    Emlak Stüdyosu&apos;nu geliştirmemiz için fikirlerinizi bizimle paylaşın. Eksik gördüğünüz bir özellik veya yeni bir araç öneriniz mi var?
                 </p>
             </div>
 

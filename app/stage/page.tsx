@@ -1,8 +1,8 @@
 import Stage from "./Stage";
 
 export const metadata = {
-    title: "Dekorasyon Stüdyosu - Emlak YZ",
-    description: "Boş odaları Emlak YZ ile döşeyin.",
+    title: "Dekorasyon - Emlak Stüdyosu",
+    description: "Boş odaları Emlak Stüdyosu ile döşeyin.",
 };
 
 export default function StagePage() {

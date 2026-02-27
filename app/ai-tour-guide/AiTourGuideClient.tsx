@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
+import ProcessingOverlay from '@/components/ProcessingOverlay';
 import styles from './AiTourGuide.module.css';
 
 export default function AiTourGuideClient() {
@@ -13,6 +14,11 @@ export default function AiTourGuideClient() {
     const [scriptText, setScriptText] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [latestRunId, setLatestRunId] = useState<string>('');
+    const [generatedScript, setGeneratedScript] = useState<string>('');
+    const [qualityScore, setQualityScore] = useState<number | null>(null);
+    const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+    const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'sent'>('idle');
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
 
@@ -34,15 +40,17 @@ export default function AiTourGuideClient() {
         setSubmitted(false);
     };
 
-    const handleGenerate = async () => {
+    const runGenerate = async (scriptOverride?: string) => {
         if (!file) return;
         setIsProcessing(true);
         setSubmitted(false);
+        setFeedbackStatus('idle');
         try {
             const phone = window.localStorage.getItem('emlak_user_phone') || '';
             const formData = new FormData();
             formData.append('image', file);
-            formData.append('script', scriptText.trim().slice(0, SCRIPT_MAX_LENGTH));
+            const payloadScript = typeof scriptOverride === 'string' ? scriptOverride : scriptText;
+            formData.append('script', payloadScript.trim().slice(0, SCRIPT_MAX_LENGTH));
             formData.append('phone', phone);
             const response = await fetch('/api/ai-tour-guide', { method: 'POST', body: formData });
             const data = await response.json();
@@ -53,6 +61,10 @@ export default function AiTourGuideClient() {
                         detail: { credits: data.credits }
                     }));
                 }
+                setLatestRunId(String(data.runId || ''));
+                setGeneratedScript(String(data.generatedScript || ''));
+                setQualityScore(typeof data.qualityScore === 'number' ? data.qualityScore : null);
+                setQualityIssues(Array.isArray(data.qualityIssues) ? data.qualityIssues.map((x: unknown) => String(x)) : []);
                 setSubmitted(true);
             } else {
                 if (data?.code === 'INSUFFICIENT_CREDITS') {
@@ -68,12 +80,54 @@ export default function AiTourGuideClient() {
         }
     };
 
+    const handleGenerate = async () => {
+        await runGenerate();
+    };
+
     const handleReset = () => {
         if (fileUrl) URL.revokeObjectURL(fileUrl);
         setFile(null);
         setFileUrl(null);
         setScriptText('');
+        setLatestRunId('');
+        setGeneratedScript('');
+        setQualityScore(null);
+        setQualityIssues([]);
+        setFeedbackStatus('idle');
         setSubmitted(false);
+    };
+
+    const sendFeedback = async (verdict: 'good' | 'bad', note = '') => {
+        if (!latestRunId) return;
+        const phone = window.localStorage.getItem('emlak_user_phone') || '';
+        if (!phone) return;
+        try {
+            const response = await fetch('/api/ai-tour-guide/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    runId: latestRunId,
+                    phone,
+                    verdict,
+                    note,
+                }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Geri bildirim gönderilemedi');
+            }
+            setFeedbackStatus('sent');
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleImproveAgain = async () => {
+        if (!generatedScript) return;
+        await sendFeedback('bad', 'Metni daha detaylı ve özgün hale getir');
+        const nextScript = generatedScript.slice(0, SCRIPT_MAX_LENGTH);
+        setScriptText(nextScript);
+        await runGenerate(nextScript);
     };
 
     if (!mounted) {
@@ -88,9 +142,9 @@ export default function AiTourGuideClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Yapay Zeka Sunucusu</h1>
+                    <h1 className={styles.title}>Sanal Sunucu</h1>
                     <p className={styles.description}>
-                        Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
+                        Mülk fotoğraflarınızı yükleyin. Sanal sunucu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
@@ -118,7 +172,34 @@ export default function AiTourGuideClient() {
                                         </svg>
                                     </div>
                                     <h3>Tur talebiniz alındı</h3>
-                                    <p>Yapay zeka sunucusu ile sanal tur oluşturma özelliği yakında eklenecek.</p>
+                                    <p>Video tur özelliği hazırlanıyor. Bu arada adaptif anlatım metni üretildi.</p>
+                                    {generatedScript ? (
+                                        <div className={styles.generatedBox}>
+                                            <div className={styles.generatedHeader}>
+                                                <strong>Üretilen Metin</strong>
+                                                {qualityScore !== null ? (
+                                                    <span className={styles.qualityBadge}>Kalite: {(qualityScore * 100).toFixed(0)}%</span>
+                                                ) : null}
+                                            </div>
+                                            <p>{generatedScript}</p>
+                                            {qualityIssues.length > 0 ? (
+                                                <div className={styles.qualityIssues}>
+                                                    {qualityIssues.join(' • ')}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ) : null}
+                                    <div className={styles.feedbackActions}>
+                                        <button type="button" className={styles.downloadBtn} onClick={() => sendFeedback('good', 'Metin başarılı')}>
+                                            Metin İyi
+                                        </button>
+                                        <button type="button" className={styles.resetBtn} onClick={handleImproveAgain}>
+                                            Yeniden İyileştir
+                                        </button>
+                                    </div>
+                                    {feedbackStatus === 'sent' ? (
+                                        <p className={styles.feedbackHint}>Geri bildiriminiz kaydedildi. Sonraki çıktılar buna göre iyileştirilecek.</p>
+                                    ) : null}
                                     <button type="button" className={styles.resetBtn} onClick={handleReset}>
                                         Yeni Yükleme
                                     </button>
@@ -132,6 +213,7 @@ export default function AiTourGuideClient() {
                                     </button>
                                 </>
                             )}
+                            <ProcessingOverlay active={isProcessing} />
                         </div>
                     )}
                 </div>
@@ -139,7 +221,7 @@ export default function AiTourGuideClient() {
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
-                            <div className={styles.panelTitle}>Yapay Zeka Sunucusu</div>
+                            <div className={styles.panelTitle}>Sanal Sunucu</div>
                             <span className={styles.inlineCost}>10 kredi</span>
                         </div>
                         <div className={styles.scriptField}>
@@ -181,7 +263,7 @@ export default function AiTourGuideClient() {
                         </button>
                         <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Mülk fotoğraflarınızı yükleyin. Yapay zeka sunucusu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
+                            <p>Mülk fotoğraflarınızı yükleyin. Sanal sunucu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
                         </div>
                     </div>
                 </div>
@@ -189,7 +271,7 @@ export default function AiTourGuideClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Yapay Zeka Sunucusu Örneği"
+                title="Sanal Sunucu Örneği"
                 summary="Yüklenen görsel üzerinde kısa bir tur metni oluşturulur ve video anlatım için hazır hale getirilir."
                 singleSrc="/images/examples/living-furnished.png"
                 sampleText={`Örnek anlatım:\\nMerhaba, şimdi geniş salon ve doğal ışık alan oturma bölümünü geziyoruz...`}

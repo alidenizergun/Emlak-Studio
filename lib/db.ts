@@ -93,7 +93,139 @@ function initDb(db: Database.Database): void {
             created_at INTEGER NOT NULL,
             paid_at INTEGER
         );
+
+        CREATE TABLE IF NOT EXISTS stage_result_cache (
+            request_key TEXT PRIMARY KEY,
+            response_json TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            expires_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS enhance_result_cache (
+            request_key TEXT PRIMARY KEY,
+            response_json TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            expires_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS stage_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            request_key TEXT NOT NULL,
+            room_type TEXT NOT NULL,
+            style TEXT NOT NULL,
+            prompt_version TEXT NOT NULL,
+            status TEXT NOT NULL CHECK(status IN ('success', 'failed', 'blocked')),
+            fail_code TEXT,
+            architecture_score REAL,
+            quality_score REAL,
+            before_image_url TEXT,
+            after_image_url TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            refunded INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS stage_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT NOT NULL REFERENCES stage_runs(run_id) ON DELETE CASCADE,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            verdict TEXT NOT NULL CHECK(verdict IN ('good', 'bad')),
+            note TEXT,
+            created_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS stage_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS tool_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_tour_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            status TEXT NOT NULL CHECK(status IN ('success', 'failed')),
+            fail_code TEXT,
+            quality_score REAL,
+            script_input TEXT,
+            script_output TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_tour_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT NOT NULL REFERENCES ai_tour_runs(run_id) ON DELETE CASCADE,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            verdict TEXT NOT NULL CHECK(verdict IN ('good', 'bad')),
+            note TEXT,
+            created_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_tour_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS listing_text_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            status TEXT NOT NULL CHECK(status IN ('success', 'failed')),
+            fail_code TEXT,
+            quality_score REAL,
+            provider TEXT,
+            input_json TEXT,
+            output_text TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS listing_text_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT NOT NULL REFERENCES listing_text_runs(run_id) ON DELETE CASCADE,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            verdict TEXT NOT NULL CHECK(verdict IN ('good', 'bad')),
+            note TEXT,
+            created_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS listing_text_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
     `);
+
+    db.exec(`
+        CREATE INDEX IF NOT EXISTS idx_stage_cache_expires_at ON stage_result_cache(expires_at);
+        CREATE INDEX IF NOT EXISTS idx_enhance_cache_expires_at ON enhance_result_cache(expires_at);
+        CREATE INDEX IF NOT EXISTS idx_stage_runs_phone_created_at ON stage_runs(phone, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_stage_runs_status_created_at ON stage_runs(status, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_stage_feedback_run_id ON stage_feedback(run_id);
+        CREATE INDEX IF NOT EXISTS idx_ai_tour_runs_phone_created_at ON ai_tour_runs(phone, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_ai_tour_feedback_run_id ON ai_tour_feedback(run_id);
+        CREATE INDEX IF NOT EXISTS idx_listing_text_runs_phone_created_at ON listing_text_runs(phone, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_listing_text_feedback_run_id ON listing_text_feedback(run_id);
+    `);
+
+    // Lightweight migrations for existing local databases.
+    try {
+        db.exec(`ALTER TABLE stage_runs ADD COLUMN before_image_url TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE stage_runs ADD COLUMN after_image_url TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
 }
 
 export function getDb(): Database.Database {

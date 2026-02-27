@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
-import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
+import { clampText, validateUploadedImage } from '@/lib/upload-guard';
+import { createAiTourRun, recordAiTourFailure } from '@/lib/ai-tour-runtime';
 
-/** Placeholder: accepts upload, returns success until video/tour AI is integrated */
 export async function POST(request: NextRequest) {
+    let currentPhone = '';
+    let currentScript = '';
     try {
         const formData = await request.formData();
         const image = formData.get('image') as File;
-        const script = (formData.get('script') as string)?.trim() ?? '';
+        const script = clampText((formData.get('script') as string) || '', 150);
+        currentScript = script;
         const phone = String(formData.get('phone') || '');
-        if (!image) {
+        currentPhone = phone;
+        const uploadCheck = validateUploadedImage(image);
+        if (!uploadCheck.ok) {
             return NextResponse.json(
-                { success: false, error: 'Görsel gerekli' },
+                { success: false, error: uploadCheck.error },
                 { status: 400 }
             );
         }
@@ -24,22 +28,22 @@ export async function POST(request: NextRequest) {
         }
         const authError = requireAuthPhone(request, phone);
         if (authError) return authError;
-        const creditResult = await deductCredits(phone, TOOL_CREDIT_COSTS.aiTourGuide, 'tool_ai_tour_guide');
-        if (!creditResult.ok) {
-            return NextResponse.json(
-                { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
-                { status: 402 }
-            );
-        }
-        // script: kullanıcının girdiği metin (max 150 karakter), 8 sn videoda yapay zeka sunucusu tarafından söylenecek
+
+        const draft = createAiTourRun(phone, script);
         return NextResponse.json({
             success: true,
-            message: 'Yapay zeka sunucusu tur oluşturma yakında eklenecek.',
-            script: script.slice(0, 150),
-            credits: creditResult.credits,
-            usedCredits: TOOL_CREDIT_COSTS.aiTourGuide,
+            code: 'DRAFT_READY',
+            message: 'Video tur özelliği hazırlanıyor. Bu sırada adaptif anlatım metni üretildi.',
+            runId: draft.runId,
+            scriptInput: script,
+            generatedScript: draft.script,
+            qualityScore: draft.qualityScore,
+            qualityIssues: draft.issues,
+            policySnapshot: draft.policy,
+            usedCredits: 0,
         });
     } catch (error: unknown) {
+        if (currentPhone) recordAiTourFailure(currentPhone, currentScript, 'provider');
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }

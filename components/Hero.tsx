@@ -82,9 +82,7 @@ const Hero = () => {
                 <div className={styles.content}>
                     <h1 className={styles.title}>
                         Emlak Fotoğraflarınızı <br />
-                        <span className={styles.heroTitleAi}>
-                            <span className={styles.heroLogoChar}>Y</span>apay <span className={styles.heroLogoChar}>Z</span>eka
-                        </span> ile <br />
+                        <span className={styles.heroTitleAi}>Akıllı Düzenlemelerle</span> <br />
                         Güçlendirin
                         <span className={styles.aiIcon}>
                             <svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -102,7 +100,7 @@ const Hero = () => {
                     <ul className={styles.subtitleList}>
                         <li>
                             <strong>İlanlarınız Daha Fazla Tıklansın</strong>
-                            <span className={styles.listDesc}>Yapay Zeka destekli profesyonel görsellerle dikkat çekin, talebi artırın.</span>
+                            <span className={styles.listDesc}>Kaliteli görsellerle ilanınızın tıklanma oranını yükseltin.</span>
                         </li>
                         <li>
                             <strong>Mülkün Potansiyelini Anında Gösterin</strong>
@@ -177,7 +175,7 @@ const Hero = () => {
                                     transition: 'opacity 0.3s ease, box-shadow 0.3s ease'
                                 }}
                             >
-                                Yapay Zeka ile Dekorasyon
+                                Emlak Stüdyosu ile Dekorasyon
                             </span>
                         </div>
                     </div>

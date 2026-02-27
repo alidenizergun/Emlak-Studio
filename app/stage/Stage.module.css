@@ -155,6 +155,246 @@
     justify-content: center;
 }
 
+.historyInfo {
+    color: #64748b;
+    font-size: 0.9rem;
+    padding: 12px;
+}
+
+.photosPage {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.photosPageHeader {
+    margin-bottom: 0.75rem;
+}
+
+.photosFilters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(160px, 220px)) 1fr;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+}
+
+.dateFilterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filterLabel {
+    font-size: 0.72rem;
+    color: #475569;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.dateInput {
+    border: 1px solid #d5e0ec;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    color: #0f172a;
+    background: #fff;
+}
+
+.quickFilters {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.quickFilterBtn {
+    border: 1px solid #d5e0ec;
+    background: #fff;
+    color: #334155;
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.quickFilterBtn:hover {
+    border-color: #10b981;
+    color: #047857;
+    background: #f0fdf4;
+}
+
+.photosTitle {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.photosSubtitle {
+    margin: 0.2rem 0 0;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.photoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+
+.photosBody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bulkActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.bulkButtons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bulkCheck {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #475569;
+}
+
+.photoPairCard {
+    border: 1px solid #dbe5ef;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.photoCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.photoTile {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 8px;
+}
+
+.pairGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.pairFrame {
+    border: 1px solid #d5e0ec;
+    border-radius: 12px;
+    padding: 8px;
+    background: #f8fafc;
+}
+
+.frameLabel {
+    display: inline-block;
+    font-size: 0.72rem;
+    color: #334155;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.photoThumbWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.photoThumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: zoom-in;
+}
+
+.photoPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.78rem;
+    background: #f1f5f9;
+}
+
+.photoMetaRow {
+    margin-top: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.photoMeta {
+    font-size: 0.68rem;
+    color: #475569;
+    line-height: 1.25;
+}
+
+.lightboxOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(15, 23, 42, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.lightboxImage {
+    max-width: min(96vw, 1400px);
+    max-height: 92vh;
+    border-radius: 14px;
+    object-fit: contain;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+}
+
+.lightboxClose {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(15, 23, 42, 0.72);
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
 .previewImage {
     max-width: 100%;
     max-height: 100%;
@@ -507,6 +747,27 @@
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
 }
 
+.deleteBtn {
+    background: #ffffff;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.deleteBtn:hover:not(:disabled) {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.deleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .resetBtn {
     background: white;
     border: 1px solid #e2e8f0;
@@ -548,6 +809,15 @@
         flex-direction: column;
         gap: 1.25rem;
         padding: 0 1rem;
+    }
+
+    .photosFilters {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .quickFilters {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
     }
 
     .separator {
@@ -592,6 +862,15 @@
     .gallerySection {
         min-height: 280px;
         height: 280px;
+    }
+
+    .pairGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .bulkActions {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .processBtn {

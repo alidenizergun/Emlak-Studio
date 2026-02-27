@@ -1,18 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deductCredits } from '@/lib/credits';
+import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
+import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
+import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image-quality-guard';
+import { postprocessListingImage } from '@/lib/output-postprocess';
+import { clampText, validateUploadedImage } from '@/lib/upload-guard';
+import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
+
+const ENABLE_RENOVATION_RETRY = process.env.RENOVATION_ENABLE_AUTO_RETRY !== '0';
 
 export async function POST(request: NextRequest) {
+    let chargedPhone = '';
+    let chargedCredits = 0;
     try {
         const formData = await request.formData();
         const image = formData.get('image') as File;
-        const instructions = (formData.get('instructions') as string) || '';
+        const instructions = clampText((formData.get('instructions') as string) || '', 800);
         const phone = String(formData.get('phone') || '');
-        if (!image) {
+        chargedPhone = phone;
+        const uploadCheck = validateUploadedImage(image);
+        if (!uploadCheck.ok) {
             return NextResponse.json(
-                { success: false, error: 'Görsel gerekli' },
+                { success: false, error: uploadCheck.error },
                 { status: 400 }
             );
         }
@@ -24,13 +35,82 @@ export async function POST(request: NextRequest) {
         }
         const authError = requireAuthPhone(request, phone);
         if (authError) return authError;
+        const inputQuality = await validateInputImageQuality(image, 'virtual-renovation');
+        if (!inputQuality.ok) {
+            return NextResponse.json(
+                { success: false, code: 'INPUT_QUALITY_LOW', error: inputQuality.error },
+                { status: 422 }
+            );
+        }
+        const adaptivePolicy = getToolAdaptivePolicy('virtual-renovation');
         const allowArchitecturalChanges = hasExplicitArchitectureChangeRequest(instructions);
         const prompt = buildVirtualRenovationPrompt(instructions, allowArchitecturalChanges);
-        const generation = await generateEditedImageWithNanoBanana({
+        let generation = await generateEditedImageWithNanoBanana({
             image,
             prompt,
             allowArchitecturalChanges,
         });
+        let finalizedImageUrl = await postprocessListingImage(generation.imageUrl, { tool: 'virtual-renovation' });
+
+        let integrity = allowArchitecturalChanges
+            ? { ok: true, score: 1 }
+            : await verifyArchitectureIntegrity(image, finalizedImageUrl, adaptivePolicy.architectureThreshold);
+        let quality = await verifyOutputImageQuality(image, finalizedImageUrl, 'virtual-renovation');
+
+        if ((!integrity.ok || !quality.ok) && ENABLE_RENOVATION_RETRY && adaptivePolicy.retryEnabled) {
+            const retryPrompt = `${prompt}
+
+RETRY MODE:
+- Keep perspective and camera framing unchanged.
+- Keep structural geometry stable unless explicitly requested by user.
+- Increase clarity, realism, and listing quality; avoid blur/haze.
+${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
+    ? '- Adaptive rule: clean artifacts and avoid semi-transparent/unfinished rendered furniture or finishes.'
+    : ''}`;
+            const retry = await generateEditedImageWithNanoBanana({
+                image,
+                prompt: retryPrompt,
+                allowArchitecturalChanges,
+            });
+            const retryFinal = await postprocessListingImage(retry.imageUrl, { tool: 'virtual-renovation' });
+            const retryIntegrity = allowArchitecturalChanges
+                ? { ok: true, score: 1 }
+                : await verifyArchitectureIntegrity(image, retryFinal, adaptivePolicy.architectureThreshold);
+            const retryQuality = await verifyOutputImageQuality(image, retryFinal, 'virtual-renovation');
+            if (retryIntegrity.ok && retryQuality.ok) {
+                generation = retry;
+                finalizedImageUrl = retryFinal;
+                integrity = retryIntegrity;
+                quality = retryQuality;
+            }
+        }
+
+        if (!allowArchitecturalChanges) {
+            if (!integrity.ok) {
+                recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'architecture' });
+                return NextResponse.json(
+                    {
+                        success: false,
+                        code: 'ARCHITECTURE_CHANGED',
+                        error: `Mimari detaylar korunamadi (skor: ${integrity.score.toFixed(2)}). Lutfen tekrar deneyin.`,
+                        architectureScore: integrity.score,
+                    },
+                    { status: 422 }
+                );
+            }
+        }
+        if (!quality.ok) {
+            recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'quality' });
+            return NextResponse.json(
+                {
+                    success: false,
+                    code: 'OUTPUT_QUALITY_LOW',
+                    error: quality.error || 'Cikti kalite kontrolden gecemedi.',
+                    qualityScore: quality.score,
+                },
+                { status: 422 }
+            );
+        }
 
         const creditResult = await deductCredits(phone, TOOL_CREDIT_COSTS.virtualRenovation, 'tool_virtual_renovation');
         if (!creditResult.ok) {
@@ -39,16 +119,28 @@ export async function POST(request: NextRequest) {
                 { status: 402 }
             );
         }
+        chargedCredits = TOOL_CREDIT_COSTS.virtualRenovation;
+        recordToolAdaptiveOutcome('virtual-renovation', { ok: true });
 
         return NextResponse.json({
             success: true,
-            imageUrl: generation.imageUrl,
+            imageUrl: finalizedImageUrl,
             provider: generation.provider,
             model: generation.model,
+            architectureScore: allowArchitecturalChanges ? undefined : integrity.score,
+            qualityScore: quality.score,
             credits: creditResult.credits,
             usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
         });
     } catch (error: unknown) {
+        recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'provider' });
+        if (chargedCredits > 0 && chargedPhone) {
+            try {
+                await addCredits(chargedPhone, chargedCredits, 'auto_refund_renovation_error');
+            } catch (refundError) {
+                console.error('Renovation auto refund failed:', refundError);
+            }
+        }
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }

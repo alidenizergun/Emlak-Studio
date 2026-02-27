@@ -1,0 +1,84 @@
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(1.5px);
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid #dbe7f4;
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+    max-width: min(90%, 360px);
+}
+
+.aiOrb {
+    width: 28px;
+    height: 28px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.ringA,
+.ringB,
+.core {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+}
+
+.ringA {
+    border: 2px solid rgba(16, 185, 129, 0.55);
+    animation: orbitA 1.6s linear infinite;
+}
+
+.ringB {
+    border: 2px dashed rgba(59, 130, 246, 0.55);
+    transform: scale(0.78);
+    animation: orbitB 1.2s linear infinite reverse;
+}
+
+.core {
+    inset: 7px;
+    background: radial-gradient(circle at 35% 30%, #6ee7b7 0%, #10b981 45%, #059669 100%);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    animation: pulse 1.35s ease-in-out infinite;
+}
+
+.text {
+    margin: 0;
+    color: #0f172a;
+    font-size: 0.86rem;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+@keyframes orbitA {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes orbitB {
+    to {
+        transform: scale(0.78) rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.92);
+    }
+}

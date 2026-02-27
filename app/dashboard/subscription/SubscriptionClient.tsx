@@ -257,10 +257,6 @@ export default function SubscriptionClient() {
                                 <p className={`${styles.purchaseText} ${styles.purchaseTotalText}`}>
                                     Toplam ödeme: ₺{purchaseQuote.total.toLocaleString('tr-TR')}
                                 </p>
-                                <p className={`${styles.warning} ${styles.purchasePricingNote}`}>
-                                    Ödeme tutarı, paketinize özel kredi birim maliyetine göre hesaplanır:
-                                    ₺{Math.round(purchaseQuote.perCreditPrice ?? 0).toLocaleString('tr-TR')} x {purchaseQuote.amount} kredi.
-                                </p>
                                 <p className={styles.warning}>
                                     Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS.toLocaleString('tr-TR')}, maksimum {MAX_TOPUP_CREDITS.toLocaleString('tr-TR')} kredi girebilirsiniz.
                                 </p>

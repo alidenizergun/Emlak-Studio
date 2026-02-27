@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 export const metadata = {
-    title: 'Yönlendiriliyor - Emlak YZ',
+    title: 'Yönlendiriliyor - Emlak Stüdyosu',
 };
 
 /** Dashboard iptal; giriş yapan kullanıcı doğrudan Stüdyo sayfasına yönlendirilir. */

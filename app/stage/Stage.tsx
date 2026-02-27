@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
+import ProcessingOverlay from '@/components/ProcessingOverlay';
 import styles from './Stage.module.css';
 
 const ROOM_TYPES = [
@@ -208,8 +209,22 @@ const STYLES = [
     },
 ];
 
+const ROOM_TYPE_LABEL_BY_ID = Object.fromEntries(ROOM_TYPES.map((room) => [room.id, room.label])) as Record<string, string>;
+const STYLE_LABEL_BY_ID = Object.fromEntries(STYLES.map((style) => [style.id, style.label])) as Record<string, string>;
+
+function toInputDateValue(ts: number): string {
+    const d = new Date(ts);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export default function StageClient() {
-    const router = useRouter();
+    const searchParams = useSearchParams();
+    const stageTab = searchParams.get('stageTab');
+    const urlTab: 'editor' | 'photos' = stageTab === 'photos' ? 'photos' : 'editor';
+    const [activeTab, setActiveTab] = useState<'editor' | 'photos'>(urlTab);
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
@@ -218,16 +233,31 @@ export default function StageClient() {
     const [isSelectingStyle, setIsSelectingStyle] = useState(false);
     const [isAiStyle, setIsAiStyle] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
+    const [historyItems, setHistoryItems] = useState<Array<{
+        runId: string;
+        roomType: string;
+        style: string;
+        createdAt: number;
+        beforeImageUrl: string | null;
+        afterImageUrl: string | null;
+    }>>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyError, setHistoryError] = useState<string>('');
+    const [historyFromDate, setHistoryFromDate] = useState<string>('');
+    const [historyToDate, setHistoryToDate] = useState<string>('');
+    const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
+    const [historyDeleting, setHistoryDeleting] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    if (!mounted) {
-        return <div className={styles.pageContainer} style={{ textAlign: 'center' }}>Yükleniyor...</div>;
-    }
+    useEffect(() => {
+        setActiveTab(urlTab);
+    }, [urlTab]);
 
     const handleImageSelect = (selectedFile: File) => {
         setFile(selectedFile);
@@ -312,70 +342,337 @@ export default function StageClient() {
         }
     };
 
+    const handleDownloadUrl = (url: string, filename: string) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleDownloadPair = async (item: {
+        runId: string;
+        beforeImageUrl: string | null;
+        afterImageUrl: string | null;
+    }) => {
+        if (item.beforeImageUrl) {
+            handleDownloadUrl(item.beforeImageUrl, `yuklenen-${item.runId}.jpg`);
+        }
+        if (item.afterImageUrl) {
+            setTimeout(() => {
+                handleDownloadUrl(item.afterImageUrl as string, `islenmis-${item.runId}.jpg`);
+            }, item.beforeImageUrl ? 240 : 0);
+        }
+    };
+
+    const loadHistory = useCallback(async () => {
+        const phone = window.localStorage.getItem('emlak_user_phone') || '';
+        if (!phone) {
+            setHistoryError('Geçmiş fotoğrafları görmek için giriş yapın.');
+            setHistoryItems([]);
+            return;
+        }
+        setHistoryLoading(true);
+        setHistoryError('');
+        try {
+            const res = await fetch(`/api/stage/history?phone=${encodeURIComponent(phone)}&limit=200`);
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Geçmiş getirilemedi');
+            }
+            const items = Array.isArray(data.items) ? data.items : [];
+            setHistoryItems(items);
+            setSelectedRunIds((prev) => {
+                if (prev.size === 0) return prev;
+                const next = new Set<string>();
+                const validIds = new Set(items.map((x: { runId: string }) => x.runId));
+                prev.forEach((id) => {
+                    if (validIds.has(id)) next.add(id);
+                });
+                return next;
+            });
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Geçmiş getirilemedi';
+            setHistoryError(message);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, []);
+
+    const handleDeleteRuns = async (runIds: string[]) => {
+        if (runIds.length === 0) return;
+        const confirmed = window.confirm(`Seçili ${runIds.length} kaydı silmek istediğinizden emin misiniz?`);
+        if (!confirmed) return;
+        const phone = window.localStorage.getItem('emlak_user_phone') || '';
+        if (!phone) return;
+        setHistoryDeleting(true);
+        try {
+            const res = await fetch('/api/stage/history', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, runIds }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) {
+                throw new Error(data.error || 'Silme işlemi başarısız');
+            }
+            setSelectedRunIds(new Set());
+            await loadHistory();
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Silme işlemi başarısız';
+            alert(message);
+        } finally {
+            setHistoryDeleting(false);
+        }
+    };
+
+    const visibleHistoryItems = useMemo(() => {
+        const from = historyFromDate ? new Date(`${historyFromDate}T00:00:00`).getTime() : null;
+        const to = historyToDate ? new Date(`${historyToDate}T23:59:59`).getTime() : null;
+        return historyItems.filter((item) => {
+            if (from !== null && item.createdAt < from) return false;
+            if (to !== null && item.createdAt > to) return false;
+            return true;
+        });
+    }, [historyFromDate, historyItems, historyToDate]);
+
+    const allVisibleSelected = visibleHistoryItems.length > 0 && visibleHistoryItems.every((item) => selectedRunIds.has(item.runId));
+
+    useEffect(() => {
+        if (activeTab !== 'photos') return;
+        loadHistory();
+    }, [activeTab, loadHistory]);
+
+    if (!mounted) {
+        return <div className={styles.pageContainer} style={{ textAlign: 'center' }}>Yükleniyor...</div>;
+    }
+
     return (
         <div className={styles.pageContainer}>
-            <header className={styles.header}>
-                <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Dekorasyon Stüdyosu</h1>
-                    <p className={styles.description}>
-                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin.
-                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                            Örnek Gör
-                        </button>
-                    </p>
-                </div>
-            </header>
+            {activeTab !== 'photos' ? (
+                <header className={styles.header}>
+                    <div className={styles.headerContent}>
+                        <h1 className={styles.title}>Dekorasyon</h1>
+                        <p className={styles.description}>
+                            Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin emlak stüdyosu evinizi dekore etsin.
+                            <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                                Örnek Gör
+                            </button>
+                        </p>
+                    </div>
+                </header>
+            ) : null}
 
             <div className={styles.workspace}>
-                {/* LEFT: Canvas/Gallery */}
-                <div className={styles.gallerySection}>
-                    {!file ? (
-                        <div className={styles.emptyState}>
-                            <ImageUploader
-                                onImageSelect={handleImageSelect}
-                                label="Fotoğrafı Buraya Tıklayıp Yükleyin"
-                            />
+                {activeTab === 'photos' ? (
+                    <section className={styles.photosPage}>
+                        <div className={styles.photosPageHeader}>
+                            <h2 className={styles.photosTitle}>Tüm Fotoğraflarım</h2>
+                            <p className={styles.photosSubtitle}>Yüklediğiniz ve sistemin ürettiği görselleri tarih aralığıyla filtreleyin, birlikte indirin veya silin.</p>
                         </div>
-                    ) : (
-                        <div className={styles.previewContainer}>
-                            {result ? (
-                                <div style={{ width: '100%', height: '100%' }}>
-                                    <ComparisonSlider beforeImage={result.before} afterImage={result.after} />
-                                    <div className={styles.resultActions}>
-                                        <button className={styles.downloadBtn} onClick={handleDownload}>
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                <polyline points="7 10 12 15 17 10" />
-                                                <line x1="12" y1="15" x2="12" y2="3" />
-                                            </svg>
-                                            İndir
+                        <div className={styles.photosFilters}>
+                            <div className={styles.dateFilterGroup}>
+                                <label className={styles.filterLabel} htmlFor="historyFromDate">Başlangıç</label>
+                                <input
+                                    id="historyFromDate"
+                                    type="date"
+                                    className={styles.dateInput}
+                                    value={historyFromDate}
+                                    onChange={(e) => setHistoryFromDate(e.target.value)}
+                                />
+                            </div>
+                            <div className={styles.dateFilterGroup}>
+                                <label className={styles.filterLabel} htmlFor="historyToDate">Bitiş</label>
+                                <input
+                                    id="historyToDate"
+                                    type="date"
+                                    className={styles.dateInput}
+                                    value={historyToDate}
+                                    onChange={(e) => setHistoryToDate(e.target.value)}
+                                />
+                            </div>
+                            <div className={styles.quickFilters}>
+                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(toInputDateValue(Date.now())); setHistoryToDate(toInputDateValue(Date.now())); }}>Bugün</button>
+                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(toInputDateValue(Date.now() - 6 * 24 * 60 * 60 * 1000)); setHistoryToDate(toInputDateValue(Date.now())); }}>Son 7 Gün</button>
+                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(toInputDateValue(Date.now() - 29 * 24 * 60 * 60 * 1000)); setHistoryToDate(toInputDateValue(Date.now())); }}>Son 30 Gün</button>
+                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(''); setHistoryToDate(''); }}>Temizle</button>
+                            </div>
+                        </div>
+                        {historyLoading && <div className={styles.historyInfo}>Geçmiş yükleniyor...</div>}
+                        {!historyLoading && historyError && <div className={styles.historyInfo}>{historyError}</div>}
+                        {!historyLoading && !historyError && historyItems.length === 0 && (
+                            <div className={styles.historyInfo}>Henüz işlenmiş fotoğraf bulunmuyor.</div>
+                        )}
+                        {!historyLoading && !historyError && historyItems.length > 0 && (
+                            <div className={styles.photosBody}>
+                                <div className={styles.bulkActions}>
+                                    <label className={styles.bulkCheck}>
+                                        <input
+                                            type="checkbox"
+                                            checked={allVisibleSelected}
+                                            onChange={(e) => {
+                                                if (!e.target.checked) {
+                                                    setSelectedRunIds(new Set());
+                                                    return;
+                                                }
+                                                setSelectedRunIds(new Set(visibleHistoryItems.map((item) => item.runId)));
+                                            }}
+                                        />
+                                        <span>Tümünü Seç</span>
+                                    </label>
+                                    <div className={styles.bulkButtons}>
+                                        <button
+                                            className={styles.downloadBtn}
+                                            disabled={selectedRunIds.size === 0}
+                                            onClick={() => {
+                                                visibleHistoryItems
+                                                    .filter((item) => selectedRunIds.has(item.runId))
+                                                    .forEach((item, idx) => {
+                                                        setTimeout(() => {
+                                                            handleDownloadPair(item);
+                                                        }, idx * 280);
+                                                    });
+                                            }}
+                                        >
+                                            Seçilenleri İndir
                                         </button>
-                                        <button className={styles.resetBtn} onClick={handleReset}>Yeni Fotoğraf</button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            disabled={selectedRunIds.size === 0 || historyDeleting}
+                                            onClick={() => handleDeleteRuns(Array.from(selectedRunIds))}
+                                        >
+                                            {historyDeleting ? 'Siliniyor...' : 'Seçilenleri Sil'}
+                                        </button>
                                     </div>
                                 </div>
-                            ) : (
-                                <>
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={fileUrl || ''}
-                                        alt="Preview"
-                                        className={styles.previewImage}
+                                {visibleHistoryItems.length === 0 ? (
+                                    <div className={styles.historyInfo}>Bu tarih aralığında fotoğraf bulunamadı.</div>
+                                ) : (
+                                    <div className={styles.photoGrid}>
+                                        {visibleHistoryItems.map((item) => (
+                                            <article key={item.runId} className={styles.photoPairCard}>
+                                                <div className={styles.photoCardHeader}>
+                                                    <label className={styles.bulkCheck}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedRunIds.has(item.runId)}
+                                                            onChange={(e) => {
+                                                                setSelectedRunIds((prev) => {
+                                                                    const next = new Set(prev);
+                                                                    if (e.target.checked) next.add(item.runId);
+                                                                    else next.delete(item.runId);
+                                                                    return next;
+                                                                });
+                                                            }}
+                                                        />
+                                                        <span>{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
+                                                    </label>
+                                                    <span className={styles.photoMeta}>
+                                                        {(ROOM_TYPE_LABEL_BY_ID[item.roomType] || item.roomType)} • {(STYLE_LABEL_BY_ID[item.style] || item.style)}
+                                                    </span>
+                                                </div>
+                                                <div className={styles.pairGrid}>
+                                                    <div className={styles.pairFrame}>
+                                                        <span className={styles.frameLabel}>Yüklenen</span>
+                                                        <div className={styles.photoThumbWrap}>
+                                                            {item.beforeImageUrl ? (
+                                                                // eslint-disable-next-line @next/next/no-img-element
+                                                                <img
+                                                                    src={item.beforeImageUrl}
+                                                                    alt="Yüklenen fotoğraf"
+                                                                    className={styles.photoThumb}
+                                                                    onClick={() => setPreviewImageUrl(item.beforeImageUrl)}
+                                                                />
+                                                            ) : (
+                                                                <div className={styles.photoPlaceholder}>Görsel yok</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className={styles.pairFrame}>
+                                                        <span className={styles.frameLabel}>İşlenmiş</span>
+                                                        <div className={styles.photoThumbWrap}>
+                                                            {item.afterImageUrl ? (
+                                                                // eslint-disable-next-line @next/next/no-img-element
+                                                                <img
+                                                                    src={item.afterImageUrl}
+                                                                    alt="İşlenmiş fotoğraf"
+                                                                    className={styles.photoThumb}
+                                                                    onClick={() => setPreviewImageUrl(item.afterImageUrl)}
+                                                                />
+                                                            ) : (
+                                                                <div className={styles.photoPlaceholder}>Görsel yok</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className={styles.photoMetaRow}>
+                                                    <button className={styles.downloadBtn} onClick={() => handleDownloadPair(item)}>
+                                                        Birlikte İndir
+                                                    </button>
+                                                    <button className={styles.deleteBtn} onClick={() => handleDeleteRuns([item.runId])}>
+                                                        Sil
+                                                    </button>
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </section>
+                ) : (
+                    <>
+                        {/* LEFT: Canvas/Gallery */}
+                        <div className={styles.gallerySection}>
+                            {!file ? (
+                                <div className={styles.emptyState}>
+                                    <ImageUploader
+                                        onImageSelect={handleImageSelect}
+                                        label="Fotoğrafı Buraya Tıklayıp Yükleyin"
                                     />
-                                    <button
-                                        className={styles.changeImageBtn}
-                                        onClick={() => setFile(null)}
-                                    >
-                                        Farklı Görsel Seç
-                                    </button>
-                                </>
+                                </div>
+                            ) : (
+                                <div className={styles.previewContainer}>
+                                    {result ? (
+                                        <div style={{ width: '100%', height: '100%' }}>
+                                            <ComparisonSlider beforeImage={result.before} afterImage={result.after} />
+                                            <div className={styles.resultActions}>
+                                                <button className={styles.downloadBtn} onClick={handleDownload}>
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                        <polyline points="7 10 12 15 17 10" />
+                                                        <line x1="12" y1="15" x2="12" y2="3" />
+                                                    </svg>
+                                                    İndir
+                                                </button>
+                                                <button className={styles.resetBtn} onClick={handleReset}>Yeni Fotoğraf</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={fileUrl || ''}
+                                                alt="Önizleme"
+                                                className={styles.previewImage}
+                                            />
+                                            <button
+                                                className={styles.changeImageBtn}
+                                                onClick={() => setFile(null)}
+                                            >
+                                                Farklı Görsel Seç
+                                            </button>
+                                        </>
+                                    )}
+                                    <ProcessingOverlay active={isProcessing} />
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
 
-                {/* RIGHT: Controls Sidebar */}
-                <div className={styles.controlsSidebar}>
-                    <div className={styles.panel}>
+                        {/* RIGHT: Controls Sidebar */}
+                        <div className={styles.controlsSidebar}>
+                            <div className={styles.panel}>
                         <div className={styles.optionsArea} style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             <div className={styles.functionalStep}>
                                 <div className={styles.stepHeader}>
@@ -430,7 +727,7 @@ export default function StageClient() {
                                                 )}
                                             </div>
                                             <div className={styles.aiText}>
-                                                <span className={styles.aiTitle}>Yapay Zeka Seçsin</span>
+                                                <span className={styles.aiTitle}>Emlak Stüdyosu Seçsin</span>
                                                 <span className={styles.aiDesc}>En uygun tarzı uygula</span>
                                             </div>
                                             <div className={styles.aiSparkle}>
@@ -470,13 +767,36 @@ export default function StageClient() {
                                 </>
                             )}
                         </button>
-                    </div>
-                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
+            {previewImageUrl ? (
+                <div className={styles.lightboxOverlay} onClick={() => setPreviewImageUrl(null)}>
+                    <button
+                        type="button"
+                        className={styles.lightboxClose}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setPreviewImageUrl(null);
+                        }}
+                    >
+                        Kapat
+                    </button>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={previewImageUrl}
+                        alt="Büyük önizleme"
+                        className={styles.lightboxImage}
+                        onClick={(event) => event.stopPropagation()}
+                    />
+                </div>
+            ) : null}
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Dekorasyon Stüdyosu Örneği"
+                title="Dekorasyon Örneği"
                 summary="Boş oda fotoğrafına seçtiğiniz oda tipi ve tarz doğrultusunda sanal mobilyalama uygulanır."
                 beforeSrc="/images/examples/bedroom-empty.png"
                 afterSrc="/images/examples/bedroom-furnished.png"

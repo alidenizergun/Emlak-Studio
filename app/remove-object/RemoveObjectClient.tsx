@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
+import ProcessingOverlay from '@/components/ProcessingOverlay';
 import styles from './RemoveObject.module.css';
 import { buildRemoveObjectPrompt, type RemoveMode } from './prompts';
 
@@ -128,7 +129,7 @@ export default function RemoveObjectClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Akıllı Eşya Silme</h1>
                     <p className={styles.description}>
-                        İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, yapay zeka seçtiğiniz alanları temizlesin.
+                        İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, emlak stüdyosu seçtiğiniz alanları temizlesin.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
@@ -184,6 +185,7 @@ export default function RemoveObjectClient() {
                                     </button>
                                 </>
                             )}
+                            <ProcessingOverlay active={isProcessing} />
                         </div>
                     )}
                 </div>

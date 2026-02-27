@@ -127,7 +127,7 @@ export default function PricingClient() {
                     <h1 className={styles.title}>
                         <span style={{ display: 'block' }}>Emlak Fotoğraflarınızı</span>
                         <span style={{ display: 'block' }}>
-                            <span className={styles.titleGradient}>Yapay Zeka</span> ile Güçlendirin
+                            <span className={styles.titleGradient}>Akıllı Düzenlemelerle</span> Güçlendirin
                         </span>
                     </h1>
                     <p className={styles.subtitle}>

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAndSendOtp } from '@/lib/otp';
+import { isOwnerBypassPhone } from '@/lib/auth-bypass';
+import { createSessionToken, getSessionCookieName, getSessionTtlSeconds } from '@/lib/session';
 
 function allowDevOtpBypass(): boolean {
     return process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEV_OTP_BYPASS === '1';
@@ -14,8 +16,23 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Geçersiz telefon' }, { status: 400 });
         }
 
+        if (isOwnerBypassPhone(normalizedPhone)) {
+            const token = createSessionToken(normalizedPhone);
+            const response = NextResponse.json({ success: true, directLogin: true });
+            response.cookies.set({
+                name: getSessionCookieName(),
+                value: token,
+                httpOnly: true,
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: getSessionTtlSeconds(),
+            });
+            return response;
+        }
+
         if (allowDevOtpBypass() && normalizedPhone === '5322168292') {
-            return NextResponse.json({ success: true });
+            return NextResponse.json({ success: true, directLogin: true });
         }
 
         await createAndSendOtp(normalizedPhone);

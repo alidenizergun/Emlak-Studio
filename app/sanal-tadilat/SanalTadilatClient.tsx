@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
+import ProcessingOverlay from '@/components/ProcessingOverlay';
 import styles from './SanalTadilat.module.css';
 
 export default function SanalTadilatClient() {
@@ -101,7 +102,7 @@ export default function SanalTadilatClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Sanal Tadilat</h1>
+                    <h1 className={styles.title}>Tadilat</h1>
                     <p className={styles.description}>
                         Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
@@ -151,6 +152,7 @@ export default function SanalTadilatClient() {
                                     </button>
                                 </>
                             )}
+                            <ProcessingOverlay active={isProcessing} />
                         </div>
                     )}
                 </div>
@@ -158,7 +160,7 @@ export default function SanalTadilatClient() {
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
-                            <div className={styles.panelTitle}>Sanal tadilat</div>
+                            <div className={styles.panelTitle}>tadilat</div>
                             <span className={styles.inlineCost}>2 kredi</span>
                         </div>
                         <div className={styles.tadilatQuestionBlock}>
@@ -204,7 +206,7 @@ export default function SanalTadilatClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Sanal Tadilat Örneği"
+                title="Tadilat Örneği"
                 summary="Eski görünümlü alanlar, yeni malzeme ve modern yüzeylerle tadilat sonrası hale dönüştürülür."
                 beforeSrc="/images/examples/kitchen-empty.png"
                 afterSrc="/images/examples/kitchen-furnished.png"

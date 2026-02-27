@@ -35,7 +35,7 @@ const ComparisonSlider = ({
     beforeImage,
     afterImage,
     beforeAlt = "Boş Oda",
-    afterAlt = "Yapay Zeka ile Dekorasyon",
+    afterAlt = "Emlak Stüdyosu ile Dekorasyon",
     degradeBefore = false,
     onPositionChange,
     hintSlide = false,

@@ -29,7 +29,7 @@ const CATEGORIES = [
     ),
   },
   {
-    title: "Dekorasyon Stüdyosu",
+    title: "Dekorasyon",
     description: "Oda tipi, tarz seçimi ve sonuç indirme.",
     href: "#sanal-dekorasyon",
     icon: (
@@ -66,7 +66,7 @@ const CATEGORIES = [
 const FAQ_ITEMS = [
   {
     question: "Emlak AIStudio’ya nasıl kayıt olurum?",
-    answer: "Ana sayfadaki \"Ücretsiz Deneyin\" veya \"Kayıt Ol\" butonuna tıklayın. Cep telefonu numaranızı girin, SMS ile gelen 6 haneli doğrulama kodunu girerek hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen Fotoğraf Geliştirme ve Dekorasyon Stüdyosu araçlarını kullanmaya başlayabilirsiniz.",
+    answer: "Ana sayfadaki \"Ücretsiz Deneyin\" veya \"Kayıt Ol\" butonuna tıklayın. Cep telefonu numaranızı girin, SMS ile gelen 6 haneli doğrulama kodunu girerek hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen Fotoğraf Geliştirme ve Dekorasyon araçlarını kullanmaya başlayabilirsiniz.",
   },
   {
     question: "Kredi nedir? Nasıl kullanılır?",
@@ -77,8 +77,8 @@ const FAQ_ITEMS = [
     answer: "JPG, PNG ve WebP formatları desteklenmektedir. Önerilen minimum çözünürlük 800x600’dür. Yükleme sonrası çözünürlük yükseltme, parlaklık ve netlik gibi seçenekleri işaretleyip \"Seçilenleri Uygula\" ile işlemi başlatabilirsiniz.",
   },
   {
-    question: "Dekorasyon Stüdyosu'nda oda tipi ve tarz nasıl seçilir?",
-    answer: "Boş oda fotoğrafınızı yükledikten sonra \"Oda Tipi\" (Salon, Yatak Odası, Mutfak vb.) ve \"Dekorasyon Tarzı\" (Modern, Klasik, Minimal vb.) alanlarından seçim yapın. İsterseniz \"Yapay Zeka Seçsin\" ile otomatik öneri alabilirsiniz. \"Dekorasyon Oluştur\" butonuyla işlemi başlatın.",
+    question: "Dekorasyon'da oda tipi ve tarz nasıl seçilir?",
+    answer: "Boş oda fotoğrafınızı yükledikten sonra \"Oda Tipi\" (Salon, Yatak Odası, Mutfak vb.) ve \"Dekorasyon Tarzı\" (Modern, Klasik, Minimal vb.) alanlarından seçim yapın. İsterseniz \"Emlak Stüdyosu Seçsin\" ile otomatik öneri alabilirsiniz. \"Dekorasyon Oluştur\" butonuyla işlemi başlatın.",
   },
   {
     question: "İşlem ne kadar sürer?",

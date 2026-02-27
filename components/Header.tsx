@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type CSSProperties } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -48,12 +48,6 @@ const Header = () => {
     const [isMounted, setIsMounted] = useState(false);
     const [showRegisterNotify, setShowRegisterNotify] = useState(false);
     const [isAuthed, setIsAuthed] = useState(false);
-    const logoTextWrapperRef = useRef<HTMLDivElement>(null);
-    const logoBrandRef = useRef<HTMLSpanElement>(null);
-    const logoStudioRef = useRef<HTMLSpanElement>(null);
-    const mobileLogoTextWrapperRef = useRef<HTMLDivElement>(null);
-    const mobileLogoBrandRef = useRef<HTMLSpanElement>(null);
-    const mobileLogoStudioRef = useRef<HTMLSpanElement>(null);
 
     // Set mounted state and read auth
     useEffect(() => {
@@ -113,40 +107,6 @@ const Header = () => {
         } catch {}
     }, [pathname, isMounted]);
 
-    // YZ.com'u EMLAK genişliğine sığdır (desktop + mobil menü)
-    const applyLogoScale = (wrapper: HTMLDivElement, brand: HTMLSpanElement, studio: HTMLSpanElement) => {
-        studio.style.transform = '';
-        studio.style.transformOrigin = '';
-        wrapper.style.width = '';
-        wrapper.style.minWidth = '';
-        wrapper.offsetHeight; // reflow
-        const wBrand = brand.offsetWidth;
-        const wStudio = studio.offsetWidth;
-        if (wStudio <= 0) return;
-        wrapper.style.width = `${wBrand}px`;
-        wrapper.style.minWidth = `${wBrand}px`;
-        const scale = wBrand / wStudio;
-        studio.style.transform = `scaleX(${scale})`;
-        studio.style.transformOrigin = 'left';
-    };
-    useEffect(() => {
-        const wrapper = logoTextWrapperRef.current;
-        const brand = logoBrandRef.current;
-        const studio = logoStudioRef.current;
-        const mWrapper = mobileLogoTextWrapperRef.current;
-        const mBrand = mobileLogoBrandRef.current;
-        const mStudio = mobileLogoStudioRef.current;
-        const apply = () => {
-            if (wrapper && brand && studio) applyLogoScale(wrapper, brand, studio);
-            if (mWrapper && mBrand && mStudio) applyLogoScale(mWrapper, mBrand, mStudio);
-        };
-        apply();
-        const ro = new ResizeObserver(apply);
-        if (wrapper) ro.observe(wrapper);
-        if (mWrapper) ro.observe(mWrapper);
-        return () => ro.disconnect();
-    }, [isMounted, isMenuOpen]);
-
     const handleLogout = async () => {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
@@ -191,16 +151,16 @@ const Header = () => {
                         <div className={styles.logoIcon}>
                             <Image
                                 src="/logo.png"
-                                alt="Emlak YZ Logo"
+                                alt="Emlak Stüdyosu Logo"
                                 width={64}
                                 height={64}
                                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                 priority
                             />
                         </div>
-                        <div className={styles.logoTextWrapper} ref={logoTextWrapperRef}>
-                            <span className={styles.logoBrand} ref={logoBrandRef}>EMLAK</span>
-                            <span className={styles.logoStudio}><span className={styles.logoStudioInner} ref={logoStudioRef}>YZ.com</span></span>
+                        <div className={styles.logoTextWrapper}>
+                            <span className={styles.logoBrand}>EMLAK</span>
+                            <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Stüdyosu</span></span>
                         </div>
                     </Link>
                 </div>
@@ -212,7 +172,7 @@ const Header = () => {
                             <Link href={isAuthed ? '/studio?tool=enhance' : '/enhance'} className={styles.navLink}>Fotoğraf Geliştirme</Link>
                         </li>
                         <li>
-                            <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.navLink}>Dekorasyon Stüdyosu</Link>
+                            <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.navLink}>Dekorasyon</Link>
                         </li>
                         <li className={styles.navItem}>
                             <Link href="/tools" className={styles.navLink}>Tüm Araçlar</Link>
@@ -302,15 +262,15 @@ const Header = () => {
                                 <div className={styles.logoIcon}>
                                     <Image
                                         src="/logo.png"
-                                        alt="Emlak YZ Logo"
+                                        alt="Emlak Stüdyosu Logo"
                                         width={64}
                                         height={64}
                                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     />
                                 </div>
-                                <div className={styles.logoTextWrapper} ref={mobileLogoTextWrapperRef}>
-                                    <span className={styles.logoBrand} ref={mobileLogoBrandRef}>EMLAK</span>
-                                    <span className={styles.logoStudio}><span className={styles.logoStudioInner} ref={mobileLogoStudioRef}>YZ.com</span></span>
+                                <div className={styles.logoTextWrapper}>
+                                    <span className={styles.logoBrand}>EMLAK</span>
+                                    <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Stüdyosu</span></span>
                                 </div>
                             </Link>
                         </div>
@@ -330,7 +290,7 @@ const Header = () => {
                         <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
                             <div className={styles.mobileIconWrapper}>{Icons.Stage}</div>
                             <div className={styles.mobileLinkContent}>
-                                <span className={styles.mobileLinkLabel}>Dekorasyon Stüdyosu</span>
+                                <span className={styles.mobileLinkLabel}>Dekorasyon</span>
                                 <span className={styles.mobileLinkDesc}>Boş odaları yapay zeka ile döşeyin</span>
                             </div>
                         </Link>
@@ -380,7 +340,7 @@ const Header = () => {
                             </Link>
                         </div>
                         <div className={styles.footerBrand}>
-                            <p>© 2026 Emlak YZ. Her hakkı saklıdır.</p>
+                            <p>© 2026 Emlak Stüdyosu. Her hakkı saklıdır.</p>
                         </div>
                     </div>
                 </div>

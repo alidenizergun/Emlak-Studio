@@ -86,9 +86,8 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.02em;
-    text-transform: uppercase;
+    text-transform: none;
     font-family: 'Inter', sans-serif;
-    transform-origin: left;
 }
 
 /* Cümle içinde Y Z – paragraf harfleriyle aynı boyut */

@@ -2,8 +2,8 @@ import Link from 'next/link';
 import styles from './Contact.module.css';
 
 export const metadata = {
-    title: 'İletişim - Emlak YZ | 7/24 Destek',
-    description: 'Emlak YZ müşteri hizmetleri ile iletişime geçin. Telefon ve e-posta desteği ile yanınızdayız.',
+    title: 'İletişim - Emlak Stüdyosu | 7/24 Destek',
+    description: 'Emlak Stüdyosu müşteri hizmetleri ile iletişime geçin. Telefon ve e-posta desteği ile yanınızdayız.',
 };
 
 const CHANNELS = [

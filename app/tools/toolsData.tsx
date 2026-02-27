@@ -29,7 +29,7 @@ export const TOOLS: Tool[] = [
     },
     {
         id: 'stage',
-        title: 'Dekorasyon Stüdyosu',
+        title: 'Dekorasyon',
         description: 'Boş odaları yapay zeka ile modern mobilyalarla döşeyin.',
         href: '/stage',
         icon: (
@@ -56,7 +56,7 @@ export const TOOLS: Tool[] = [
     },
     {
         id: 'renovation',
-        title: 'Sanal Tadilat',
+        title: 'Tadilat',
         description: 'Duvarları, zeminleri veya mutfakları tamamen yenileyerek potansiyeli gösterin.',
         href: '/sanal-tadilat',
         icon: (
@@ -65,8 +65,8 @@ export const TOOLS: Tool[] = [
     },
     {
         id: 'ai-tour-guide',
-        title: 'Yapay Zeka Sunucusu',
-        description: 'Yapay zeka sunucusu evin içinde gezer, mülk bilgilerini video olarak kullanıcılara aktarır.',
+        title: 'Sanal Sunucu',
+        description: 'Sanal sunucu evin içinde gezer, mülk bilgilerini video olarak kullanıcılara aktarır.',
         href: '/ai-tour-guide',
         icon: (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /><path d="M6 10h4" /><path d="M6 14h6" /></svg>

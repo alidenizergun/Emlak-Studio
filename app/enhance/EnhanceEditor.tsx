@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 import EnhanceResultModal from '@/components/EnhanceResultModal';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
+import ProcessingOverlay from '@/components/ProcessingOverlay';
 import styles from './Enhance.module.css';
 
 interface EnhancedItem {
@@ -22,7 +23,7 @@ export default function EnhanceClient() {
     const router = useRouter();
     const pathname = usePathname();
     const isInStudio = pathname === '/studio';
-    const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({}); // Yapay Zeka Seçsin varsayılan kapalı
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({}); // Emlak Stüdyosu Seçsin varsayılan kapalı
     const [items, setItems] = useState<EnhancedItem[]>([]);
     const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
@@ -168,10 +169,9 @@ export default function EnhanceClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Fotoğraf Geliştirme Stüdyosu</h1>
+                    <h1 className={styles.title}>Fotoğraf Geliştirme</h1>
                     <p className={styles.description}>
-                        Yapay zeka ile fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar,
-                        çözünürlüğü 4K kaliteye yükseltir.
+                        Emlak Stüdyosu fotoğraflarınızı analiz eder, şık ve renk dengesini sağlar, çözünürlüğü 4K kaliteye yükseltir.
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             Örnek Gör
                         </button>
@@ -181,7 +181,7 @@ export default function EnhanceClient() {
 
             <div className={styles.workspace}>
                 {/* LEFT: Gallery Area */}
-                <div className={styles.gallerySection}>
+                <div className={styles.gallerySection} style={{ position: 'relative' }}>
                     {!hasItems ? (
                         <div className={styles.emptyState}>
                             <ImageUploader
@@ -260,6 +260,7 @@ export default function EnhanceClient() {
                             )}
                         </div>
                     )}
+                    <ProcessingOverlay active={isGlobalProcessing} />
                 </div>
 
                 {/* RIGHT: Sidebar Controls */}
@@ -301,10 +302,10 @@ export default function EnhanceClient() {
                                 </div>
                                 <div className={styles.optionText}>
                                     <div className={styles.optionNameRow}>
-                                        <span className={styles.optionName}>Yapay Zeka Seçsin</span>
+                                        <span className={styles.optionName}>Emlak Stüdyosu Seçsin</span>
                                         <span className={styles.optionCost}>5 kredi</span>
                                     </div>
-                                    <span className={styles.optionDesc}>Yapay zeka en iyi ayarları seçsin</span>
+                                    <span className={styles.optionDesc}>Emlak Stüdyosu en iyi ayarları seçsin</span>
                                 </div>
                                 <div className={styles.optionIcon}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

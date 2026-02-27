@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { deductCredits } from '@/lib/credits';
+import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
+import {
+    buildAdaptiveListingPrompt,
+    createListingRunId,
+    evaluateListingTextQuality,
+    getListingAdaptivePolicy,
+    recordListingRun,
+    updateListingAdaptiveOutcome,
+} from '@/lib/listing-text-runtime';
 
 interface IlanBilgileri {
     lokasyon?: string;
@@ -125,11 +133,15 @@ function generateFallbackListingText(info: IlanBilgileri): string {
 }
 
 export async function POST(request: NextRequest) {
+    let chargedPhone = '';
+    let chargedCredits = 0;
+    let infoForFailure: IlanBilgileri = {};
     try {
         const formData = await request.formData();
         const image = formData.get('image') as File;
         const ilanBilgileriRaw = formData.get('ilanBilgileri') as string | null;
         const phone = String(formData.get('phone') || '');
+        chargedPhone = phone;
 
         if (!image) {
             return NextResponse.json(
@@ -154,9 +166,12 @@ export async function POST(request: NextRequest) {
                 // ignore
             }
         }
+        infoForFailure = info;
 
         let text = '';
         let provider: 'gemini' | 'fallback' = 'fallback';
+        const runId = createListingRunId();
+        const adaptivePolicy = getListingAdaptivePolicy();
 
         if (genAI) {
             try {
@@ -164,7 +179,7 @@ export async function POST(request: NextRequest) {
                 const mimeType = image.type || 'image/jpeg';
                 const bytes = await image.arrayBuffer();
                 const base64Data = Buffer.from(bytes).toString('base64');
-                const prompt = buildListingPrompt(info);
+                const prompt = buildAdaptiveListingPrompt(buildListingPrompt(info), adaptivePolicy, false);
 
                 const result = await model.generateContent({
                     contents: [
@@ -177,15 +192,41 @@ export async function POST(request: NextRequest) {
                         },
                     ],
                     generationConfig: {
-                        temperature: 0.65,
+                        temperature: adaptivePolicy.temperature,
                         topP: 0.9,
-                        maxOutputTokens: 900,
+                        maxOutputTokens: adaptivePolicy.maxOutputTokens,
                     },
                 });
 
                 const generated = result.response.text() || '';
                 text = cleanModelOutput(generated);
                 if (text) provider = 'gemini';
+
+                const firstQuality = evaluateListingTextQuality(text, info, adaptivePolicy);
+                if (!firstQuality.ok && adaptivePolicy.retryEnabled) {
+                    const retryPrompt = buildAdaptiveListingPrompt(buildListingPrompt(info), adaptivePolicy, true);
+                    const retryResult = await model.generateContent({
+                        contents: [
+                            {
+                                role: 'user',
+                                parts: [
+                                    { text: retryPrompt },
+                                    { inlineData: { mimeType, data: base64Data } },
+                                ],
+                            },
+                        ],
+                        generationConfig: {
+                            temperature: Math.max(0.35, adaptivePolicy.temperature - 0.08),
+                            topP: 0.88,
+                            maxOutputTokens: Math.max(700, adaptivePolicy.maxOutputTokens),
+                        },
+                    });
+                    const retryText = cleanModelOutput(retryResult.response.text() || '');
+                    const retryQuality = evaluateListingTextQuality(retryText, info, adaptivePolicy);
+                    if (retryQuality.score >= firstQuality.score && retryText) {
+                        text = retryText;
+                    }
+                }
             } catch (aiError) {
                 console.error('Ilan-metni Gemini generation failed, using fallback:', aiError);
             }
@@ -196,6 +237,8 @@ export async function POST(request: NextRequest) {
             provider = 'fallback';
         }
 
+        const quality = evaluateListingTextQuality(text, info, adaptivePolicy);
+
         const creditResult = await deductCredits(phone, LISTING_TEXT_COST, 'tool_listing_text');
         if (!creditResult.ok) {
             return NextResponse.json(
@@ -203,15 +246,53 @@ export async function POST(request: NextRequest) {
                 { status: 402 }
             );
         }
+        chargedCredits = LISTING_TEXT_COST;
+
+        recordListingRun({
+            runId,
+            phone,
+            status: 'success',
+            provider,
+            info,
+            outputText: text,
+            qualityScore: quality.score,
+            reason: quality.ok ? undefined : quality.reason,
+            usedCredits: LISTING_TEXT_COST,
+        });
+        updateListingAdaptiveOutcome(quality.ok, quality.reason);
 
         return NextResponse.json({
             success: true,
+            runId,
             text,
             provider,
+            qualityScore: quality.score,
+            qualityIssues: quality.issues,
             credits: creditResult.credits,
             usedCredits: LISTING_TEXT_COST
         });
     } catch (error: unknown) {
+        if (chargedCredits > 0 && chargedPhone) {
+            try {
+                await addCredits(chargedPhone, chargedCredits, 'auto_refund_listing_text_error');
+            } catch (refundError) {
+                console.error('Listing-text auto refund failed:', refundError);
+            }
+        }
+        if (chargedPhone) {
+            recordListingRun({
+                runId: createListingRunId(),
+                phone: chargedPhone,
+                status: 'failed',
+                provider: 'fallback',
+                info: infoForFailure,
+                outputText: '',
+                qualityScore: 0,
+                reason: 'provider',
+                usedCredits: 0,
+            });
+            updateListingAdaptiveOutcome(false, 'provider');
+        }
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }

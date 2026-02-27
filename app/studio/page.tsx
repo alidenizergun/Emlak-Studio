@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import StudioClient from './StudioClient';
 
 export const metadata = {
-    title: 'Stüdyo - Emlak YZ',
+    title: 'Stüdyo - Emlak Stüdyosu',
     description: 'Tüm araçlara tek sayfadan erişin. Fotoğraf geliştirme, dekorasyon, ilan metni ve daha fazlası.',
 };
 

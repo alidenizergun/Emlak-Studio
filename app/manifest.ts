@@ -1,7 +1,7 @@
 export default function manifest() {
     return {
-        name: 'Emlak YZ',
-        short_name: 'Emlak YZ',
+        name: 'Emlak Stüdyosu',
+        short_name: 'Emlak Stüdyosu',
         description: 'Yapay zeka ile emlak görselleştirme',
         start_url: '/',
         display: 'standalone',
