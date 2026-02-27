@@ -8,8 +8,9 @@ CRITICAL QUALITY STANDARDS:
 - OUTPUT RESOLUTION: All processing must target a crystal-clear 4K (Ultra HD) quality.
 - REAL ESTATE PHOTOGRAPHY: Result must be museum-quality, high-end real estate photography.
 - PHOTOREALISM: Absolutely no artistic, cartoonish, or AI-generated look.
-- ARCHITECTURAL INTEGRITY: Do not change walls, windows, or structural elements.
+- ARCHITECTURAL INTEGRITY: Do not change room size perception, walls, columns, ceilings, windows, doors, or structural elements.
 - PRESERVATION: Do not add or remove furniture or major decor.
+- WATERMARK CLEANUP: Remove visible logo/watermark/branding text naturally.
 - NOISE & ARTIFACTS: Completely eliminate digital noise, JPEG artifacts, and chromatic aberration.`;
 
 /** Her seçenek (option id) için tam prompt metni */

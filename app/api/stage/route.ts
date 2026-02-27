@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Jimp } from 'jimp';
-import Replicate from 'replicate';
 import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
-
-const replicate = process.env.REPLICATE_API_TOKEN
-    ? new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
-    : null;
+import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 const STAGE_COST = TOOL_CREDIT_COSTS.stage;
 
 export async function POST(request: NextRequest) {
@@ -33,66 +28,8 @@ export async function POST(request: NextRequest) {
         const authError = requireAuthPhone(request, phone);
         if (authError) return authError;
 
-        const bytes = await image.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        console.log('Processing real stage request (Jimp):', { roomType, style });
-
-        let finalImageUrl: string;
-
-        // 1. IF REPLICATE TOKEN IS PRESENT - Use True AI Furniture Staging
-        if (replicate) {
-            try {
-                const output = await replicate.run(
-                    "jagadeesh-k/furniture_styler:9ef04d23250adb34c9f957df487e35b7e2d93e9f45d5a71383505c879d762e58",
-                    {
-                        input: {
-                            image: `data:${image.type};base64,${buffer.toString('base64')}`,
-                            room_type: roomType,
-                            style: style,
-                            prompt: generateStagePrompt(roomType, style)
-                        }
-                    }
-                );
-
-                console.log('Replicate Stage Output:', output);
-
-                // Handle different output types
-                if (typeof output === 'string') {
-                    finalImageUrl = output;
-                } else if (Array.isArray(output) && output.length > 0) {
-                    finalImageUrl = output[0] as string;
-                } else if (typeof output === 'object') {
-                    finalImageUrl = String(output);
-                } else {
-                    throw new Error('Unexpected Replicate output format');
-                }
-
-                const creditResult = await deductCredits(phone, STAGE_COST, 'tool_stage');
-                if (!creditResult.ok) {
-                    return NextResponse.json(
-                        { success: false, code: 'INSUFFICIENT_CREDITS', error: 'Yetersiz kredi', credits: creditResult.credits },
-                        { status: 402 }
-                    );
-                }
-
-                return NextResponse.json({
-                    success: true,
-                    imageUrl: finalImageUrl,
-                    credits: creditResult.credits,
-                    usedCredits: STAGE_COST
-                });
-            } catch (aiError) {
-                console.error('Replicate AI Error (Stage), falling back to Jimp:', aiError);
-            }
-        }
-
-        // 2. FALLBACK - Apply some photographic enhancement to original image using Jimp
-        const jimpImage = await Jimp.read(buffer);
-        jimpImage.brightness(0.1).contrast(0.1);
-
-        const outputBuffer = await jimpImage.getBuffer("image/jpeg");
-        finalImageUrl = `data:image/jpeg;base64,${outputBuffer.toString('base64')}`;
+        const prompt = generateStagePrompt(roomType, style);
+        const generation = await generateEditedImageWithNanoBanana({ image, prompt });
 
         const creditResult = await deductCredits(phone, STAGE_COST, 'tool_stage');
         if (!creditResult.ok) {
@@ -104,9 +41,9 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            imageUrl: finalImageUrl,
-            processed: true,
-            note: 'AI Staging requires REPLICATE_API_TOKEN. This is a photorealistic enhancement fallback.',
+            imageUrl: generation.imageUrl,
+            provider: generation.provider,
+            model: generation.model,
             credits: creditResult.credits,
             usedCredits: STAGE_COST
         });
@@ -122,6 +59,11 @@ export async function POST(request: NextRequest) {
 }
 
 function generateStagePrompt(roomType: string, style: string): string {
-    return `Transform this empty room into a beautifully furnished ${roomType} with ${style} interior design style.
-Maintain original architecture. Ultra-photorealistic rendering.`;
+    return `Transform this room into a beautifully furnished ${roomType} with ${style} interior design style.
+STRICT CONSTRAINTS:
+- Keep architecture identical to the uploaded photo: room dimensions, column positions, wall lines, ceiling geometry, window and door locations must remain unchanged.
+- Keep original layout, perspective, camera angle, framing, and lens feel.
+- Clean floor and surfaces (remove dirt, stains, smudges, dust) while preserving original floor material and tile/texture layout.
+- Improve lighting, exposure and sharpness to premium real-estate quality without geometric changes.
+Ultra-photorealistic rendering only.`;
 }

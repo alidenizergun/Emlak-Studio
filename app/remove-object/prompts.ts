@@ -3,10 +3,12 @@ export type RemoveMode = 'all' | 'prompt';
 const BASE_RULES = `
 Preserve original perspective, camera angle, lens characteristics, and composition.
 Do not crop, rotate, warp, or change framing.
-Do not alter walls, floor, ceiling, windows, doors, fixed architectural elements, or room layout.
+Do not alter room dimensions, walls, floor, ceiling, windows, doors, columns, fixed architectural elements, or room layout.
 Keep photorealistic lighting, shadows, and reflections consistent with the original scene.
 Generate natural inpainting where removed regions blend seamlessly with nearby textures.
 Do not add new objects, furniture, people, logos, text, or watermarks.
+If visible, remove existing logos/watermarks/branding text naturally.
+Improve lighting and sharpness to a premium real-estate quality without changing architecture.
 Output a clean, high-quality real-estate photo.
 `.trim();
 
@@ -43,4 +45,3 @@ Important constraints:
 ${BASE_RULES}
 `.trim();
 }
-

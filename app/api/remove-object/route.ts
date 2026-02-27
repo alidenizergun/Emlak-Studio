@@ -3,11 +3,8 @@ import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/pr
 import { deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
+import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 
-/**
- * Placeholder API: returns the same image as "processed" until a real
- * inpainting/object-removal model is integrated.
- */
 export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
@@ -41,11 +38,7 @@ export async function POST(request: NextRequest) {
 
         const prompt = clientPrompt || buildRemoveObjectPrompt(mode, userPrompt);
 
-        const bytes = await image.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const base64 = buffer.toString('base64');
-        const mime = image.type || 'image/jpeg';
-        const imageUrl = `data:${mime};base64,${base64}`;
+        const generation = await generateEditedImageWithNanoBanana({ image, prompt });
 
         const cost = mode === 'all' ? TOOL_CREDIT_COSTS.removeObjectAll : TOOL_CREDIT_COSTS.removeObjectPrompt;
         const creditResult = await deductCredits(phone, cost, `tool_remove_object_${mode}`);
@@ -58,13 +51,14 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            imageUrl,
+            imageUrl: generation.imageUrl,
             mode,
             prompt,
             userPrompt: userPrompt || undefined,
+            provider: generation.provider,
+            model: generation.model,
             credits: creditResult.credits,
             usedCredits: cost,
-            note: 'Object removal AI will be integrated here. Placeholder currently returns original image.',
         });
     } catch (error: unknown) {
         console.error('Remove-object API error:', error);
