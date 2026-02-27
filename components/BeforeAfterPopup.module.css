@@ -330,8 +330,8 @@
 @media (max-width: 768px) {
     .popupOverlay {
         --app-header-height: 76px;
-        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
-        align-items: center;
+        padding: 2px max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        align-items: flex-start;
         justify-content: center;
         box-sizing: border-box;
         overflow: hidden;
