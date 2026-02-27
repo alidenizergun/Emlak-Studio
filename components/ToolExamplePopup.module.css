@@ -13,7 +13,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .modal {
@@ -92,6 +92,7 @@
 
 .body {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 0.9rem 1rem 1rem;
 }
@@ -142,6 +143,17 @@
 @media (max-width: 768px) {
     .overlay {
         --app-header-height: 76px;
+        padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        overflow: hidden;
+    }
+
+    .modal {
+        width: min(100%, calc(100vw - 1rem));
+        width: min(100%, calc(100dvw - 1rem));
+        height: auto;
+        max-height: calc(100vh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100dvh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     }
 
     .compareGrid {
@@ -149,6 +161,6 @@
     }
 
     .image {
-        height: min(40vh, 288px);
+        height: clamp(160px, 28svh, 260px);
     }
 }

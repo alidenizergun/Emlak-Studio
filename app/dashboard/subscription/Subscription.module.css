@@ -201,17 +201,21 @@
     justify-content: center;
     padding: 1rem;
     z-index: 1000;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .modalCard {
     position: relative;
     width: min(560px, 100%);
+    max-height: calc(100vh - var(--app-header-height) - 2rem);
+    max-height: calc(100dvh - var(--app-header-height) - 2rem);
     background: #fff;
     border-radius: 14px;
     border: 1px solid #e2e8f0;
     padding: 1rem;
     box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.45);
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .modalXBtn {
@@ -307,7 +311,14 @@
 @media (max-width: 640px) {
     .modalOverlay {
         --app-header-height: 76px;
-        padding: 0.75rem;
+        padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+        overflow: hidden;
+    }
+
+    .modalCard {
+        max-height: calc(100vh - var(--app-header-height) - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100dvh - var(--app-header-height) - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - var(--app-header-height) - 1.5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     }
 
     .title {

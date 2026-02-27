@@ -15,7 +15,7 @@
     justify-content: center;
     padding: 1.5rem;
     animation: popupOverlayIn 0.25s ease;
-    overflow: auto;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
@@ -334,14 +334,16 @@
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow: hidden;
     }
 
     .popup {
         border-radius: 20px;
         max-width: calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        max-width: calc(100dvw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+        height: auto;
         max-height: calc(100vh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100dvh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         max-height: calc(100svh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
         width: 100%;
         overflow-y: hidden;
@@ -375,11 +377,12 @@
         padding: 2.5rem 1rem 1rem;
         min-height: 0;
         flex: 1 1 auto;
+        overflow-y: auto;
     }
 
     .popupImageWrap {
-        min-height: 50px;
-        max-height: min(32.5vh, 250px);
+        min-height: clamp(120px, 22svh, 210px);
+        max-height: clamp(120px, 22svh, 210px);
     }
 
     .popupFooter {
