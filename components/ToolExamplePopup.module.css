@@ -143,7 +143,7 @@
 @media (max-width: 768px) {
     .overlay {
         --app-header-height: 76px;
-        padding: 2px max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+        padding: 2px max(0.5rem, env(safe-area-inset-right)) 0 max(0.5rem, env(safe-area-inset-left));
         align-items: flex-start;
         overflow: hidden;
     }
@@ -151,10 +151,12 @@
     .modal {
         width: min(100%, calc(100vw - 1rem));
         width: min(100%, calc(100dvw - 1rem));
-        height: auto;
-        max-height: calc(100vh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100dvh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-        max-height: calc(100svh - var(--app-header-height) - 1rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        height: calc(100vh - var(--app-header-height) - 2px - env(safe-area-inset-bottom, 0px));
+        height: calc(100dvh - var(--app-header-height) - 2px - env(safe-area-inset-bottom, 0px));
+        height: calc(100svh - var(--app-header-height) - 2px - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100vh - var(--app-header-height) - 2px - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100dvh - var(--app-header-height) - 2px - env(safe-area-inset-bottom, 0px));
+        max-height: calc(100svh - var(--app-header-height) - 2px - env(safe-area-inset-bottom, 0px));
     }
 
     .compareGrid {
