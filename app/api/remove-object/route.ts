@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/prompts';
 import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
@@ -9,6 +10,7 @@ import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image
 import { postprocessListingImage } from '@/lib/output-postprocess';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
+import { recordToolRun } from '@/lib/work-history';
 
 const ENABLE_REMOVE_RETRY = process.env.REMOVE_OBJECT_ENABLE_AUTO_RETRY !== '0';
 
@@ -77,6 +79,11 @@ RETRY MODE:
 - Keep architecture, perspective, and room geometry strictly unchanged.
 - Remove only requested objects; do not alter structural lines.
 - Improve clarity and avoid blurry or low-contrast output.
+- Enforce clean inpainting: no ghost traces, no semi-transparent leftovers, no black patches, no double edges.
+- If mode is "all", output must look like a truly empty room (all movable items removed).
+- If lighting is dark/flat, rebalance exposure and shadows for a bright natural listing look.
+- Rebuild removed regions with continuous floor/wall texture direction and realistic contact shadows.
+- Return one complete edited image only (no partial/failed output).
 ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
     ? '- Adaptive rule: remove semi-transparent traces and double-exposure artifacts around removed zones.'
     : ''}`;
@@ -127,15 +134,31 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
         }
         chargedCredits = cost;
         recordToolAdaptiveOutcome('remove-object', { ok: true });
+        const runId = randomUUID();
+        const beforeImageUrl = await fileToDataUrl(image);
+        recordToolRun({
+            runId,
+            phone,
+            toolId: 'remove-object',
+            beforeImageUrl,
+            afterImageUrl: finalizedImageUrl,
+            title: 'Akıllı Eşya Silme',
+            detail: mode === 'all' ? 'Tüm eşyalar silindi' : `İstek: ${userPrompt || 'Belirli eşya silme'}`,
+            usedCredits: cost,
+        });
 
         return NextResponse.json({
             success: true,
+            runId,
             imageUrl: finalizedImageUrl,
             mode,
             prompt,
             userPrompt: userPrompt || undefined,
             provider: generation.provider,
             model: generation.model,
+            fallbackUsed: generation.fallbackUsed,
+            attemptedModels: generation.attemptedModels,
+            attemptLog: process.env.NODE_ENV === 'production' ? undefined : generation.attemptLog,
             architectureScore: integrity.score,
             qualityScore: quality.score,
             credits: creditResult.credits,
@@ -157,4 +180,10 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
             { status: 500 }
         );
     }
+}
+
+async function fileToDataUrl(file: File): Promise<string> {
+    const bytes = Buffer.from(await file.arrayBuffer()).toString('base64');
+    const mime = file.type || 'image/jpeg';
+    return `data:${mime};base64,${bytes}`;
 }

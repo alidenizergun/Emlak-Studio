@@ -109,7 +109,7 @@ export async function verifyEnhanceQualityContract(
                 0.2 * Math.max(0, Math.min(1, colorQuality))
         )
     );
-    const minScore = Number(process.env.ENHANCE_CONTRACT_MIN_SCORE || 0.56);
+    const minScore = Number(process.env.ENHANCE_CONTRACT_MIN_SCORE || 0.64);
     if (!base.ok) {
         return {
             ok: false,

@@ -170,10 +170,10 @@ export default function IlanMetniClient() {
                     <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
                     <p className={styles.description}>
                         Fotoğrafları yükleyin ve ilan bilgilerini girin; emlak stüdyosu profesyonel ilan metni üretsin.
-                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                            Örnek Gör
-                        </button>
                     </p>
+                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                        Örnekleri Gör
+                    </button>
                 </div>
             </header>
 
@@ -375,7 +375,7 @@ export default function IlanMetniClient() {
                                 </>
                             ) : (
                                 <>
-                                    Metni Oluştur
+                                    Başlat
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
@@ -384,7 +384,7 @@ export default function IlanMetniClient() {
                         </button>
                         <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Fotoğraf ve zorunlu alanları doldurup <strong>Metni Oluştur</strong> butonuna tıklayın. Yapay zeka bu bilgiler ve görsellerden ilan metnini üretir.</p>
+                            <p>Fotoğraf ve zorunlu alanları doldurup <strong>Başlat</strong> butonuna tıklayın. Yapay zeka bu bilgiler ve görsellerden ilan metnini üretir.</p>
                         </div>
                     </div>
                 </div>

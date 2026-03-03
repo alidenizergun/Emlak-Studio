@@ -51,26 +51,27 @@
 }
 
 .exampleLink {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    vertical-align: middle;
-    margin-left: 0.5rem;
-    border: 1px solid #dbe5ef;
-    background: #ffffff;
+    justify-content: center;
+    align-self: flex-start;
+    margin-top: 0.55rem;
+    margin-left: 0;
+    padding: 0.58rem 0.7rem;
+    background: #d9f4f1;
     color: #0f766e;
-    border-radius: 8px;
-    padding: 0.4rem 0.62rem;
-    font-size: 0.74rem;
-    font-weight: 400;
-    line-height: 1.2;
-    white-space: nowrap;
+    border-radius: 11px;
+    font-weight: 500;
+    font-size: 0.82rem;
+    text-decoration: none;
+    border: 1px solid #8de6dd;
+    transition: background 0.2s, border-color 0.2s;
     cursor: pointer;
-    transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 
 .exampleLink:hover {
-    border-color: #99f6e4;
-    background: #f0fdfa;
+    background: #cdeeea;
+    border-color: #5bd4c8;
     color: #0f766e;
 }
 @media (max-width: 1024px) {

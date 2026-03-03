@@ -1,10 +1,19 @@
-import Stage from "./Stage";
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import Stage from './Stage';
 
-export const metadata = {
-    title: "Dekorasyon - Emlak Stüdyosu",
-    description: "Boş odaları Emlak Stüdyosu ile döşeyin.",
+export const metadata: Metadata = {
+  title: 'Dekorasyon',
+  description: 'Boş odaları Emlak Stüdyosu ile mimariyi koruyarak dekore edin.',
+  alternates: {
+    canonical: '/stage',
+  },
 };
 
 export default function StagePage() {
-    return <Stage />;
+  return (
+    <Suspense fallback={null}>
+      <Stage />
+    </Suspense>
+  );
 }

@@ -1,10 +1,14 @@
+import type { Metadata } from 'next';
 import RemoveObjectClient from './RemoveObjectClient';
 
-export const metadata = {
-    title: 'Akıllı Eşya Silme - Emlak Stüdyosu',
-    description: 'İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları fotoğraflarınızdan saniyeler içinde silin.',
+export const metadata: Metadata = {
+  title: 'Akıllı Eşya Silme',
+  description: 'İstenmeyen eşyaları fotoğraflarınızdan doğal ve temiz sonuçlarla kaldırın.',
+  alternates: {
+    canonical: '/remove-object',
+  },
 };
 
 export default function RemoveObjectPage() {
-    return <RemoveObjectClient />;
+  return <RemoveObjectClient />;
 }

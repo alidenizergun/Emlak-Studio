@@ -1,31 +1,34 @@
 import { Metadata } from 'next';
 import RegisterClient from './RegisterClient';
+import { DEFAULT_OG_IMAGE, SITE_NAME, absoluteUrl } from '@/lib/seo/site';
 
 export const metadata: Metadata = {
-    title: 'Ücretsiz Kayıt Ol - Emlak AIStudio | 2 Kredi Hediye',
-    description: 'Emlak AIStudio\'ya ücretsiz kayıt olun, 2 kredi hediye kazanın. Profesyonel emlak görselleri oluşturmaya hemen başlayın. Kredi kartı gerekmez.',
-    openGraph: {
-        title: 'Ücretsiz Kayıt Ol - Emlak AIStudio',
-        description: 'Ücretsiz kayıt olun, 2 kredi hediye kazanın. Profesyonel emlak görselleri oluşturmaya hemen başlayın.',
-        url: 'https://emlak-aistudio.com/register',
-        siteName: 'Emlak AIStudio',
-        locale: 'tr_TR',
-        type: 'website',
-    },
-    twitter: {
-        card: 'summary_large_image',
-        title: 'Ücretsiz Kayıt Ol - Emlak AIStudio',
-        description: 'Ücretsiz kayıt olun, 2 kredi hediye kazanın.',
-    },
-    robots: {
-        index: true,
-        follow: true,
-    },
-    alternates: {
-        canonical: '/register',
-    },
+  title: 'Ücretsiz Kayıt Ol',
+  description: `${SITE_NAME}'na ücretsiz kayıt olun ve araçları hemen kullanmaya başlayın.`,
+  openGraph: {
+    title: `Ücretsiz Kayıt Ol | ${SITE_NAME}`,
+    description: `${SITE_NAME}'nda hesabınızı oluşturun ve çalışmalara başlayın.`,
+    url: absoluteUrl('/register'),
+    siteName: SITE_NAME,
+    locale: 'tr_TR',
+    type: 'website',
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `Ücretsiz Kayıt Ol | ${SITE_NAME}`,
+    description: `${SITE_NAME}'nda hesabınızı oluşturun ve çalışmalara başlayın.`,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: '/register',
+  },
 };
 
 export default function RegisterPage() {
-    return <RegisterClient />;
+  return <RegisterClient />;
 }

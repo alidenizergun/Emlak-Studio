@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
@@ -8,6 +9,7 @@ import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image
 import { postprocessListingImage } from '@/lib/output-postprocess';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
+import { recordToolRun } from '@/lib/work-history';
 
 const ENABLE_RENOVATION_RETRY = process.env.RENOVATION_ENABLE_AUTO_RETRY !== '0';
 
@@ -121,12 +123,28 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
         }
         chargedCredits = TOOL_CREDIT_COSTS.virtualRenovation;
         recordToolAdaptiveOutcome('virtual-renovation', { ok: true });
+        const runId = randomUUID();
+        const beforeImageUrl = await fileToDataUrl(image);
+        recordToolRun({
+            runId,
+            phone,
+            toolId: 'virtual-renovation',
+            beforeImageUrl,
+            afterImageUrl: finalizedImageUrl,
+            title: 'Tadilat',
+            detail: instructions || 'Genel tadilat uygulandı',
+            usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
+        });
 
         return NextResponse.json({
             success: true,
+            runId,
             imageUrl: finalizedImageUrl,
             provider: generation.provider,
             model: generation.model,
+            fallbackUsed: generation.fallbackUsed,
+            attemptedModels: generation.attemptedModels,
+            attemptLog: process.env.NODE_ENV === 'production' ? undefined : generation.attemptLog,
             architectureScore: allowArchitecturalChanges ? undefined : integrity.score,
             qualityScore: quality.score,
             credits: creditResult.credits,
@@ -144,6 +162,12 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
+}
+
+async function fileToDataUrl(file: File): Promise<string> {
+    const bytes = Buffer.from(await file.arrayBuffer()).toString('base64');
+    const mime = file.type || 'image/jpeg';
+    return `data:${mime};base64,${bytes}`;
 }
 
 function hasExplicitArchitectureChangeRequest(instructions: string): boolean {
@@ -176,7 +200,7 @@ function hasExplicitArchitectureChangeRequest(instructions: string): boolean {
 }
 
 function buildVirtualRenovationPrompt(instructions: string, allowArchitecturalChanges: boolean): string {
-    const task = instructions.trim() || 'Modern ve sade bir tadilat uygula.';
+    const task = instructions.trim() || 'Apply a modern and clean virtual renovation.';
     const architectureRule = allowArchitecturalChanges
         ? 'User explicitly requested architectural edits. Apply only those requested architectural changes; keep all other architecture unchanged.'
         : 'Do not change architecture, room dimensions, columns, ceilings, window/door positions, or structural geometry.';
@@ -189,6 +213,7 @@ ${task}
 Rules:
 - ${architectureRule}
 - Preserve original perspective, camera framing, and lens feel.
+- If the floor is dirty in the uploaded image, clean it completely (remove all visible dirt/stain/dust marks) while preserving floor material, seams/patterns, and geometry.
 - Remove visible logos/watermarks naturally.
 - Improve lighting and sharpness to premium listing quality.
 - Do not add people, logos, text, or watermarks.

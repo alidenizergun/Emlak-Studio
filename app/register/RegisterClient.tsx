@@ -299,7 +299,7 @@ export default function RegisterClient() {
                             <div className={styles.benefitIcon}>✨</div>
                             <div>
                                 <h3>Fotoğraf Geliştirme & Dekorasyon</h3>
-                                <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları yapay zeka ile modern mobilyalarla döşeyin.</p>
+                                <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları emlak stüdyosu ile istediğiniz tarz mobilyalarla döşeyin.</p>
                             </div>
                         </li>
                         <li className={styles.benefitItem}>

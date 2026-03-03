@@ -1,4 +1,5 @@
 import styles from './StudioSidebarVariants.module.css';
+import type { Metadata } from 'next';
 
 type Variant = {
   id: string;
@@ -29,8 +30,9 @@ const variants: Variant[] = [
   { id: 'v20', name: 'Clean Future', note: 'Modern sade gelecek dili' },
 ];
 
-export const metadata = {
-  title: 'Studio Sidebar Varyasyonlari',
+export const metadata: Metadata = {
+  title: 'Studio Sidebar Varyasyonları',
+  robots: { index: false, follow: false },
 };
 
 export default function StudioSidebarVariantsPage() {

@@ -65,7 +65,7 @@ const CATEGORIES = [
 
 const FAQ_ITEMS = [
     {
-        question: "Emlak AIStudio’ya nasıl kayıt olurum?",
+        question: "Emlak Stüdyosu’ya nasıl kayıt olurum?",
         answer: "Ana sayfadaki \"Ücretsiz Deneyin\" veya \"Kayıt Ol\" butonuna tıklayın. Cep telefonu numaranızı girin, SMS ile gelen 6 haneli doğrulama kodunu girerek hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen Fotoğraf Geliştirme ve Dekorasyon araçlarını kullanmaya başlayabilirsiniz.",
     },
     {
@@ -103,7 +103,7 @@ export default function HelpClient() {
             <header className={styles.header}>
                 <h1 className={styles.title}>Yardım Merkezi</h1>
                 <p className={styles.subtitle}>
-                    Emlak AIStudio ile ilgili sık sorulan sorulara yanıtlar ve kullanım rehberleri. Aradığınız konuyu aşağıdaki kategorilerden veya SSS bölümünden bulabilirsiniz.
+                    Emlak Stüdyosu ile ilgili sık sorulan sorulara yanıtlar ve kullanım rehberleri. Aradığınız konuyu aşağıdaki kategorilerden veya SSS bölümünden bulabilirsiniz.
                 </p>
                 <div className={styles.searchWrap}>
                     <div className={styles.searchBox}>

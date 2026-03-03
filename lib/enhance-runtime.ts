@@ -6,9 +6,25 @@ interface CachedEnhanceResponse {
     imageUrl: string;
     provider: string;
     model: string;
+    fallbackUsed?: boolean;
+    attemptedModels?: string[];
+    attemptLog?: Array<{
+        model: string;
+        attempt: number;
+        status: string;
+        latencyMs: number;
+        message?: string;
+    }>;
+    processingMode?: 'ai' | 'ai_cached';
+    appliedOptionsResolved?: string[];
     architectureScore?: number;
     qualityScore?: number;
     contractScore?: number;
+    qualityMetrics?: {
+        architectureScore?: number;
+        contractScore?: number;
+        outputScore?: number;
+    };
     appliedOptions?: string[];
 }
 
@@ -17,6 +33,9 @@ const retryBudgetByDay = new Map<string, number>();
 
 const CACHE_TTL_MS = Number(process.env.ENHANCE_CACHE_TTL_MS || 1000 * 60 * 60 * 24);
 const DAILY_RETRY_LIMIT = Number(process.env.ENHANCE_DAILY_RETRY_BUDGET || 2);
+const FALLBACK_PIPELINE_VERSION = process.env.ENHANCE_FALLBACK_PIPELINE_VERSION || 'fp1';
+const ENHANCE_GUARD_VERSION = process.env.ENHANCE_GUARD_VERSION || 'eg1';
+const ENHANCE_POSTPROCESS_VERSION = process.env.ENHANCE_POSTPROCESS_VERSION || 'pp1';
 
 function hashParts(parts: string[]): string {
     const h = crypto.createHash('sha256');
@@ -31,12 +50,23 @@ function todayKey(phone: string): string {
 export async function buildEnhanceRequestKey(
     image: File,
     options: Record<string, boolean>,
-    promptVersion: string
+    promptVersion: string,
+    promptText?: string
 ): Promise<string> {
     const bytes = Buffer.from(await image.arrayBuffer());
     const imageHash = crypto.createHash('sha256').update(bytes).digest('hex');
     const selected = Object.keys(options).filter((k) => options[k]).sort().join(',');
-    return hashParts([imageHash, selected, promptVersion, 'enhance-v2']);
+    const promptHash = crypto.createHash('sha256').update(String(promptText || '')).digest('hex').slice(0, 16);
+    return hashParts([
+        imageHash,
+        selected,
+        promptVersion,
+        promptHash,
+        FALLBACK_PIPELINE_VERSION,
+        ENHANCE_GUARD_VERSION,
+        ENHANCE_POSTPROCESS_VERSION,
+        'enhance-v3',
+    ]);
 }
 
 export function withEnhanceIdempotency<T>(requestKey: string, fn: () => Promise<T>): Promise<T> {

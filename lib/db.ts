@@ -155,6 +155,9 @@ function initDb(db: Database.Database): void {
             quality_score REAL,
             script_input TEXT,
             script_output TEXT,
+            provider TEXT,
+            video_url TEXT,
+            duration_seconds INTEGER,
             used_credits INTEGER NOT NULL DEFAULT 0,
             created_at INTEGER NOT NULL
         );
@@ -201,6 +204,19 @@ function initDb(db: Database.Database): void {
             policy_json TEXT NOT NULL,
             updated_at INTEGER NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS tool_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            tool_id TEXT NOT NULL,
+            status TEXT NOT NULL CHECK(status IN ('success', 'failed')),
+            before_image_url TEXT,
+            after_image_url TEXT,
+            title TEXT,
+            detail TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL
+        );
     `);
 
     db.exec(`
@@ -213,6 +229,7 @@ function initDb(db: Database.Database): void {
         CREATE INDEX IF NOT EXISTS idx_ai_tour_feedback_run_id ON ai_tour_feedback(run_id);
         CREATE INDEX IF NOT EXISTS idx_listing_text_runs_phone_created_at ON listing_text_runs(phone, created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_listing_text_feedback_run_id ON listing_text_feedback(run_id);
+        CREATE INDEX IF NOT EXISTS idx_tool_runs_phone_created_at ON tool_runs(phone, created_at DESC);
     `);
 
     // Lightweight migrations for existing local databases.
@@ -223,6 +240,21 @@ function initDb(db: Database.Database): void {
     }
     try {
         db.exec(`ALTER TABLE stage_runs ADD COLUMN after_image_url TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE ai_tour_runs ADD COLUMN provider TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE ai_tour_runs ADD COLUMN video_url TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE ai_tour_runs ADD COLUMN duration_seconds INTEGER`);
     } catch {
         // ignore (already exists)
     }

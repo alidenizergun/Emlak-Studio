@@ -1,10 +1,14 @@
+import type { Metadata } from 'next';
 import AiTourGuideClient from './AiTourGuideClient';
 
-export const metadata = {
-    title: 'Sanal Sunucu - Emlak Stüdyosu',
-    description: 'Sanal sunucu evin içinde gezer, mülk bilgilerini video olarak kullanıcılara aktarır.',
+export const metadata: Metadata = {
+  title: 'Sanal Sunucu',
+  description: 'Mülk bilgilerini akıcı bir anlatım ile sunan sanal sunucu içeriği oluşturun.',
+  alternates: {
+    canonical: '/ai-tour-guide',
+  },
 };
 
 export default function AiTourGuidePage() {
-    return <AiTourGuideClient />;
+  return <AiTourGuideClient />;
 }

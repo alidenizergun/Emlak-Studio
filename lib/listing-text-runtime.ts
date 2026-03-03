@@ -293,20 +293,20 @@ export function createListingRunId(): string {
 
 export function buildAdaptiveListingPrompt(basePrompt: string, policy: ListingAdaptivePolicy, retry = false): string {
     const strict = policy.strictFormat
-        ? '- Formatı kesin uygula: başlık + giriş + "Öne Çıkan Özellikler" + kapanış.'
+        ? '- Enforce format strictly: title + intro + "Öne Çıkan Özellikler" + closing.'
         : '';
     const coverage = policy.coverageBoost
-        ? '- Kullanıcı tarafından verilen lokasyon, metrekare, fiyat/oda gibi alanları metne görünür şekilde dağıt.'
+        ? '- Explicitly include user-provided fields such as location, square meters, price, and room count throughout the text.'
         : '';
     const antiGeneric = policy.antiGenericBoost
-        ? '- Klişe ve tekrar eden satış cümlelerinden kaçın; somut ve fotoğrafla uyumlu detay kullan.'
+        ? '- Avoid generic repetitive sales phrases; use concrete details consistent with the uploaded photo.'
         : '';
     const retryRule = retry
-        ? '- Önceki çıktı yetersizdi. Format hatası, bilgi kapsama eksikliği ve genellik sorunlarını düzelt.'
+        ? '- Previous output was insufficient. Fix format issues, missing information coverage, and generic language.'
         : '';
     return `${basePrompt}
 
-ADAPTIF KALİTE KURALLARI:
+ADAPTIVE QUALITY RULES:
 ${strict}
 ${coverage}
 ${antiGeneric}

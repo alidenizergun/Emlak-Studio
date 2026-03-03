@@ -38,6 +38,7 @@ import { validateUploadedImage } from '@/lib/upload-guard';
 
 const STAGE_COST = TOOL_CREDIT_COSTS.stage;
 const ENABLE_STAGE_RETRY = process.env.STAGE_ENABLE_AUTO_RETRY !== '0';
+const ENABLE_STAGE_RESULT_CACHE = false;
 
 export async function POST(request: NextRequest) {
     const startedAt = trackStageStart();
@@ -114,16 +115,19 @@ export async function POST(request: NextRequest) {
         const operationKey = idempotencyKey
             ? createHash('sha256').update(requestKey).update(':').update(idempotencyKey).digest('hex')
             : requestKey;
-        const cached = readCachedStageResponse(operationKey);
-        if (cached) {
-            const currentCredits = await getCredits(phone);
-            return NextResponse.json({
-                ...cached,
-                cached: true,
-                usedCredits: 0,
-                credits: currentCredits,
-                stageMetrics: snapshotStageMetrics(),
-            });
+        if (ENABLE_STAGE_RESULT_CACHE) {
+            const cached = readCachedStageResponse(operationKey);
+            if (cached) {
+                const currentCredits = await getCredits(phone);
+                return NextResponse.json({
+                    ...cached,
+                    attemptLog: process.env.NODE_ENV === 'production' ? undefined : cached.attemptLog,
+                    cached: true,
+                    usedCredits: 0,
+                    credits: currentCredits,
+                    stageMetrics: snapshotStageMetrics(),
+                });
+            }
         }
 
         return await withStageIdempotency(operationKey, async () => {
@@ -227,6 +231,9 @@ export async function POST(request: NextRequest) {
                 imageUrl: accepted.generation.imageUrl,
                 provider: accepted.generation.provider,
                 model: accepted.generation.model,
+                fallbackUsed: accepted.generation.fallbackUsed,
+                attemptedModels: accepted.generation.attemptedModels,
+                attemptLog: process.env.NODE_ENV === 'production' ? undefined : accepted.generation.attemptLog,
                 promptVersion,
                 architectureScore: accepted.architectureScore,
                 qualityScore: accepted.qualityScore,
@@ -236,16 +243,21 @@ export async function POST(request: NextRequest) {
                 stageMetrics: snapshotStageMetrics(),
             };
             try {
-                writeCachedStageResponse(operationKey, {
-                    success: true,
-                    runId,
-                    imageUrl: accepted.generation.imageUrl,
-                    provider: accepted.generation.provider,
-                    model: accepted.generation.model,
-                    promptVersion,
-                    architectureScore: accepted.architectureScore,
-                    qualityScore: accepted.qualityScore,
-                });
+                if (ENABLE_STAGE_RESULT_CACHE) {
+                    writeCachedStageResponse(operationKey, {
+                        success: true,
+                        runId,
+                        imageUrl: accepted.generation.imageUrl,
+                        provider: accepted.generation.provider,
+                        model: accepted.generation.model,
+                        fallbackUsed: accepted.generation.fallbackUsed,
+                        attemptedModels: accepted.generation.attemptedModels,
+                        attemptLog: accepted.generation.attemptLog,
+                        promptVersion,
+                        architectureScore: accepted.architectureScore,
+                        qualityScore: accepted.qualityScore,
+                    });
+                }
                 recordStageRun({
                     runId,
                     phone,
@@ -332,7 +344,8 @@ function generateStagePrompt(input: {
 STRICT CONSTRAINTS:
 - Keep architecture identical to the uploaded photo: room dimensions, column positions, wall lines, ceiling geometry, window and door locations must remain unchanged.
 - Keep original layout, perspective, camera angle, framing, and lens feel.
-- Clean floor and surfaces (remove dirt, stains, smudges, dust) while preserving original floor material and tile/texture layout.
+- Floor cleanup hard rule: if uploaded floor is dirty, clean it completely (no visible dirt/stain/smudges/dust remains) while preserving original floor material and tile/texture layout.
+- Clean other visible surfaces (remove dirt, stains, smudges, dust) without changing geometry.
 - Remove temporary renovation/construction clutter completely (tools, bags, loose items, debris) and leave no semi-visible traces.
 - Improve lighting, exposure and sharpness to premium real-estate quality without geometric changes.
 - Decoration density must be ${input.styleIntensity}. Do not overfill the room.

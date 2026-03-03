@@ -105,10 +105,10 @@ export default function SanalTadilatClient() {
                     <h1 className={styles.title}>Tadilat</h1>
                     <p className={styles.description}>
                         Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
-                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                            Örnek Gör
-                        </button>
                     </p>
+                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                        Örnekleri Gör
+                    </button>
                 </div>
             </header>
 
@@ -189,7 +189,7 @@ export default function SanalTadilatClient() {
                                 </>
                             ) : (
                                 <>
-                                    Tadilatı Uygula
+                                    Başlat
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
@@ -198,7 +198,7 @@ export default function SanalTadilatClient() {
                         </button>
                         <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Tadilatı Uygula</strong> butonuna basın.</p>
+                            <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Başlat</strong> butonuna basın.</p>
                         </div>
                     </div>
                 </div>

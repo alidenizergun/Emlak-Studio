@@ -1,5 +1,11 @@
 
 import React from 'react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'İkon Testi',
+    robots: { index: false, follow: false },
+};
 
 const ICONS: React.ReactElement<React.SVGProps<SVGSVGElement>>[] = [
     <svg key="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.4 7.2L20 9.2L14.4 11.2L12 16.4L9.6 11.2L4 9.2L9.6 7.2L12 2Z" fill="currentColor" /><path d="M19 15L20.2 17.6L23 18.6L20.2 19.6L19 22.2L17.8 19.6L15 18.6L17.8 17.6L19 15Z" fill="currentColor" /></svg>,

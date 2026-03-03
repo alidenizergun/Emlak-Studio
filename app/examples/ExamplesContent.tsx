@@ -142,7 +142,7 @@ export function ExamplesContent() {
                     beforeSrc={popupExample.before}
                     afterSrc={popupExample.after}
                     beforeAlt="Önce"
-                    afterAlt="Yapay Zeka ile Dekore Edildikten Sonra"
+                    afterAlt="Emlak Stüdyosu ile Dekore Edildikten Sonra"
                     showArrows={filteredExamples.length > 1}
                     onPrev={(e) => {
                         e.stopPropagation();

@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-
-# Sitemaps
-Sitemap: https://emlak-yz.com/sitemap.xml

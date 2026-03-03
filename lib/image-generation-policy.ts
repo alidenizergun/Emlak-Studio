@@ -1,28 +1,30 @@
 export function getImageGenerationPolicy(allowArchitecturalChanges: boolean): string {
     const architectureRules = allowArchitecturalChanges
         ? `
-- Mimari değişiklik sadece kullanıcı açıkça isterse uygulanabilir.
-- Kullanıcının özellikle istemediği hiçbir mimari unsur (metrekare algısı, duvar, kolon, tavan, pencere, kapı, geometri) değiştirilmez.
+- Architectural changes are allowed only when the user explicitly requests them.
+- Do not change any architectural element unless explicitly requested by the user (room size perception, walls, columns, ceiling, windows, doors, geometry).
 `.trim()
         : `
-- Mimariyi asla değiştirme: metrekare algısı, duvar konumları, kolon yerleri, tavan yüksekliği/şekli, pencere/kapı konumları ve tüm yapısal geometri korunmalı.
-- Yapısal eleman ekleme, silme, taşıma veya şekil değiştirme yapma.
+- Never modify architecture: preserve room size perception, wall positions, column positions, ceiling height/shape, window/door positions, and all structural geometry.
+- Do not add, remove, move, or reshape structural elements.
 `.trim();
 
     return `
-GLOBAL IMAGE POLICY (zorunlu):
+GLOBAL IMAGE POLICY (MANDATORY):
 ${architectureRules}
-- Kamera açısı, perspektif, kadraj ve lens karakteri korunmalı.
-- Mimari sabitlik zorunlu: kolon, kiriş, duvar, pencere, kapı, tavan çizgileri ve oda oranları birebir korunmalı.
-- Mevcut pencerelere dekoratif perde/tul/jaluzi eklenebilir; ancak pencere dogramasi, boyutu, konumu ve geometri asla degistirilmez.
-- Duvarlara dekorasyon tarzina uygun, olculu sayida tablo/cerceve ve sade bir duvar saati eklenebilir.
-- Duvar dekoru asiri yogun olmayacak; olcek ve yerlestim oda boyutuna gore dengeli olacak.
-- Zemin temizliği zorunlu: kir, leke, iz, toz ve yüzeydeki dağınık görsel kirler temizlenmeli; zemin malzemesi ve derz yapısı korunmalı.
-- Işık, pozlama, beyaz ayarı, netlik ve keskinliği üst seviye emlak fotoğrafı kalitesine getir.
-- Temizlik ve kalite iyileştirmesi yaparken geometriyi bozma, geniş açı etkisi üretme veya odanın boyut algısını değiştirme.
-- Çıktı fotogerçekçi olmalı; çizim/karikatür/AI-art görünümü olmamalı.
-- İnsan, yeni yazı, yeni logo veya yeni watermark ekleme.
-- Görselde mevcut logo/watermark varsa bu alanları bozma; asıl hedef mimariyi koruyarak kalite/temizlik iyileştirmesi yapmaktır.
-- Herhangi bir kural çakışmasında mimariyi koruma önceliklidir.
+- These rules are mandatory for all visual tools, including Photo Enhancement, Decoration, Smart Object Removal, Renovation, and AI Tour visuals.
+- Preserve camera angle, perspective, framing, and lens character.
+- Architectural stability is mandatory: keep columns, beams, walls, windows, doors, ceiling lines, and room proportions exactly the same.
+- Decorative curtains/tulle/blinds may be added to existing windows, but window frame geometry, size, and position must never change.
+- Wall decor may include style-matching framed artworks and a subtle wall clock in measured quantity.
+- Keep wall decor balanced and proportional to room scale; avoid visual clutter.
+- Floor cleaning is mandatory (HARD RULE): if the uploaded floor is dirty, clean it completely (no visible dirt, stains, smudges, dust, or mud residue). Preserve floor material, grout/seam structure, pattern, perspective, and geometry.
+- Output quality is mandatory (HARD RULE): final image must be crisp, clean, and premium real-estate quality; no blurry, hazy, washed-out, or low-resolution look.
+- Lighting improvement is mandatory (HARD RULE): if input lighting is insufficient, improve exposure/shadows/white balance naturally without altering architecture.
+- During cleanup and quality enhancement, do not distort geometry, create wide-angle warping, or change perceived room size.
+- Output must remain photorealistic; no cartoon, illustration, or AI-art look.
+- Do not add people, new text, new logos, or new watermarks.
+- If a logo/watermark exists in the input, do not over-distort those pixel regions; prioritize architectural fidelity and quality cleanup.
+- If any rule conflicts, architectural preservation has highest priority.
 `.trim();
 }

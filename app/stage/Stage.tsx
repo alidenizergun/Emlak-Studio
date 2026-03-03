@@ -211,6 +211,23 @@ const STYLES = [
 
 const ROOM_TYPE_LABEL_BY_ID = Object.fromEntries(ROOM_TYPES.map((room) => [room.id, room.label])) as Record<string, string>;
 const STYLE_LABEL_BY_ID = Object.fromEntries(STYLES.map((style) => [style.id, style.label])) as Record<string, string>;
+const TOOL_LABEL_BY_ID: Record<string, string> = {
+    stage: 'Dekorasyon',
+    enhance: 'Fotoğraf Geliştirme',
+    'remove-object': 'Akıllı Eşya Silme',
+    'virtual-renovation': 'Tadilat',
+    'listing-text': 'İlan Metni Oluşturucu',
+    'ai-tour-guide': 'Sanal Sunucu',
+};
+const TOOL_FILTER_OPTIONS: Array<{ id: string; label: string }> = [
+    { id: 'all', label: 'Tümü' },
+    { id: 'enhance', label: 'Fotoğraf Geliştirme' },
+    { id: 'stage', label: 'Dekorasyon' },
+    { id: 'remove-object', label: 'Akıllı Eşya Silme' },
+    { id: 'listing-text', label: 'İlan Metni' },
+    { id: 'virtual-renovation', label: 'Tadilat' },
+    { id: 'ai-tour-guide', label: 'Sanal Sunucu' },
+];
 
 function toInputDateValue(ts: number): string {
     const d = new Date(ts);
@@ -220,11 +237,16 @@ function toInputDateValue(ts: number): string {
     return `${year}-${month}-${day}`;
 }
 
+function compactDetail(text: string | null | undefined, max = 72): string {
+    if (!text) return '';
+    return text.replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
 export default function StageClient() {
     const searchParams = useSearchParams();
     const stageTab = searchParams.get('stageTab');
-    const urlTab: 'editor' | 'photos' = stageTab === 'photos' ? 'photos' : 'editor';
-    const [activeTab, setActiveTab] = useState<'editor' | 'photos'>(urlTab);
+    const urlTab: 'editor' | 'works' = stageTab === 'works' || stageTab === 'photos' ? 'works' : 'editor';
+    const [activeTab, setActiveTab] = useState<'editor' | 'works'>(urlTab);
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
@@ -234,18 +256,26 @@ export default function StageClient() {
     const [isAiStyle, setIsAiStyle] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [historyItems, setHistoryItems] = useState<Array<{
+        entryId: string;
         runId: string;
-        roomType: string;
-        style: string;
+        toolId: string;
+        roomType?: string;
+        style?: string;
+        title?: string | null;
+        detail?: string | null;
         createdAt: number;
         beforeImageUrl: string | null;
         afterImageUrl: string | null;
     }>>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
+    const [historyHasMore, setHistoryHasMore] = useState(false);
     const [historyError, setHistoryError] = useState<string>('');
     const [historyFromDate, setHistoryFromDate] = useState<string>('');
     const [historyToDate, setHistoryToDate] = useState<string>('');
-    const [selectedRunIds, setSelectedRunIds] = useState<Set<string>>(new Set());
+    const [selectedQuickRange, setSelectedQuickRange] = useState<'all' | '3m' | '30d' | '7d' | 'today'>('all');
+    const [selectedToolFilter, setSelectedToolFilter] = useState<string>('all');
+    const [selectedEntryIds, setSelectedEntryIds] = useState<Set<string>>(new Set());
     const [historyDeleting, setHistoryDeleting] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
@@ -352,57 +382,86 @@ export default function StageClient() {
     };
 
     const handleDownloadPair = async (item: {
+        entryId: string;
+        toolId?: string;
         runId: string;
         beforeImageUrl: string | null;
         afterImageUrl: string | null;
+        detail?: string | null;
     }) => {
         if (item.beforeImageUrl) {
-            handleDownloadUrl(item.beforeImageUrl, `yuklenen-${item.runId}.jpg`);
+            handleDownloadUrl(item.beforeImageUrl, `yuklenen-${item.toolId || 'tool'}-${item.runId}.jpg`);
         }
         if (item.afterImageUrl) {
             setTimeout(() => {
-                handleDownloadUrl(item.afterImageUrl as string, `islenmis-${item.runId}.jpg`);
+                handleDownloadUrl(item.afterImageUrl as string, `islenmis-${item.toolId || 'tool'}-${item.runId}.jpg`);
             }, item.beforeImageUrl ? 240 : 0);
+            return;
+        }
+        if (item.detail) {
+            const blob = new Blob([item.detail], { type: 'text/plain;charset=utf-8' });
+            const blobUrl = URL.createObjectURL(blob);
+            handleDownloadUrl(blobUrl, `cikti-${item.toolId || 'tool'}-${item.runId}.txt`);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 800);
         }
     };
 
-    const loadHistory = useCallback(async () => {
+    const loadHistory = useCallback(async (append = false, offsetOverride = 0) => {
         const phone = window.localStorage.getItem('emlak_user_phone') || '';
         if (!phone) {
             setHistoryError('Geçmiş fotoğrafları görmek için giriş yapın.');
             setHistoryItems([]);
+            setHistoryHasMore(false);
             return;
         }
-        setHistoryLoading(true);
-        setHistoryError('');
+        if (append) {
+            setHistoryLoadingMore(true);
+        } else {
+            setHistoryLoading(true);
+            setHistoryError('');
+        }
         try {
-            const res = await fetch(`/api/stage/history?phone=${encodeURIComponent(phone)}&limit=200`);
+            const offset = append ? Math.max(0, Math.floor(offsetOverride)) : 0;
+            const res = await fetch(`/api/stage/history?phone=${encodeURIComponent(phone)}&limit=200&offset=${offset}`);
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.success) {
                 throw new Error(data.error || 'Geçmiş getirilemedi');
             }
             const items = Array.isArray(data.items) ? data.items : [];
-            setHistoryItems(items);
-            setSelectedRunIds((prev) => {
-                if (prev.size === 0) return prev;
-                const next = new Set<string>();
-                const validIds = new Set(items.map((x: { runId: string }) => x.runId));
-                prev.forEach((id) => {
-                    if (validIds.has(id)) next.add(id);
+            setHistoryHasMore(Boolean(data.hasMore));
+            setHistoryItems((prev) => {
+                if (!append) return items;
+                if (items.length === 0) return prev;
+                const seen = new Set(prev.map((item) => item.entryId));
+                const merged = [...prev];
+                items.forEach((item) => {
+                    if (!seen.has(item.entryId)) merged.push(item);
                 });
-                return next;
+                return merged;
             });
+            if (!append) {
+                setSelectedEntryIds((prev) => {
+                    if (prev.size === 0) return prev;
+                    const next = new Set<string>();
+                    const validIds = new Set(items.map((x: { entryId: string }) => x.entryId));
+                    prev.forEach((id) => {
+                        if (validIds.has(id)) next.add(id);
+                    });
+                    return next;
+                });
+            }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Geçmiş getirilemedi';
             setHistoryError(message);
         } finally {
-            setHistoryLoading(false);
+            if (append) setHistoryLoadingMore(false);
+            else setHistoryLoading(false);
         }
     }, []);
 
-    const handleDeleteRuns = async (runIds: string[]) => {
-        if (runIds.length === 0) return;
-        const confirmed = window.confirm(`Seçili ${runIds.length} kaydı silmek istediğinizden emin misiniz?`);
+    const handleDeleteRuns = async (entryIds: string[]) => {
+        if (entryIds.length === 0) return;
+        const confirmed = window.confirm(`Seçili ${entryIds.length} kaydı silmek istediğinizden emin misiniz?`);
         if (!confirmed) return;
         const phone = window.localStorage.getItem('emlak_user_phone') || '';
         if (!phone) return;
@@ -411,14 +470,14 @@ export default function StageClient() {
             const res = await fetch('/api/stage/history', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, runIds }),
+                body: JSON.stringify({ phone, entryIds }),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.success) {
                 throw new Error(data.error || 'Silme işlemi başarısız');
             }
-            setSelectedRunIds(new Set());
-            await loadHistory();
+            setSelectedEntryIds(new Set());
+            await loadHistory(false);
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Silme işlemi başarısız';
             alert(message);
@@ -433,15 +492,16 @@ export default function StageClient() {
         return historyItems.filter((item) => {
             if (from !== null && item.createdAt < from) return false;
             if (to !== null && item.createdAt > to) return false;
+            if (selectedToolFilter !== 'all' && item.toolId !== selectedToolFilter) return false;
             return true;
         });
-    }, [historyFromDate, historyItems, historyToDate]);
+    }, [historyFromDate, historyItems, historyToDate, selectedToolFilter]);
 
-    const allVisibleSelected = visibleHistoryItems.length > 0 && visibleHistoryItems.every((item) => selectedRunIds.has(item.runId));
+    const allVisibleSelected = visibleHistoryItems.length > 0 && visibleHistoryItems.every((item) => selectedEntryIds.has(item.entryId));
 
     useEffect(() => {
-        if (activeTab !== 'photos') return;
-        loadHistory();
+        if (activeTab !== 'works') return;
+        loadHistory(false);
     }, [activeTab, loadHistory]);
 
     if (!mounted) {
@@ -450,55 +510,141 @@ export default function StageClient() {
 
     return (
         <div className={styles.pageContainer}>
-            {activeTab !== 'photos' ? (
+            {activeTab !== 'works' ? (
                 <header className={styles.header}>
                     <div className={styles.headerContent}>
                         <h1 className={styles.title}>Dekorasyon</h1>
                         <p className={styles.description}>
-                            Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin emlak stüdyosu evinizi dekore etsin.
-                            <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                                Örnek Gör
-                            </button>
-                        </p>
+                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin emlak stüdyosu evinizi dekore etsin.
+                    </p>
+                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                        Örnekleri Gör
+                    </button>
                     </div>
                 </header>
             ) : null}
 
             <div className={styles.workspace}>
-                {activeTab === 'photos' ? (
+                {activeTab === 'works' ? (
                     <section className={styles.photosPage}>
                         <div className={styles.photosPageHeader}>
-                            <h2 className={styles.photosTitle}>Tüm Fotoğraflarım</h2>
-                            <p className={styles.photosSubtitle}>Yüklediğiniz ve sistemin ürettiği görselleri tarih aralığıyla filtreleyin, birlikte indirin veya silin.</p>
+                            <div>
+                                <h2 className={styles.photosTitle}>Tüm Çalışmalarım</h2>
+                                <p className={styles.photosSubtitle}>Filtreleyin, seçin, indirin veya silin.</p>
+                            </div>
+                            <div className={styles.photosStats}>
+                                <span>{visibleHistoryItems.length} kayıt</span>
+                                <span>{selectedEntryIds.size} seçili</span>
+                            </div>
                         </div>
                         <div className={styles.photosFilters}>
-                            <div className={styles.dateFilterGroup}>
-                                <label className={styles.filterLabel} htmlFor="historyFromDate">Başlangıç</label>
-                                <input
-                                    id="historyFromDate"
-                                    type="date"
-                                    className={styles.dateInput}
-                                    value={historyFromDate}
-                                    onChange={(e) => setHistoryFromDate(e.target.value)}
-                                />
-                            </div>
-                            <div className={styles.dateFilterGroup}>
-                                <label className={styles.filterLabel} htmlFor="historyToDate">Bitiş</label>
-                                <input
-                                    id="historyToDate"
-                                    type="date"
-                                    className={styles.dateInput}
-                                    value={historyToDate}
-                                    onChange={(e) => setHistoryToDate(e.target.value)}
-                                />
-                            </div>
                             <div className={styles.quickFilters}>
-                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(toInputDateValue(Date.now())); setHistoryToDate(toInputDateValue(Date.now())); }}>Bugün</button>
-                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(toInputDateValue(Date.now() - 6 * 24 * 60 * 60 * 1000)); setHistoryToDate(toInputDateValue(Date.now())); }}>Son 7 Gün</button>
-                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(toInputDateValue(Date.now() - 29 * 24 * 60 * 60 * 1000)); setHistoryToDate(toInputDateValue(Date.now())); }}>Son 30 Gün</button>
-                                <button className={styles.quickFilterBtn} onClick={() => { setHistoryFromDate(''); setHistoryToDate(''); }}>Temizle</button>
+                                <button
+                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === 'all' ? styles.toolFilterBtnActive : ''}`}
+                                    onClick={() => {
+                                        setSelectedQuickRange('all');
+                                        setHistoryFromDate('');
+                                        setHistoryToDate('');
+                                    }}
+                                >
+                                    Tümü
+                                </button>
+                                <button
+                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === '3m' ? styles.toolFilterBtnActive : ''}`}
+                                    onClick={() => {
+                                        setSelectedQuickRange('3m');
+                                        setHistoryFromDate(toInputDateValue(Date.now() - 89 * 24 * 60 * 60 * 1000));
+                                        setHistoryToDate(toInputDateValue(Date.now()));
+                                    }}
+                                >
+                                    Son 3 Ay
+                                </button>
+                                <button
+                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === '30d' ? styles.toolFilterBtnActive : ''}`}
+                                    onClick={() => {
+                                        setSelectedQuickRange('30d');
+                                        setHistoryFromDate(toInputDateValue(Date.now() - 29 * 24 * 60 * 60 * 1000));
+                                        setHistoryToDate(toInputDateValue(Date.now()));
+                                    }}
+                                >
+                                    Son 30 Gün
+                                </button>
+                                <button
+                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === '7d' ? styles.toolFilterBtnActive : ''}`}
+                                    onClick={() => {
+                                        setSelectedQuickRange('7d');
+                                        setHistoryFromDate(toInputDateValue(Date.now() - 6 * 24 * 60 * 60 * 1000));
+                                        setHistoryToDate(toInputDateValue(Date.now()));
+                                    }}
+                                >
+                                    Son 7 Gün
+                                </button>
+                                <button
+                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === 'today' ? styles.toolFilterBtnActive : ''}`}
+                                    onClick={() => {
+                                        setSelectedQuickRange('today');
+                                        setHistoryFromDate(toInputDateValue(Date.now()));
+                                        setHistoryToDate(toInputDateValue(Date.now()));
+                                    }}
+                                >
+                                    Bugün
+                                </button>
+                            </div>
+                            <div className={styles.toolFilters}>
+                                {TOOL_FILTER_OPTIONS.map((tool) => (
+                                    <button
+                                        key={tool.id}
+                                        type="button"
+                                        className={`${styles.toolFilterBtn} ${selectedToolFilter === tool.id ? styles.toolFilterBtnActive : ''}`}
+                                        onClick={() => setSelectedToolFilter(tool.id)}
+                                    >
+                                        {tool.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
+                        {!historyLoading && !historyError && historyItems.length > 0 && (
+                            <div className={styles.bulkActions}>
+                                <label className={styles.bulkCheck}>
+                                    <input
+                                        type="checkbox"
+                                        checked={allVisibleSelected}
+                                        onChange={(e) => {
+                                            if (!e.target.checked) {
+                                                setSelectedEntryIds(new Set());
+                                                return;
+                                            }
+                                            setSelectedEntryIds(new Set(visibleHistoryItems.map((item) => item.entryId)));
+                                        }}
+                                    />
+                                    <span>Tümünü Seç</span>
+                                </label>
+                                <div className={styles.bulkButtons}>
+                                    <button
+                                        className={styles.photosPrimaryBtn}
+                                        disabled={selectedEntryIds.size === 0}
+                                        onClick={() => {
+                                            visibleHistoryItems
+                                                .filter((item) => selectedEntryIds.has(item.entryId))
+                                                .forEach((item, idx) => {
+                                                    setTimeout(() => {
+                                                        handleDownloadPair(item);
+                                                    }, idx * 280);
+                                                });
+                                        }}
+                                    >
+                                        Seçilenleri İndir
+                                    </button>
+                                    <button
+                                        className={styles.photosDangerBtn}
+                                        disabled={selectedEntryIds.size === 0 || historyDeleting}
+                                        onClick={() => handleDeleteRuns(Array.from(selectedEntryIds))}
+                                    >
+                                        {historyDeleting ? 'Siliniyor...' : 'Seçilenleri Sil'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {historyLoading && <div className={styles.historyInfo}>Geçmiş yükleniyor...</div>}
                         {!historyLoading && historyError && <div className={styles.historyInfo}>{historyError}</div>}
                         {!historyLoading && !historyError && historyItems.length === 0 && (
@@ -506,71 +652,36 @@ export default function StageClient() {
                         )}
                         {!historyLoading && !historyError && historyItems.length > 0 && (
                             <div className={styles.photosBody}>
-                                <div className={styles.bulkActions}>
-                                    <label className={styles.bulkCheck}>
-                                        <input
-                                            type="checkbox"
-                                            checked={allVisibleSelected}
-                                            onChange={(e) => {
-                                                if (!e.target.checked) {
-                                                    setSelectedRunIds(new Set());
-                                                    return;
-                                                }
-                                                setSelectedRunIds(new Set(visibleHistoryItems.map((item) => item.runId)));
-                                            }}
-                                        />
-                                        <span>Tümünü Seç</span>
-                                    </label>
-                                    <div className={styles.bulkButtons}>
-                                        <button
-                                            className={styles.downloadBtn}
-                                            disabled={selectedRunIds.size === 0}
-                                            onClick={() => {
-                                                visibleHistoryItems
-                                                    .filter((item) => selectedRunIds.has(item.runId))
-                                                    .forEach((item, idx) => {
-                                                        setTimeout(() => {
-                                                            handleDownloadPair(item);
-                                                        }, idx * 280);
-                                                    });
-                                            }}
-                                        >
-                                            Seçilenleri İndir
-                                        </button>
-                                        <button
-                                            className={styles.deleteBtn}
-                                            disabled={selectedRunIds.size === 0 || historyDeleting}
-                                            onClick={() => handleDeleteRuns(Array.from(selectedRunIds))}
-                                        >
-                                            {historyDeleting ? 'Siliniyor...' : 'Seçilenleri Sil'}
-                                        </button>
-                                    </div>
-                                </div>
                                 {visibleHistoryItems.length === 0 ? (
-                                    <div className={styles.historyInfo}>Bu tarih aralığında fotoğraf bulunamadı.</div>
+                                    <div className={styles.historyInfo}>Bu tarih aralığında çalışma bulunamadı.</div>
                                 ) : (
                                     <div className={styles.photoGrid}>
                                         {visibleHistoryItems.map((item) => (
-                                            <article key={item.runId} className={styles.photoPairCard}>
+                                            <article key={item.entryId} className={styles.photoPairCard}>
                                                 <div className={styles.photoCardHeader}>
-                                                    <label className={styles.bulkCheck}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedRunIds.has(item.runId)}
-                                                            onChange={(e) => {
-                                                                setSelectedRunIds((prev) => {
-                                                                    const next = new Set(prev);
-                                                                    if (e.target.checked) next.add(item.runId);
-                                                                    else next.delete(item.runId);
-                                                                    return next;
-                                                                });
-                                                            }}
-                                                        />
-                                                        <span>{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
-                                                    </label>
-                                                    <span className={styles.photoMeta}>
-                                                        {(ROOM_TYPE_LABEL_BY_ID[item.roomType] || item.roomType)} • {(STYLE_LABEL_BY_ID[item.style] || item.style)}
-                                                    </span>
+                                                    <div className={styles.photoCardInfo}>
+                                                        <label className={styles.bulkCheck}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedEntryIds.has(item.entryId)}
+                                                                onChange={(e) => {
+                                                                    setSelectedEntryIds((prev) => {
+                                                                        const next = new Set(prev);
+                                                                        if (e.target.checked) next.add(item.entryId);
+                                                                        else next.delete(item.entryId);
+                                                                        return next;
+                                                                    });
+                                                                }}
+                                                            />
+                                                            <span>{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
+                                                        </label>
+                                                        <span className={styles.photoMeta}>
+                                                            {TOOL_LABEL_BY_ID[item.toolId] || item.title || 'Çalışma'}
+                                                            {item.toolId === 'stage'
+                                                                ? ` • ${(ROOM_TYPE_LABEL_BY_ID[item.roomType || ''] || item.roomType || '')} • ${(STYLE_LABEL_BY_ID[item.style || ''] || item.style || '')}`
+                                                                : item.detail ? ` • ${compactDetail(item.detail, 72)}` : ''}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div className={styles.pairGrid}>
                                                     <div className={styles.pairFrame}>
@@ -588,9 +699,17 @@ export default function StageClient() {
                                                                 <div className={styles.photoPlaceholder}>Görsel yok</div>
                                                             )}
                                                         </div>
+                                                        <div className={styles.photoCardActions}>
+                                                            <button className={styles.photosPrimaryBtn} onClick={() => handleDownloadPair(item)}>
+                                                                İndir
+                                                            </button>
+                                                            <button className={styles.photosDangerBtn} onClick={() => handleDeleteRuns([item.entryId])}>
+                                                                Sil
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div className={styles.pairFrame}>
-                                                        <span className={styles.frameLabel}>İşlenmiş</span>
+                                                        <span className={styles.frameLabel}>Çıktı</span>
                                                         <div className={styles.photoThumbWrap}>
                                                             {item.afterImageUrl ? (
                                                                 // eslint-disable-next-line @next/next/no-img-element
@@ -601,21 +720,25 @@ export default function StageClient() {
                                                                     onClick={() => setPreviewImageUrl(item.afterImageUrl)}
                                                                 />
                                                             ) : (
-                                                                <div className={styles.photoPlaceholder}>Görsel yok</div>
+                                                                <div className={styles.photoPlaceholder}>{item.detail ? 'Metin çıktısı indirilebilir' : 'Görsel yok'}</div>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className={styles.photoMetaRow}>
-                                                    <button className={styles.downloadBtn} onClick={() => handleDownloadPair(item)}>
-                                                        Birlikte İndir
-                                                    </button>
-                                                    <button className={styles.deleteBtn} onClick={() => handleDeleteRuns([item.runId])}>
-                                                        Sil
-                                                    </button>
-                                                </div>
                                             </article>
                                         ))}
+                                    </div>
+                                )}
+                                {historyHasMore && (
+                                    <div className={styles.historyInfo}>
+                                        <button
+                                            type="button"
+                                            className={styles.quickFilterBtn}
+                                            onClick={() => loadHistory(true, historyItems.length)}
+                                            disabled={historyLoadingMore}
+                                        >
+                                            {historyLoadingMore ? 'Yükleniyor...' : 'Daha fazla yükle'}
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -760,7 +883,7 @@ export default function StageClient() {
                                 </>
                             ) : (
                                 <>
-                                    Geliştirmeyi Başlat
+                                    Başlat
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>

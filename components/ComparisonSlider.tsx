@@ -45,8 +45,12 @@ const ComparisonSlider = ({
 }: ComparisonSliderProps) => {
     const [isResizing, setIsResizing] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
+    const [displayBeforeImage, setDisplayBeforeImage] = useState(beforeImage);
+    const [displayAfterImage, setDisplayAfterImage] = useState(afterImage);
     const [hintPlaying, setHintPlaying] = useState(false);
     const [hintVisible, setHintVisible] = useState(false);
+    const [beforeLoadedFor, setBeforeLoadedFor] = useState<string | null>(null);
+    const [afterLoadedFor, setAfterLoadedFor] = useState<string | null>(null);
     const sliderRef = useRef<HTMLDivElement>(null);
     const hintPlayedRef = useRef(false);
     const visibilityTriggeredRef = useRef(false);
@@ -86,6 +90,14 @@ const ComparisonSlider = ({
         }
     };
 
+    const handleKeyAdjust = (delta: number) => {
+        setSliderPosition((prev) => {
+            const next = Math.max(0, Math.min(100, prev + delta));
+            onPositionChange?.(next);
+            return next;
+        });
+    };
+
     useEffect(() => {
         document.addEventListener('mouseup', handleMouseUp);
         document.addEventListener('touchend', handleMouseUp);
@@ -94,6 +106,54 @@ const ComparisonSlider = ({
             document.removeEventListener('touchend', handleMouseUp);
         };
     }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        const img = new window.Image();
+        img.decoding = 'async';
+        img.onload = () => {
+            if (cancelled) return;
+            setDisplayBeforeImage(beforeImage);
+            setBeforeLoadedFor(beforeImage);
+        };
+        img.onerror = () => {
+            if (cancelled) return;
+            setDisplayBeforeImage(beforeImage);
+            setBeforeLoadedFor(beforeImage);
+        };
+        img.src = beforeImage;
+
+        return () => {
+            cancelled = true;
+        };
+    }, [beforeImage]);
+
+    useEffect(() => {
+        let cancelled = false;
+        const img = new window.Image();
+        img.decoding = 'async';
+        img.onload = () => {
+            if (cancelled) return;
+            setDisplayAfterImage(afterImage);
+            setAfterLoadedFor(afterImage);
+        };
+        img.onerror = () => {
+            if (cancelled) return;
+            // Sonra görseli okunamazsa beyaz/boş alan yerine güvenli fallback göster.
+            setDisplayAfterImage(beforeImage);
+            setAfterLoadedFor(afterImage);
+        };
+        img.src = afterImage;
+
+        return () => {
+            cancelled = true;
+        };
+    }, [afterImage, beforeImage]);
+
+    const safePosition = Math.max(0.5, Math.min(99.5, sliderPosition));
+    const safeAfterImage = displayAfterImage || displayBeforeImage;
+    const beforeReady = beforeLoadedFor === beforeImage;
+    const afterReady = afterLoadedFor === afterImage;
 
     // Slider %100 görünür olduğunda ipucunu başlat (desktop + mobil); mobilde scroll ile tam görünce de tetiklenir
     useEffect(() => {
@@ -163,66 +223,81 @@ const ComparisonSlider = ({
         };
     }, [hintSlide]);
 
-    // İpucu: görünür olduktan sonra konumu kare kare güncelle — handle ve kesim senkron
-    const hintRafRef = useRef<number>(0);
+    // İpucu: CSS animasyonu ile çalışır; React'ta her frame setState yapılmaz.
     useEffect(() => {
         if (!hintSlide || !hintVisible || hintPlayedRef.current) return;
+        if (!beforeReady || !afterReady) return;
         hintPlayedRef.current = true;
-        const id = setTimeout(() => setHintPlaying(true), 0);
-
-        const startDelay = 0;
-        const duration = 1500;
-        const linear = (t: number) => t;
-
-        const runPhase = (from: number, to: number, phaseDuration: number) => {
-            cancelAnimationFrame(hintRafRef.current);
-            const phaseStart = performance.now();
-            const tick = (now: number) => {
-                const elapsed = now - phaseStart;
-                const t = Math.min(elapsed / phaseDuration, 1);
-                const value = from + (to - from) * linear(t);
-                setSliderPosition(value);
-                onPositionChange?.(value);
-                if (t < 1) hintRafRef.current = requestAnimationFrame(tick);
-            };
-            hintRafRef.current = requestAnimationFrame(tick);
-        };
-
-        const left = hintFullRange ? 0.5 : 25.5;
-        const right = hintFullRange ? 99.5 : 74.5;
-        const t1 = setTimeout(() => runPhase(50, right, duration), startDelay);
-        const t2 = setTimeout(() => runPhase(right, left, duration), startDelay + duration);
-        const t3 = setTimeout(() => runPhase(left, 50, duration), startDelay + duration * 2);
-        const t4 = setTimeout(() => setHintPlaying(false), startDelay + duration * 3);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setHintPlaying(true);
+        const totalDuration = 4200;
+        const end = setTimeout(() => {
+            setHintPlaying(false);
+            setSliderPosition(50);
+            onPositionChange?.(50);
+        }, totalDuration);
 
         return () => {
-            clearTimeout(id);
-            clearTimeout(t1);
-            clearTimeout(t2);
-            clearTimeout(t3);
-            clearTimeout(t4);
-            cancelAnimationFrame(hintRafRef.current);
+            clearTimeout(end);
         };
-    }, [hintSlide, hintVisible, onPositionChange, hintFullRange]);
-
-    const safePosition = Math.max(0.5, Math.min(99.5, sliderPosition));
+    }, [hintSlide, hintVisible, onPositionChange, hintFullRange, beforeReady, afterReady]);
 
     return (
         <div
-            className={`${styles.container} ${preserveAspect ? styles.containerPreserveAspect : ''}`}
+            className={`${styles.container} ${preserveAspect ? styles.containerPreserveAspect : ''} ${hintPlaying ? styles.containerHintPlaying : ''}`}
             ref={sliderRef}
             onMouseMove={handleMouseMove}
             onTouchMove={handleMouseMove}
             onClick={handleContainerClick}
-            style={{ ['--slider-position' as string]: safePosition }}
+            onKeyDown={(e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    handleKeyAdjust(-2);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    handleKeyAdjust(2);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    setSliderPosition(0);
+                    onPositionChange?.(0);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    setSliderPosition(100);
+                    onPositionChange?.(100);
+                }
+            }}
+            tabIndex={0}
+            style={{
+                ['--slider-position' as string]: safePosition,
+                ['--hint-left' as string]: hintFullRange ? 0.5 : 25.5,
+                ['--hint-right' as string]: hintFullRange ? 99.5 : 74.5,
+            }}
         >
-            <div className={`${styles.imageWrapperAfter} ${brightenAfter ? styles.imageWrapperAfterBright : ''}`}>
+            <div
+                className={`${styles.imageWrapperAfter} ${brightenAfter ? styles.imageWrapperAfterBright : ''} ${styles.imageLoaded}`}
+            >
                 <Image
-                    src={afterImage}
+                    src={safeAfterImage}
                     alt={afterAlt}
                     fill
                     quality={100}
-                    priority
+                    unoptimized
+                    placeholder="empty"
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    draggable={false}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 3840px"
+                    onError={() => setDisplayAfterImage(displayBeforeImage)}
+                />
+            </div>
+            <div
+                className={`${styles.beforeClip} ${hintPlaying ? styles.beforeClipHintPlaying : ''} ${styles.imageLoaded}`}
+                style={{ filter: degradeBefore ? 'brightness(0.7) contrast(1.1) sepia(0.2)' : 'none' }}
+            >
+                <Image
+                    src={displayBeforeImage}
+                    alt={beforeAlt}
+                    fill
+                    quality={100}
                     unoptimized
                     placeholder="empty"
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
@@ -230,36 +305,19 @@ const ComparisonSlider = ({
                     sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 3840px"
                 />
             </div>
-            <div
-                className={styles.beforeClip}
-                style={{ filter: degradeBefore ? 'brightness(0.7) contrast(1.1) sepia(0.2)' : 'none' }}
-            >
-                <div className={styles.beforeInner}>
-                    <Image
-                        src={beforeImage}
-                        alt={beforeAlt}
-                        fill
-                        quality={100}
-                        priority
-                        unoptimized
-                        placeholder="empty"
-                        style={{ objectFit: 'cover', objectPosition: 'center' }}
-                        draggable={false}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 3840px"
-                    />
-                </div>
-            </div>
-            <div
-                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying ? styles.sliderHandleNoTransition : ''}`}
+            <button
+                type="button"
+                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying ? styles.sliderHandleHintPlaying : ''} ${hintPlaying ? styles.sliderHandleNoTransition : ''}`}
                 style={{ left: `${safePosition}%` }}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleMouseDown}
+                aria-label="Karsilastirma ayiracini kaydir"
             >
                 <div className={styles.handleLine} />
                 <div className={styles.handleCircle}>
                     {SLIDER_HANDLE_ICON}
                 </div>
-            </div>
+            </button>
         </div>
     );
 };

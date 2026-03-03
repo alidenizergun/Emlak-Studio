@@ -51,19 +51,21 @@
 }
 
 .sidebarCreditLabel {
-    font-size: calc(0.8rem + 1px);
-    font-weight: 500;
     color: #475569;
-    letter-spacing: 0.01em;
     text-transform: none;
 }
 
 .sidebarCreditValue {
-    font-size: calc(0.8rem + 1px);
-    line-height: 1;
-    font-weight: 500;
     color: #0f172a;
-    letter-spacing: -0.01em;
+}
+
+.sidebarCreditLabel,
+.sidebarCreditValue {
+    font-family: var(--font-sans);
+    font-size: calc(0.8rem + 1px);
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0;
 }
 
 .sidebarHelper {
@@ -446,6 +448,13 @@
 
     .sidebarCreditValue {
         font-size: calc(0.86rem + 1px);
+    }
+
+    .sidebarCreditLabel,
+    .sidebarCreditValue {
+        line-height: 1.2;
+        font-weight: 600;
+        letter-spacing: 0;
     }
 
     .sidebarHelper {

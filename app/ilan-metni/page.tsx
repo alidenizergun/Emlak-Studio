@@ -1,10 +1,14 @@
+import type { Metadata } from 'next';
 import IlanMetniClient from './IlanMetniClient';
 
-export const metadata = {
-    title: 'İlan Metni Oluşturucu - Emlak Stüdyosu',
-    description: 'Fotoğraflardan otomatik olarak profesyonel ilan açıklamaları yazın.',
+export const metadata: Metadata = {
+  title: 'İlan Metni Oluşturucu',
+  description: 'Fotoğraf ve mülk verilerine göre ilan metinlerini hızlıca oluşturun.',
+  alternates: {
+    canonical: '/ilan-metni',
+  },
 };
 
 export default function IlanMetniPage() {
-    return <IlanMetniClient />;
+  return <IlanMetniClient />;
 }

@@ -17,6 +17,14 @@ export interface AiTourAdaptivePolicy {
     updatedAt: number;
 }
 
+export interface AiTourDraft {
+    runId: string;
+    script: string;
+    qualityScore: number;
+    issues: string[];
+    policy: AiTourAdaptivePolicy;
+}
+
 interface ScriptEvaluation {
     ok: boolean;
     score: number;
@@ -238,20 +246,26 @@ function recordAiTourRun(input: {
     failCode?: string;
     phone?: string;
     usedCredits?: number;
+    provider?: string;
+    videoUrl?: string | null;
+    durationSeconds?: number | null;
 }): void {
     const db = getDb();
     const phone = normalizePhone(input.phone || '');
     if (!phone) return;
     ensureUser(phone);
     db.prepare(
-        `INSERT INTO ai_tour_runs (run_id, phone, status, fail_code, quality_score, script_input, script_output, used_credits, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO ai_tour_runs (run_id, phone, status, fail_code, quality_score, script_input, script_output, provider, video_url, duration_seconds, used_credits, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(run_id) DO UPDATE SET
            status = excluded.status,
            fail_code = excluded.fail_code,
            quality_score = excluded.quality_score,
            script_input = excluded.script_input,
            script_output = excluded.script_output,
+           provider = excluded.provider,
+           video_url = excluded.video_url,
+           duration_seconds = excluded.duration_seconds,
            used_credits = excluded.used_credits`
     ).run(
         input.runId,
@@ -261,31 +275,88 @@ function recordAiTourRun(input: {
         input.qualityScore ?? null,
         normalizeSentence(input.scriptInput),
         normalizeSentence(input.scriptOutput),
+        input.provider || null,
+        input.videoUrl || null,
+        Number(input.durationSeconds ?? 0) || null,
         input.usedCredits || 0,
         Date.now()
     );
 }
 
-export function createAiTourRun(phoneRaw: string, inputScript: string): {
+export function createAiTourDraft(inputScript: string): AiTourDraft {
+    const policy = getAiTourAdaptivePolicy();
+    const firstScript = buildBaseScript(inputScript, policy, false);
+    const firstEval = evaluateScript(firstScript, policy);
+    const accepted = firstEval.ok || !policy.retryEnabled
+        ? { script: firstScript, eval: firstEval }
+        : (() => {
+              const retryScript = buildBaseScript(firstScript, { ...policy, detailBoost: true, antiGenericBoost: true }, true);
+              const retryEval = evaluateScript(retryScript, policy);
+              return retryEval.score >= firstEval.score
+                  ? { script: retryScript, eval: retryEval }
+                  : { script: firstScript, eval: firstEval };
+          })();
+
+    return {
+        runId: randomUUID(),
+        script: accepted.script,
+        qualityScore: accepted.eval.score,
+        issues: accepted.eval.issues,
+        policy,
+    };
+}
+
+export function finalizeAiTourSuccess(input: {
     runId: string;
-    script: string;
+    phone: string;
+    scriptInput: string;
+    scriptOutput: string;
     qualityScore: number;
-    issues: string[];
-    policy: AiTourAdaptivePolicy;
-} {
-    const phone = normalizePhone(phoneRaw);
-    const result = generateAdaptiveAiTourScript(inputScript);
+    usedCredits: number;
+    provider: string;
+    videoUrl: string;
+    durationSeconds: number;
+}): void {
+    const phone = normalizePhone(input.phone);
+    if (!phone) return;
+
     recordAiTourRun({
-        runId: result.runId,
+        runId: input.runId,
         status: 'success',
-        scriptInput: inputScript,
-        scriptOutput: result.script,
-        qualityScore: result.qualityScore,
-        failCode: result.issues.length ? 'SCRIPT_QUALITY_LOW' : undefined,
+        scriptInput: input.scriptInput,
+        scriptOutput: input.scriptOutput,
+        qualityScore: input.qualityScore,
+        failCode: undefined,
+        phone,
+        usedCredits: input.usedCredits,
+        provider: input.provider,
+        videoUrl: input.videoUrl,
+        durationSeconds: input.durationSeconds,
+    });
+    recordAiTourAdaptiveOutcome(true);
+}
+
+export function finalizeAiTourFailure(input: {
+    runId: string;
+    phone: string;
+    scriptInput: string;
+    scriptOutput: string;
+    reason: AiTourFailureReason;
+    qualityScore?: number;
+}): void {
+    const phone = normalizePhone(input.phone);
+    if (!phone) return;
+    recordAiTourRun({
+        runId: input.runId,
+        status: 'failed',
+        failCode: input.reason,
+        scriptInput: input.scriptInput,
+        scriptOutput: input.scriptOutput,
+        qualityScore: input.qualityScore ?? 0,
         phone,
         usedCredits: 0,
     });
-    return result;
+    recordAiTourAdaptiveOutcome(false, input.reason);
 }
 
 function recordAiTourAdaptiveOutcome(ok: boolean, reason?: AiTourFailureReason): AiTourAdaptivePolicy {

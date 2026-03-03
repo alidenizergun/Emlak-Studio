@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Yardım Merkezi | Emlak AISTUDIO',
-  description: 'Emlak AIStudio kullanım rehberi, sıkça sorulan sorular ve destek. Fotoğraf geliştirme, sanal dekorasyon ve hesaplar hakkında yardım.',
+  title: 'Yardım Merkezi',
+  description: 'Emlak Stüdyosu kullanım rehberi, sıkça sorulan sorular ve destek içerikleri.',
+  alternates: {
+    canonical: '/help',
+  },
 };
 
 export default function HelpLayout({

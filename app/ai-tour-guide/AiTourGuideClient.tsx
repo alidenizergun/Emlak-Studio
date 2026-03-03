@@ -6,18 +6,28 @@ import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
 import styles from './AiTourGuide.module.css';
 
+interface TourResult {
+    runId: string;
+    script: string;
+    videoUrl: string;
+    durationSeconds: number;
+    qualityScore: number | null;
+    qualityIssues: string[];
+}
+
+function isImageLikeUrl(url: string): boolean {
+    const value = String(url || '').toLowerCase();
+    return value.startsWith('data:image/') || /\.(png|jpg|jpeg|webp|gif)(\?|$)/.test(value);
+}
+
 export default function AiTourGuideClient() {
-    const SCRIPT_MAX_LENGTH = 150;
+    const SCRIPT_MAX_LENGTH = 280;
 
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [scriptText, setScriptText] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
-    const [latestRunId, setLatestRunId] = useState<string>('');
-    const [generatedScript, setGeneratedScript] = useState<string>('');
-    const [qualityScore, setQualityScore] = useState<number | null>(null);
-    const [qualityIssues, setQualityIssues] = useState<string[]>([]);
+    const [result, setResult] = useState<TourResult | null>(null);
     const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'sent'>('idle');
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
@@ -37,13 +47,15 @@ export default function AiTourGuideClient() {
         if (fileUrl) URL.revokeObjectURL(fileUrl);
         setFile(selected);
         setFileUrl(URL.createObjectURL(selected));
-        setSubmitted(false);
+        setResult(null);
+        setFeedbackStatus('idle');
     };
 
     const runGenerate = async (scriptOverride?: string) => {
         if (!file) return;
+
         setIsProcessing(true);
-        setSubmitted(false);
+        setResult(null);
         setFeedbackStatus('idle');
         try {
             const phone = window.localStorage.getItem('emlak_user_phone') || '';
@@ -52,29 +64,38 @@ export default function AiTourGuideClient() {
             const payloadScript = typeof scriptOverride === 'string' ? scriptOverride : scriptText;
             formData.append('script', payloadScript.trim().slice(0, SCRIPT_MAX_LENGTH));
             formData.append('phone', phone);
+
             const response = await fetch('/api/ai-tour-guide', { method: 'POST', body: formData });
             const data = await response.json();
-            if (data.success) {
-                if (typeof data.credits === 'number' && typeof window !== 'undefined') {
-                    window.localStorage.setItem('emlak_credits', String(data.credits));
-                    window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
-                        detail: { credits: data.credits }
-                    }));
-                }
-                setLatestRunId(String(data.runId || ''));
-                setGeneratedScript(String(data.generatedScript || ''));
-                setQualityScore(typeof data.qualityScore === 'number' ? data.qualityScore : null);
-                setQualityIssues(Array.isArray(data.qualityIssues) ? data.qualityIssues.map((x: unknown) => String(x)) : []);
-                setSubmitted(true);
-            } else {
+
+            if (!response.ok || !data.success) {
                 if (data?.code === 'INSUFFICIENT_CREDITS') {
-                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    alert('Yetersiz kredi. Lütfen kredi satın alın.');
                     return;
                 }
-                alert(data.error || 'İşlem başarısız. Lütfen tekrar deneyin.');
+                throw new Error(data?.error || 'Video üretimi başarısız.');
             }
-        } catch {
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+
+            if (typeof data.credits === 'number' && typeof window !== 'undefined') {
+                window.localStorage.setItem('emlak_credits', String(data.credits));
+                window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
+                    detail: { credits: data.credits },
+                }));
+            }
+
+            setResult({
+                runId: String(data.runId || ''),
+                script: String(data.generatedScript || ''),
+                videoUrl: String(data.videoUrl || ''),
+                durationSeconds: Number(data.durationSeconds || 9),
+                qualityScore: typeof data.qualityScore === 'number' ? data.qualityScore : null,
+                qualityIssues: Array.isArray(data.qualityIssues)
+                    ? data.qualityIssues.map((x: unknown) => String(x))
+                    : [],
+            });
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Bir hata oluştu. Lütfen tekrar deneyin.';
+            alert(message);
         } finally {
             setIsProcessing(false);
         }
@@ -89,16 +110,12 @@ export default function AiTourGuideClient() {
         setFile(null);
         setFileUrl(null);
         setScriptText('');
-        setLatestRunId('');
-        setGeneratedScript('');
-        setQualityScore(null);
-        setQualityIssues([]);
+        setResult(null);
         setFeedbackStatus('idle');
-        setSubmitted(false);
     };
 
     const sendFeedback = async (verdict: 'good' | 'bad', note = '') => {
-        if (!latestRunId) return;
+        if (!result?.runId) return;
         const phone = window.localStorage.getItem('emlak_user_phone') || '';
         if (!phone) return;
         try {
@@ -106,7 +123,7 @@ export default function AiTourGuideClient() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    runId: latestRunId,
+                    runId: result.runId,
                     phone,
                     verdict,
                     note,
@@ -117,15 +134,15 @@ export default function AiTourGuideClient() {
                 throw new Error(data.error || 'Geri bildirim gönderilemedi');
             }
             setFeedbackStatus('sent');
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
         }
     };
 
     const handleImproveAgain = async () => {
-        if (!generatedScript) return;
-        await sendFeedback('bad', 'Metni daha detaylı ve özgün hale getir');
-        const nextScript = generatedScript.slice(0, SCRIPT_MAX_LENGTH);
+        if (!result?.script) return;
+        await sendFeedback('bad', 'Sunucu hareketi ve anlatımı daha doğal olsun');
+        const nextScript = result.script.slice(0, SCRIPT_MAX_LENGTH);
         setScriptText(nextScript);
         await runGenerate(nextScript);
     };
@@ -144,11 +161,11 @@ export default function AiTourGuideClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>Sanal Sunucu</h1>
                     <p className={styles.description}>
-                        Mülk fotoğraflarınızı yükleyin. Sanal sunucu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.
-                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                            Örnek Gör
-                        </button>
+                        Tek bir mülk fotoğrafı yükleyin. Sistem 8-10 saniyelik video üretir; kadın sunucu evin içinde konuşarak evi tanıtır.
                     </p>
+                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                        Örnekleri Gör
+                    </button>
                 </div>
             </header>
 
@@ -158,47 +175,59 @@ export default function AiTourGuideClient() {
                         <div className={styles.emptyState}>
                             <ImageUploader
                                 onImageSelect={handleImageSelect}
-                                label="Fotoğrafları Buraya Tıklayıp Yükleyin"
+                                label="Tek fotoğraf yükleyin"
+                                subtext="veya sürükleyip bırakın (en fazla 1 fotoğraf)"
                             />
                         </div>
                     ) : (
                         <div className={styles.previewContainer}>
-                            {submitted ? (
-                                <div className={styles.resultMessage}>
-                                    <div className={styles.resultIcon}>
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <polygon points="23 7 16 12 23 17 23 7" />
-                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                                        </svg>
-                                    </div>
-                                    <h3>Tur talebiniz alındı</h3>
-                                    <p>Video tur özelliği hazırlanıyor. Bu arada adaptif anlatım metni üretildi.</p>
-                                    {generatedScript ? (
-                                        <div className={styles.generatedBox}>
-                                            <div className={styles.generatedHeader}>
-                                                <strong>Üretilen Metin</strong>
-                                                {qualityScore !== null ? (
-                                                    <span className={styles.qualityBadge}>Kalite: {(qualityScore * 100).toFixed(0)}%</span>
-                                                ) : null}
+                            {result?.videoUrl ? (
+                                <div className={styles.videoResultWrap}>
+                                    {isImageLikeUrl(result.videoUrl) ? (
+                                        <>
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={result.videoUrl} className={styles.tourVideo} alt="Sanal sunucu önizleme" />
+                                            <div className={styles.resultMetaRow}>
+                                                <span className={styles.resultMetaBadge}>Gemini geçiş modu: video yerine görsel önizleme üretildi</span>
                                             </div>
-                                            <p>{generatedScript}</p>
-                                            {qualityIssues.length > 0 ? (
-                                                <div className={styles.qualityIssues}>
-                                                    {qualityIssues.join(' • ')}
-                                                </div>
-                                            ) : null}
+                                        </>
+                                    ) : (
+                                        <video
+                                            src={result.videoUrl}
+                                            className={styles.tourVideo}
+                                            controls
+                                            playsInline
+                                            preload="metadata"
+                                        />
+                                    )}
+                                    <div className={styles.resultMetaRow}>
+                                        <span className={styles.resultMetaBadge}>Video süresi: {result.durationSeconds} sn</span>
+                                        {result.qualityScore !== null ? (
+                                            <span className={styles.resultMetaBadge}>Metin kalite skoru: {(result.qualityScore * 100).toFixed(0)}%</span>
+                                        ) : null}
+                                    </div>
+                                    <div className={styles.generatedBox}>
+                                        <div className={styles.generatedHeader}>
+                                            <strong>Kullanılan Anlatım Metni</strong>
                                         </div>
-                                    ) : null}
+                                        <p>{result.script}</p>
+                                        {result.qualityIssues.length > 0 ? (
+                                            <div className={styles.qualityIssues}>{result.qualityIssues.join(' • ')}</div>
+                                        ) : null}
+                                    </div>
                                     <div className={styles.feedbackActions}>
-                                        <button type="button" className={styles.downloadBtn} onClick={() => sendFeedback('good', 'Metin başarılı')}>
-                                            Metin İyi
+                                        <button type="button" className={styles.downloadBtn} onClick={() => sendFeedback('good', 'Video sonucu başarılı')}>
+                                            Sonuç İyi
                                         </button>
                                         <button type="button" className={styles.resetBtn} onClick={handleImproveAgain}>
-                                            Yeniden İyileştir
+                                            Yeniden Üret
                                         </button>
+                                        <a href={result.videoUrl} target="_blank" rel="noreferrer" className={styles.downloadBtn}>
+                                            {isImageLikeUrl(result.videoUrl) ? 'Görseli İndir' : 'Videoyu İndir'}
+                                        </a>
                                     </div>
                                     {feedbackStatus === 'sent' ? (
-                                        <p className={styles.feedbackHint}>Geri bildiriminiz kaydedildi. Sonraki çıktılar buna göre iyileştirilecek.</p>
+                                        <p className={styles.feedbackHint}>Geri bildiriminiz kaydedildi. Sonraki videolar buna göre iyileştirilecek.</p>
                                     ) : null}
                                     <button type="button" className={styles.resetBtn} onClick={handleReset}>
                                         Yeni Yükleme
@@ -207,13 +236,13 @@ export default function AiTourGuideClient() {
                             ) : (
                                 <>
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={fileUrl || ''} alt="Önizleme" className={styles.previewImage} />
+                                    <img src={fileUrl || ''} alt="Yüklenen görsel" className={styles.previewImage} />
                                     <button type="button" className={styles.changeImageBtn} onClick={handleReset}>
                                         Farklı Görsel Seç
                                     </button>
                                 </>
                             )}
-                            <ProcessingOverlay active={isProcessing} />
+                            <ProcessingOverlay active={isProcessing} message="Video tur hazırlanıyor, lütfen bekleyin" />
                         </div>
                     )}
                 </div>
@@ -226,16 +255,16 @@ export default function AiTourGuideClient() {
                         </div>
                         <div className={styles.scriptField}>
                             <label htmlFor="ai-script" className={styles.scriptLabel}>
-                                Videoda söylenecek metin
+                                Sunucunun söyleyeceği metin
                             </label>
                             <textarea
                                 id="ai-script"
                                 className={styles.scriptInput}
-                                placeholder="Örnek: Bu mülk geniş salonu, aydınlık mutfağı ve ferah balkonu ile dikkat çekiyor. Konumu ve ulaşım imkânlarıyla değerlendirmeye değer bir seçenek."
+                                placeholder="Örnek: Bu dairemiz ferah salonu, gün ışığı alan odaları ve kullanışlı planı ile dikkat çekiyor."
                                 value={scriptText}
                                 onChange={(e) => setScriptText(e.target.value.slice(0, SCRIPT_MAX_LENGTH))}
                                 maxLength={SCRIPT_MAX_LENGTH}
-                                rows={3}
+                                rows={4}
                                 lang="tr"
                                 spellCheck
                             />
@@ -254,7 +283,7 @@ export default function AiTourGuideClient() {
                                 </>
                             ) : (
                                 <>
-                                    Tur Oluştur
+                                    Başlat
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
@@ -263,7 +292,8 @@ export default function AiTourGuideClient() {
                         </button>
                         <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
                         <div className={styles.tipBlock}>
-                            <p>Mülk fotoğraflarınızı yükleyin. Sanal sunucu evi gezer, girdiğiniz bilgileri sesli ve videolu şeklinde sunar.</p>
+                            <p>1) Tek fotoğraf yükleyin. 2) Metni girin. 3) Sistem 8-10 sn video üretir.</p>
+                            <p>Video içinde kadın sunucu evin içinde konuşur; mimari detaylar korunur.</p>
                         </div>
                     </div>
                 </div>
@@ -272,9 +302,9 @@ export default function AiTourGuideClient() {
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
                 title="Sanal Sunucu Örneği"
-                summary="Yüklenen görsel üzerinde kısa bir tur metni oluşturulur ve video anlatım için hazır hale getirilir."
+                summary="Yüklenen görselden 8-10 saniyelik kadın sunuculu video üretilir ve mülk anlatımı sesli şekilde verilir."
                 singleSrc="/images/examples/living-furnished.png"
-                sampleText={`Örnek anlatım:\\nMerhaba, şimdi geniş salon ve doğal ışık alan oturma bölümünü geziyoruz...`}
+                sampleText={`Örnek anlatım:\nMerhaba, şimdi bu ferah yaşam alanını birlikte geziyoruz...`}
             />
         </div>
     );

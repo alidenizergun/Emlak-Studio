@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import styles from './Contact.module.css';
+import type { Metadata } from 'next';
 
-export const metadata = {
+export const metadata: Metadata = {
     title: 'İletişim - Emlak Stüdyosu | 7/24 Destek',
     description: 'Emlak Stüdyosu müşteri hizmetleri ile iletişime geçin. Telefon ve e-posta desteği ile yanınızdayız.',
+    alternates: {
+        canonical: '/contact',
+    },
 };
 
 const CHANNELS = [

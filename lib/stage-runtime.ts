@@ -10,6 +10,15 @@ interface CachedStageResponse {
     imageUrl: string;
     provider: string;
     model: string;
+    fallbackUsed?: boolean;
+    attemptedModels?: string[];
+    attemptLog?: Array<{
+        model: string;
+        attempt: number;
+        status: string;
+        latencyMs: number;
+        message?: string;
+    }>;
     promptVersion: PromptVersion;
     architectureScore?: number;
     qualityScore?: number;

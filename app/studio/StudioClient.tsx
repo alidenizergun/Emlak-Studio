@@ -191,7 +191,7 @@ export default function StudioClient() {
     }
 
     const ToolComponent = TOOL_COMPONENTS[selectedToolId];
-    const isMyPhotosActive = selectedToolId === 'stage' && stageTabParam === 'photos';
+    const isMyPhotosActive = selectedToolId === 'stage' && (stageTabParam === 'works' || stageTabParam === 'photos');
     const purchaseAmount = Math.floor(Number(purchaseAmountInput) || 0);
     const perCreditPrice = subscription
         ? subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1)
@@ -289,7 +289,9 @@ export default function StudioClient() {
                     <nav className={styles.toolNav} aria-label="Araçlar">
                         {TOOLS.map((tool) => {
                             const isDisabled = !!tool.status;
-                            const isActive = selectedToolId === tool.id && !(tool.id === 'stage' && stageTabParam === 'photos');
+                            const isActive =
+                                selectedToolId === tool.id &&
+                                !(tool.id === 'stage' && (stageTabParam === 'works' || stageTabParam === 'photos'));
                             return (
                                 <div key={tool.id} className={styles.toolGroup}>
                                     <button
@@ -317,7 +319,7 @@ export default function StudioClient() {
                                             className={`${styles.myPhotosItem} ${isMyPhotosActive ? styles.myPhotosItemActive : ''}`}
                                             onClick={() => {
                                                 setSelectedToolId('stage');
-                                                router.replace('/studio?tool=stage&stageTab=photos', { scroll: false });
+                                                router.replace('/studio?tool=stage&stageTab=works', { scroll: false });
                                             }}
                                         >
                                             <span className={styles.myPhotosIcon} aria-hidden="true">
@@ -327,7 +329,7 @@ export default function StudioClient() {
                                                     <circle cx="9" cy="9" r="1.2" />
                                                 </svg>
                                             </span>
-                                            <span className={styles.myPhotosTitle}>Tüm Fotoğraflarım</span>
+                                            <span className={styles.myPhotosTitle}>Tüm Çalışmalarım</span>
                                         </button>
                                     ) : null}
                                 </div>

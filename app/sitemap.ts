@@ -1,32 +1,29 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/seo/site';
+
+const INDEXABLE_ROUTES = [
+  '/',
+  '/tools',
+  '/enhance',
+  '/stage',
+  '/remove-object',
+  '/sanal-tadilat',
+  '/ilan-metni',
+  '/ai-tour-guide',
+  '/pricing',
+  '/examples',
+  '/contact',
+  '/help',
+  '/register',
+  '/suggestions',
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://emlak-yz.com'
-
-    return [
-        {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 1,
-        },
-        {
-            url: `${baseUrl}/register`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/enhance`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/examples`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.7,
-        },
-    ]
+  const now = new Date();
+  return INDEXABLE_ROUTES.map((route, index) => ({
+    url: `${SITE_URL}${route === '/' ? '' : route}`,
+    lastModified: now,
+    changeFrequency: route === '/' ? 'daily' : 'weekly',
+    priority: index === 0 ? 1 : 0.7,
+  }));
 }

@@ -1,6 +1,8 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { TOOLS } from '../toolsData';
+import { DEFAULT_OG_IMAGE, SITE_NAME, absoluteUrl } from '@/lib/seo/site';
 
 export async function generateStaticParams() {
     return TOOLS.filter(t => t.href.startsWith('/tools/')).map((tool) => ({
@@ -8,9 +10,36 @@ export async function generateStaticParams() {
     }));
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const tool = TOOLS.find((t) => t.id === slug && t.href.startsWith('/tools/'));
+
+    if (!tool) {
+        return {
+            title: 'Araç Bulunamadı',
+            robots: { index: false, follow: false },
+        };
+    }
+
+    const canonical = `/tools/${tool.id}`;
+    return {
+        title: `${tool.title}`,
+        description: tool.description,
+        alternates: {
+            canonical,
+        },
+        openGraph: {
+            title: `${tool.title} | ${SITE_NAME}`,
+            description: tool.description,
+            url: absoluteUrl(canonical),
+            images: [DEFAULT_OG_IMAGE],
+        },
+    };
+}
+
 export default async function ToolDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const tool = TOOLS.find((t) => t.id === slug);
+    const tool = TOOLS.find((t) => t.id === slug && t.href.startsWith('/tools/'));
 
     if (!tool) {
         notFound();

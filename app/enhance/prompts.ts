@@ -10,23 +10,51 @@ CRITICAL QUALITY STANDARDS:
 - PHOTOREALISM: Absolutely no artistic, cartoonish, or AI-generated look.
 - ARCHITECTURAL INTEGRITY: Do not change room size perception, walls, columns, ceilings, windows, doors, or structural elements.
 - PRESERVATION: Do not add or remove furniture or major decor.
-- WATERMARK CLEANUP: Remove visible logo/watermark/branding text naturally.
+- FLOOR CLEANUP HARD RULE: If the uploaded image floor looks dirty, clean it completely (remove dirt/stains/dust/mud marks) while preserving floor material, tile/joint pattern, and geometry.
+- TEXT OVERLAY HANDLING: If a distracting listing overlay can be safely reduced without violating policy, reduce it naturally; otherwise keep it unchanged.
 - NOISE & ARTIFACTS: Completely eliminate digital noise, JPEG artifacts, and chromatic aberration.`;
 
 /** Her seçenek (option id) için tam prompt metni */
 export const ENHANCE_PROMPTS: Record<string, string> = {
     auto: `AUTO MODE:
-Analyze this real estate photograph and automatically apply the best combination of:
-- 4K lighting and exposure balancing
-- Color vibrancy and white balance correction
-- Sharpening and fine detail enhancement
-- Gentle cleaning of noise and minor artifacts
+You are running Emlak Stüdyosu premium enhancement mode.
+Analyze this real-estate photo and apply the strongest high-end enhancement pipeline that still preserves reality.
+
+PRIMARY OBJECTIVE:
+- Produce a premium, listing-ready result with very high perceived quality at first glance.
+- The image must look exceptionally clear, naturally lit, and color-balanced with professional consistency.
+
+AUTO ENHANCEMENT STACK (apply together, in one coherent pass):
+- 4K-grade lighting and exposure balancing with natural shadow recovery
+- Precise white-balance normalization and color cast correction
+- Controlled vibrancy and micro-contrast improvement (rich but realistic colors)
+- High-fidelity sharpening and texture clarity (walls, floors, furniture edges, fabrics)
+- Noise/artifact cleanup (JPEG blocks, chromatic aberration, haze, mild blur)
+- Surface cleanup for small distractions (dust, tiny stains, minor scuffs) without texture loss
+
+LIGHTING & COLOR EXCELLENCE REQUIREMENTS:
+- If the photo is dark/flat, rebalance exposure aggressively but naturally.
+- Window areas must retain detail; avoid clipped highlights and crushed shadows.
+- Maintain neutral whites and realistic material tones (wood, paint, textiles, skin where present).
+- Avoid over-HDR, neon saturation, gray haze, or plastic/waxy textures.
+
+SHARPNESS REQUIREMENTS:
+- Result must be very crisp and clean without halos or edge ringing.
+- Fine details should be visibly improved while preserving natural grain/texture.
+- No softness, ghosting, or smeared regions.
 
 CRITICAL RULES:
 - Keep the image fully photorealistic; no cartoon or AI-art style.
 - Do NOT change walls, windows, or architectural structure.
 - Do NOT add or remove furniture or major objects.
-- Preserve the original room layout and perspective.${BASE_RULES}`,
+- Preserve the original room layout and perspective.
+
+FINAL SELF-CHECK BEFORE OUTPUT:
+- Is the image clearly sharper than input while still natural?
+- Are light and color balance excellent and believable across the full frame?
+- Is there any haze, blur, halo, clipping, or artifact left?
+- Is architecture fully preserved with no geometry drift?
+If any answer is "no", fix it before returning output.${BASE_RULES}`,
 
     lighting: `LIGHTING & EXPOSURE:
 Brighten dark areas of the room, recover detail in shadows, and gently compress highlights so windows and bright spots are not blown out.
@@ -103,14 +131,34 @@ export function buildEnhancePrompt(options: Record<string, boolean>): string {
         return ENHANCE_PROMPTS.auto;
     }
 
-    const selected = Object.keys(ENHANCE_PROMPTS).filter((id) => id !== 'auto' && options[id]);
+    const selected = Object.keys(ENHANCE_OPTION_DIRECTIVES).filter((id) => options[id]);
     if (selected.length === 0) {
         return `Apply a subtle 4K professional enhancement to this real estate photo.${BASE_RULES}`;
     }
-    if (selected.length === 1) {
-        return ENHANCE_PROMPTS[selected[0]];
-    }
+    const selectedInstructions = selected
+        .map((id) => `- ${ENHANCE_OPTION_DIRECTIVES[id]}`)
+        .join('\n');
+    return `You are Emlak Stüdyosu enhancement engine. Apply ONLY the selected enhancements below in one coherent, photorealistic result.
 
-    const parts = selected.map((id) => ENHANCE_PROMPTS[id]);
-    return `Enhancement Task: Apply the following enhancements to this real estate photo in a single, coherent result:\n\n${parts.join('\n\n---\n\n')}`;
+SELECTED ENHANCEMENTS:
+${selectedInstructions}
+
+QUALITY CONTRACT:
+${BASE_RULES}
+
+IMPORTANT EXECUTION RULES:
+- Keep camera perspective and architecture identical.
+- Apply visible improvements for selected options (no negligible/no-op output).
+- If any single instruction conflicts with policy, continue with all remaining safe instructions and still return an image.
+- Never return an empty or black output.`;
 }
+
+const ENHANCE_OPTION_DIRECTIVES: Record<string, string> = {
+    lighting: 'Rebalance exposure, lift dark regions, and protect highlights for a naturally brighter image.',
+    color: 'Correct white balance and boost color richness moderately while keeping material tones realistic.',
+    sharpness: 'Increase micro-contrast and edge clarity without halos, ringing, or oversharpen artifacts.',
+    clean: 'Remove minor dirt/stain/noise distractions and preserve real textures (tile joints, wood grain, fabric).',
+    privacy: 'Blur only sensitive personal data regions (faces/documents/screens), keep all other areas sharp.',
+    sky: 'If visible sky exists, improve only upper/outdoor sky tone subtly; do not affect indoor walls/ceilings.',
+    twilight: 'Add a warm golden-hour ambience with controlled contrast and believable light balance.',
+};

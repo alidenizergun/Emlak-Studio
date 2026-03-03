@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
+import { getGeminiClient, getGeminiTextModel } from '@/lib/gemini';
 import {
     buildAdaptiveListingPrompt,
     createListingRunId,
@@ -11,6 +11,7 @@ import {
     recordListingRun,
     updateListingAdaptiveOutcome,
 } from '@/lib/listing-text-runtime';
+import { recordToolRun } from '@/lib/work-history';
 
 interface IlanBilgileri {
     lokasyon?: string;
@@ -25,56 +26,49 @@ interface IlanBilgileri {
     ekNotlar?: string;
 }
 
-const GOOGLE_API_KEY =
-    process.env.GOOGLE_API_KEY ||
-    process.env.GEMINI_API_KEY ||
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-    '';
-
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
+const GEMINI_MODEL = getGeminiTextModel();
 const LISTING_TEXT_COST = TOOL_CREDIT_COSTS.listingText;
 
 function buildListingPrompt(info: IlanBilgileri): string {
-    const kullanimLabel = info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
+    const listingTypeLabel = info.kullanim === 'kiralik' ? 'For Rent' : 'For Sale';
     return `
-Sen Türkiye emlak sektöründe çalışan kıdemli bir ilan metni uzmanısın.
-Kullanıcının verdiği ilan bilgileri ve yüklenen fotoğrafı birlikte analiz ederek güçlü bir ilan metni üret.
+You are a senior real-estate listing copywriter for the Turkish market.
+Analyze the user's listing details together with the uploaded property photo and produce high-quality listing copy.
 
-Amaç:
-- İlanın tıklanma oranını artıracak, güven veren ve profesyonel bir metin yaz.
-- Abartı, gerçek dışı vaat, yanıltıcı ifade kullanma.
+Goal:
+- Write trustworthy, professional copy that improves click-through and inquiry intent.
+- Do not use exaggerated, unrealistic, or misleading claims.
 
-Dil ve stil:
-- Sadece Türkçe yaz.
-- Akıcı, satış odaklı ama doğal bir ton kullan.
-- Aşırı emoji, gereksiz büyük harf, spam tonu kullanma.
-- Gereksiz uzatma yapma; kısa ama etkili ol.
+Language and style:
+- Final output must be in Turkish.
+- Keep tone natural, fluent, and sales-oriented.
+- Avoid excessive emoji, all-caps spam style, and filler.
+- Keep it concise but persuasive.
 
-Çıktı formatı (tam olarak bu sırayla):
-1) Tek satır başlık
-2) Kısa giriş paragrafı (2-3 cümle)
-3) "Öne Çıkan Özellikler" başlığı altında 5-8 madde
-4) Kapanış paragrafı (iletişime yönlendiren kısa çağrı)
+Required output format (exact order):
+1) Single-line title
+2) Short intro paragraph (2-3 sentences)
+3) Section titled "Öne Çıkan Özellikler" with 5-8 bullets
+4) Short closing paragraph with a call to contact
 
-Kurallar:
-- Kullanıcının verdiği bilgileri önceliklendir.
-- Fotoğrafta gördüğün güçlü noktaları metne doğal şekilde yedir.
-- Bilinmeyen alanları uydurma.
-- Fiyat, konum, m² gibi alanlar varsa mutlaka metinde geçir.
-- Metni markdown code block içine alma.
+Rules:
+- Prioritize user-provided details.
+- Integrate visual strengths seen in the photo naturally into the copy.
+- Never invent unknown facts.
+- If available, include price, location, and m² details explicitly.
+- Do not wrap the output in markdown code blocks.
 
-Kullanıcı verileri:
-- İlan Türü: ${kullanimLabel}
-- Lokasyon: ${info.lokasyon || 'Belirtilmedi'}
-- Metrekare: ${info.metrekare || 'Belirtilmedi'}
-- Oda Sayısı: ${info.odaSayisi || 'Belirtilmedi'}
-- Banyo Sayısı: ${info.banyoSayisi || 'Belirtilmedi'}
-- Kat: ${info.kat || 'Belirtilmedi'}
-- Bina Yaşı: ${info.binaYasi || 'Belirtilmedi'}
-- Isıtma: ${info.isitma || 'Belirtilmedi'}
-- Fiyat: ${info.fiyat || 'Belirtilmedi'}
-- Ek Notlar: ${info.ekNotlar || 'Yok'}
+User data:
+- Listing Type: ${listingTypeLabel}
+- Location: ${info.lokasyon || 'Not specified'}
+- Square Meters: ${info.metrekare || 'Not specified'}
+- Room Count: ${info.odaSayisi || 'Not specified'}
+- Bathroom Count: ${info.banyoSayisi || 'Not specified'}
+- Floor: ${info.kat || 'Not specified'}
+- Building Age: ${info.binaYasi || 'Not specified'}
+- Heating: ${info.isitma || 'Not specified'}
+- Price: ${info.fiyat || 'Not specified'}
+- Additional Notes: ${info.ekNotlar || 'None'}
 `.trim();
 }
 
@@ -173,63 +167,61 @@ export async function POST(request: NextRequest) {
         const runId = createListingRunId();
         const adaptivePolicy = getListingAdaptivePolicy();
 
-        if (genAI) {
-            try {
-                const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
-                const mimeType = image.type || 'image/jpeg';
-                const bytes = await image.arrayBuffer();
-                const base64Data = Buffer.from(bytes).toString('base64');
-                const prompt = buildAdaptiveListingPrompt(buildListingPrompt(info), adaptivePolicy, false);
+        try {
+            const model = getGeminiClient().getGenerativeModel({ model: GEMINI_MODEL });
+            const mimeType = image.type || 'image/jpeg';
+            const bytes = await image.arrayBuffer();
+            const base64Data = Buffer.from(bytes).toString('base64');
+            const prompt = buildAdaptiveListingPrompt(buildListingPrompt(info), adaptivePolicy, false);
 
-                const result = await model.generateContent({
+            const result = await model.generateContent({
+                contents: [
+                    {
+                        role: 'user',
+                        parts: [
+                            { text: prompt },
+                            { inlineData: { mimeType, data: base64Data } },
+                        ],
+                    },
+                ],
+                generationConfig: {
+                    temperature: adaptivePolicy.temperature,
+                    topP: 0.9,
+                    maxOutputTokens: adaptivePolicy.maxOutputTokens,
+                },
+            });
+
+            const generated = result.response.text() || '';
+            text = cleanModelOutput(generated);
+            if (text) provider = 'gemini';
+
+            const firstQuality = evaluateListingTextQuality(text, info, adaptivePolicy);
+            if (!firstQuality.ok && adaptivePolicy.retryEnabled) {
+                const retryPrompt = buildAdaptiveListingPrompt(buildListingPrompt(info), adaptivePolicy, true);
+                const retryResult = await model.generateContent({
                     contents: [
                         {
                             role: 'user',
                             parts: [
-                                { text: prompt },
+                                { text: retryPrompt },
                                 { inlineData: { mimeType, data: base64Data } },
                             ],
                         },
                     ],
                     generationConfig: {
-                        temperature: adaptivePolicy.temperature,
-                        topP: 0.9,
-                        maxOutputTokens: adaptivePolicy.maxOutputTokens,
+                        temperature: Math.max(0.35, adaptivePolicy.temperature - 0.08),
+                        topP: 0.88,
+                        maxOutputTokens: Math.max(700, adaptivePolicy.maxOutputTokens),
                     },
                 });
-
-                const generated = result.response.text() || '';
-                text = cleanModelOutput(generated);
-                if (text) provider = 'gemini';
-
-                const firstQuality = evaluateListingTextQuality(text, info, adaptivePolicy);
-                if (!firstQuality.ok && adaptivePolicy.retryEnabled) {
-                    const retryPrompt = buildAdaptiveListingPrompt(buildListingPrompt(info), adaptivePolicy, true);
-                    const retryResult = await model.generateContent({
-                        contents: [
-                            {
-                                role: 'user',
-                                parts: [
-                                    { text: retryPrompt },
-                                    { inlineData: { mimeType, data: base64Data } },
-                                ],
-                            },
-                        ],
-                        generationConfig: {
-                            temperature: Math.max(0.35, adaptivePolicy.temperature - 0.08),
-                            topP: 0.88,
-                            maxOutputTokens: Math.max(700, adaptivePolicy.maxOutputTokens),
-                        },
-                    });
-                    const retryText = cleanModelOutput(retryResult.response.text() || '');
-                    const retryQuality = evaluateListingTextQuality(retryText, info, adaptivePolicy);
-                    if (retryQuality.score >= firstQuality.score && retryText) {
-                        text = retryText;
-                    }
+                const retryText = cleanModelOutput(retryResult.response.text() || '');
+                const retryQuality = evaluateListingTextQuality(retryText, info, adaptivePolicy);
+                if (retryQuality.score >= firstQuality.score && retryText) {
+                    text = retryText;
                 }
-            } catch (aiError) {
-                console.error('Ilan-metni Gemini generation failed, using fallback:', aiError);
             }
+        } catch (aiError) {
+            console.error('Ilan-metni Gemini generation failed, using fallback:', aiError);
         }
 
         if (!text) {
@@ -257,6 +249,17 @@ export async function POST(request: NextRequest) {
             outputText: text,
             qualityScore: quality.score,
             reason: quality.ok ? undefined : quality.reason,
+            usedCredits: LISTING_TEXT_COST,
+        });
+        const beforeImageUrl = await fileToDataUrl(image);
+        recordToolRun({
+            runId,
+            phone,
+            toolId: 'listing-text',
+            beforeImageUrl,
+            afterImageUrl: null,
+            title: 'İlan Metni Oluşturucu',
+            detail: text.slice(0, 500),
             usedCredits: LISTING_TEXT_COST,
         });
         updateListingAdaptiveOutcome(quality.ok, quality.reason);
@@ -296,4 +299,10 @@ export async function POST(request: NextRequest) {
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
+}
+
+async function fileToDataUrl(file: File): Promise<string> {
+    const bytes = Buffer.from(await file.arrayBuffer()).toString('base64');
+    const mime = file.type || 'image/jpeg';
+    return `data:${mime};base64,${bytes}`;
 }

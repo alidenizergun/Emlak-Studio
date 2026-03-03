@@ -130,10 +130,10 @@ export default function RemoveObjectClient() {
                     <h1 className={styles.title}>Akıllı Eşya Silme</h1>
                     <p className={styles.description}>
                         İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin. Fotoğrafı yükleyin, emlak stüdyosu seçtiğiniz alanları temizlesin.
-                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                            Örnek Gör
-                        </button>
                     </p>
+                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                        Örnekleri Gör
+                    </button>
                 </div>
             </header>
 
@@ -267,7 +267,7 @@ export default function RemoveObjectClient() {
                                 </>
                             ) : (
                                 <>
-                                    Eşyayı Sil
+                                    Başlat
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
@@ -279,7 +279,7 @@ export default function RemoveObjectClient() {
                         <div className={styles.tipBlock}>
                             <p>
                                 Fotoğrafı yükleyin. Yukarıdan tüm eşyaları silme veya sadece belirli eşyaları metne göre silme
-                                seçeneğini işaretleyin, ardından <strong>Eşyayı Sil</strong> butonuna tıklayın.
+                                seçeneğini işaretleyin, ardından <strong>Başlat</strong> butonuna tıklayın.
                             </p>
                         </div>
 

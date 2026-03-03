@@ -1,67 +1,68 @@
-// JSON-LD Structured Data for Emlak AIStudio
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from '@/lib/seo/site';
 
-export const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Emlak AIStudio",
-    "url": "https://emlak-aistudio.com",
-    "logo": "https://emlak-aistudio.com/logo.png",
-    "description": "Emlak ilanlarınızı yapay zeka ile dönüştürün. Boş odaları mobilyalandırın, karanlık fotoğrafları aydınlatın.",
-    "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer support",
-        "email": "destek@emlak-aistudio.com"
+export function buildOrganizationSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: absoluteUrl('/logo.png'),
+    description: SITE_DESCRIPTION,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'destek@emlak-yz.com',
     },
-    "sameAs": []
-};
+    sameAs: [],
+  };
+}
 
-export const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Emlak AIStudio",
-    "url": "https://emlak-aistudio.com",
-    "description": "Yapay zeka ile emlak görselleştirme platformu",
-    "publisher": {
-        "@type": "Organization",
-        "name": "Emlak AIStudio"
-    }
-};
-
-export const softwareApplicationSchema = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Emlak AIStudio",
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web",
-    "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "TRY",
-        "description": "2 ücretsiz kredi ile başlayın"
+export function buildWebsiteSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
     },
-    "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "245",
-        "bestRating": "5",
-        "worstRating": "1"
-    },
-    "featureList": [
-        "Sanal Mobilyalama",
-        "Işık İyileştirme",
-        "Gökyüzü Değiştirme",
-        "HDR Fotoğraf",
-        "AI Dekorasyon"
-    ]
-};
+  };
+}
 
-export const breadcrumbSchema = (items: { name: string; url: string }[]) => ({
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": items.map((item, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "name": item.name,
-        "item": `https://emlak-aistudio.com${item.url}`
-    }))
-});
+export function buildSoftwareApplicationSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: SITE_NAME,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'TRY',
+      description: 'Ücretsiz kredi ile başlayın',
+    },
+    featureList: [
+      'Fotoğraf Geliştirme',
+      'Dekorasyon',
+      'Akıllı Eşya Silme',
+      'Sanal Tadilat',
+      'İlan Metni Oluşturma',
+    ],
+  };
+}
+
+export function breadcrumbSchema(items: { name: string; url: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.url),
+    })),
+  };
+}

@@ -1,48 +1,55 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { buildOrganizationSchema, buildSoftwareApplicationSchema, buildWebsiteSchema } from '@/lib/seo/structured-data';
+import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_URL } from '@/lib/seo/site';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Emlak Stüdyosu - Yapay Zeka ile Emlak Görselleştirme | AI Fotoğraf Düzenleme",
-  description: "Emlak ilanlarınızı yapay zeka ile dönüştürün. Boş odaları mobilyalandırın, karanlık fotoğrafları aydınlatın, gökyüzünü maviye boyayın. Ücretsiz deneyin!",
-  keywords: ["emlak ai", "yapay zeka emlak", "sanal mobilyalama", "emlak fotoğraf", "ai dekorasyon", "emlak görselleştirme", "sanal staging"],
-  authors: [{ name: "Emlak Stüdyosu" }],
-  creator: "Emlak Stüdyosu",
-  publisher: "Emlak Stüdyosu",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} | Emlak Fotoğraf ve İçerik Araçları`,
+    template: `%s | ${SITE_NAME}`,
   },
-  metadataBase: new URL('https://emlak-yz.com'),
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'emlak stüdyosu',
+    'emlak fotoğraf geliştirme',
+    'sanal dekorasyon',
+    'akıllı eşya silme',
+    'ilan metni oluşturucu',
+    'sanal tadilat',
+  ],
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: "Emlak Stüdyosu - Yapay Zeka ile Emlak Görselleştirme",
-    description: "Emlak ilanlarınızı yapay zeka ile dönüştürün. Boş odaları mobilyalandırın, karanlık fotoğrafları aydınlatın, gökyüzünü maviye boyayın.",
-    url: 'https://emlak-yz.com',
-    siteName: 'Emlak Stüdyosu',
-    locale: 'tr_TR',
+    title: `${SITE_NAME} | Emlak Fotoğraf ve İçerik Araçları`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: SITE_LOCALE,
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: 'Emlak Stüdyosu - Yapay Zeka ile Emlak Görselleştirme',
+        alt: `${SITE_NAME} kapak görseli`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Emlak Stüdyosu - Yapay Zeka ile Emlak Görselleştirme",
-    description: "Emlak ilanlarınızı yapay zeka ile dönüştürün. Ücretsiz deneyin!",
-    images: ['/og-image.jpg'],
+    title: `${SITE_NAME} | Emlak Fotoğraf ve İçerik Araçları`,
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: {
     index: true,
@@ -55,9 +62,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'google-site-verification-code',
-  },
 };
 
 export default function RootLayout({
@@ -66,26 +70,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "name": "Emlak Stüdyosu",
-        "url": "https://emlak-yz.com",
-        "logo": "https://emlak-yz.com/logo.png"
-      },
-      {
-        "@type": "WebSite",
-        "name": "Emlak Stüdyosu",
-        "url": "https://emlak-yz.com"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Emlak Stüdyosu",
-        "applicationCategory": "BusinessApplication",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" }
-      }
-    ]
+    '@context': 'https://schema.org',
+    '@graph': [buildOrganizationSchema(), buildWebsiteSchema(), buildSoftwareApplicationSchema()],
   };
 
   return (
@@ -98,9 +84,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <main className="min-h-screen">{children}</main>
         <Footer />
       </body>
     </html>

@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: "Örnekler | Emlak Stüdyosu",
-    description: "Yapay zeka ile dönüştürülmüş emlak fotoğraflarını inceleyin.",
+  title: 'Örnekler',
+  description: 'Emlak Stüdyosu ile üretilen örnek dönüşümleri inceleyin.',
+  alternates: {
+    canonical: '/examples',
+  },
 };
 
 export default function ExamplesLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return children;
+  return children;
 }
