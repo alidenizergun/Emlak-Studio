@@ -229,6 +229,19 @@ const TOOL_FILTER_OPTIONS: Array<{ id: string; label: string }> = [
     { id: 'ai-tour-guide', label: 'Sanal Sunucu' },
 ];
 
+type HistoryItem = {
+    entryId: string;
+    runId: string;
+    toolId: string;
+    roomType?: string;
+    style?: string;
+    title?: string | null;
+    detail?: string | null;
+    createdAt: number;
+    beforeImageUrl: string | null;
+    afterImageUrl: string | null;
+};
+
 function toInputDateValue(ts: number): string {
     const d = new Date(ts);
     const year = d.getFullYear();
@@ -255,18 +268,7 @@ export default function StageClient() {
     const [isSelectingStyle, setIsSelectingStyle] = useState(false);
     const [isAiStyle, setIsAiStyle] = useState(false);
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
-    const [historyItems, setHistoryItems] = useState<Array<{
-        entryId: string;
-        runId: string;
-        toolId: string;
-        roomType?: string;
-        style?: string;
-        title?: string | null;
-        detail?: string | null;
-        createdAt: number;
-        beforeImageUrl: string | null;
-        afterImageUrl: string | null;
-    }>>([]);
+    const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
     const [historyHasMore, setHistoryHasMore] = useState(false);
@@ -427,7 +429,7 @@ export default function StageClient() {
             if (!res.ok || !data.success) {
                 throw new Error(data.error || 'Geçmiş getirilemedi');
             }
-            const items = Array.isArray(data.items) ? data.items : [];
+            const items: HistoryItem[] = Array.isArray(data.items) ? data.items : [];
             setHistoryHasMore(Boolean(data.hasMore));
             setHistoryItems((prev) => {
                 if (!append) return items;
