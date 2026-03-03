@@ -19,8 +19,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@img/sharp-darwin-arm64": "^0.34.5",
-    "@img/sharp-libvips-darwin-arm64": "^1.2.4",
     "better-sqlite3": "^12.6.2",
     "jimp": "^1.6.0",
     "next": "16.1.6",
