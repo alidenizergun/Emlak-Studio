@@ -60,7 +60,8 @@ export async function GET(request: NextRequest) {
             if (!parsed) {
                 return NextResponse.json({ success: false, error: 'Görsel verisi okunamadı' }, { status: 422 });
             }
-            return new NextResponse(parsed.buffer, {
+            const bytes = new Uint8Array(parsed.buffer);
+            return new NextResponse(bytes, {
                 status: 200,
                 headers: {
                     'Content-Type': parsed.mime,
