@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+coverage
+.git
+.gitignore
+.DS_Store
+.env*
+.dev-server.log
+data/app.db
+data/app.db-shm
+data/app.db-wal
+data/*.db
+data/*.db-shm
+data/*.db-wal
