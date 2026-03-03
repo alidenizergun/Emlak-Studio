@@ -48,12 +48,10 @@ const ComparisonSlider = ({
     const [displayBeforeImage, setDisplayBeforeImage] = useState(beforeImage);
     const [displayAfterImage, setDisplayAfterImage] = useState(afterImage);
     const [hintPlaying, setHintPlaying] = useState(false);
-    const [hintVisible, setHintVisible] = useState(false);
     const [beforeLoadedFor, setBeforeLoadedFor] = useState<string | null>(null);
     const [afterLoadedFor, setAfterLoadedFor] = useState<string | null>(null);
     const sliderRef = useRef<HTMLDivElement>(null);
     const hintPlayedRef = useRef(false);
-    const visibilityTriggeredRef = useRef(false);
 
     const handleMouseDown = () => setIsResizing(true);
     const handleMouseUp = () => setIsResizing(false);
@@ -155,92 +153,27 @@ const ComparisonSlider = ({
     const beforeReady = beforeLoadedFor === beforeImage;
     const afterReady = afterLoadedFor === afterImage;
 
-    // Slider %100 görünür olduğunda ipucunu başlat (desktop + mobil); mobilde scroll ile tam görünce de tetiklenir
+    // İpucu animasyonu: üretim/lokal aynı davransın diye görünürlük API'lerine değil,
+    // görsellerin hazır olmasına bağlı tek seferlik deterministik tetikleme.
     useEffect(() => {
-        if (!hintSlide || !sliderRef.current) return;
-        const el = sliderRef.current;
-
-        const triggerHint = () => {
-            if (visibilityTriggeredRef.current) return;
-            visibilityTriggeredRef.current = true;
-            setHintVisible(true);
-        };
-
-        const checkFullyVisible = () => {
-            if (!el || typeof window === 'undefined') return false;
-            const rect = el.getBoundingClientRect();
-            return (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-            );
-        };
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const entry = entries[0];
-                if (!entry?.isIntersecting) return;
-                if (entry.intersectionRatio >= 1) {
-                    triggerHint();
-                    observer.disconnect();
-                }
-            },
-            { threshold: [0, 0.5, 0.99, 1], rootMargin: '0px', root: null }
-        );
-        observer.observe(el);
-
-        // Desktop: sayfa açıldığında slider zaten tam görünürse observer bazen 1 vermeyebilir; fallback
-        const fallbackId = setTimeout(() => {
-            if (checkFullyVisible()) triggerHint();
-        }, 150);
-
-        // Mobil: kullanıcı scroll edip hero %100 görünce tetikle (observer bazen mobilde ratio 1 vermeyebilir)
-        let rafId = 0;
-        const onScrollOrResize = () => {
-            if (visibilityTriggeredRef.current) return;
-            rafId = requestAnimationFrame(() => {
-                if (checkFullyVisible()) triggerHint();
-            });
-        };
-        window.addEventListener('scroll', onScrollOrResize, { passive: true });
-        window.addEventListener('resize', onScrollOrResize);
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('scroll', onScrollOrResize, { passive: true });
-            window.visualViewport.addEventListener('resize', onScrollOrResize);
-        }
-
-        return () => {
-            observer.disconnect();
-            clearTimeout(fallbackId);
-            cancelAnimationFrame(rafId);
-            window.removeEventListener('scroll', onScrollOrResize);
-            window.removeEventListener('resize', onScrollOrResize);
-            if (typeof window !== 'undefined' && window.visualViewport) {
-                window.visualViewport.removeEventListener('scroll', onScrollOrResize);
-                window.visualViewport.removeEventListener('resize', onScrollOrResize);
-            }
-        };
-    }, [hintSlide]);
-
-    // İpucu: CSS animasyonu ile çalışır; React'ta her frame setState yapılmaz.
-    useEffect(() => {
-        if (!hintSlide || !hintVisible || hintPlayedRef.current) return;
+        if (!hintSlide || hintPlayedRef.current) return;
         if (!beforeReady || !afterReady) return;
-        hintPlayedRef.current = true;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setHintPlaying(true);
+        const start = setTimeout(() => {
+            hintPlayedRef.current = true;
+            setHintPlaying(true);
+        }, 220);
         const totalDuration = 4200;
         const end = setTimeout(() => {
             setHintPlaying(false);
             setSliderPosition(50);
             onPositionChange?.(50);
-        }, totalDuration);
+        }, 220 + totalDuration);
 
         return () => {
+            clearTimeout(start);
             clearTimeout(end);
         };
-    }, [hintSlide, hintVisible, onPositionChange, hintFullRange, beforeReady, afterReady]);
+    }, [hintSlide, onPositionChange, hintFullRange, beforeReady, afterReady]);
 
     return (
         <div
