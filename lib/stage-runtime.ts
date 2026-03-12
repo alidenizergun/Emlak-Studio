@@ -40,6 +40,16 @@ export interface StageAdaptivePolicy {
     updatedAt: number;
 }
 
+export interface StagePromptLearning {
+    directives: string[];
+    stats: {
+        scopedRuns: number;
+        scopedArchLowRate: number;
+        scopedQualityLowRate: number;
+        badFeedbackRate: number;
+    };
+}
+
 const inflightByKey = new Map<string, Promise<unknown>>();
 const retryBudgetByDay = new Map<string, number>();
 const hardBlockFailures = new Map<string, { count: number; blockedUntil: number }>();
@@ -168,7 +178,7 @@ function defaultAdaptivePolicy(): StageAdaptivePolicy {
         firstLockStrength: 0.8,
         retryLockArchitecture: 0.86,
         retryLockQuality: 0.68,
-        architectureThreshold: Number(process.env.ARCH_GUARD_THRESHOLD || 0.58),
+        architectureThreshold: Number(process.env.ARCH_GUARD_THRESHOLD || 0.6),
         styleIntensityCap: 'high',
         cleanupBoost: false,
         antiGhostBoost: false,
@@ -189,7 +199,7 @@ function normalizeAdaptivePolicy(input: Partial<StageAdaptivePolicy> | null | un
         retryLockQuality: clamp(Number(input.retryLockQuality ?? base.retryLockQuality), 0.55, 0.82),
         architectureThreshold: clamp(
             Number(input.architectureThreshold ?? base.architectureThreshold),
-            0.54,
+            0.58,
             0.72
         ),
         styleIntensityCap: input.styleIntensityCap === 'medium' ? 'medium' : 'high',
@@ -341,6 +351,88 @@ export function canAutoRefundByFeedback(scores: {
     if (scores.architectureScore !== null && scores.architectureScore <= FEEDBACK_REFUND_ARCH_MAX) return true;
     if (scores.qualityScore !== null && scores.qualityScore <= FEEDBACK_REFUND_QUALITY_MAX) return true;
     return false;
+}
+
+export function getStagePromptLearning(roomType: string, style: string): StagePromptLearning {
+    const db = getDb();
+    const scopedRows = db
+        .prepare(
+            `SELECT architecture_score, quality_score
+             FROM stage_runs
+             WHERE room_type = ? AND style = ? AND status='success'
+             ORDER BY created_at DESC
+             LIMIT 80`
+        )
+        .all(roomType, style) as Array<{
+        architecture_score: number | null;
+        quality_score: number | null;
+    }>;
+    const feedbackRows = db
+        .prepare(
+            `SELECT verdict, COALESCE(note, '') as note
+             FROM stage_feedback
+             ORDER BY created_at DESC
+             LIMIT 120`
+        )
+        .all() as Array<{
+        verdict: string;
+        note: string;
+    }>;
+
+    const archLearnThreshold = Number(process.env.STAGE_LEARN_ARCH_THRESHOLD || 0.64);
+    const qualityLearnThreshold = Number(process.env.STAGE_LEARN_QUALITY_THRESHOLD || 0.6);
+
+    const scopedRuns = scopedRows.length;
+    const scopedArchLow = scopedRows.filter((x) => Number(x.architecture_score ?? 1) < archLearnThreshold).length;
+    const scopedQualityLow = scopedRows.filter((x) => Number(x.quality_score ?? 1) < qualityLearnThreshold).length;
+    const scopedArchLowRate = scopedRuns > 0 ? scopedArchLow / scopedRuns : 0;
+    const scopedQualityLowRate = scopedRuns > 0 ? scopedQualityLow / scopedRuns : 0;
+
+    const badFeedback = feedbackRows.filter((x) => x.verdict === 'bad');
+    const badFeedbackRate = feedbackRows.length > 0 ? badFeedback.length / feedbackRows.length : 0;
+    const noteText = badFeedback.map((x) => x.note || '').join('\n');
+
+    const directives: string[] = [];
+    if (scopedArchLowRate >= 0.2) {
+        directives.push('Learned rule: preserve architecture strictly (corners, ceiling lines, door/window coordinates).');
+    }
+    if (scopedArchLowRate >= 0.32) {
+        directives.push('Learned rule: reduce staging density by one level and keep only essential furniture.');
+    }
+    if (scopedQualityLowRate >= 0.24) {
+        directives.push('Learned rule: improve local clarity/contrast and avoid hazy textures.');
+    }
+    if (/dolasim|dolaşım|gecis|geçiş|sikisik|sıkışık|dar/i.test(noteText)) {
+        directives.push('Learned rule: keep clear circulation from entrance to living area; avoid choke points.');
+    }
+    if (/olcek|ölçek|oran|buyuk|büyük|kucuk|küçük/i.test(noteText)) {
+        directives.push('Learned rule: enforce realistic furniture scale relative to room size.');
+    }
+    if (/fokal|odak|tv|televizyon|aks/i.test(noteText)) {
+        directives.push('Learned rule: keep a coherent focal axis (TV/media or social focus).');
+    }
+    if (/isik|ışık|avize|armatur|armatür|aydinlatma|aydınlatma/i.test(noteText)) {
+        directives.push('Learned rule: keep lighting fixtures style-consistent and physically plausible.');
+    }
+    if (/hali|halı|ankraj|denge|dengesiz/i.test(noteText)) {
+        directives.push('Learned rule: keep rug anchoring and left-right composition balance coherent.');
+    }
+    if (/duvar|tablo|hiza|hizalama|aksesuar/i.test(noteText)) {
+        directives.push('Learned rule: keep wall decor hierarchy aligned and avoid random mixed-scale placement.');
+    }
+    if (badFeedbackRate >= 0.35) {
+        directives.push('Learned rule: prioritize listing-ready practicality over over-staging.');
+    }
+
+    return {
+        directives: Array.from(new Set(directives)).slice(0, 8),
+        stats: {
+            scopedRuns,
+            scopedArchLowRate,
+            scopedQualityLowRate,
+            badFeedbackRate,
+        },
+    };
 }
 
 export function getStageOpsSummary() {
@@ -512,8 +604,8 @@ function deriveAdaptivePolicy(): StageAdaptivePolicy {
     const retryLockArchitecture = clamp(firstLockStrength + 0.06 + archRate * 0.04, 0.68, 0.92);
     const retryLockQuality = clamp(firstLockStrength - 0.12 - qualityRate * 0.04, 0.55, 0.82);
     const architectureThreshold = clamp(
-        Number(process.env.ARCH_GUARD_THRESHOLD || 0.58) + archRate * 0.08 - qualityRate * 0.02,
-        0.54,
+        Number(process.env.ARCH_GUARD_THRESHOLD || 0.6) + archRate * 0.04 - qualityRate * 0.02,
+        0.58,
         0.72
     );
     const styleIntensityCap: 'medium' | 'high' = badFeedbackRate >= 0.42 ? 'medium' : 'high';

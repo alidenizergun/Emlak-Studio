@@ -210,7 +210,10 @@ const STYLES = [
 ];
 
 const ROOM_TYPE_LABEL_BY_ID = Object.fromEntries(ROOM_TYPES.map((room) => [room.id, room.label])) as Record<string, string>;
-const STYLE_LABEL_BY_ID = Object.fromEntries(STYLES.map((style) => [style.id, style.label])) as Record<string, string>;
+const STYLE_LABEL_BY_ID = {
+    ...(Object.fromEntries(STYLES.map((style) => [style.id, style.label])) as Record<string, string>),
+    custom: 'Özel',
+} as Record<string, string>;
 const TOOL_LABEL_BY_ID: Record<string, string> = {
     stage: 'Dekorasyon',
     enhance: 'Fotoğraf Geliştirme',
@@ -265,8 +268,7 @@ export default function StageClient() {
     const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isSelectingStyle, setIsSelectingStyle] = useState(false);
-    const [isAiStyle, setIsAiStyle] = useState(false);
+    const [customStylePrompt, setCustomStylePrompt] = useState('');
     const [result, setResult] = useState<{ before: string; after: string } | null>(null);
     const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
@@ -291,6 +293,13 @@ export default function StageClient() {
         setActiveTab(urlTab);
     }, [urlTab]);
 
+    useEffect(() => {
+        if (activeTab !== 'works') return;
+        setSelectedQuickRange('all');
+        setHistoryFromDate('');
+        setHistoryToDate('');
+    }, [activeTab]);
+
     const handleImageSelect = (selectedFile: File) => {
         setFile(selectedFile);
         setFileUrl(URL.createObjectURL(selectedFile));
@@ -306,6 +315,9 @@ export default function StageClient() {
             formData.append('image', file);
             formData.append('roomType', selectedRoom!);
             formData.append('style', selectedStyle!);
+            if (selectedStyle === 'custom') {
+                formData.append('customStylePrompt', customStylePrompt.trim());
+            }
             formData.append('phone', phone);
 
             const response = await fetch('/api/stage', {
@@ -347,20 +359,7 @@ export default function StageClient() {
         setResult(null);
         setSelectedRoom(null);
         setSelectedStyle(null);
-    };
-
-    const handleAISelectStyle = () => {
-        setIsSelectingStyle(true);
-        setIsAiStyle(true); // Enable AI mode for style
-        const otherStyles = STYLES.filter(s => s.id !== selectedStyle);
-        const randomStyle = otherStyles.length > 0
-            ? otherStyles[Math.floor(Math.random() * otherStyles.length)]
-            : STYLES[Math.floor(Math.random() * STYLES.length)];
-
-        setTimeout(() => {
-            setSelectedStyle(randomStyle.id);
-            setIsSelectingStyle(false);
-        }, 500);
+        setCustomStylePrompt('');
     };
 
     const handleDownload = () => {
@@ -542,7 +541,7 @@ export default function StageClient() {
                         <div className={styles.photosFilters}>
                             <div className={styles.quickFilters}>
                                 <button
-                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === 'all' ? styles.toolFilterBtnActive : ''}`}
+                                    className={`${styles.toolFilterBtn} ${selectedQuickRange === 'all' ? styles.toolFilterBtnActive : ''}`}
                                     onClick={() => {
                                         setSelectedQuickRange('all');
                                         setHistoryFromDate('');
@@ -552,7 +551,7 @@ export default function StageClient() {
                                     Tümü
                                 </button>
                                 <button
-                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === '3m' ? styles.toolFilterBtnActive : ''}`}
+                                    className={`${styles.toolFilterBtn} ${selectedQuickRange === '3m' ? styles.toolFilterBtnActive : ''}`}
                                     onClick={() => {
                                         setSelectedQuickRange('3m');
                                         setHistoryFromDate(toInputDateValue(Date.now() - 89 * 24 * 60 * 60 * 1000));
@@ -562,7 +561,7 @@ export default function StageClient() {
                                     Son 3 Ay
                                 </button>
                                 <button
-                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === '30d' ? styles.toolFilterBtnActive : ''}`}
+                                    className={`${styles.toolFilterBtn} ${selectedQuickRange === '30d' ? styles.toolFilterBtnActive : ''}`}
                                     onClick={() => {
                                         setSelectedQuickRange('30d');
                                         setHistoryFromDate(toInputDateValue(Date.now() - 29 * 24 * 60 * 60 * 1000));
@@ -572,7 +571,7 @@ export default function StageClient() {
                                     Son 30 Gün
                                 </button>
                                 <button
-                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === '7d' ? styles.toolFilterBtnActive : ''}`}
+                                    className={`${styles.toolFilterBtn} ${selectedQuickRange === '7d' ? styles.toolFilterBtnActive : ''}`}
                                     onClick={() => {
                                         setSelectedQuickRange('7d');
                                         setHistoryFromDate(toInputDateValue(Date.now() - 6 * 24 * 60 * 60 * 1000));
@@ -582,7 +581,7 @@ export default function StageClient() {
                                     Son 7 Gün
                                 </button>
                                 <button
-                                    className={`${styles.quickFilterBtn} ${selectedQuickRange === 'today' ? styles.toolFilterBtnActive : ''}`}
+                                    className={`${styles.toolFilterBtn} ${selectedQuickRange === 'today' ? styles.toolFilterBtnActive : ''}`}
                                     onClick={() => {
                                         setSelectedQuickRange('today');
                                         setHistoryFromDate(toInputDateValue(Date.now()));
@@ -701,14 +700,6 @@ export default function StageClient() {
                                                                 <div className={styles.photoPlaceholder}>Görsel yok</div>
                                                             )}
                                                         </div>
-                                                        <div className={styles.photoCardActions}>
-                                                            <button className={styles.photosPrimaryBtn} onClick={() => handleDownloadPair(item)}>
-                                                                İndir
-                                                            </button>
-                                                            <button className={styles.photosDangerBtn} onClick={() => handleDeleteRuns([item.entryId])}>
-                                                                Sil
-                                                            </button>
-                                                        </div>
                                                     </div>
                                                     <div className={styles.pairFrame}>
                                                         <span className={styles.frameLabel}>Çıktı</span>
@@ -726,6 +717,14 @@ export default function StageClient() {
                                                             )}
                                                         </div>
                                                     </div>
+                                                </div>
+                                                <div className={styles.photoCardActionsStack}>
+                                                    <button className={styles.photosPrimaryBtn} onClick={() => handleDownloadPair(item)}>
+                                                        İndir
+                                                    </button>
+                                                    <button className={styles.photosDangerBtn} onClick={() => handleDeleteRuns([item.entryId])}>
+                                                        Sil
+                                                    </button>
                                                 </div>
                                             </article>
                                         ))}
@@ -831,43 +830,32 @@ export default function StageClient() {
                                         {STYLES.map((style) => (
                                             <button
                                                 key={style.id}
-                                                className={`${styles.styleBtn} ${selectedStyle === style.id && !isAiStyle ? styles.selected : ''}`}
+                                                className={`${styles.styleBtn} ${selectedStyle === style.id ? styles.selected : ''}`}
                                                 onClick={() => {
                                                     setSelectedStyle(style.id);
-                                                    setIsAiStyle(false);
+                                                    setCustomStylePrompt('');
                                                 }}
                                             >
                                                 <div className={styles.styleIcon}>{style.icon}</div>
                                                 <span>{style.label}</span>
                                             </button>
                                         ))}
-                                        <button
-                                            className={`${styles.aiButton} ${isAiStyle ? styles.selected : ''}`}
-                                            onClick={handleAISelectStyle}
-                                            disabled={isSelectingStyle}
-                                        >
-                                            <div className={styles.checkbox}>
-                                                {isAiStyle && (
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                                                )}
-                                            </div>
-                                            <div className={styles.aiText}>
-                                                <span className={styles.aiTitle}>Emlak Stüdyosu Seçsin</span>
-                                                <span className={styles.aiDesc}>En uygun tarzı uygula</span>
-                                            </div>
-                                            <div className={styles.aiSparkle}>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <defs>
-                                                        <linearGradient id="yzSparkleGradientStyle" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                            <stop offset="0%" stopColor="#10b981" />
-                                                            <stop offset="100%" stopColor="#059669" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                    <path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z" fill="url(#yzSparkleGradientStyle)" />
-                                                    <path d="M19 16L19.75 18.25L22 19L19.75 19.75L19 22L18.25 19.75L16 19L18.25 18.25L19 16Z" fill="url(#yzSparkleGradientStyle)" />
-                                                </svg>
-                                            </div>
-                                        </button>
+                                        <div className={styles.customStyleWrap}>
+                                            <label htmlFor="custom-style-prompt" className={styles.customStyleLabel}>Özel tarz isteği</label>
+                                            <textarea
+                                                id="custom-style-prompt"
+                                                className={styles.customStyleInput}
+                                                placeholder="Örn: Japandi, açık meşe tonları, sade ve ferah..."
+                                                value={customStylePrompt}
+                                                onChange={(event) => {
+                                                    const next = event.target.value;
+                                                    setCustomStylePrompt(next);
+                                                    setSelectedStyle(next.trim() ? 'custom' : null);
+                                                }}
+                                                rows={3}
+                                                maxLength={240}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -876,7 +864,7 @@ export default function StageClient() {
                         <button
                             className={styles.processBtn}
                             onClick={handleGenerate}
-                            disabled={!file || isProcessing || !selectedRoom || (!selectedStyle && !isAiStyle)}
+                            disabled={!file || isProcessing || !selectedRoom || !selectedStyle}
                         >
                             {isProcessing ? (
                                 <>

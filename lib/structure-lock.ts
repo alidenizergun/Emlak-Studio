@@ -9,13 +9,15 @@ function parseDataUrl(dataUrl: string): { mimeType: string; buffer: Buffer } {
 function buildArchitectureWeight(x: number, y: number, width: number, height: number): number {
     const nx = x / width;
     const ny = y / height;
+    const fixtureEditableZone = nx >= 0.38 && nx <= 0.62 && ny >= 0.03 && ny <= 0.3;
 
     let w = 0;
-    if (ny <= 0.25) w = Math.max(w, 0.86); // ceiling
-    if (nx <= 0.15 && ny <= 0.9) w = Math.max(w, 0.8); // left wall
-    if (nx >= 0.85 && ny <= 0.9) w = Math.max(w, 0.8); // right wall
-    if (nx >= 0.15 && nx <= 0.85 && ny >= 0.14 && ny <= 0.62) w = Math.max(w, 0.78); // window zone
-    if (ny >= 0.7) w = Math.max(w, 0.06); // floor stays highly editable to avoid ghost artifacts
+    if (ny <= 0.26) w = Math.max(w, 0.9); // ceiling/cornice band must stay locked
+    if (nx <= 0.18 && ny <= 0.98) w = Math.max(w, 0.88); // left wall + corner continuity
+    if (nx >= 0.8 && ny <= 0.98) w = Math.max(w, 0.9); // right wall/partition area gets strongest lock
+    if (nx >= 0.15 && nx <= 0.85 && ny >= 0.14 && ny <= 0.62) w = Math.max(w, 0.74); // central structural zone
+    if (ny >= 0.72) w = Math.max(w, 0.08); // floor remains editable but minimally anchored
+    if (fixtureEditableZone) w = Math.min(w, 0.18); // let chandelier/pendant styling change while preserving ceiling geometry around it
     return w;
 }
 
@@ -71,14 +73,16 @@ export async function applyArchitectureStructureLock(
             const edgeBefore = computeEdgeConfidence(grayBefore, x, y, width, height);
             const edgeAfter = computeEdgeConfidence(grayAfter, x, y, width, height);
             const edgeAgreement = Math.min(edgeBefore, edgeAfter);
-            const edgeSupport = 0.08 + 0.92 * edgeAgreement;
-            const chromaAgreement = 1 - Math.min(1, colorDistance(beforeRaw, afterRaw, idx) * 1.2);
-            // Protect only stable structural zones; keep editable regions free from before/after ghost mixing.
-            const w = Math.max(0, Math.min(0.88, baseW * s * edgeSupport * (0.25 + 0.75 * chromaAgreement)));
+            const diff = colorDistance(beforeRaw, afterRaw, idx);
+            const lockSignal = baseW * s;
+            const isStructuralPixel = lockSignal >= 0.56 && edgeBefore >= 0.15;
+            const isStableStructuralPixel = diff <= 0.14 && (edgeBefore >= 0.22 || edgeAgreement >= 0.18);
+            const keepInputPixel = isStructuralPixel && isStableStructuralPixel;
             for (let c = 0; c < 3; c += 1) {
                 const b = beforeRaw[idx + c];
                 const a = afterRaw[idx + c];
-                merged[idx + c] = Math.round(b * w + a * (1 - w));
+                // No alpha-blending between before/after: pick one source pixel to eliminate ghost/seam artifacts.
+                merged[idx + c] = keepInputPixel ? b : a;
             }
             merged[idx + 3] = 255;
         }

@@ -5,6 +5,7 @@ import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
+import { verifyStageArtifacts } from '@/lib/stage-artifact-guard';
 import {
     validateInputImageQuality,
     verifyOutputImageQuality,
@@ -26,6 +27,7 @@ import {
     choosePromptVersion,
     consumeRetryBudget,
     getStageAdaptivePolicy,
+    getStagePromptLearning,
     isHardBlocked,
     noteHardBlockFailure,
     notePromptAttempt,
@@ -34,11 +36,12 @@ import {
     withStageIdempotency,
     writeCachedStageResponse,
 } from '@/lib/stage-runtime';
-import { validateUploadedImage } from '@/lib/upload-guard';
+import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 
 const STAGE_COST = TOOL_CREDIT_COSTS.stage;
 const ENABLE_STAGE_RETRY = process.env.STAGE_ENABLE_AUTO_RETRY !== '0';
 const ENABLE_STAGE_RESULT_CACHE = false;
+const STAGE_MIN_QUALITY_ACCEPT_SCORE = Number(process.env.STAGE_MIN_QUALITY_ACCEPT_SCORE || 0.44);
 
 export async function POST(request: NextRequest) {
     const startedAt = trackStageStart();
@@ -49,12 +52,16 @@ export async function POST(request: NextRequest) {
         const image = formData.get('image') as File;
         const roomType = formData.get('roomType') as string;
         const style = formData.get('style') as string;
+        const customStylePrompt = clampText(String(formData.get('customStylePrompt') || ''), 240);
         const phone = String(formData.get('phone') || '');
         chargedPhone = phone;
         const idempotencyKey = String(formData.get('idempotencyKey') || '').trim();
 
         if (!image || !roomType || !style) {
             return NextResponse.json({ success: false, error: 'Gerekli alanlar eksik' }, { status: 400 });
+        }
+        if (style === 'custom' && !customStylePrompt.trim()) {
+            return NextResponse.json({ success: false, error: 'Özel tarz isteği gerekli' }, { status: 400 });
         }
         const uploadCheck = validateUploadedImage(image);
         if (!uploadCheck.ok) {
@@ -111,7 +118,8 @@ export async function POST(request: NextRequest) {
         }
 
         const promptVersion = choosePromptVersion();
-        const requestKey = await buildStageRequestKey(normalizedImage, roomType, style, promptVersion);
+        const styleKey = style === 'custom' ? `custom:${customStylePrompt.trim()}` : style;
+        const requestKey = await buildStageRequestKey(normalizedImage, roomType, styleKey, promptVersion);
         const operationKey = idempotencyKey
             ? createHash('sha256').update(requestKey).update(':').update(idempotencyKey).digest('hex')
             : requestKey;
@@ -133,11 +141,14 @@ export async function POST(request: NextRequest) {
         return await withStageIdempotency(operationKey, async () => {
             const runId = randomUUID();
             const adaptivePolicy = getStageAdaptivePolicy();
+            const promptLearning = getStagePromptLearning(roomType, style);
             const styleIntensity = pickAutoStyleIntensity(inputQuality.metrics, adaptivePolicy.styleIntensityCap);
             const prompt = generateStagePrompt({
                 roomType,
                 style,
+                customStylePrompt,
                 styleIntensity,
+                learnedDirectives: promptLearning.directives,
                 watermarkSuspected: normalized.watermarkSuspected,
                 watermarkCropApplied: normalized.watermarkCropApplied,
                 promptVersion,
@@ -173,38 +184,9 @@ export async function POST(request: NextRequest) {
                     accepted = second.ok ? second : first;
                 }
             }
-
             if (!accepted.ok) {
-                notePromptAttempt(promptVersion, false);
-                noteHardBlockFailure(roomType, style);
-                trackStageFailure(accepted.reason === 'quality' ? 'output_quality' : 'architecture', startedAt);
-                recordStageRun({
-                    runId,
-                    phone,
-                    requestKey: operationKey,
-                    roomType,
-                    style,
-                    promptVersion,
-                    status: 'failed',
-                    failCode: accepted.reason === 'quality' ? 'OUTPUT_QUALITY_LOW' : 'ARCHITECTURE_CHANGED',
-                    architectureScore: accepted.architectureScore,
-                    qualityScore: accepted.qualityScore,
-                    beforeImageUrl,
-                });
-                return NextResponse.json(
-                    {
-                        success: false,
-                        code: accepted.reason === 'quality' ? 'OUTPUT_QUALITY_LOW' : 'ARCHITECTURE_CHANGED',
-                        error:
-                            accepted.reason === 'quality'
-                                ? `Cikti kalite kontrolden gecmedi (skor: ${accepted.qualityScore?.toFixed(2)}).`
-                                : `Mimari detaylar korunamadi (skor: ${accepted.architectureScore?.toFixed(2)}).`,
-                        runId,
-                        architectureScore: accepted.architectureScore,
-                        qualityScore: accepted.qualityScore,
-                    },
-                    { status: 422 }
-                );
+                // Kullanıcı isteği: kalite/mimari eşik takılsa da her işlem sonuç üretsin.
+                accepted = { ...accepted, ok: true, softAccepted: true };
             }
 
             if (first.ok) trackStageFirstPassSuccess();
@@ -237,10 +219,12 @@ export async function POST(request: NextRequest) {
                 promptVersion,
                 architectureScore: accepted.architectureScore,
                 qualityScore: accepted.qualityScore,
+                architectureRelaxed: Boolean(accepted.softAccepted),
                 credits: creditResult.credits,
                 usedCredits: STAGE_COST,
                 cached: false,
                 stageMetrics: snapshotStageMetrics(),
+                promptLearning: process.env.NODE_ENV === 'production' ? undefined : promptLearning.stats,
             };
             try {
                 if (ENABLE_STAGE_RESULT_CACHE) {
@@ -312,7 +296,9 @@ function pickAutoStyleIntensity(
 function generateStagePrompt(input: {
     roomType: string;
     style: string;
+    customStylePrompt: string;
     styleIntensity: 'low' | 'medium' | 'high';
+    learnedDirectives: string[];
     watermarkSuspected: boolean;
     watermarkCropApplied: boolean;
     promptVersion: 'A' | 'B';
@@ -320,8 +306,13 @@ function generateStagePrompt(input: {
     antiGhostBoost: boolean;
 }): string {
     const roomLabel = ROOM_LABELS[input.roomType] || 'room';
-    const styleGuideline = STYLE_GUIDELINES[input.style] || 'balanced and realistic furnishing';
-    const styleAnchor = STYLE_ANCHORS[input.style] || STYLE_ANCHORS.default;
+    const hasCustomStyle = input.style === 'custom' && input.customStylePrompt.trim().length > 0;
+    const styleGuideline = hasCustomStyle
+        ? `a custom interior direction: ${input.customStylePrompt.trim()}`
+        : STYLE_GUIDELINES[input.style] || 'balanced and realistic furnishing';
+    const styleAnchor = hasCustomStyle
+        ? `strictly follow this custom style brief: ${input.customStylePrompt.trim()}`
+        : STYLE_ANCHORS[input.style] || STYLE_ANCHORS.default;
     const roomLayoutGuideline = ROOM_LAYOUT_GUIDELINES[input.roomType] || ROOM_LAYOUT_GUIDELINES.default;
     const roomMustHave = ROOM_MUST_HAVE[input.roomType] || ROOM_MUST_HAVE.default;
     const watermarkRule = input.watermarkSuspected
@@ -340,9 +331,14 @@ function generateStagePrompt(input: {
     const adaptiveGhostRule = input.antiGhostBoost
         ? '- Adaptive quality rule: enforce zero ghosting; reject semi-transparent or partially rendered furniture.'
         : '';
+    const learnedRules = input.learnedDirectives.length > 0
+        ? `- Learned rules from previous runs (apply strictly):\n${input.learnedDirectives.map((x) => `  - ${x}`).join('\n')}`
+        : '';
     return `Task: Furnish this ${roomLabel} with ${styleGuideline}.
 STRICT CONSTRAINTS:
-- Keep architecture identical to the uploaded photo: room dimensions, column positions, wall lines, ceiling geometry, window and door locations must remain unchanged.
+- Never change architectural details under any condition: room dimensions, column positions, wall lines, ceiling geometry, window/door locations, openings, fixed structural contours must remain exactly unchanged.
+- Never invent new architectural surfaces: no new wall, half-wall, divider, partition, niche, beam, column, bulkhead, or fake depth plane anywhere in frame.
+- Do not create any new vertical plane on image edges (especially right side). Existing side geometry must remain identical.
 - Keep original layout, perspective, camera angle, framing, and lens feel.
 - Floor cleanup hard rule: if uploaded floor is dirty, clean it completely (no visible dirt/stain/smudges/dust remains) while preserving original floor material and tile/texture layout.
 - Clean other visible surfaces (remove dirt, stains, smudges, dust) without changing geometry.
@@ -363,10 +359,21 @@ STRICT CONSTRAINTS:
   - ${styleAnchor}
 - Furniture and decor must be fully opaque and physically grounded. No transparent, ghosted, floating, or double-exposure objects.
 - Every placed object must be fully rendered and physically consistent with floor/wall contact and shadows.
+- Never output semi-transparent overlay bands, stitched seams, scanline-like strips, or partial cut objects.
+- Remove all residual imprints from replaced objects (no faded silhouettes, no duplicate outlines, no echo edges).
+- Do not leave horizontal or vertical blending bands across walls, furniture, TV area, or floor.
+- Never duplicate ceiling fixtures or leave double-contour traces around chandelier/pendant anchors.
+- If any object is uncertain, omit it instead of rendering a partial/transparent version.
 - For dressing room tasks, include a complete modern dressing setup (wardrobe modules, mirror, bench/ottoman, organized storage accents) while keeping architecture fixed.
 - Curtains/blinds/tulle may be added on existing windows as decor, but window frame geometry and position must remain unchanged.
+- Lighting fixtures can be restyled by design style (chandelier, pendant, sconces, floor/table lamps), but electrical anchor points and mounting locations must stay fixed.
+- If fixtures are updated, keep physically coherent light behavior (no impossible glow directions, no detached lights).
 - Wall decor is allowed in measured amount: style-matching framed artworks and a subtle wall clock can be added if they fit scale and do not clutter walls.
+- Never place framed artworks on the TV/media focal wall.
+- If other walls are empty, you may place limited artwork on those non-TV walls with balanced spacing.
 - Keep wall accessories proportional and sparse; avoid excessive gallery-wall density.
+- Preserve all existing wall termination lines and corner joins exactly; do not close open areas with added surfaces.
+${learnedRules}
 ${watermarkRule}
 ${cropRule}
 ${versionRule}
@@ -383,14 +390,18 @@ RETRY MODE (QUALITY):
 - Keep architecture constraints unchanged.
 - Improve local clarity, edge crispness, and balanced exposure.
 - Avoid soft, hazy, low-contrast output.
-- Remove any semi-transparent remnants, double-exposure artifacts, or incomplete objects.`;
+- Remove any semi-transparent remnants, double-exposure artifacts, or incomplete objects.
+- Eliminate any horizontal/vertical ghost band and seam-like overlay.
+- Ensure every furniture edge is complete and fully opaque (no cut/half-rendered parts).`;
     }
     return `${basePrompt}
 
 RETRY MODE (ARCHITECTURE):
 - This is a failed previous attempt.
 - Keep window frame geometry, wall corners, ceiling line, and room depth exactly identical.
+- Do not move any fixed architectural/electrical anchor point.
 - Do not alter camera pose, focal perspective, or room proportions.
+- Do not add any new wall/partition/vertical plane. Right-side geometry and edge lines must be pixel-faithful to input.
 - Prioritize architectural fidelity over decoration density.`;
 }
 
@@ -475,6 +486,8 @@ async function runStageAttempt(
     reason?: 'architecture' | 'quality';
     architectureScore?: number;
     qualityScore?: number;
+    softAccepted?: boolean;
+    artifactScore?: number;
     generation: Awaited<ReturnType<typeof generateEditedImageWithNanoBanana>>;
 }> {
     const generation = await generateEditedImageWithNanoBanana({ image, prompt });
@@ -486,29 +499,77 @@ async function runStageAttempt(
     );
     const finalizedImageUrl = await postprocessListingImage(lockedImageUrl, { tool: 'stage' });
     const lockedGeneration = { ...generation, imageUrl: finalizedImageUrl };
-    const integrity = await verifyArchitectureIntegrity(image, lockedGeneration.imageUrl, architectureThreshold);
-    if (!integrity.ok) {
-        return {
-            ok: false,
-            reason: 'architecture',
-            architectureScore: integrity.score,
-            generation: lockedGeneration,
-        };
+    const threshold = Number.isFinite(Number(architectureThreshold))
+        ? Number(architectureThreshold)
+        : Number(process.env.ARCH_GUARD_THRESHOLD || 0.55);
+    const firstIntegrity = await verifyArchitectureIntegrity(image, lockedGeneration.imageUrl, threshold);
+    let chosenGeneration = lockedGeneration;
+    let chosenIntegrity = firstIntegrity;
+
+    if (!firstIntegrity.ok) {
+        const aggressiveLockStrength = watermarkSuspected ? 0.9 : 0.98;
+        const aggressiveLockedImageUrl = await applyArchitectureStructureLock(
+            image,
+            generation.imageUrl,
+            aggressiveLockStrength
+        );
+        const aggressiveFinalized = await postprocessListingImage(aggressiveLockedImageUrl, { tool: 'stage' });
+        const aggressiveGeneration = { ...generation, imageUrl: aggressiveFinalized };
+        const aggressiveIntegrity = await verifyArchitectureIntegrity(image, aggressiveGeneration.imageUrl, threshold);
+        if (aggressiveIntegrity.score > chosenIntegrity.score) {
+            chosenGeneration = aggressiveGeneration;
+            chosenIntegrity = aggressiveIntegrity;
+        }
     }
-    const quality = await verifyOutputImageQuality(image, lockedGeneration.imageUrl, 'stage');
+
+    const quality = await verifyOutputImageQuality(image, chosenGeneration.imageUrl, 'stage');
     if (!quality.ok) {
+        const score = Number(quality.score ?? 0);
+        if (score >= STAGE_MIN_QUALITY_ACCEPT_SCORE) {
+            return {
+                ok: true,
+                architectureScore: chosenIntegrity.score,
+                qualityScore: score,
+                softAccepted: true,
+                generation: chosenGeneration,
+            };
+        }
         return {
             ok: false,
             reason: 'quality',
-            architectureScore: integrity.score,
-            qualityScore: quality.score,
-            generation: lockedGeneration,
+            architectureScore: chosenIntegrity.score,
+            qualityScore: score,
+            generation: chosenGeneration,
         };
     }
+    const artifact = await verifyStageArtifacts(image, chosenGeneration.imageUrl);
+    if (!artifact.ok) {
+        return {
+            ok: false,
+            reason: 'quality',
+            architectureScore: chosenIntegrity.score,
+            qualityScore: Math.max(quality.score ?? 0, 0.35),
+            artifactScore: artifact.score,
+            generation: chosenGeneration,
+        };
+    }
+
+    if (chosenIntegrity.ok) {
+        return {
+            ok: true,
+            architectureScore: chosenIntegrity.score,
+            qualityScore: quality.score,
+            artifactScore: artifact.score,
+            generation: chosenGeneration,
+        };
+    }
+
     return {
-        ok: true,
-        architectureScore: integrity.score,
+        ok: false,
+        reason: 'architecture',
+        architectureScore: chosenIntegrity.score,
         qualityScore: quality.score,
-        generation: lockedGeneration,
+        artifactScore: artifact.score,
+        generation: chosenGeneration,
     };
 }

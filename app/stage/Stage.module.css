@@ -367,6 +367,17 @@
     margin-top: 7px;
 }
 
+.photoCardActionsStack {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .photoTile {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
@@ -439,11 +450,16 @@
 .photosPrimaryBtn,
 .photosDangerBtn {
     border-radius: 8px;
-    padding: 0.46rem 0.68rem;
+    padding: 0.62rem 0.9rem;
     font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    width: 100%;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .photosPrimaryBtn {
@@ -639,6 +655,41 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
+}
+
+.customStyleWrap {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.customStyleLabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.01em;
+}
+
+.customStyleInput {
+    width: 100%;
+    resize: vertical;
+    min-height: 72px;
+    max-height: 140px;
+    border: 1px solid #d1d9e6;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.customStyleInput:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 1px #10b981;
 }
 
 .roomBtn,
