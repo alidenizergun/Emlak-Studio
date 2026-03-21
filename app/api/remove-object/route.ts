@@ -81,6 +81,7 @@ RETRY MODE:
 - Improve clarity and avoid blurry or low-contrast output.
 - Enforce clean inpainting: no ghost traces, no semi-transparent leftovers, no black patches, no double edges.
 - If mode is "all", output must look like a truly empty room (all movable items removed).
+- If mode is "all", also remove visible decorative lighting fixtures such as chandeliers, pendant lights, sconces, and hanging lamps, while keeping ceiling geometry and fixture connection point architecture intact.
 - If lighting is dark/flat, rebalance exposure and shadows for a bright natural listing look.
 - Rebuild removed regions with continuous floor/wall texture direction and realistic contact shadows.
 - Return one complete edited image only (no partial/failed output).

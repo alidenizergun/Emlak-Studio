@@ -8,7 +8,6 @@ const INDEXABLE_ROUTES = [
   '/stage',
   '/remove-object',
   '/sanal-tadilat',
-  '/ilan-metni',
   '/ai-tour-guide',
   '/pricing',
   '/examples',

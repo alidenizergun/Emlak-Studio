@@ -1,37 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './Login.module.css';
 import { TESTIMONIALS } from '@/lib/data/testimonials';
-import {
-    clearPostAuthRedirect,
-    readPendingCheckoutSelection,
-    readPostAuthRedirect,
-    savePendingCheckoutSelection,
-    setPostAuthRedirect
-} from '@/lib/checkout';
+import { persistStoredUserId } from '@/lib/client-auth';
+import { useI18n } from '@/components/LanguageProvider';
 
-function normalizePhone(value: string): string {
-    const digits = value.replace(/\D/g, '').slice(0, 10);
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
-    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+function normalizeEmail(value: string): string {
+    return value.trim().toLowerCase();
 }
 
-function isValidPhone(phone: string): boolean {
-    const digits = phone.replace(/\D/g, '');
-    return digits.length === 10 && /^5[0-9]/.test(digits);
+function isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+}
+
+function persistAuth(email: string): void {
+    persistStoredUserId(email);
 }
 
 export default function LoginClient() {
+    const { t } = useI18n();
     const router = useRouter();
-    const [authQuery, setAuthQuery] = useState('');
-    const [phone, setPhone] = useState('');
-    const [otpSent, setOtpSent] = useState(false);
-    const [otpCode, setOtpCode] = useState('');
-    const [resendCooldown, setResendCooldown] = useState(0);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [currentTestimonial, setCurrentTestimonial] = useState(0);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
@@ -43,123 +36,35 @@ export default function LoginClient() {
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-        const params = new URLSearchParams(window.location.search);
-        const next = params.get('next');
-        const plan = params.get('plan');
-        const billing = params.get('billing');
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const normalizedEmail = normalizeEmail(email);
+        const nextErrors: Record<string, string> = {};
 
-        if (next === 'checkout') {
-            setPostAuthRedirect('/checkout');
-            if (plan && (billing === 'monthly' || billing === 'yearly')) {
-                savePendingCheckoutSelection({ planId: plan, billing });
-                setAuthQuery(`?next=checkout&plan=${encodeURIComponent(plan)}&billing=${billing}`);
-                return;
-            }
-            setAuthQuery('?next=checkout');
+        if (!isValidEmail(normalizedEmail)) nextErrors.email = t('Gecerli bir e-posta adresi girin');
+        if (password.length < 8) nextErrors.password = t('Sifre en az 8 karakter olmali');
+        if (Object.keys(nextErrors).length > 0) {
+            setErrors(nextErrors);
             return;
         }
-        setAuthQuery('');
-    }, []);
 
-    useEffect(() => {
-        if (resendCooldown <= 0) return;
-        const t = setInterval(() => setResendCooldown((c) => c - 1), 1000);
-        return () => clearInterval(t);
-    }, [resendCooldown]);
-
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPhone(normalizePhone(e.target.value));
-        if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
-    };
-
-    const handleSendOtp = async () => {
-        if (!isValidPhone(phone)) {
-            setErrors({ phone: 'Geçerli bir cep telefonu numarası girin (5XX XXX XX XX)' });
-            return;
-        }
         setErrors({});
         setIsLoading(true);
         try {
-            const res = await fetch('/api/auth/send-otp', {
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phone.replace(/\D/g, '') }),
+                body: JSON.stringify({ email: normalizedEmail, password }),
             });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.success) throw new Error('Gönderilemedi');
-            if (data.directLogin) {
-                const normalized = phone.replace(/\D/g, '');
-                if (typeof window !== 'undefined') {
-                    window.localStorage.setItem('emlak_authed', '1');
-                    window.localStorage.setItem('emlak_user_phone', normalized);
-                }
-                const redirect = readPostAuthRedirect();
-                if (redirect === '/checkout') {
-                    const pending = readPendingCheckoutSelection();
-                    clearPostAuthRedirect();
-                    if (pending) {
-                        router.push(`/checkout?plan=${encodeURIComponent(pending.planId)}&billing=${pending.billing}`);
-                        return;
-                    }
-                    router.push('/checkout');
-                    return;
-                }
-                router.push('/studio');
+            if (!res.ok || !data.success) {
+                setErrors({ form: data.error ? t(data.error) : t('Giris basarisiz. Lutfen tekrar deneyin.') });
                 return;
             }
-            setOtpSent(true);
-            setResendCooldown(60);
+            persistAuth(String(data.email || normalizedEmail));
+            router.push('/studio');
         } catch {
-            setErrors({ phone: 'Kod gönderilemedi. Lütfen tekrar deneyin.' });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const newErrors: Record<string, string> = {};
-        if (!otpSent || !isValidPhone(phone)) {
-            newErrors.phone = 'Önce SMS ile kod alın';
-        } else if (otpCode.replace(/\D/g, '').length !== 6) {
-            newErrors.otp = '6 haneli kodu girin';
-        }
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            return;
-        }
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/auth/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phone.replace(/\D/g, ''), code: otpCode.replace(/\D/g, '') }),
-            });
-            const data = await res.json().catch(() => ({}));
-            if (data.success) {
-                if (typeof window !== 'undefined') {
-                    window.localStorage.setItem('emlak_authed', '1');
-                    window.localStorage.setItem('emlak_user_phone', phone.replace(/\D/g, ''));
-                }
-                const redirect = readPostAuthRedirect();
-                if (redirect === '/checkout') {
-                    const pending = readPendingCheckoutSelection();
-                    clearPostAuthRedirect();
-                    if (pending) {
-                        router.push(`/checkout?plan=${encodeURIComponent(pending.planId)}&billing=${pending.billing}`);
-                        return;
-                    }
-                    router.push('/checkout');
-                    return;
-                }
-                router.push('/studio');
-            } else {
-                setErrors({ otp: data.error || 'Kod geçersiz veya süresi dolmuş.' });
-            }
-        } catch {
-            setErrors({ otp: 'Doğrulama başarısız. Lütfen tekrar deneyin.' });
+            setErrors({ form: t('Giris basarisiz. Lutfen tekrar deneyin.') });
         } finally {
             setIsLoading(false);
         }
@@ -169,148 +74,87 @@ export default function LoginClient() {
 
     return (
         <div className={styles.pageContainer}>
-            <div className={styles.rightPanel}>
-                <div className={styles.formContainer}>
-                    <div className={styles.formHeader}>
-                        <h1 className={styles.title}>Giriş Yapın</h1>
-                        <p className={styles.subtitle}>
-                            Cep telefonu numaranız ile giriş yapın. SMS ile doğrulama kodu göndereceğiz.
-                        </p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        <div className={styles.inputGroup}>
-                            <label htmlFor="phone" className={styles.label}>
-                                Cep Telefonu
-                            </label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                value={phone}
-                                onChange={handlePhoneChange}
-                                className={`${styles.input} ${errors.phone ? styles.inputError : ''}`}
-                                placeholder="5XX XXX XX XX"
-                                autoComplete="tel"
-                                maxLength={12}
-                                disabled={otpSent}
-                            />
-                            {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
-                            {!otpSent ? (
-                                <button
-                                    type="button"
-                                    className={styles.sendOtpBtn}
-                                    onClick={handleSendOtp}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? 'Gönderiliyor...' : 'SMS ile kod gönder'}
-                                </button>
-                            ) : (
-                                <p className={styles.otpSentNote}>
-                                    {phone} numarasına 6 haneli kod gönderildi.
-                                </p>
-                            )}
-                        </div>
-
-                        {otpSent && (
-                            <>
-                                <div className={styles.inputGroup}>
-                                    <label htmlFor="otp" className={styles.label}>
-                                        Doğrulama Kodu
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="otp"
-                                        inputMode="numeric"
-                                        value={otpCode}
-                                        onChange={(e) => {
-                                            const v = e.target.value.replace(/\D/g, '').slice(0, 6);
-                                            setOtpCode(v);
-                                            if (errors.otp) setErrors((p) => ({ ...p, otp: '' }));
-                                        }}
-                                        className={`${styles.input} ${styles.otpInput} ${errors.otp ? styles.inputError : ''}`}
-                                        placeholder="000000"
-                                        maxLength={6}
-                                        autoComplete="one-time-code"
-                                    />
-                                    {errors.otp && <span className={styles.errorText}>{errors.otp}</span>}
-                                    {resendCooldown > 0 ? (
-                                        <p className={styles.resendNote}>Tekrar kod gönder: {resendCooldown} sn</p>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className={styles.resendButton}
-                                            onClick={handleSendOtp}
-                                            disabled={isLoading}
-                                        >
-                                            Kodu tekrar gönder
-                                        </button>
-                                    )}
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className={styles.submitButton}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <div className={styles.spinner} />
-                                            Giriş Yapılıyor...
-                                        </>
-                                    ) : (
-                                        'Giriş Yap'
-                                    )}
-                                </button>
-                            </>
-                        )}
-                    </form>
-
-                    <p className={styles.registerLink}>
-                        Hesabınız yok mu? <Link href={`/register${authQuery}`} className={styles.link}>Şimdi Kayıt Olun</Link>
-                    </p>
-                </div>
-            </div>
-
             <div className={styles.leftPanel}>
                 <div className={styles.leftContent}>
                     <ul className={styles.benefitsList}>
                         <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>✨</div>
+                            <div className={styles.benefitIcon}>01</div>
                             <div>
-                                <h3>Fotoğraf Geliştirme & Dekorasyon</h3>
-                                <p>Düşük çözünürlüklü fotoğrafları 4K&apos;ya yükseltin; boş odaları emlak stüdyosu ile istediğiniz tarz mobilyalarla döşeyin.</p>
+                                <h3>{t('Tek hesapla tum araclar')}</h3>
+                                <p>{t('Fotoğraf geliştirme, dekorasyon, akilli esya silme ve ilan metni araclari ayni panelde sizi bekliyor.')}</p>
                             </div>
                         </li>
                         <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>⚡</div>
+                            <div className={styles.benefitIcon}>02</div>
                             <div>
-                                <h3>Saniyeler İçinde Sonuç</h3>
-                                <p>Manuel çekim veya dekoratör beklemeden ilan görsellerinizi tek platformda hazırlayın.</p>
-                            </div>
-                        </li>
-                        <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>💰</div>
-                            <div>
-                                <h3>Maliyet Tasarrufu</h3>
-                                <p>Profesyonel fotoğrafçı ve sanal dekorasyon hizmetlerine kıyasla çok daha uygun maliyetle çalışın.</p>
-                            </div>
-                        </li>
-                        <li className={styles.benefitItem}>
-                            <div className={styles.benefitIcon}>🏆</div>
-                            <div>
-                                <h3>Tüm Araçlar Tek Yerde</h3>
-                                <p>Geliştirme, sanal dekorasyon, gökyüzü değiştirme, ilan metni ve daha fazlası—emlak ilanlarınız için ihtiyacınız olan her şey.</p>
+                                <h3>{t('Hizli kredi takibi')}</h3>
+                                <p>{t('Giris yaptiginiz anda kalan kredi ve gecmis calismalarinizi gorebilir, aktif araclara hemen donebilirsiniz.')}</p>
                             </div>
                         </li>
                     </ul>
-                    <div className={styles.testimonial} key={currentTestimonial}>
-                        <div className={styles.testimonialStars}>⭐⭐⭐⭐⭐</div>
-                        <p className={styles.testimonialText}>&quot;{testimonial.text}&quot;</p>
+
+                    <div className={styles.testimonial}>
+                        <p className={styles.testimonialText}>“{testimonial.text}”</p>
                         <div className={styles.authorInfo}>
                             <p className={styles.testimonialAuthor}>{testimonial.author}</p>
                             <p className={styles.testimonialCompany}>{testimonial.company}</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className={styles.rightPanel}>
+                <div className={styles.formContainer}>
+                    <div className={styles.formHeader}>
+                        <h1 className={styles.title}>{t('Giriş Yapın')}</h1>
+                        <p className={styles.subtitle}>{t('E-posta adresiniz ve şifreniz ile hesabınıza girin.')}</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="email" className={styles.label}>{t('E-posta')}</label>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+                                }}
+                                className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
+                                placeholder="ornek@eposta.com"
+                                autoComplete="email"
+                            />
+                            {errors.email ? <span className={styles.errorText}>{errors.email}</span> : null}
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <label htmlFor="password" className={styles.label}>{t('Şifre')}</label>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+                                }}
+                                className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+                                placeholder={t('En az 8 karakter')}
+                                autoComplete="current-password"
+                            />
+                            {errors.password ? <span className={styles.errorText}>{errors.password}</span> : null}
+                        </div>
+
+                        {errors.form ? <span className={styles.errorText}>{errors.form}</span> : null}
+
+                        <button type="submit" className={styles.submitButton} disabled={isLoading}>
+                            {isLoading ? (<><div className={styles.spinner} />{t('Giriş Yapılıyor...')}</>) : t('Giriş Yap')}
+                        </button>
+                    </form>
+
+                    <p className={styles.registerLink}>
+                        {t('Hesabınız yok mu?')} <Link href="/register">{t('Ücretsiz kayıt olun')}</Link>
+                    </p>
                 </div>
             </div>
         </div>

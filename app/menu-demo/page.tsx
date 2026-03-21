@@ -17,7 +17,7 @@ export default function MenuDemoPage() {
       {/* Seçenek 1: Hamburger + Menü */}
       <section className={styles.section}>
         <div className={styles.bar}>
-          <div className={styles.logo}>Emlak Stüdyosu</div>
+          <div className={styles.logo}>STUDIO Estate</div>
           <button type="button" className={styles.menuButton} aria-label="Menü">
             <span className={styles.hamburger}>
               <span />
@@ -33,7 +33,7 @@ export default function MenuDemoPage() {
       {/* Seçenek 2: Liste ikonu */}
       <section className={styles.section}>
         <div className={styles.bar}>
-          <div className={styles.logo}>Emlak Stüdyosu</div>
+          <div className={styles.logo}>STUDIO Estate</div>
           <button type="button" className={styles.menuButton} aria-label="Menü">
             <svg className={styles.listIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="5" cy="6" r="1.5" fill="currentColor" />
@@ -52,7 +52,7 @@ export default function MenuDemoPage() {
       {/* Seçenek 3: Dikey üç nokta */}
       <section className={styles.section}>
         <div className={styles.bar}>
-          <div className={styles.logo}>Emlak Stüdyosu</div>
+          <div className={styles.logo}>STUDIO Estate</div>
           <button type="button" className={styles.menuButton} aria-label="Menü">
             <span className={styles.dotsVertical}>
               <span />
@@ -68,7 +68,7 @@ export default function MenuDemoPage() {
       {/* Seçenek 4: Grid */}
       <section className={styles.section}>
         <div className={styles.bar}>
-          <div className={styles.logo}>Emlak Stüdyosu</div>
+          <div className={styles.logo}>STUDIO Estate</div>
           <button type="button" className={styles.menuButton} aria-label="Menü">
             <span className={styles.gridIcon}>
               <span /><span /><span /><span />
@@ -82,7 +82,7 @@ export default function MenuDemoPage() {
       {/* Seçenek 5: Sadece "Menü" butonu */}
       <section className={styles.section}>
         <div className={styles.bar}>
-          <div className={styles.logo}>Emlak Stüdyosu</div>
+          <div className={styles.logo}>STUDIO Estate</div>
           <button type="button" className={styles.menuButtonTextOnly} aria-label="Menü">
             Menü
           </button>

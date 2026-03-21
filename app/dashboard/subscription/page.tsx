@@ -1,7 +1,7 @@
 import SubscriptionClient from './SubscriptionClient';
 
 export const metadata = {
-    title: 'Paketler / Abonelik Yönetimi - Emlak Stüdyosu',
+    title: 'Paketler / Abonelik Yönetimi - Studio Estate',
     robots: { index: false, follow: false },
 };
 

@@ -5,11 +5,11 @@ import { getGeminiClient, getGeminiImageModels } from '@/lib/gemini';
 const ENABLE_MODEL_FALLBACK = process.env.NANO_BANANA_ENABLE_MODEL_FALLBACK !== '0';
 const ENABLE_GENERATION_CACHE = process.env.NANO_BANANA_CACHE === '1';
 const MAX_CACHE_ENTRIES = Number(process.env.NANO_BANANA_CACHE_MAX || 80);
-const GENERATION_POLICY_VERSION = 'v3-gemini-only';
-const NANO_BANANA_TEMPERATURE = Number(process.env.NANO_BANANA_TEMPERATURE || 0.2);
-const EMPTY_IMAGE_RETRY_PER_MODEL = Math.max(0, Number(process.env.NANO_BANANA_EMPTY_RETRY_PER_MODEL || 1));
-const REQUEST_TIMEOUT_MS = Math.max(12_000, Number(process.env.NANO_BANANA_REQUEST_TIMEOUT_MS || 45_000));
-const TOTAL_TIMEOUT_MS = Math.max(REQUEST_TIMEOUT_MS, Number(process.env.NANO_BANANA_TOTAL_TIMEOUT_MS || 120_000));
+const GENERATION_POLICY_VERSION = 'v4-gemini-quality-first';
+const NANO_BANANA_TEMPERATURE = Number(process.env.NANO_BANANA_TEMPERATURE || 0.12);
+const EMPTY_IMAGE_RETRY_PER_MODEL = Math.max(0, Number(process.env.NANO_BANANA_EMPTY_RETRY_PER_MODEL || 2));
+const REQUEST_TIMEOUT_MS = Math.max(20_000, Number(process.env.NANO_BANANA_REQUEST_TIMEOUT_MS || 75_000));
+const TOTAL_TIMEOUT_MS = Math.max(REQUEST_TIMEOUT_MS, Number(process.env.NANO_BANANA_TOTAL_TIMEOUT_MS || 180_000));
 const MAX_MODELS_TO_TRY = Math.max(1, Number(process.env.NANO_BANANA_MAX_MODELS_TO_TRY || 2));
 const NANO_BANANA_DEBUG_LOG = process.env.NANO_BANANA_DEBUG_LOG === '1' || process.env.NODE_ENV !== 'production';
 

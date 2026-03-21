@@ -1,14 +1,16 @@
 import Link from 'next/link';
 import styles from './Contact.module.css';
 import type { Metadata } from 'next';
+import { DEFAULT_LANGUAGE, translateText } from '@/lib/i18n';
+import { buildLocalizedMetadata } from '@/lib/page-metadata';
 
-export const metadata: Metadata = {
-    title: 'İletişim - Emlak Stüdyosu | 7/24 Destek',
-    description: 'Emlak Stüdyosu müşteri hizmetleri ile iletişime geçin. Telefon ve e-posta desteği ile yanınızdayız.',
-    alternates: {
-        canonical: '/contact',
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    return buildLocalizedMetadata({
+        title: 'İletişim',
+        description: 'Studio Estate müşteri hizmetleri ile iletişime geçin. Telefon ve e-posta desteği ile yanınızdayız.',
+        path: '/contact',
+    });
+}
 
 const CHANNELS = [
     {
@@ -55,30 +57,30 @@ const CHANNELS = [
     },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+    const lang = DEFAULT_LANGUAGE;
     return (
         <div className={styles.page}>
             <div className={`container ${styles.container}`}>
                 <section className={styles.hero}>
-                    <p className={styles.kicker}>Contact Desk</p>
-                    <h1 className={styles.title}>Sizin için doğru destek kanalını seçelim</h1>
+                    <p className={styles.kicker}>{translateText(lang, 'Contact Desk')}</p>
+                    <h1 className={styles.title}>{translateText(lang, 'Sizin için doğru destek kanalını seçelim')}</h1>
                     <p className={styles.subtitle}>
-                        Teknik destekten kurumsal iş birliğine kadar tüm iletişim noktaları tek yerde.
-                        Hızlı, net ve takip edilebilir bir destek akışı sunuyoruz.
+                        {translateText(lang, 'Teknik destekten kurumsal iş birliğine kadar tüm iletişim noktaları tek yerde. Hızlı, net ve takip edilebilir bir destek akışı sunuyoruz.')}
                     </p>
 
                     <div className={styles.heroStats}>
                         <div>
                             <strong>&lt; 2 saat</strong>
-                            <span>Ortalama e-posta yanıtı</span>
+                            <span>{translateText(lang, 'Ortalama e-posta yanıtı')}</span>
                         </div>
                         <div>
                             <strong>09:00-18:00</strong>
-                            <span>Canlı telefon desteği</span>
+                            <span>{translateText(lang, 'Canlı telefon desteği')}</span>
                         </div>
                         <div>
                             <strong>7/24</strong>
-                            <span>Yardım merkezi erişimi</span>
+                            <span>{translateText(lang, 'Yardım merkezi erişimi')}</span>
                         </div>
                     </div>
                 </section>
@@ -88,21 +90,21 @@ export default function ContactPage() {
                         <article key={channel.key} className={styles.card}>
                             <div className={styles.cardTop}>
                                 <span className={styles.icon}>{channel.icon}</span>
-                                <span className={styles.label}>{channel.label}</span>
+                                <span className={styles.label}>{translateText(lang, channel.label)}</span>
                             </div>
                             <h2 className={styles.cardTitle}>{channel.title}</h2>
-                            <p className={styles.cardDesc}>{channel.desc}</p>
-                            <p className={styles.cardMeta}>{channel.meta}</p>
+                            <p className={styles.cardDesc}>{translateText(lang, channel.desc)}</p>
+                            <p className={styles.cardMeta}>{translateText(lang, channel.meta)}</p>
                             <Link href={channel.href} className={styles.cardCta}>
-                                Hemen Ulaş
+                                {translateText(lang, 'Hemen Ulaş')}
                             </Link>
                         </article>
                     ))}
                 </section>
 
                 <section className={styles.bottomStrip}>
-                    <p>Çözüm bulamadınız mı?</p>
-                    <Link href="/help" className={styles.stripBtn}>Yardım Merkezine Git</Link>
+                    <p>{translateText(lang, 'Çözüm bulamadınız mı?')}</p>
+                    <Link href="/help" className={styles.stripBtn}>{translateText(lang, 'Yardım Merkezine Git')}</Link>
                 </section>
             </div>
         </div>

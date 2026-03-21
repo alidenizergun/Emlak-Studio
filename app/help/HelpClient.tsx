@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import styles from "./Help.module.css";
+import { useI18n } from '@/components/LanguageProvider';
 
 const CATEGORIES = [
     {
@@ -65,8 +66,8 @@ const CATEGORIES = [
 
 const FAQ_ITEMS = [
     {
-        question: "Emlak Stüdyosu’ya nasıl kayıt olurum?",
-        answer: "Ana sayfadaki \"Ücretsiz Deneyin\" veya \"Kayıt Ol\" butonuna tıklayın. Cep telefonu numaranızı girin, SMS ile gelen 6 haneli doğrulama kodunu girerek hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen Fotoğraf Geliştirme ve Dekorasyon araçlarını kullanmaya başlayabilirsiniz.",
+        question: "Studio Estate’ya nasıl kayıt olurum?",
+        answer: "Ana sayfadaki \"Ücretsiz Deneyin\" veya \"Kayıt Ol\" butonuna tıklayın. E-posta adresiniz ve şifreniz ile hesabınızı oluşturabilirsiniz. Kayıt sonrası hemen aktif araçları kullanmaya başlayabilirsiniz.",
     },
     {
         question: "Kredi nedir? Nasıl kullanılır?",
@@ -78,7 +79,7 @@ const FAQ_ITEMS = [
     },
     {
         question: "Dekorasyon'da oda tipi ve tarz nasıl seçilir?",
-        answer: "Boş oda fotoğrafınızı yükledikten sonra \"Oda Tipi\" (Salon, Yatak Odası, Mutfak vb.) ve \"Dekorasyon Tarzı\" (Modern, Klasik, Minimal vb.) alanlarından seçim yapın. İsterseniz \"Emlak Stüdyosu Seçsin\" ile otomatik öneri alabilirsiniz. \"Dekorasyon Oluştur\" butonuyla işlemi başlatın.",
+        answer: "Boş oda fotoğrafınızı yükledikten sonra \"Oda Tipi\" (Salon, Yatak Odası, Mutfak vb.) ve \"Dekorasyon Tarzı\" (Modern, Klasik, Minimal vb.) alanlarından seçim yapın. İsterseniz \"Studio Estate Seçsin\" ile otomatik öneri alabilirsiniz. \"Dekorasyon Oluştur\" butonuyla işlemi başlatın.",
     },
     {
         question: "İşlem ne kadar sürer?",
@@ -86,7 +87,7 @@ const FAQ_ITEMS = [
     },
     {
         question: "Aboneliğimi nasıl iptal ederim?",
-        answer: "Hesap ayarlarından \"Aboneliği Yönet\" bölümüne giderek aboneliğinizi iptal edebilirsiniz. İptal sonrası mevcut dönem sonuna kadar hizmeti kullanmaya devam edersiniz; sonraki dönemden itibaren yenileme yapılmaz.",
+        answer: "Hesap ayarlarından \"Paket ve Aktivasyon\" bölümüne giderek paketinizi kapatabilirsiniz. MVP döneminde aktivasyonlar manuel olduğu için değişiklikler destek ekibi ile birlikte hızlıca yönetilir.",
     },
     {
         question: "Destek ekibine nasıl ulaşırım?",
@@ -95,15 +96,16 @@ const FAQ_ITEMS = [
 ];
 
 export default function HelpClient() {
+    const { t } = useI18n();
     const [openFaq, setOpenFaq] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
 
     return (
         <div className={`container ${styles.page}`}>
             <header className={styles.header}>
-                <h1 className={styles.title}>Yardım Merkezi</h1>
+                <h1 className={styles.title}>{t('Yardım Merkezi')}</h1>
                 <p className={styles.subtitle}>
-                    Emlak Stüdyosu ile ilgili sık sorulan sorulara yanıtlar ve kullanım rehberleri. Aradığınız konuyu aşağıdaki kategorilerden veya SSS bölümünden bulabilirsiniz.
+                    {t('Studio Estate ile ilgili sık sorulan sorulara yanıtlar ve kullanım rehberleri. Aradığınız konuyu aşağıdaki kategorilerden veya SSS bölümünden bulabilirsiniz.')}
                 </p>
                 <div className={styles.searchWrap}>
                     <div className={styles.searchBox}>
@@ -116,10 +118,10 @@ export default function HelpClient() {
                         <input
                             type="search"
                             className={styles.searchInput}
-                            placeholder="Konu veya soru ara..."
+                            placeholder={t('Konu veya soru ara...')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            aria-label="Yardım ara"
+                            aria-label={t('Yardım ara')}
                         />
                     </div>
                 </div>
@@ -129,23 +131,23 @@ export default function HelpClient() {
                 {CATEGORIES.map((cat) => (
                     <Link key={cat.title} href={cat.href} className={styles.card}>
                         <div className={styles.cardIcon}>{cat.icon}</div>
-                        <h2 className={styles.cardTitle}>{cat.title}</h2>
-                        <p className={styles.cardDesc}>{cat.description}</p>
+                        <h2 className={styles.cardTitle}>{t(cat.title)}</h2>
+                        <p className={styles.cardDesc}>{t(cat.description)}</p>
                     </Link>
                 ))}
             </section>
 
             <section id="sss" aria-labelledby="sss-title">
                 <h2 id="sss-title" className={styles.sectionTitle}>
-                    Sıkça Sorulan Sorular
+                    {t('Sıkça Sorulan Sorular')}
                 </h2>
                 <div className={styles.faqList}>
                     {FAQ_ITEMS.map((item, index) => {
                         const isOpen = openFaq === index;
                         const matchSearch =
                             !searchQuery ||
-                            item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            item.answer.toLowerCase().includes(searchQuery.toLowerCase());
+                            t(item.question).toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            t(item.answer).toLowerCase().includes(searchQuery.toLowerCase());
                         if (!matchSearch) return null;
 
                         return (
@@ -161,7 +163,7 @@ export default function HelpClient() {
                                     aria-controls={`faq-answer-${index}`}
                                     id={`faq-question-${index}`}
                                 >
-                                    {item.question}
+                                    {t(item.question)}
                                     <span className={styles.faqChevron} aria-hidden>
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="m6 9 6 6 6-6" />
@@ -175,7 +177,7 @@ export default function HelpClient() {
                                     aria-labelledby={`faq-question-${index}`}
                                     hidden={!isOpen}
                                 >
-                                    <div className={styles.faqAnswerInner}>{item.answer}</div>
+                                    <div className={styles.faqAnswerInner}>{t(item.answer)}</div>
                                 </div>
                             </div>
                         );
@@ -184,12 +186,12 @@ export default function HelpClient() {
             </section>
 
             <div className={styles.ctaBlock}>
-                <h3 className={styles.ctaTitle}>Cevabını bulamadın mı?</h3>
+                <h3 className={styles.ctaTitle}>{t('Cevabını bulamadın mı?')}</h3>
                 <p className={styles.ctaText}>
-                    Destek ekibimiz size yardımcı olmaktan mutluluk duyar. İletişim sayfamızdan bize ulaşın.
+                    {t('Destek ekibimiz size yardımcı olmaktan mutluluk duyar. İletişim sayfamızdan bize ulaşın.')}
                 </p>
                 <Link href="/contact" className={styles.ctaButton}>
-                    İletişime Geç
+                    {t('İletişime Geç')}
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5 12h14" />
                         <path d="m12 5 7 7-7 7" />

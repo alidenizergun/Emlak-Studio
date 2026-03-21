@@ -39,7 +39,7 @@ export default function SuggestionsClient() {
       <div className={styles.header}>
         <h1 className={styles.title}>Öneride Bulunun</h1>
         <p className={styles.description}>
-          Emlak Stüdyosu&apos;nu geliştirmemiz için fikirlerinizi bizimle paylaşın. Eksik gördüğünüz bir özellik veya yeni bir araç öneriniz mi var?
+          Studio Estate&apos;nu geliştirmemiz için fikirlerinizi bizimle paylaşın. Eksik gördüğünüz bir özellik veya yeni bir araç öneriniz mi var?
         </p>
       </div>
 

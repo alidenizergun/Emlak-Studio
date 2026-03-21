@@ -95,7 +95,7 @@ export async function buildStageRequestKey(
 ): Promise<string> {
     const bytes = Buffer.from(await image.arrayBuffer());
     const imageHash = crypto.createHash('sha256').update(bytes).digest('hex');
-    return hashParts([imageHash, roomType, style, promptVersion, 'stage-v3']);
+    return hashParts([imageHash, roomType, style, promptVersion, 'stage-v4']);
 }
 
 export function withStageIdempotency<T>(requestKey: string, fn: () => Promise<T>): Promise<T> {

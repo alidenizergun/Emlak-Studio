@@ -23,12 +23,21 @@ let dbPath = resolvePreferredDbPath();
 let dbInstance: Database.Database | null = null;
 
 export function normalizePhone(phoneRaw: string | null | undefined): string {
-    const digits = String(phoneRaw || '').replace(/\D/g, '');
+    const value = String(phoneRaw || '').trim().toLowerCase();
+    if (!value) return '';
+    if (value.includes('@')) {
+        return value;
+    }
+    const digits = value.replace(/\D/g, '');
     if (!digits) return '';
     if (digits.length === 12 && digits.startsWith('90')) return digits.slice(2);
     if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
     if (digits.length > 10) return digits.slice(-10);
     return digits;
+}
+
+export function normalizeUserId(userIdRaw: string | null | undefined): string {
+    return normalizePhone(userIdRaw);
 }
 
 function initDb(db: Database.Database): void {
@@ -38,6 +47,8 @@ function initDb(db: Database.Database): void {
     db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             phone TEXT PRIMARY KEY,
+            email TEXT,
+            password_hash TEXT,
             created_at INTEGER NOT NULL
         );
 
@@ -234,6 +245,21 @@ function initDb(db: Database.Database): void {
 
     // Lightweight migrations for existing local databases.
     try {
+        db.exec(`ALTER TABLE users ADD COLUMN email TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE users ADD COLUMN password_hash TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users(email) WHERE email IS NOT NULL`);
+    } catch {
+        // ignore
+    }
+    try {
         db.exec(`ALTER TABLE stage_runs ADD COLUMN before_image_url TEXT`);
     } catch {
         // ignore (already exists)
@@ -282,7 +308,11 @@ export function ensureUser(phone: string): void {
     const normalized = normalizePhone(phone);
     if (!normalized) return;
     const db = getDb();
+    const email = normalized.includes('@') ? normalized : null;
     db.prepare(
-        `INSERT OR IGNORE INTO users (phone, created_at) VALUES (?, ?)`
-    ).run(normalized, Date.now());
+        `INSERT INTO users (phone, email, created_at)
+         VALUES (?, ?, ?)
+         ON CONFLICT(phone) DO UPDATE SET
+            email = COALESCE(excluded.email, users.email)`
+    ).run(normalized, email, Date.now());
 }

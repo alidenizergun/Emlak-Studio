@@ -1,5 +1,5 @@
 .pageContainer {
-    padding-top: 104px;
+    padding-top: var(--page-top-space);
     padding-bottom: 40px;
     background: #f8fafc;
     max-width: 1400px;
@@ -171,6 +171,44 @@
 .changeImageBtn:hover {
     background: #0f172a;
     transform: translateY(-2px);
+}
+
+.validationSummary {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 20;
+    max-width: calc(100% - 160px);
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(191, 219, 254, 0.95);
+    background: rgba(239, 246, 255, 0.96);
+    color: #1e3a8a;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.validationSummaryStrong {
+    font-weight: 800;
+}
+
+.validationSummaryGood {
+    border-color: rgba(134, 239, 172, 0.95);
+    background: rgba(240, 253, 244, 0.96);
+    color: #166534;
+}
+
+.validationSummaryMedium {
+    border-color: rgba(253, 230, 138, 0.95);
+    background: rgba(255, 251, 235, 0.96);
+    color: #a16207;
+}
+
+.validationSummaryLow {
+    border-color: rgba(254, 202, 202, 0.95);
+    background: rgba(254, 242, 242, 0.96);
+    color: #991b1b;
 }
 
 .controlsSidebar {
@@ -467,7 +505,7 @@
 
 @media (max-width: 1024px) {
     .pageContainer {
-        padding-top: 80px;
+        padding-top: var(--page-top-space);
         padding-bottom: 20px;
     }
 

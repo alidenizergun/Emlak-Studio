@@ -28,15 +28,18 @@ Core objective:
 Scope to remove:
 - Furniture (sofa, chair, table, bed, TV unit, cabinet, shelf, etc.)
 - Decorative items (carpet, curtains if removable-looking, lamps, frames, plants, accessories)
+- Visible lighting fixtures that function as removable decor in the photo (chandeliers, pendant lights, hanging lamps, wall sconces, decorative ceiling fixtures)
 - Small clutter and personal belongings
 
 Scope to preserve:
 - Architectural elements and structural fixtures
 - Built-in or fixed components that are part of the property
+- Ceiling, wiring exit point, rosette/base location, and architecture around removed lighting must remain geometrically identical
 
 All-remove success criteria (strict):
 - The room must read as an empty room at first glance.
 - Remove all movable furniture/decor/clutter visible in the frame.
+- If decorative lighting fixtures are visible, remove them too and reconstruct the surrounding ceiling naturally while keeping ceiling geometry unchanged.
 - Do not leave partial objects, shadows of removed furniture, or material mismatches.
 - Removed zones must be fully reconstructed with realistic texture continuity and lighting continuity.
 - Final image must look like a single natural photograph, not edited/inpainted.

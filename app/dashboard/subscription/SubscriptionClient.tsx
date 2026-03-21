@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
 import styles from './Subscription.module.css';
 
 interface SubscriptionInfo {
@@ -17,9 +18,6 @@ interface SubscriptionInfo {
     lastUsedCredits?: number;
 }
 
-const MIN_TOPUP_CREDITS = 10;
-const MAX_TOPUP_CREDITS = 10000;
-
 function formatDate(iso: string): string {
     try {
         return new Date(iso).toLocaleDateString('tr-TR');
@@ -33,66 +31,55 @@ export default function SubscriptionClient() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [processingCancel, setProcessingCancel] = useState(false);
-    const [processingPurchase, setProcessingPurchase] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [purchaseAmountInput, setPurchaseAmountInput] = useState<string>('100');
-    const [phone, setPhone] = useState('');
+    const [accountId, setAccountId] = useState('');
     const [credits, setCredits] = useState<number>(0);
     const [usedCredits, setUsedCredits] = useState<number>(0);
     const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
     const [error, setError] = useState<string>('');
     const [resultNote, setResultNote] = useState<string>('');
-    const [purchaseNote, setPurchaseNote] = useState<string>('');
 
     useEffect(() => {
         setMounted(true);
         if (typeof window === 'undefined') return;
 
-        const authed = window.localStorage.getItem('emlak_authed') === '1';
+        const authed = isStoredAuthed();
         if (!authed) {
             router.replace('/login');
             return;
         }
 
-        const currentPhone = window.localStorage.getItem('emlak_user_phone') || '';
-        if (!currentPhone) {
-            setError('Telefon bilgisi bulunamadı.');
+        const currentAccountId = getStoredUserId();
+        if (!currentAccountId) {
+            setError('Hesap bilgisi bulunamadi.');
             setLoading(false);
             return;
         }
 
-        setPhone(currentPhone);
+        setAccountId(currentAccountId);
 
-        fetch(`/api/subscription?phone=${encodeURIComponent(currentPhone)}`)
+        fetch(`/api/subscription?email=${encodeURIComponent(currentAccountId)}`)
             .then((res) => res.json())
             .then((data) => {
                 if (!data.success) {
-                    setError(data.error || 'Abonelik bilgileri alınamadı.');
+                    setError(data.error || 'Paket bilgileri alinamadi.');
                     return;
                 }
                 setSubscription(data.subscription || null);
                 setCredits(typeof data.credits === 'number' ? data.credits : 0);
                 setUsedCredits(typeof data.usedCredits === 'number' ? data.usedCredits : 0);
             })
-            .catch(() => setError('Abonelik bilgileri alınamadı.'))
+            .catch(() => setError('Paket bilgileri alinamadi.'))
             .finally(() => setLoading(false));
     }, [router]);
 
     const statusText = useMemo(() => {
         if (!subscription) return '-';
-        return subscription.status === 'active' ? 'Aktif' : 'İptal edildi';
+        return subscription.status === 'active' ? 'Aktif' : 'Iptal edildi';
     }, [subscription]);
 
-    const purchaseQuote = useMemo(() => {
-        const amount = Math.floor(Number(purchaseAmountInput) || 0);
-        if (!subscription || amount <= 0) return { amount: 0, total: 0, perCreditPrice: 0 };
-        const perCreditPrice = subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1);
-        const total = Math.round(perCreditPrice * amount);
-        return { amount, total, perCreditPrice };
-    }, [purchaseAmountInput, subscription]);
-
     const handleCancelSubscription = async () => {
-        if (!phone || !subscription || subscription.status === 'cancelled') return;
+        if (!accountId || !subscription || subscription.status === 'cancelled') return;
 
         setProcessingCancel(true);
         setError('');
@@ -102,12 +89,12 @@ export default function SubscriptionClient() {
             const response = await fetch('/api/subscription', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, action: 'cancel' }),
+                body: JSON.stringify({ email: accountId, action: 'cancel' }),
             });
             const data = await response.json();
 
             if (!data.success) {
-                setError(data.error || 'İptal işlemi başarısız oldu.');
+                setError(data.error || 'Iptal islemi basarisiz oldu.');
                 return;
             }
 
@@ -118,78 +105,33 @@ export default function SubscriptionClient() {
             window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
                 detail: { credits: typeof data.credits === 'number' ? data.credits : 0 }
             }));
-            setResultNote(
-                `Abonelik iptal edildi. Kullanılan kredi: ${typeof data.usedCredits === 'number' ? data.usedCredits : 0}, ` +
-                `kaldırılan bakiye: ${typeof data.removedCredits === 'number' ? data.removedCredits : 0}.`
-            );
+            setResultNote('Paket iptal edildi. Yeni aktivasyon gerektiginde bizimle iletisime gecebilirsiniz.');
             setShowCancelModal(false);
         } catch {
-            setError('İptal işlemi sırasında bir hata oluştu.');
+            setError('Iptal islemi sirasinda bir hata olustu.');
         } finally {
             setProcessingCancel(false);
         }
     };
 
-    const handlePurchaseCredits = async () => {
-        if (!phone || !subscription) return;
-        const amount = purchaseQuote.amount;
-        if (amount < MIN_TOPUP_CREDITS || amount > MAX_TOPUP_CREDITS) return;
-
-        setProcessingPurchase(true);
-        setError('');
-        setPurchaseNote('');
-        try {
-            const params = new URLSearchParams({
-                mode: 'topup',
-                plan: subscription.planId,
-                billing: 'monthly',
-                credits: String(amount),
-            });
-            router.push(`/checkout?${params.toString()}`);
-        } catch {
-            setError('Kredi satın alma sırasında bir hata oluştu.');
-        } finally {
-            setProcessingPurchase(false);
-        }
-    };
-
-    const normalizeTopupAmount = () => {
-        const raw = purchaseAmountInput.replace(/\D/g, '');
-        if (!raw) {
-            setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
-            return;
-        }
-        const numericValue = Number(raw);
-        if (numericValue < MIN_TOPUP_CREDITS) {
-            setPurchaseAmountInput(String(MIN_TOPUP_CREDITS));
-            return;
-        }
-        if (numericValue > MAX_TOPUP_CREDITS) {
-            setPurchaseAmountInput(String(MAX_TOPUP_CREDITS));
-            return;
-        }
-        setPurchaseAmountInput(String(numericValue));
-    };
-
     if (!mounted) {
-        return <div className={styles.pageContainer}>Yükleniyor...</div>;
+        return <div className={styles.pageContainer}>Yukleniyor...</div>;
     }
 
     return (
         <div className={styles.pageContainer}>
             <div className={styles.container}>
                 <div className={styles.headerRow}>
-                    <h1 className={styles.title}>Abonetliği Yönet</h1>
+                    <h1 className={styles.title}>Paket ve Aktivasyon</h1>
                 </div>
-                <p className={styles.subtitle}>Abonelik durumunuz, kredi kullanımı ve ek kredi satın alma işlemlerinizi bu ekrandan yönetebilirsiniz.</p>
+                <p className={styles.subtitle}>MVP doneminde aktivasyonlari manuel olarak ilerletiyoruz. Mevcut kredi ve paket durumunuzu burada gorebilirsiniz.</p>
 
                 {loading ? (
-                    <div className={styles.card}>Yükleniyor...</div>
+                    <div className={styles.card}>Yukleniyor...</div>
                 ) : (
                     <>
                         {error ? <div className={styles.error}>{error}</div> : null}
                         {resultNote ? <div className={styles.success}>{resultNote}</div> : null}
-                        {purchaseNote ? <div className={styles.success}>{purchaseNote}</div> : null}
 
                         <div className={styles.card}>
                             <div className={styles.row}>
@@ -201,15 +143,15 @@ export default function SubscriptionClient() {
                                 <span className={styles.value}>{statusText}</span>
                             </div>
                             <div className={styles.row}>
-                                <span className={styles.label}>Aylık Ücret</span>
+                                <span className={styles.label}>Aylik Ucret Referansi</span>
                                 <span className={styles.value}>₺{subscription?.monthlyPrice?.toLocaleString('tr-TR') ?? '-'}</span>
                             </div>
                             <div className={styles.row}>
-                                <span className={styles.label}>Aylık Kredi</span>
+                                <span className={styles.label}>Aylik Kredi</span>
                                 <span className={styles.value}>{subscription?.monthlyCredits ?? 0}</span>
                             </div>
                             <div className={styles.row}>
-                                <span className={styles.label}>Kullanılan Kredi</span>
+                                <span className={styles.label}>Kullanilan Kredi</span>
                                 <span className={styles.value}>{usedCredits}</span>
                             </div>
                             <div className={styles.row}>
@@ -217,61 +159,31 @@ export default function SubscriptionClient() {
                                 <span className={styles.value}>{credits}</span>
                             </div>
                             <div className={styles.row}>
-                                <span className={styles.label}>Başlangıç</span>
+                                <span className={styles.label}>Baslangic</span>
                                 <span className={styles.value}>{subscription?.startDate ? formatDate(subscription.startDate) : '-'}</span>
                             </div>
                             <div className={styles.row}>
-                                <span className={styles.label}>Sonraki Fatura</span>
+                                <span className={styles.label}>Sonraki Kontrol</span>
                                 <span className={styles.value}>{subscription?.nextBillingDate ? formatDate(subscription.nextBillingDate) : '-'}</span>
                             </div>
                         </div>
 
                         <div className={styles.actions}>
                             <div className={styles.purchaseBlock}>
-                                <p className={styles.purchaseText}>İhtiyacınıza göre kredi adedini girin ve hesabınıza anında ekleyin.</p>
-                                <div className={styles.purchaseRow}>
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        pattern="[0-9]*"
-                                        value={purchaseAmountInput}
-                                        onChange={(e) => {
-                                            const digitsOnly = e.target.value.replace(/\D/g, '');
-                                            setPurchaseAmountInput(digitsOnly);
-                                        }}
-                                        onFocus={(e) => e.currentTarget.select()}
-                                        onBlur={normalizeTopupAmount}
-                                        className={styles.purchaseInput}
-                                        placeholder="100"
-                                        aria-label="Satın alınacak kredi adedi"
-                                    />
-                                    <button
-                                        type="button"
-                                        className={styles.purchaseBtn}
-                                        onClick={handlePurchaseCredits}
-                                        disabled={processingPurchase}
-                                    >
-                                        {processingPurchase ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
-                                    </button>
-                                </div>
-                                <p className={`${styles.purchaseText} ${styles.purchaseTotalText}`}>
-                                    Toplam ödeme: ₺{purchaseQuote.total.toLocaleString('tr-TR')}
-                                </p>
-                                <p className={styles.warning}>
-                                    Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS.toLocaleString('tr-TR')}, maksimum {MAX_TOPUP_CREDITS.toLocaleString('tr-TR')} kredi girebilirsiniz.
-                                </p>
+                                <p className={styles.purchaseText}>Yeni kredi ya da paket tanimi icin bize ulasin. Aktivasyonu manuel olarak ayni gun icinde tamamlayalim.</p>
+                                <p className={`${styles.purchaseText} ${styles.purchaseTotalText}`}>Odeme entegrasyonu MVP sonrasinda acilacak.</p>
                             </div>
-
                         </div>
                         <div className={styles.headerActions}>
-                            <Link href="/pricing" className={styles.linkBtn}>Paketleri Gör</Link>
+                            <Link href="/pricing" className={styles.linkBtn}>Paketleri Gor</Link>
+                            <Link href="/contact" className={styles.linkBtn}>Iletisime Gec</Link>
                             <button
                                 type="button"
                                 className={styles.linkBtn}
                                 onClick={() => setShowCancelModal(true)}
-                                disabled={processingCancel || processingPurchase || !subscription || subscription.status === 'cancelled'}
+                                disabled={processingCancel || !subscription || subscription.status === 'cancelled'}
                             >
-                                {processingCancel ? 'İptal Ediliyor...' : 'Üyeliği İptal Et'}
+                                {processingCancel ? 'Iptal Ediliyor...' : 'Paketi Iptal Et'}
                             </button>
                         </div>
 
@@ -280,7 +192,7 @@ export default function SubscriptionClient() {
                                 className={styles.modalOverlay}
                                 role="dialog"
                                 aria-modal="true"
-                                aria-label="Abonelik iptali"
+                                aria-label="Paket iptali"
                                 onClick={() => setShowCancelModal(false)}
                             >
                                 <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
@@ -293,19 +205,16 @@ export default function SubscriptionClient() {
                                     >
                                         ×
                                     </button>
-                                    <h3 className={styles.modalTitle}>Gitmeden önce birlikte çözelim</h3>
+                                    <h3 className={styles.modalTitle}>Paketi kapatmadan once bizimle konusun</h3>
                                     <p className={styles.modalText}>
-                                        Aboneliğinizi iptal etmek yerine maliyeti düşürmek ve kredinizi daha verimli kullanmak için şu seçenekleri deneyebilirsiniz:
+                                        Kredi ihtiyaciniza gore daha uygun bir manuel plan tanimlayabiliriz. Yine de devam etmek isterseniz mevcut paketi kapatabiliriz.
                                     </p>
                                     <div className={styles.modalActions}>
-                                        <Link href="/pricing" className={styles.modalSecondaryBtn}>
-                                            Daha Uygun Pakete Geç
-                                        </Link>
-                                        <Link href="/help" className={styles.modalSecondaryBtn}>
-                                            Kullanım Rehberini Aç
-                                        </Link>
                                         <Link href="/contact" className={styles.modalSecondaryBtn}>
-                                            Destek ile Görüş
+                                            Destek ile Goruş
+                                        </Link>
+                                        <Link href="/pricing" className={styles.modalSecondaryBtn}>
+                                            Paketleri Incele
                                         </Link>
                                     </div>
                                     <div className={styles.modalFooter}>
@@ -315,15 +224,15 @@ export default function SubscriptionClient() {
                                             onClick={() => setShowCancelModal(false)}
                                             disabled={processingCancel}
                                         >
-                                            İptalden Vazgeç
+                                            Vazgec
                                         </button>
                                         <button
                                             type="button"
-                                            className={styles.modalDangerBtn}
+                                            className={styles.modalConfirmBtn}
                                             onClick={handleCancelSubscription}
                                             disabled={processingCancel}
                                         >
-                                            {processingCancel ? 'İptal Ediliyor...' : 'Yine de İptal Et'}
+                                            {processingCancel ? 'Iptal Ediliyor...' : 'Paketi Iptal Et'}
                                         </button>
                                     </div>
                                 </div>

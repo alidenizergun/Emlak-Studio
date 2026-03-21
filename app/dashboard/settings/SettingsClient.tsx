@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
 import styles from '../Dashboard.module.css';
 
 const MIN_TOPUP_CREDITS = 1;
@@ -15,7 +16,13 @@ interface SubscriptionInfo {
     status: 'active' | 'cancelled';
 }
 
-function maskPhone(raw: string): string {
+function maskIdentity(raw: string): string {
+    if (!raw) return '—';
+    if (raw.includes('@')) {
+        const [name, domain] = raw.split('@');
+        const safeName = name.length <= 2 ? `${name[0] || '*'}*` : `${name.slice(0, 2)}***`;
+        return `${safeName}@${domain}`;
+    }
     const digits = raw.replace(/\D/g, '');
     if (digits.length < 5) return '*** ** **';
     const first = digits.slice(0, 3);
@@ -46,7 +53,7 @@ function isValidOfficeName(value: string): boolean {
 export default function SettingsClient() {
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
-    const [phoneDisplay, setPhoneDisplay] = useState<string>('');
+    const [identityDisplay, setIdentityDisplay] = useState<string>('');
     const [fullName, setFullName] = useState('');
     const [officeName, setOfficeName] = useState('');
     const [email, setEmail] = useState('');
@@ -55,7 +62,7 @@ export default function SettingsClient() {
     const [needsCorrectionAttempt, setNeedsCorrectionAttempt] = useState(false);
     const [bonusEligibilityLocked, setBonusEligibilityLocked] = useState(false);
     const [showProfileBonusHint, setShowProfileBonusHint] = useState(true);
-    const [rawPhone, setRawPhone] = useState('');
+    const [accountId, setAccountId] = useState('');
     const [purchaseAmountInput, setPurchaseAmountInput] = useState('100');
     const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
     const [topupLoading, setTopupLoading] = useState(false);
@@ -64,7 +71,7 @@ export default function SettingsClient() {
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const authed = window.localStorage.getItem('emlak_authed') === '1';
+        const authed = isStoredAuthed();
         if (!authed) {
             if (!redirectDone.current) {
                 redirectDone.current = true;
@@ -72,17 +79,16 @@ export default function SettingsClient() {
             }
             return;
         }
-        const phone = window.localStorage.getItem('emlak_user_phone');
+        const identity = getStoredUserId();
         const storedFullName = window.localStorage.getItem('emlak_profile_full_name') || '';
         const storedOfficeName = window.localStorage.getItem('emlak_profile_office_name') || '';
         const storedEmail = window.localStorage.getItem('emlak_profile_email') || '';
-        const normalizedPhone = (phone || '').replace(/\D/g, '');
-        const bonusKey = `emlak_profile_bonus_awarded_${normalizedPhone}`;
-        const bonusAlreadyAwarded = normalizedPhone ? window.localStorage.getItem(bonusKey) === '1' : false;
+        const bonusKey = identity ? `emlak_profile_bonus_awarded_${identity}` : '';
+        const bonusAlreadyAwarded = identity ? window.localStorage.getItem(bonusKey) === '1' : false;
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPhoneDisplay(phone ? maskPhone(phone) : '—');
+        setIdentityDisplay(identity ? maskIdentity(identity) : '—');
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setRawPhone(phone || '');
+        setAccountId(identity || '');
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setFullName(storedFullName);
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -96,10 +102,10 @@ export default function SettingsClient() {
     }, [router]);
 
     useEffect(() => {
-        if (!rawPhone) return;
+        if (!accountId) return;
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setTopupLoading(true);
-        fetch(`/api/subscription?phone=${encodeURIComponent(rawPhone)}`)
+        fetch(`/api/subscription?email=${encodeURIComponent(accountId)}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.success && data.subscription) {
@@ -108,7 +114,7 @@ export default function SettingsClient() {
             })
             .catch(() => {})
             .finally(() => setTopupLoading(false));
-    }, [rawPhone]);
+    }, [accountId]);
 
     const handleSave = async () => {
         if (typeof window === 'undefined') return;
@@ -164,14 +170,14 @@ export default function SettingsClient() {
         window.localStorage.setItem('emlak_profile_office_name', normalizedOffice);
         window.localStorage.setItem('emlak_profile_email', normalizedEmail);
 
-        const phone = (window.localStorage.getItem('emlak_user_phone') || '').replace(/\D/g, '');
-        const bonusKey = `emlak_profile_bonus_awarded_${phone}`;
-        const bonusAlreadyAwarded = phone ? window.localStorage.getItem(bonusKey) === '1' : true;
+        const identity = getStoredUserId();
+        const bonusKey = identity ? `emlak_profile_bonus_awarded_${identity}` : '';
+        const bonusAlreadyAwarded = identity ? window.localStorage.getItem(bonusKey) === '1' : true;
         const bonusBlocked = bonusEligibilityLocked;
 
         setNeedsCorrectionAttempt(false);
 
-        if (!phone || bonusAlreadyAwarded || bonusBlocked) {
+        if (!identity || bonusAlreadyAwarded || bonusBlocked) {
             setSaveNoteType('success');
             setSaveNote('Bilgiler kaydedildi.');
             return;
@@ -181,7 +187,7 @@ export default function SettingsClient() {
             const response = await fetch('/api/credits', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, amount: 5 })
+                body: JSON.stringify({ email: identity, amount: 5 })
             });
             const data = await response.json();
             if (!data.success || typeof data.credits !== 'number') {
@@ -209,15 +215,8 @@ export default function SettingsClient() {
     const totalTopupPrice = Math.round(perCreditPrice * purchaseAmount);
 
     const handleTopupPurchase = () => {
-        if (!subscription || !rawPhone || subscription.status === 'cancelled') return;
-        const params = new URLSearchParams({
-            mode: 'topup',
-            plan: subscription.planId,
-            billing: 'monthly',
-            credits: String(purchaseAmount),
-        });
         setTopupProcessing(true);
-        router.push(`/checkout?${params.toString()}`);
+        router.push('/contact');
     };
 
     const normalizeTopupAmount = () => {
@@ -289,11 +288,11 @@ export default function SettingsClient() {
                                 />
                             </label>
                             <label className={styles.settingsField}>
-                                <span className={styles.krediLabel}>Telefon (değiştirilemez)</span>
+                                <span className={styles.krediLabel}>Hesap (değiştirilemez)</span>
                                 <input
                                     className={styles.settingsInputReadOnly}
                                     type="text"
-                                    value={phoneDisplay}
+                                    value={identityDisplay}
                                     readOnly
                                 />
                             </label>
@@ -310,16 +309,16 @@ export default function SettingsClient() {
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
                         <h2 className={styles.settingsSectionTitle}>Abonelik / Ödeme</h2>
                         <p className={styles.accountNote} style={{ marginTop: 0 }}>
-                            Aboneliğinizi iptal etmek veya planınızı değiştirmek için aşağıdaki bağlantıyı kullanın.
+                            Paket aktivasyonu ve faturalandirma su anda manuel ilerliyor. Size uygun paketi birlikte belirleyelim.
                         </p>
                         <Link href="/dashboard/subscription" className={`${styles.accountBtn} ${styles.settingsActionBtn}`} style={{ marginTop: '1.25rem' }}>
-                            Paketleri görüntüle / Aboneliği yönet
+                            Paketleri goruntule / aktivasyon talep et
                         </Link>
 
                         <div className={styles.topupPanel}>
                             <h3 className={styles.topupTitle}>Ek kredi satın al</h3>
                             <p className={styles.topupText}>
-                                İhtiyacınıza göre kredi adedini girin ve anında hesabınıza ekleyin.
+                                Ihtiyaciniza gore kredi adedini girin, ekibimiz hesabinizi manuel olarak aktive etsin.
                             </p>
                             <div className={styles.topupRow}>
                                 <input
@@ -341,10 +340,10 @@ export default function SettingsClient() {
                                     onClick={handleTopupPurchase}
                                     disabled={topupLoading || topupProcessing || !subscription || subscription.status === 'cancelled'}
                                 >
-                                    {topupProcessing ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
+                                    {topupProcessing ? 'Yonlendiriliyor...' : 'Iletisime Gec'}
                                 </button>
                             </div>
-                            <p className={styles.topupText}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
+                            <p className={styles.topupText}>Tahmini paket referansi: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
                             <p className={styles.topupNote}>
                                 Ek kredi satın alımı için minimum {MIN_TOPUP_CREDITS}, maksimum {MAX_TOPUP_CREDITS} kredi girebilirsiniz.
                             </p>
@@ -359,6 +358,9 @@ export default function SettingsClient() {
                             </Link>
                             <Link href="/contact" className={styles.accountBtnSecondary}>
                                 İletişim
+                            </Link>
+                            <Link href="/dashboard/admin" className={styles.accountBtnSecondary}>
+                                Admin Paneli
                             </Link>
                         </div>
                     </div>

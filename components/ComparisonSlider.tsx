@@ -1,16 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 import styles from './ComparisonSlider.module.css';
 
 /** Tüm sitedeki slider handle ikonu — beyaz arka plan üzerinde koyu stroke (currentColor). */
-const SLIDER_HANDLE_ICON = (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10 12H4" />
-        <path d="M20 12h-6" />
-        <path d="M8 8L4 12l4 4" />
-        <path d="M16 8l4 4-4 4" />
+const HANDLE_ICON = (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 12H3" />
+        <path d="M21 12h-6" />
+        <path d="M7 9l-4 3 4 3" />
+        <path d="M17 9l4 3-4 3" />
     </svg>
 );
 
@@ -29,19 +28,28 @@ interface ComparisonSliderProps {
     hintFullRange?: boolean;
     /** true ise "sonra" (dekore edilmiş) görseli %2 daha parlak gösterilir (örn. Hero) */
     brightenAfter?: boolean;
+    variant?: 'default' | 'hero';
+    introHint?: 'none' | 'once';
+    labels?: {
+        before: string;
+        after: string;
+    };
 }
 
 const ComparisonSlider = ({
     beforeImage,
     afterImage,
     beforeAlt = "Boş Oda",
-    afterAlt = "Emlak Stüdyosu ile Dekorasyon",
+    afterAlt = "Studio Estate ile Dekorasyon",
     degradeBefore = false,
     onPositionChange,
     hintSlide = false,
     preserveAspect = false,
     hintFullRange = false,
-    brightenAfter = false
+    brightenAfter = false,
+    variant = 'default',
+    introHint = 'none',
+    labels,
 }: ComparisonSliderProps) => {
     const [isResizing, setIsResizing] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -50,8 +58,10 @@ const ComparisonSlider = ({
     const [hintPlaying, setHintPlaying] = useState(false);
     const [beforeLoadedFor, setBeforeLoadedFor] = useState<string | null>(null);
     const [afterLoadedFor, setAfterLoadedFor] = useState<string | null>(null);
+    const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const sliderRef = useRef<HTMLDivElement>(null);
     const hintPlayedRef = useRef(false);
+    const heroVariant = variant === 'hero';
 
     const handleMouseDown = () => setIsResizing(true);
     const handleMouseUp = () => setIsResizing(false);
@@ -106,6 +116,24 @@ const ComparisonSlider = ({
     }, []);
 
     useEffect(() => {
+        if (!sliderRef.current) return;
+        const element = sliderRef.current;
+        const updateSize = () => {
+            const rect = element.getBoundingClientRect();
+            setContainerSize({
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+            });
+        };
+
+        updateSize();
+        const observer = new ResizeObserver(() => updateSize());
+        observer.observe(element);
+
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
         let cancelled = false;
         const img = new window.Image();
         img.decoding = 'async';
@@ -148,36 +176,113 @@ const ComparisonSlider = ({
         };
     }, [afterImage, beforeImage]);
 
-    const safePosition = Math.max(0.5, Math.min(99.5, sliderPosition));
+    const safePosition = heroVariant
+        ? Math.max(2, Math.min(98, sliderPosition))
+        : Math.max(0.5, Math.min(99.5, sliderPosition));
     const safeAfterImage = displayAfterImage || displayBeforeImage;
     const beforeReady = beforeLoadedFor === beforeImage;
     const afterReady = afterLoadedFor === afterImage;
+    const contentReady = beforeReady && afterReady;
+
+    const shouldPlayHint = introHint === 'once' || hintSlide;
 
     // İpucu animasyonu: üretim/lokal aynı davransın diye görünürlük API'lerine değil,
     // görsellerin hazır olmasına bağlı tek seferlik deterministik tetikleme.
     useEffect(() => {
-        if (!hintSlide || hintPlayedRef.current) return;
-        if (!beforeReady || !afterReady) return;
-        const start = setTimeout(() => {
-            hintPlayedRef.current = true;
-            setHintPlaying(true);
-        }, 220);
-        const totalDuration = 4200;
-        const end = setTimeout(() => {
+        if (!shouldPlayHint || hintPlayedRef.current) return;
+        if (!contentReady) return;
+        if (!sliderRef.current || sliderRef.current.clientWidth <= 0) return;
+
+        if (heroVariant) {
+            if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+                hintPlayedRef.current = true;
+                return;
+            }
+
+            let raf1 = 0;
+            let raf2 = 0;
+            let animationFrame = 0;
+            let cancelled = false;
+            const easeInOutCubic = (t: number) => (
+                t < 0.5
+                    ? 4 * t * t * t
+                    : 1 - Math.pow(-2 * t + 2, 3) / 2
+            );
+            const runSegment = (from: number, to: number, duration: number) => (
+                new Promise<void>((resolve) => {
+                    const startTime = performance.now();
+                    const step = (now: number) => {
+                        if (cancelled) return;
+                        const rawProgress = Math.min(1, (now - startTime) / duration);
+                        const easedProgress = easeInOutCubic(rawProgress);
+                        const nextPosition = from + ((to - from) * easedProgress);
+                        setSliderPosition(nextPosition);
+                        onPositionChange?.(nextPosition);
+
+                        if (rawProgress < 1) {
+                            animationFrame = window.requestAnimationFrame(step);
+                        } else {
+                            resolve();
+                        }
+                    };
+
+                    animationFrame = window.requestAnimationFrame(step);
+                })
+            );
+
+            raf1 = window.requestAnimationFrame(() => {
+                raf2 = window.requestAnimationFrame(() => {
+                    hintPlayedRef.current = true;
+                    setHintPlaying(true);
+                    void (async () => {
+                        await runSegment(50, 61, 420);
+                        await runSegment(61, 39, 640);
+                        await runSegment(39, 50, 420);
+                        if (cancelled) return;
+                        setSliderPosition(50);
+                        onPositionChange?.(50);
+                        setHintPlaying(false);
+                    })();
+                });
+            });
+
+            return () => {
+                cancelled = true;
+                window.cancelAnimationFrame(raf1);
+                window.cancelAnimationFrame(raf2);
+                window.cancelAnimationFrame(animationFrame);
+            };
+        }
+
+        let raf1 = 0;
+        let raf2 = 0;
+        let start = 0;
+        let end = 0;
+        raf1 = window.requestAnimationFrame(() => {
+            raf2 = window.requestAnimationFrame(() => {
+                start = window.setTimeout(() => {
+                    hintPlayedRef.current = true;
+                    setHintPlaying(true);
+                }, 220);
+            });
+        });
+        end = window.setTimeout(() => {
             setHintPlaying(false);
             setSliderPosition(50);
             onPositionChange?.(50);
-        }, 220 + totalDuration);
+        }, 4420);
 
         return () => {
+            window.cancelAnimationFrame(raf1);
+            window.cancelAnimationFrame(raf2);
             clearTimeout(start);
             clearTimeout(end);
         };
-    }, [hintSlide, onPositionChange, hintFullRange, beforeReady, afterReady]);
+    }, [shouldPlayHint, onPositionChange, hintFullRange, contentReady, heroVariant]);
 
     return (
         <div
-            className={`${styles.container} ${preserveAspect ? styles.containerPreserveAspect : ''} ${hintPlaying ? styles.containerHintPlaying : ''}`}
+            className={`${styles.container} ${preserveAspect ? styles.containerPreserveAspect : ''} ${hintPlaying && !heroVariant ? styles.containerHintPlaying : ''} ${heroVariant ? styles.containerHero : ''} ${contentReady ? styles.containerReady : ''}`}
             ref={sliderRef}
             onMouseMove={handleMouseMove}
             onTouchMove={handleMouseMove}
@@ -202,45 +307,46 @@ const ComparisonSlider = ({
             tabIndex={0}
             style={{
                 ['--slider-position' as string]: safePosition,
-                ['--hint-left' as string]: hintFullRange ? 0.5 : 25.5,
-                ['--hint-right' as string]: hintFullRange ? 99.5 : 74.5,
+                ['--hint-left' as string]: variant === 'hero' ? 34 : hintFullRange ? 0.5 : 25.5,
+                ['--hint-right' as string]: variant === 'hero' ? 66 : hintFullRange ? 99.5 : 74.5,
+                ['--slider-fallback-image' as string]: `url("${displayBeforeImage}")`,
             }}
         >
             <div
-                className={`${styles.imageWrapperAfter} ${brightenAfter ? styles.imageWrapperAfterBright : ''} ${styles.imageLoaded}`}
+                className={`${styles.imageWrapperAfter} ${brightenAfter ? styles.imageWrapperAfterBright : ''}`}
             >
-                <Image
-                    src={safeAfterImage}
-                    alt={afterAlt}
-                    fill
-                    quality={100}
-                    unoptimized
-                    placeholder="empty"
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    draggable={false}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 3840px"
-                    onError={() => setDisplayAfterImage(displayBeforeImage)}
+                <div
+                    role="img"
+                    aria-label={afterAlt}
+                    className={`${styles.heroImage} ${styles.heroImageLayer}`}
+                    style={{ backgroundImage: `url("${safeAfterImage}")` }}
                 />
             </div>
             <div
-                className={`${styles.beforeClip} ${hintPlaying ? styles.beforeClipHintPlaying : ''} ${styles.imageLoaded}`}
-                style={{ filter: degradeBefore ? 'brightness(0.7) contrast(1.1) sepia(0.2)' : 'none' }}
+                className={`${styles.beforeClip} ${heroVariant ? styles.beforeClipHero : ''} ${hintPlaying && !heroVariant ? styles.beforeClipHintPlaying : ''}`}
+                style={{
+                    filter: degradeBefore ? 'brightness(0.7) contrast(1.1) sepia(0.2)' : 'none',
+                    width: `${safePosition}%`,
+                }}
             >
-                <Image
-                    src={displayBeforeImage}
-                    alt={beforeAlt}
-                    fill
-                    quality={100}
-                    unoptimized
-                    placeholder="empty"
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    draggable={false}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1920px) 80vw, 3840px"
-                />
+                <div
+                    className={styles.beforeMedia}
+                    style={{
+                        width: containerSize.width > 0 ? `${containerSize.width}px` : '100%',
+                        height: containerSize.height > 0 ? `${containerSize.height}px` : '100%',
+                    }}
+                >
+                    <div
+                        role="img"
+                        aria-label={beforeAlt}
+                        className={`${styles.heroImage} ${styles.heroImageLayer}`}
+                        style={{ backgroundImage: `url("${displayBeforeImage}")` }}
+                    />
+                </div>
             </div>
             <button
                 type="button"
-                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying ? styles.sliderHandleHintPlaying : ''} ${hintPlaying ? styles.sliderHandleNoTransition : ''}`}
+                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying && !heroVariant ? styles.sliderHandleHintPlaying : ''} ${hintPlaying ? styles.sliderHandleNoTransition : ''}`}
                 style={{ left: `${safePosition}%` }}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleMouseDown}
@@ -248,9 +354,15 @@ const ComparisonSlider = ({
             >
                 <div className={styles.handleLine} />
                 <div className={styles.handleCircle}>
-                    {SLIDER_HANDLE_ICON}
+                    {HANDLE_ICON}
                 </div>
             </button>
+            {labels ? (
+                <div className={`${styles.labels} ${variant === 'hero' ? styles.labelsHero : ''}`}>
+                    <span className={`${styles.labelChip} ${styles.labelChipBefore}`}>{labels.before}</span>
+                    <span className={`${styles.labelChip} ${styles.labelChipAfter}`}>{labels.after}</span>
+                </div>
+            ) : null}
         </div>
     );
 };

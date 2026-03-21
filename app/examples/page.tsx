@@ -3,7 +3,7 @@ import { ExamplesContent } from './ExamplesContent';
 
 export const metadata: Metadata = {
   title: 'Örnekler',
-  description: 'Emlak Stüdyosu dönüşüm örneklerini inceleyin.',
+  description: 'Studio Estate dönüşüm örneklerini inceleyin.',
   alternates: {
     canonical: '/examples',
   },

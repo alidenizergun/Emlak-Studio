@@ -1,5 +1,5 @@
 .pageContainer {
-    padding-top: 104px;
+    padding-top: var(--page-top-space);
     padding-bottom: 40px;
     background: #f8fafc;
     max-width: 1400px;
@@ -508,7 +508,7 @@
 
 @media (max-width: 1024px) {
     .pageContainer {
-        padding-top: 80px;
+        padding-top: var(--page-top-space);
         padding-bottom: 20px;
     }
 

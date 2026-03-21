@@ -17,7 +17,7 @@ CRITICAL QUALITY STANDARDS:
 /** Her seçenek (option id) için tam prompt metni */
 export const ENHANCE_PROMPTS: Record<string, string> = {
     auto: `AUTO MODE:
-You are running Emlak Stüdyosu premium enhancement mode.
+You are running Studio Estate premium enhancement mode.
 Analyze this real-estate photo and apply the strongest high-end enhancement pipeline that still preserves reality.
 
 PRIMARY OBJECTIVE:
@@ -138,7 +138,7 @@ export function buildEnhancePrompt(options: Record<string, boolean>): string {
     const selectedInstructions = selected
         .map((id) => `- ${ENHANCE_OPTION_DIRECTIVES[id]}`)
         .join('\n');
-    return `You are Emlak Stüdyosu enhancement engine. Apply ONLY the selected enhancements below in one coherent, photorealistic result.
+    return `You are Studio Estate enhancement engine. Apply ONLY the selected enhancements below in one coherent, photorealistic result.
 
 SELECTED ENHANCEMENTS:
 ${selectedInstructions}

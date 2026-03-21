@@ -31,6 +31,19 @@ npm run dev
 
 Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresine giderek uygulamayı görüntüleyebilirsiniz.
 
+### 4. Admin Paneli
+Manuel kredi ve paket yönetimi için admin paneli `/dashboard/admin` altında çalışır.
+
+Production ortamı için admin erişimini mutlaka `ADMIN_EMAILS` ile sınırlandırın:
+
+```bash
+ADMIN_EMAILS=yonetici@ornek.com,digeradmin@ornek.com
+```
+
+Not:
+- Development ortamında `ADMIN_EMAILS` tanımlı değilse oturum açmış kullanıcı admin panelini test edebilir.
+- Production ortamında `ADMIN_EMAILS` tanımlamanız önerilir.
+
 ## ✨ Özellikler
 
 - **AI Fotoğraf Geliştirme:** Düşük çözünürlüklü fotoğrafları 4K kaliteye yükseltin.

@@ -61,6 +61,14 @@
     font-weight: 800;
 }
 
+.eta {
+    margin: -2px 0 2px;
+    color: rgba(7, 45, 42, 0.72);
+    font-size: 0.86rem;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
 .hourglass {
     display: inline-block;
     margin-left: 2px;
@@ -128,5 +136,9 @@
 
     .text {
         font-size: 0.93rem;
+    }
+
+    .eta {
+        font-size: 0.8rem;
     }
 }

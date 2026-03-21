@@ -1,4 +1,7 @@
+'use client';
+
 import styles from './Stats.module.css';
+import { useI18n } from '@/components/LanguageProvider';
 
 const stats = [
     {
@@ -15,12 +18,12 @@ const stats = [
         label: 'Daha Fazla Arama',
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 7.318 5.932 13.25 13.25 13.25h1.5a2.25 2.25 0 0 0 2.25-2.25v-.916a1.5 1.5 0 0 0-1.257-1.48l-2.868-.478a1.5 1.5 0 0 0-1.47.627l-.63.84a1.5 1.5 0 0 1-1.704.507 10.502 10.502 0 0 1-4.121-4.121 1.5 1.5 0 0 1 .507-1.704l.84-.63a1.5 1.5 0 0 0 .627-1.47l-.478-2.868A1.5 1.5 0 0 0 7.166 4.5H6.25A2.25 2.25 0 0 0 4 6.75v0a2.25 2.25 0 0 1-1.75 2.193" />
             </svg>
         )
     },
     {
-        value: '10 sn',
+        value: '1 dk',
         label: 'İşlem Süresi',
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -29,7 +32,7 @@ const stats = [
         )
     },
     {
-        value: '%90',
+        value: '%90+',
         label: 'Maliyet Tasarrufu',
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -58,10 +61,11 @@ const stats = [
 ];
 
 const Stats = () => {
+    const { t } = useI18n();
     return (
         <section className={styles.statsSection}>
             <div className={`container ${styles.statsContainer}`}>
-                <h2 className={styles.advantagesTitle}><span className={styles.advantagesTitleYz}>Emlak Stüdyosu</span>&apos;nun avantajları</h2>
+                <h2 className={styles.advantagesTitle}>{t("Studio Estate'in avantajları")}</h2>
                 <div className={styles.stats}>
                     {stats.map((stat, index) => (
                         <div key={index} className={styles.statItem}>
@@ -70,7 +74,7 @@ const Stats = () => {
                             </div>
                             <div className={styles.contentWrapper}>
                                 <span className={styles.statValue}>{stat.value}</span>
-                                <span className={styles.statLabel}>{stat.label}</span>
+                                <span className={styles.statLabel}>{t(stat.label)}</span>
                             </div>
                         </div>
                     ))}

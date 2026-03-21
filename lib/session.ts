@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { NextRequest } from 'next/server';
+import { normalizePhone } from '@/lib/db';
 
 const SESSION_COOKIE_NAME = 'emlak_session';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
@@ -16,7 +17,7 @@ function getSessionSecret(): string {
 }
 
 interface SessionPayload {
-    phone: string;
+    user: string;
     exp: number;
 }
 
@@ -38,19 +39,10 @@ function sign(data: string): string {
     return base64UrlEncode(crypto.createHmac('sha256', getSessionSecret()).update(data).digest());
 }
 
-function normalizePhone(phoneRaw: string): string {
-    const digits = String(phoneRaw || '').replace(/\D/g, '');
-    if (!digits) return '';
-    if (digits.length === 12 && digits.startsWith('90')) return digits.slice(2);
-    if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
-    if (digits.length > 10) return digits.slice(-10);
-    return digits;
-}
-
-export function createSessionToken(phoneRaw: string): string {
-    const phone = normalizePhone(phoneRaw);
+export function createSessionToken(userRaw: string): string {
+    const user = normalizePhone(userRaw);
     const payload: SessionPayload = {
-        phone,
+        user,
         exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
     };
     const body = base64UrlEncode(JSON.stringify(payload));
@@ -65,19 +57,23 @@ export function verifySessionToken(token: string | undefined): SessionPayload | 
     if (sign(body) !== signature) return null;
 
     try {
-        const payload = JSON.parse(base64UrlDecode(body).toString('utf-8')) as SessionPayload;
-        if (!payload?.phone || !payload?.exp) return null;
+        const payload = JSON.parse(base64UrlDecode(body).toString('utf-8')) as SessionPayload & { phone?: string };
+        const user = normalizePhone(payload?.user || payload?.phone || '');
+        if (!user || !payload?.exp) return null;
         if (payload.exp < Math.floor(Date.now() / 1000)) return null;
-        return payload;
+        return { user, exp: payload.exp };
     } catch {
         return null;
     }
 }
 
-export function getSessionPhone(request: NextRequest): string | null {
+export function getSessionUser(request: NextRequest): string | null {
     const payload = verifySessionToken(request.cookies.get(SESSION_COOKIE_NAME)?.value);
-    if (!payload?.phone) return null;
-    return normalizePhone(payload.phone);
+    return payload?.user || null;
+}
+
+export function getSessionPhone(request: NextRequest): string | null {
+    return getSessionUser(request);
 }
 
 export function getSessionCookieName(): string {

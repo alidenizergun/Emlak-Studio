@@ -23,6 +23,9 @@
   /* Slate 100 */
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  --header-safe-offset: 124px;
+  --page-top-space: calc(var(--header-safe-offset) + 14px);
+  --hero-top-space: calc(var(--header-safe-offset) + 24px);
 }
 
 * {
@@ -73,6 +76,12 @@ a {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --header-safe-offset: 102px;
+    --page-top-space: calc(var(--header-safe-offset) + 10px);
+    --hero-top-space: calc(var(--header-safe-offset) + 16px);
+  }
+
   .container {
     padding: 0 0.875rem;
   }
@@ -83,33 +92,4 @@ a {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-/* Hero Mobile Fix Overrides - hizalama ve taşmayı önle */
-@media (max-width: 1024px) {
-  div[class*="Hero-module__"][class*="__visual"],
-  div[class*="Hero-module__"][class*="__sliderWrapper"],
-  div[class*="ComparisonSlider-module__"][class*="__container"] {
-    height: auto !important;
-    min-height: 0 !important;
-    aspect-ratio: 4/3 !important;
-    max-width: 100% !important;
-  }
-}
-
-@media (max-width: 640px) {
-  div[class*="Hero-module__"][class*="__visual"],
-  div[class*="Hero-module__"][class*="__sliderWrapper"],
-  div[class*="ComparisonSlider-module__"][class*="__container"] {
-    aspect-ratio: 16/10 !important;
-    max-width: 100% !important;
-  }
-}
-
-@media (max-width: 480px) {
-  div[class*="Hero-module__"][class*="__visual"],
-  div[class*="Hero-module__"][class*="__sliderWrapper"],
-  div[class*="ComparisonSlider-module__"][class*="__container"] {
-    aspect-ratio: 4/3 !important;
-  }
 }

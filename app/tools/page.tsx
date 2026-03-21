@@ -2,29 +2,25 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import styles from './Tools.module.css';
 import { TOOLS } from './toolsData';
-import { DEFAULT_OG_IMAGE, SITE_NAME, absoluteUrl } from '@/lib/seo/site';
+import { DEFAULT_LANGUAGE, translateText } from '@/lib/i18n';
+import { buildLocalizedMetadata } from '@/lib/page-metadata';
 
-export const metadata: Metadata = {
-  title: 'Tüm Araçlar',
-  description: `${SITE_NAME} araçları: fotoğraf geliştirme, dekorasyon, akıllı eşya silme, tadilat, ilan metni ve sanal sunucu.`,
-  alternates: {
-    canonical: '/tools',
-  },
-  openGraph: {
-    title: `Tüm Araçlar | ${SITE_NAME}`,
-    description: `${SITE_NAME} araçlarını tek noktadan keşfedin.`,
-    url: absoluteUrl('/tools'),
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return buildLocalizedMetadata({
+    title: 'Tüm Araçlar',
+    description: 'Studio Estate araçları: fotoğraf geliştirme, dekorasyon, akıllı eşya silme, tadilat, ilan metni ve sanal sunucu.',
+    path: '/tools',
+  });
+}
 
-export default function ToolsPage() {
+export default async function ToolsPage() {
+  const lang = DEFAULT_LANGUAGE;
   return (
     <div className={`container ${styles.pageContainer}`}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Emlak <span className={styles.titleAi}>Stüdyosu</span> Araçları</h1>
+        <h1 className={styles.title}>Studio <span className={styles.titleAi}>Estate</span> {translateText(lang, 'Araçlar')}</h1>
         <p className={styles.description}>
-          İş akışınızı hızlandıracak ve satışlarınızı artıracak tüm araçlar tek bir yerde.
+          {translateText(lang, 'İş akışınızı hızlandıracak ve satışlarınızı artıracak tüm araçlar tek bir yerde.')}
         </p>
       </div>
 
@@ -33,11 +29,11 @@ export default function ToolsPage() {
           const isDisabled = !!tool.status;
           const cardContent = (
             <>
-              {tool.status && <span className={styles.badgeCorner}>{tool.status}</span>}
+              {tool.status && <span className={styles.badgeCorner}>{translateText(lang, tool.status)}</span>}
               <div className={styles.iconWrapper}>{tool.icon}</div>
               <div className={styles.cardContent}>
-                <h3 className={styles.cardTitle}>{tool.title}</h3>
-                <p className={styles.cardDescription}>{tool.description}</p>
+                <h3 className={styles.cardTitle}>{translateText(lang, tool.title)}</h3>
+                <p className={styles.cardDescription}>{translateText(lang, tool.description)}</p>
               </div>
             </>
           );

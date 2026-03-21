@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import AiTourGuideClient from './AiTourGuideClient';
+import AiTourGuideComingSoon from './AiTourGuideComingSoon';
 
 export const metadata: Metadata = {
-  title: 'Sanal Sunucu',
-  description: 'Mülk bilgilerini akıcı bir anlatım ile sunan sanal sunucu içeriği oluşturun.',
+  title: 'Sanal Sunucu - Yakında',
+  description: 'Sanal Sunucu aracı MVP sonrasında açılacak.',
   alternates: {
     canonical: '/ai-tour-guide',
   },
 };
 
 export default function AiTourGuidePage() {
-  return <AiTourGuideClient />;
+  return <AiTourGuideComingSoon />;
 }

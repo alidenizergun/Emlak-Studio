@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { isStoredAuthed } from '@/lib/client-auth';
 import styles from './ToolCreditBar.module.css';
 
 const CREDITS_KEY = 'emlak_credits';
-const AUTH_KEY = 'emlak_authed';
 
 interface ToolCreditBarProps {
     /** Örn: "1 kredi / fotoğraf" veya "Bu işlem: 1 kredi" */
@@ -25,7 +25,7 @@ export default function ToolCreditBar({ costLabel }: ToolCreditBarProps) {
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
         try {
-            const authed = window.localStorage.getItem(AUTH_KEY) === '1';
+            const authed = isStoredAuthed();
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsAuthed(authed);
             if (authed) {

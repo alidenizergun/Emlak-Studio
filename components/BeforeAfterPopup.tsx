@@ -66,7 +66,7 @@ export function BeforeAfterPopup({
     beforeSrc,
     afterSrc,
     beforeAlt = 'Önce',
-    afterAlt = 'Emlak Stüdyosu ile Dekore Edildikten Sonra',
+    afterAlt = 'Studio Estate ile Dekore Edildikten Sonra',
     showArrows = false,
     onPrev,
     onNext,
@@ -141,7 +141,7 @@ export function BeforeAfterPopup({
                         </div>
                         <div className={styles.popupCol}>
                             <span className={`${styles.popupBadge} ${styles.popupBadgeAfter}`}>
-                                Emlak Stüdyosu ile Dekore Edildikten Sonra
+                                Studio Estate ile Dekore Edildikten Sonra
                                 <AI_BADGE_SVG id={gradientId} />
                             </span>
                             <div className={`${styles.popupImageWrap} ${styles.popupImageWrapAfter}`}>

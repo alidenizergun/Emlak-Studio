@@ -15,10 +15,12 @@
     "github-push": "node scripts/github-push.mjs",
     "test:slider": "node scripts/test-slider-hint.mjs",
     "test:stage-regression": "node scripts/stage-regression.mjs",
-    "test:enhance-regression": "node scripts/enhance-regression.mjs"
+    "test:enhance-regression": "node scripts/enhance-regression.mjs",
+    "test:stage-prompt-snapshots": "node --experimental-strip-types scripts/stage-prompt-snapshots.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
     "jimp": "^1.6.0",
     "next": "16.1.6",

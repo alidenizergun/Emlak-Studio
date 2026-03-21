@@ -7,7 +7,9 @@
     overflow: hidden;
     cursor: ew-resize;
     user-select: none;
-    background: #0b1220;
+    background:
+        var(--slider-fallback-image) center / cover no-repeat,
+        #0b1220;
     border: 1px solid rgba(148, 163, 184, 0.28);
     box-shadow:
         0 16px 32px rgba(2, 8, 23, 0.25),
@@ -16,6 +18,21 @@
     --hint-left: 25.5;
     --hint-right: 74.5;
     outline: none;
+}
+
+.containerHero {
+    background:
+        var(--slider-fallback-image) center / cover no-repeat,
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow:
+        0 18px 36px rgba(15, 23, 42, 0.12),
+        0 1px 0 rgba(255, 255, 255, 0.95) inset;
+    border-radius: 22px;
+}
+
+.containerReady {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
 }
 
 .container:focus-visible {
@@ -28,6 +45,10 @@
     .container {
         height: 500px;
         aspect-ratio: auto;
+    }
+
+    .containerHero {
+        height: calc(100% - 5.1px);
     }
 }
 
@@ -47,41 +68,63 @@
     overflow: hidden;
     transform: translateZ(0);
     backface-visibility: hidden;
-    opacity: 0;
-    transition: opacity 240ms ease;
+    opacity: 1;
+    transition: none;
 }
 
-/* Önce görseli — tam boy katman, clip-path ile kesim (uçlarda beyaz flaşları engeller) */
+/* Önce görseli — gerçek crop penceresi, iç görsel sabit kalır */
 .beforeClip {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
-    width: 100%;
+    width: 50%;
     overflow: hidden;
-    clip-path: polygon(0 0, calc(var(--slider-position, 50) * 1%) 0, calc(var(--slider-position, 50) * 1%) 100%, 0 100%);
-    -webkit-clip-path: polygon(0 0, calc(var(--slider-position, 50) * 1%) 0, calc(var(--slider-position, 50) * 1%) 100%, 0 100%);
     transform: translateZ(0);
     backface-visibility: hidden;
-    opacity: 0;
-    transition: opacity 240ms ease;
+    opacity: 1;
+    transition: none;
+    will-change: width;
 }
 
-.beforeClip img,
-.imageWrapperAfter img {
-    object-fit: cover;
-    object-position: center;
+.beforeClipHero {
+    width: 50%;
+}
+
+.beforeMedia {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.heroImage {
+    display: block;
+    width: 100%;
+    height: 100%;
     image-rendering: high-quality;
     image-rendering: -webkit-optimize-contrast;
     transform: translate3d(0, 0, 0);
 }
 
+.heroImageLayer {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .imageWrapperAfterBright {
-    filter: brightness(1.25);
+    filter: brightness(1.08);
 }
 
 .imageLoaded {
     opacity: 1;
+}
+
+.imageLoadedHero {
+    opacity: 1;
+    transition: none;
 }
 
 .sliderHandle {
@@ -101,6 +144,13 @@
         0 0 20px rgba(255, 255, 255, 0.6);
     border: 0;
     padding: 0;
+}
+
+.containerHero .sliderHandle {
+    width: 2px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.05);
 }
 
 .sliderHandleDragging,
@@ -154,7 +204,6 @@
     }
 }
 
-
 .handleCircle {
     width: 42px;
     height: 42px;
@@ -173,14 +222,76 @@
     color: #f8fafc;
 }
 
+.containerHero .handleCircle {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.98) 100%);
+    box-shadow:
+        0 8px 18px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.12) inset;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    color: #1e293b;
+}
+
 .handleCircle svg {
     width: 22px;
     height: 22px;
 }
 
+.containerHero .handleCircle svg {
+    width: 18px;
+    height: 18px;
+}
+
 .handleLine {
     position: absolute;
     inset: 0;
+}
+
+.labels {
+    position: absolute;
+    inset: auto 1rem 1rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    pointer-events: none;
+    z-index: 12;
+}
+
+.labelsHero {
+    inset: auto 1.15rem 1.15rem 1.15rem;
+}
+
+.labelsHero .labelChip {
+    font-size: 0.765rem;
+    padding: 0.51rem 0.81rem;
+}
+
+.labelChip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.46rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.labelChipBefore {
+    color: #e2e8f0;
+    background: rgba(15, 23, 42, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.labelChipAfter {
+    color: #ecfdf5;
+    background: rgba(5, 150, 105, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 @media (max-width: 768px) {
@@ -189,5 +300,28 @@
         height: 36px;
         min-width: 36px;
         min-height: 36px;
+    }
+
+    .containerHero .handleCircle {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+
+    .labels,
+    .labelsHero {
+        inset: auto 0.7rem 0.7rem 0.7rem;
+        gap: 0.5rem;
+    }
+
+    .labelChip {
+        font-size: 0.58rem;
+        padding: 0.38rem 0.54rem;
+    }
+
+    .labelsHero .labelChip {
+        font-size: 0.6rem;
+        padding: 0.39rem 0.62rem;
     }
 }

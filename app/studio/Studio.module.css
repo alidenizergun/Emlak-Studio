@@ -4,7 +4,7 @@
     flex-direction: column;
     background: #f8fafc;
     /* Global sabit header için boşluk; Dashboard ile aynı hizaya getir. */
-    padding-top: 100px;
+    padding-top: var(--page-top-space);
 }
 
 .loading {
@@ -391,7 +391,7 @@
 
 @media (max-width: 1024px) {
     .pageContainer {
-        padding-top: 76px;
+        padding-top: var(--page-top-space);
     }
 
     .mainLayout {

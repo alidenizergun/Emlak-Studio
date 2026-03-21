@@ -113,6 +113,7 @@ export function ExamplesContent() {
                                 afterImage={ex.after}
                                 degradeBefore={true}
                                 preserveAspect
+                                variant="hero"
                             />
                             <button
                                 type="button"
@@ -123,7 +124,7 @@ export function ExamplesContent() {
                                 }}
                                 aria-label="Büyüt"
                             >
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M15 3h6v6" />
                                     <path d="M9 21H3v-6" />
                                     <path d="M21 3l-7 7" />
@@ -142,7 +143,7 @@ export function ExamplesContent() {
                     beforeSrc={popupExample.before}
                     afterSrc={popupExample.after}
                     beforeAlt="Önce"
-                    afterAlt="Emlak Stüdyosu ile Dekore Edildikten Sonra"
+                    afterAlt="Studio Estate ile Dekore Edildikten Sonra"
                     showArrows={filteredExamples.length > 1}
                     onPrev={(e) => {
                         e.stopPropagation();

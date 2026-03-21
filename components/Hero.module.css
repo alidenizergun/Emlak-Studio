@@ -1,10 +1,10 @@
 .hero {
     position: relative;
-    padding: 100px 0 0;
+    padding: var(--hero-top-space) 0 0;
     min-height: 50vh;
     display: flex;
     align-items: center;
-    overflow-x: hidden;
+    overflow: visible;
 }
 
 .backgroundGlow {
@@ -23,19 +23,18 @@
 /* Global .container ile aynı hizada (logo + Ücretsiz Dene) */
 .container {
     display: grid;
-    grid-template-columns: 1.1fr 1.4fr;
+    grid-template-columns: 0.98fr 1.63fr;
     gap: 2.5rem;
-    align-items: stretch;
+    align-items: start;
 }
 
 .content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    margin-bottom: 4px;
+    justify-content: flex-start;
+    margin-bottom: 0;
     position: relative;
     z-index: 1;
-    /* Reduced to 4px to achieve actual ~7px visual lift */
 }
 
 .title {
@@ -299,24 +298,19 @@
     height: auto;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
+    align-self: stretch;
     width: 100%;
     min-height: 0;
-    margin-top: calc(1.03rem - 4px);
-    padding-bottom: 2px;
+    margin-top: 0;
 }
 
 @media (min-width: 1025px) {
     .visual {
-        min-height: 500px;
-        align-self: stretch;
-        width: 107.5%;
-        margin-left: -7.5%;
-    }
-
-    .sliderWrapper > div {
-        height: 100% !important;
-        aspect-ratio: auto;
+        width: 100%;
+        margin-left: 0;
+        transform: translateY(5.6px);
+        height: 100%;
     }
 }
 
@@ -324,71 +318,13 @@
     width: 100%;
     height: 100%;
     position: relative;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.6),
-        0 0 24px rgba(255, 255, 255, 0.25),
-        0 0 48px rgba(253, 230, 138, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    isolation: isolate;
-    animation: frameGlow 4s ease-in-out infinite;
-}
-
-@keyframes frameGlow {
-
-    0%,
-    100% {
-        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.5),
-            0 0 20px rgba(255, 255, 255, 0.2),
-            0 0 40px rgba(253, 230, 138, 0.1);
-    }
-
-    50% {
-        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.85),
-            0 0 32px rgba(255, 255, 255, 0.4),
-            0 0 56px rgba(253, 230, 138, 0.25);
-    }
-}
-
-.sliderLabel {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding: 0 20px;
-    pointer-events: none;
-    z-index: 20;
-    gap: 8px;
-}
-
-.labelBefore,
-.labelAfter {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.9);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    border-radius: 24px;
+    overflow: visible;
+    padding: 0;
+    background: transparent;
+    border: 0;
     box-shadow: none;
-    white-space: nowrap;
-}
-
-.labelGlow {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.45),
-        0 0 40px rgba(255, 255, 255, 0.2),
-        0 2px 12px rgba(0, 0, 0, 0.25);
-    border-color: rgba(255, 255, 255, 0.95);
 }
 
 @media (max-width: 1024px) {
@@ -396,6 +332,7 @@
         grid-template-columns: 1fr;
         text-align: center;
         gap: 2.5rem;
+        align-items: stretch;
     }
 
     .content {
@@ -415,38 +352,15 @@
     .visual {
         height: auto !important;
         min-height: 0 !important;
-        aspect-ratio: 4/3;
-        max-width: 500px;
-        max-height: 55vh;
+        max-width: 560px;
         margin: 0 auto;
         transform: none;
         width: 100%;
     }
 
     .sliderWrapper {
-        height: auto !important;
-        width: 100%;
-        display: block;
-        border-radius: 16px;
-    }
-
-    .sliderLabel {
-        padding: 0 16px;
-        bottom: 16px;
-    }
-
-    .labelBefore,
-    .labelAfter {
-        font-size: 0.65rem;
-        padding: 6px 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-
-    .labelGlow {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border-color: rgba(255, 255, 255, 0.85);
+        padding: 0;
+        border-radius: 20px;
     }
 
     .stats {
@@ -456,7 +370,7 @@
 
 @media (max-width: 640px) {
     .hero {
-        padding-top: 72px;
+        padding-top: var(--hero-top-space);
         align-items: flex-start;
         min-height: auto;
         overflow-x: hidden;
@@ -468,9 +382,7 @@
     }
 
     .visual {
-        aspect-ratio: 16/10;
         max-width: 100%;
-        max-height: 45vh;
         width: 100%;
         height: auto !important;
         transform: none;
@@ -480,47 +392,14 @@
 
     .sliderWrapper {
         width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    .sliderLabel {
-        position: absolute;
-        bottom: 10px;
-        left: 0;
-        width: 100%;
-        padding: 0 10px;
-        margin: 0;
-        z-index: 30;
-        justify-content: space-between;
-        gap: 6px;
-    }
-
-    .labelBefore,
-    .labelAfter {
-        font-size: 0.6rem;
-        padding: 5px 8px;
-        white-space: nowrap;
-        line-height: 1.2;
-        max-width: 48%;
-        text-align: center;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-
-    .labelGlow {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border-color: rgba(255, 255, 255, 0.85);
+        padding: 0;
+        border-radius: 16px;
     }
 }
 
 @media (max-width: 480px) {
     .hero {
-        padding-top: 64px;
+        padding-top: var(--hero-top-space);
     }
 
     .container {
@@ -528,65 +407,46 @@
         padding-right: 0.75rem;
     }
 
-    .visual {
-        aspect-ratio: 4/3;
-        max-height: 40vh;
-    }
-
-    .sliderLabel {
-        bottom: 8px;
-        padding: 0 8px;
-    }
-
-    .labelBefore,
-    .labelAfter {
-        font-size: 0.58rem;
-        padding: 4px 6px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-    }
-
-    .labelGlow {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border-color: rgba(255, 255, 255, 0.85);
+    .sliderWrapper {
+        padding: 0;
+        border-radius: 14px;
     }
 }
 
 /* Hero büyütme butonu — slider handle ile aynı tasarım dili (küçük yuvarlak daire) */
 .heroZoomBtn {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 0.34rem;
+    right: 0.34rem;
     z-index: 15;
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    min-height: 30px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
     border-radius: 50%;
     aspect-ratio: 1;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: #fff;
-    color: #1e293b;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(255, 255, 255, 0.94);
+    color: #334155;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .heroZoomBtn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
 }
 
 /* Popup artık components/BeforeAfterPopup.tsx şablonunda */
 
 @media (max-width: 768px) {
     .heroZoomBtn {
-        top: 8px;
-        right: 8px;
+        top: 0.28rem;
+        right: 0.28rem;
         width: 32px;
         height: 32px;
     }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
+import { getStoredUserId } from '@/lib/client-auth';
 import styles from './AiTourGuide.module.css';
 
 interface TourResult {
@@ -58,7 +59,7 @@ export default function AiTourGuideClient() {
         setResult(null);
         setFeedbackStatus('idle');
         try {
-            const phone = window.localStorage.getItem('emlak_user_phone') || '';
+            const phone = getStoredUserId();
             const formData = new FormData();
             formData.append('image', file);
             const payloadScript = typeof scriptOverride === 'string' ? scriptOverride : scriptText;
@@ -116,7 +117,7 @@ export default function AiTourGuideClient() {
 
     const sendFeedback = async (verdict: 'good' | 'bad', note = '') => {
         if (!result?.runId) return;
-        const phone = window.localStorage.getItem('emlak_user_phone') || '';
+        const phone = getStoredUserId();
         if (!phone) return;
         try {
             const response = await fetch('/api/ai-tour-guide/feedback', {
@@ -242,7 +243,7 @@ export default function AiTourGuideClient() {
                                     </button>
                                 </>
                             )}
-                            <ProcessingOverlay active={isProcessing} message="Video tur hazırlanıyor, lütfen bekleyin" />
+                            <ProcessingOverlay active={isProcessing} message="Video tur hazırlanıyor, lütfen bekleyin" estimatedSeconds={75} />
                         </div>
                     )}
                 </div>

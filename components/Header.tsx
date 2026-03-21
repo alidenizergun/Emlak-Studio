@@ -5,7 +5,18 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './Header.module.css';
+import { clearStoredAuth, isStoredAuthed } from '@/lib/client-auth';
 import { TOOLS, ENHANCE_ICON } from '@/app/tools/toolsData';
+import { useI18n } from '@/components/LanguageProvider';
+
+const HEADER_NAV_ITEMS = [
+    { type: 'tool', id: 'stage' },
+    { type: 'tool', id: 'remove-object' },
+    { type: 'tool', id: 'ai-tour-guide' },
+    { type: 'tool', id: 'enhance' },
+    { type: 'tool', id: 'renovation' },
+    { type: 'link', id: 'pricing' },
+] as const;
 
 // Icons for Mobile Menu (ENHANCE_ICON tek kaynak — hydration uyumu)
 const Icons = {
@@ -39,6 +50,7 @@ const Icons = {
 };
 
 const Header = () => {
+    const { t } = useI18n();
     const pathname = usePathname();
     const isBillingPage = pathname?.startsWith('/checkout');
     const isStudioPage = pathname?.startsWith('/studio');
@@ -46,7 +58,6 @@ const Header = () => {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const [showRegisterNotify, setShowRegisterNotify] = useState(false);
     const [isAuthed, setIsAuthed] = useState(false);
 
     // Set mounted state and read auth
@@ -56,40 +67,9 @@ const Header = () => {
         try {
             if (typeof window !== 'undefined') {
                 // eslint-disable-next-line react-hooks/set-state-in-effect
-                setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+                setIsAuthed(isStoredAuthed());
             }
         } catch {}
-
-        let timeoutId: NodeJS.Timeout;
-
-        const startCycle = () => {
-            // Wait 15s before showing (ilk açılışta 15 sn sonra gelsin)
-            timeoutId = setTimeout(() => {
-                setShowRegisterNotify(true);
-                // Show for 20s
-                timeoutId = setTimeout(() => {
-                    setShowRegisterNotify(false);
-                    // Cycle again after 10s hide
-                    startCycle();
-                }, 20000);
-            }, 15000);
-        };
-
-        startCycle();
-
-        // Close notification if hero popup opens
-        const handleHeroPopup = () => {
-            setShowRegisterNotify(false);
-            // Optionally clear timeout to reset cycle if it's currently showing or about to show
-            if (timeoutId) clearTimeout(timeoutId);
-            // Restart cycle after a delay if popup closed? No, let's keep it simple for now as per request.
-        };
-        window.addEventListener('heroPopupOpen', handleHeroPopup);
-
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId);
-            window.removeEventListener('heroPopupOpen', handleHeroPopup);
-        };
     }, []);
 
     // Close menu when route changes
@@ -103,7 +83,7 @@ const Header = () => {
         if (!isMounted || typeof window === 'undefined') return;
         try {
             // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsAuthed(window.localStorage.getItem('emlak_authed') === '1');
+            setIsAuthed(isStoredAuthed());
         } catch {}
     }, [pathname, isMounted]);
 
@@ -111,13 +91,10 @@ const Header = () => {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
             if (typeof window !== 'undefined') {
-                window.localStorage.removeItem('emlak_authed');
-                window.localStorage.removeItem('emlak_user_phone');
-                window.localStorage.removeItem('emlak_credits');
+                clearStoredAuth();
             }
         } catch {}
         setIsAuthed(false);
-        setShowRegisterNotify(false);
         setIsMenuOpen(false);
         router.push('/');
     };
@@ -146,92 +123,91 @@ const Header = () => {
     return (
         <header className={styles.header}>
             <div className={`container ${styles.container}`}>
-                <div className={styles.logo}>
-                    <Link href="/">
-                        <div className={styles.logoIcon}>
-                            <Image
-                                src="/logo.png"
-                                alt="Emlak Stüdyosu Logo"
-                                width={64}
-                                height={64}
-                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                priority
-                            />
-                        </div>
-                        <div className={styles.logoTextWrapper}>
-                            <span className={styles.logoBrand}>EMLAK</span>
-                            <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Stüdyosu</span></span>
-                        </div>
-                    </Link>
-                </div>
-
-                {/* Desktop Nav */}
-                <nav className={`${styles.nav} ${styles.desktopNav}`}>
-                    <ul className={styles.navList}>
-                        <li>
-                            <Link href={isAuthed ? '/studio?tool=enhance' : '/enhance'} className={styles.navLink}>Fotoğraf Geliştirme</Link>
-                        </li>
-                        <li>
-                            <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.navLink}>Dekorasyon</Link>
-                        </li>
-                        <li className={styles.navItem}>
-                            <Link href="/tools" className={styles.navLink}>Tüm Araçlar</Link>
-                            <div className={styles.megaMenu}>
-                                {TOOLS.map((tool) => {
-                                    const isSoon = !!tool.status;
-                                    const content = (
-                                        <>
-                                            <div className={styles.menuIcon}>{tool.icon}</div>
-                                            <div className={styles.menuContent}>
-                                                <span className={styles.menuTitle}>
-                                                    {tool.title}
-                                                    {tool.status && <span className={styles.menuBadge}>{tool.status}</span>}
-                                                </span>
-                                                <span className={styles.menuDesc}>{tool.description}</span>
-                                            </div>
-                                        </>
-                                    );
-                                    return isSoon ? (
-                                        <span key={tool.id} className={`${styles.megaMenuItem} ${styles.megaMenuItemDisabled}`} aria-disabled="true">
-                                            {content}
-                                        </span>
-                                    ) : (
-                                        <Link key={tool.id} href={isAuthed ? `/studio?tool=${encodeURIComponent(tool.id)}` : tool.href} className={styles.megaMenuItem}>
-                                            {content}
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </li>
-                        <li>
-                            <Link href="/pricing" className={styles.navLink}>Fiyatlandırma</Link>
-                        </li>
-                    </ul>
-                </nav>
-
-                <div className={`${styles.cta} ${styles.desktopCta}`}>
-                    {isAuthed ? (
-                        <>
-                            <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.loginBtn : styles.registerBtn}>Stüdyo</Link>
-                            <button type="button" className={styles.loginBtn} onClick={handleLogout}>
-                                Çıkış Yap
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/login" className={styles.loginBtn} onClick={() => setShowRegisterNotify(false)}>Giriş Yap</Link>
-                            <div className={styles.registerWrapper}>
-                                <Link href="/register" className={styles.registerBtn} onClick={() => setShowRegisterNotify(false)}>
-                                    Ücretsiz Deneyin
-                                </Link>
-                                {showRegisterNotify && (
-                                    <div className={styles.notification} onClick={() => setShowRegisterNotify(false)}>
-                                        <span>1 fotoğraf için ücretsiz deneyin 🎁</span>
+                <div className={styles.desktopHeaderRows}>
+                    <div className={styles.topRow}>
+                        <div className={styles.brandAndNav}>
+                            <div className={styles.logo}>
+                                <Link href="/">
+                                    <div className={styles.logoIcon}>
+                                        <Image
+                                            src="/logo.png"
+                                            alt="Studio Estate Logo"
+                                            width={64}
+                                            height={64}
+                                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                            priority
+                                        />
                                     </div>
-                                )}
+                                    <div className={styles.logoTextWrapper}>
+                                        <span className={styles.logoBrand}>Studio</span>
+                                        <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Estate</span></span>
+                                    </div>
+                                </Link>
                             </div>
-                        </>
-                    )}
+
+                            <div className={styles.inlineNavWrap}>
+                                <nav className={`${styles.nav} ${styles.desktopNav}`}>
+                                    <ul className={styles.navList}>
+                                        {HEADER_NAV_ITEMS.map((item) => {
+                                            if (item.type === 'link') {
+                                                return (
+                                                    <li key={item.id} className={styles.navToolItem}>
+                                                        <Link href="/pricing" className={styles.navLink}>
+                                                            <span className={styles.navIcon}>{Icons.Pricing}</span>
+                                                            <span className={styles.navLabel}>{t('Fiyatlandırma')}</span>
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            }
+                                            const tool = TOOLS.find((entry) => entry.id === item.id);
+                                            if (!tool) return null;
+                                            const href = isAuthed ? `/studio?tool=${encodeURIComponent(tool.id)}` : tool.href;
+                                            return (
+                                                <li key={tool.id} className={styles.navToolItem}>
+                                                    {tool.status ? (
+                                                        <span className={`${styles.navLink} ${styles.navLinkDisabled}`} aria-disabled="true">
+                                                            <span className={styles.navIcon}>{tool.icon}</span>
+                                                            <span className={`${styles.navTextGroup} ${tool.id === 'ai-tour-guide' ? styles.navTextGroupInline : ''}`}>
+                                                                <span className={`${styles.navLabel} ${tool.id === 'ai-tour-guide' ? styles.navLabelSingleLine : ''}`}>{t(tool.title)}</span>
+                                                                <span className={styles.inlineBadge}>{t(tool.status)}</span>
+                                                            </span>
+                                                        </span>
+                                                    ) : (
+                                                        <Link href={href} className={styles.navLink}>
+                                                            <span className={styles.navIcon}>{tool.icon}</span>
+                                                            <span className={`${styles.navLabel} ${tool.id === 'ai-tour-guide' ? styles.navLabelSingleLine : ''}`}>{t(tool.title)}</span>
+                                                        </Link>
+                                                    )}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+
+                        <div className={`${styles.cta} ${styles.desktopCta}`}>
+                            {isAuthed ? (
+                                <>
+                                    <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.loginBtn : styles.registerBtn}>{t('Stüdyo')}</Link>
+                                    <button type="button" className={styles.loginBtn} onClick={handleLogout}>
+                                        {t('Çıkış Yap')}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href="/login" className={styles.loginBtn}>{t('Giriş Yap')}</Link>
+                                    <div className={styles.registerWrapper}>
+                                        <Link href="/register" className={styles.registerBtn}>
+                                            {t('Ücretsiz Deneyin')}
+                                        </Link>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className={styles.bottomRow} />
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -262,15 +238,15 @@ const Header = () => {
                                 <div className={styles.logoIcon}>
                                     <Image
                                         src="/logo.png"
-                                        alt="Emlak Stüdyosu Logo"
+                                        alt="Studio Estate Logo"
                                         width={64}
                                         height={64}
                                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     />
                                 </div>
                                 <div className={styles.logoTextWrapper}>
-                                    <span className={styles.logoBrand}>EMLAK</span>
-                                    <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Stüdyosu</span></span>
+                                    <span className={styles.logoBrand}>Studio</span>
+                                    <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Estate</span></span>
                                 </div>
                             </Link>
                         </div>
@@ -280,54 +256,62 @@ const Header = () => {
                     </div>
 
                     <nav className={styles.mobileNav}>
-                        <Link href={isAuthed ? '/studio?tool=enhance' : '/enhance'} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
-                            <div className={styles.mobileIconWrapper}>{Icons.Enhance}</div>
-                            <div className={styles.mobileLinkContent}>
-                                <span className={styles.mobileLinkLabel}>Fotoğraf Geliştirme</span>
-                                <span className={styles.mobileLinkDesc}>Emlak fotoğraflarını yapay zeka ile mükemmelleştirin</span>
-                            </div>
-                        </Link>
-                        <Link href={isAuthed ? '/studio?tool=stage' : '/stage'} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
-                            <div className={styles.mobileIconWrapper}>{Icons.Stage}</div>
-                            <div className={styles.mobileLinkContent}>
-                                <span className={styles.mobileLinkLabel}>Dekorasyon</span>
-                                <span className={styles.mobileLinkDesc}>Boş odaları yapay zeka ile döşeyin</span>
-                            </div>
-                        </Link>
-                        <Link href="/tools" className={styles.mobileNavLink}>
-                            <div className={styles.mobileIconWrapper}>{Icons.Tools}</div>
-                            <div className={styles.mobileLinkContent}>
-                                <span className={styles.mobileLinkLabel}>Tüm Araçlar</span>
-                                <span className={styles.mobileLinkDesc}>Aktif araçlar + Yakında gelecekler</span>
-                            </div>
-                        </Link>
-                        <Link href="/pricing" className={styles.mobileNavLink}>
-                            <div className={styles.mobileIconWrapper}>{Icons.Pricing}</div>
-                            <div className={styles.mobileLinkContent}>
-                                <span className={styles.mobileLinkLabel}>Fiyatlandırma</span>
-                                <span className={styles.mobileLinkDesc}>Sizin için en uygun planı seçin</span>
-                            </div>
-                        </Link>
+                        {HEADER_NAV_ITEMS.map((item) => {
+                            if (item.type === 'link') {
+                                return (
+                                    <Link key={item.id} href="/pricing" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                                        <div className={styles.mobileIconWrapper}>{Icons.Pricing}</div>
+                                        <div className={styles.mobileLinkContent}>
+                                            <span className={styles.mobileLinkLabel}>{t('Fiyatlandırma')}</span>
+                                            <span className={styles.mobileLinkDesc}>{t('Paketleri Gör')}</span>
+                                        </div>
+                                    </Link>
+                                );
+                            }
+                            const tool = TOOLS.find((entry) => entry.id === item.id);
+                            if (!tool) return null;
+                            const href = isAuthed ? `/studio?tool=${encodeURIComponent(tool.id)}` : tool.href;
+                            const content = (
+                                <>
+                                    <div className={styles.mobileIconWrapper}>{tool.icon}</div>
+                                    <div className={styles.mobileLinkContent}>
+                                        <span className={styles.mobileLinkLabel}>
+                                            {t(tool.title)}
+                                            {tool.status ? <span className={styles.mobileInlineBadge}>{t(tool.status)}</span> : null}
+                                        </span>
+                                        <span className={styles.mobileLinkDesc}>{t(tool.description)}</span>
+                                    </div>
+                                </>
+                            );
+                            return tool.status ? (
+                                <span key={tool.id} className={`${styles.mobileNavLink} ${styles.mobileNavLinkDisabled}`} aria-disabled="true">
+                                    {content}
+                                </span>
+                            ) : (
+                                <Link key={tool.id} href={href} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                                    {content}
+                                </Link>
+                            );
+                        })}
 
                         <div className={styles.mobileCtaCard}>
                             {isAuthed ? (
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
                                         <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.mobileLoginBtn : styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
-                                            Stüdyo
+                                            {t('Stüdyo')}
                                         </Link>
                                     </div>
                                     <button type="button" className={styles.mobileLoginBtn} onClick={handleLogout}>
-                                        Çıkış Yap
+                                        {t('Çıkış Yap')}
                                     </button>
                                 </>
                             ) : (
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
-                                        <Link href="/register" className={styles.mobileRegisterBtn}>✨ Ücretsiz Denemeye Başla</Link>
-                                        <span className={styles.mobileCtaSubText}>1 fotoğraf için ücretsiz deneyin 🎁</span>
+                                        <Link href="/register" className={styles.mobileRegisterBtn}>✨ {t('Ücretsiz Deneyin')}</Link>
                                     </div>
-                                    <Link href="/login" className={styles.mobileLoginBtn}>Giriş Yap</Link>
+                                    <Link href="/login" className={styles.mobileLoginBtn}>{t('Giriş Yap')}</Link>
                                 </>
                             )}
                         </div>
@@ -336,11 +320,11 @@ const Header = () => {
                     <div className={styles.mobileMenuFooter} style={{ "--i": "4" } as CSSProperties}>
                         <div className={styles.footerLinks}>
                             <Link href="/help" className={styles.footerLink}>
-                                {Icons.Support} <span>Yardım Merkezi</span>
+                                {Icons.Support} <span>{t('Yardım Merkezi')}</span>
                             </Link>
                         </div>
                         <div className={styles.footerBrand}>
-                            <p>© 2026 Emlak Stüdyosu. Her hakkı saklıdır.</p>
+                            <p>© 2026 Studio Estate. {t('Tüm hakları saklıdır.')}</p>
                         </div>
                     </div>
                 </div>

@@ -84,6 +84,7 @@ const EnhanceResultModal = ({ isOpen, onClose, beforeImage, afterImage }: Enhanc
                             beforeAlt="Orijinal"
                             afterAlt="Geliştirilmiş (4K)"
                             preserveAspect={true}
+                            variant="hero"
                         />
                     </div>
                 </div>

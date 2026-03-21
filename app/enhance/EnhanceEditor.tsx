@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import ImageUploader from '@/components/ImageUploader';
+import ImageUploader, { type ImageValidationSummary } from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
+import ValidationScorePopup from '@/components/ValidationScorePopup';
+import { getStoredUserId } from '@/lib/client-auth';
+import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
+import { useI18n } from '@/components/LanguageProvider';
 import styles from './Enhance.module.css';
 
 type EnhanceProcessingMode = 'ai' | 'ai_cached' | 'fallback_local';
@@ -14,6 +18,7 @@ type EnhanceFallbackReason = 'architecture' | 'quality' | 'black_output' | 'prov
 interface EnhanceResultState {
     before: string;
     after: string;
+    runId: string;
     processingMode?: EnhanceProcessingMode;
     fallbackReason?: EnhanceFallbackReason;
     appliedOptionsResolved?: string[];
@@ -25,21 +30,38 @@ interface EnhanceResultState {
 }
 
 export default function EnhanceClient() {
+    const { t } = useI18n();
     const pathname = usePathname();
     const isInStudio = pathname === '/studio';
     const [selectedOptions, setSelectedOptions] = useState<Record<string, boolean>>({});
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [result, setResult] = useState<EnhanceResultState | null>(null);
+    const [validationSummary, setValidationSummary] = useState<ImageValidationSummary | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [errorText, setErrorText] = useState('');
     const [infoText, setInfoText] = useState('');
     const [isExampleOpen, setIsExampleOpen] = useState(false);
+    const selectedOptionCount = useMemo(
+        () => Object.values(selectedOptions).filter(Boolean).length || (selectedOptions.auto ? 1 : 0),
+        [selectedOptions]
+    );
+    const estimatedSeconds = useMemo(
+        () =>
+            estimateToolEtaSeconds({
+                toolId: 'enhance',
+                inputBytes: file?.size,
+                complexity: 1 + selectedOptionCount * 0.12 + (selectedOptions.auto ? 0.08 : 0),
+                fallbackSeconds: 40,
+            }),
+        [file?.size, selectedOptionCount, selectedOptions]
+    );
 
     const handleImageSelect = (selectedFile: File) => {
         setFile(selectedFile);
         setFileUrl(URL.createObjectURL(selectedFile));
         setResult(null);
+        setValidationSummary((current) => current);
         setErrorText('');
         setInfoText('');
     };
@@ -48,6 +70,7 @@ export default function EnhanceClient() {
         setFile(null);
         setFileUrl(null);
         setResult(null);
+        setValidationSummary(null);
         setErrorText('');
         setInfoText('');
     };
@@ -69,20 +92,21 @@ export default function EnhanceClient() {
 
     const handleProcess = async () => {
         if (!file) return;
+        const startedAt = Date.now();
         setIsProcessing(true);
         setErrorText('');
         setInfoText('');
         try {
-            const phone = window.localStorage.getItem('emlak_user_phone') || '';
-            if (!phone) {
-                setErrorText('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
-                alert('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+            const userId = getStoredUserId();
+            if (!userId) {
+                setErrorText(t('Oturum bulunamadı. Lütfen tekrar giriş yapın.'));
+                alert(t('Oturum bulunamadı. Lütfen tekrar giriş yapın.'));
                 return;
             }
             const formData = new FormData();
             formData.append('image', file);
             formData.append('options', JSON.stringify(selectedOptions));
-            formData.append('phone', phone);
+            formData.append('phone', userId);
 
             const response = await fetch('/api/enhance', {
                 method: 'POST',
@@ -92,6 +116,13 @@ export default function EnhanceClient() {
             const data = await response.json();
 
             if (data.success) {
+                recordEtaSample({
+                    toolId: 'enhance',
+                    durationMs: Date.now() - startedAt,
+                    success: true,
+                    inputBytes: file.size,
+                    complexity: 1 + selectedOptionCount * 0.12 + (selectedOptions.auto ? 0.08 : 0),
+                });
                 if (typeof data.credits === 'number' && typeof window !== 'undefined') {
                     window.localStorage.setItem('emlak_credits', String(data.credits));
                     window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
@@ -103,6 +134,7 @@ export default function EnhanceClient() {
                 setResult({
                     before,
                     after: data.imageUrl,
+                    runId: String(data.runId || ''),
                     processingMode: data.processingMode,
                     fallbackReason: data.fallbackReason,
                     appliedOptionsResolved: Array.isArray(data.appliedOptionsResolved) ? data.appliedOptionsResolved : undefined,
@@ -115,30 +147,30 @@ export default function EnhanceClient() {
                         detail: { credits: data.credits }
                     }));
                 }
-                const reason = String(data?.error || `İşlem başarısız (HTTP ${response.status}).`);
+                const reason = String(data?.error ? t(data.error) : `${t('İşlem başarısız oldu')} (HTTP ${response.status}).`);
                 setErrorText(reason);
                 if (data?.code === 'INSUFFICIENT_CREDITS') {
-                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    alert(t('Yetersiz kredi. Lütfen kredi yükleyin.'));
                 } else if (data?.refundApplied) {
-                    alert(data?.refundMessage || `${reason}\nKredi iade edildi.`);
+                    alert(data?.refundMessage || `${reason}\n${t('Kredi iade edildi.')}`);
                 } else if (data?.creditCharged === false) {
-                    alert(`${reason}\nKredi düşülmedi.`);
+                    alert(`${reason}\n${t('Kredi düşülmedi.')}`);
                 } else {
                     alert(reason);
                 }
             }
         } catch (error) {
             console.error('Enhance error:', error);
-            setErrorText('Bir hata oluştu. Lütfen tekrar deneyin.');
+            setErrorText(t('Bir hata oluştu. Lütfen tekrar deneyin.'));
         } finally {
             setIsProcessing(false);
         }
     };
 
     const handleDownload = () => {
-        if (!result?.after) return;
+        if (!result?.after || !result?.runId) return;
         const link = document.createElement('a');
-        link.href = result.after;
+        link.href = `/api/stage/history-download?entryId=${encodeURIComponent(`enhance:${result.runId}`)}&kind=after`;
         link.download = 'gelistirilmis-fotograf.jpg';
         document.body.appendChild(link);
         link.click();
@@ -146,7 +178,6 @@ export default function EnhanceClient() {
     };
 
     const hasFile = Boolean(file);
-    const selectedOptionCount = Object.values(selectedOptions).filter(Boolean).length;
     const appliedOptionLabels = result?.appliedOptionsResolved?.map((id) => OPTION_LABELS[id] || id) || [];
     const showLimitedChangeHint = Boolean(result?.qualityMetrics?.outputScore !== undefined && result.qualityMetrics.outputScore < 0.58);
 
@@ -154,12 +185,12 @@ export default function EnhanceClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Fotoğraf Geliştirme</h1>
+                    <h1 className={styles.title}>{t('Fotoğraf Geliştirme')}</h1>
                     <p className={styles.description}>
-                        Emlak Stüdyosu fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar, çözünürlüğü 4K kaliteye yükseltir.
+                        {t('Studio Estate fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar, çözünürlüğü 4K kaliteye yükseltir.')}
                     </p>
                     <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        Örnekleri Gör
+                        {t('Örnekleri Gör')}
                     </button>
                 </div>
             </header>
@@ -170,7 +201,10 @@ export default function EnhanceClient() {
                         <div className={styles.emptyState}>
                             <ImageUploader
                                 onImageSelect={handleImageSelect}
-                                label="Fotoğrafı Buraya Tıklayıp Yükleyin"
+                                onInvalidSelection={handleReset}
+                                onValidationResult={setValidationSummary}
+                                validationTool="enhance"
+                                label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                             />
                         </div>
                     ) : (
@@ -183,39 +217,40 @@ export default function EnhanceClient() {
                                                 result.processingMode === 'fallback_local' ? styles.processingModeFallback : styles.processingModeAi
                                             }`}
                                         >
-                                            {result.processingMode === 'fallback_local' ? 'Güvenli Fallback' : 'AI Çıktısı'}
+                                            {result.processingMode === 'fallback_local' ? t('Güvenli Fallback') : t('AI Çıktısı')}
                                         </span>
                                         {appliedOptionLabels.length > 0 ? (
                                             <span className={styles.appliedOptionsMini}>
-                                                Uygulanan ayarlar: {appliedOptionLabels.join(', ')}
+                                                {t('Uygulanan ayarlar: {labels}').replace('{labels}', appliedOptionLabels.join(', '))}
                                             </span>
                                         ) : null}
                                     </div>
-                                    <ComparisonSlider beforeImage={result.before} afterImage={result.after} />
+                                    <ComparisonSlider beforeImage={result.before} afterImage={result.after} variant="hero" />
                                     {showLimitedChangeHint ? (
-                                        <div className={styles.limitedChangeHint}>Bu fotoğrafta değişim sınırlı olabilir.</div>
+                                        <div className={styles.limitedChangeHint}>{t('Bu fotoğrafta değişim sınırlı olabilir.')}</div>
                                     ) : null}
+                                    <ValidationScorePopup summary={validationSummary} />
                                     {infoText ? <div className={styles.infoText}>{infoText}</div> : null}
                                     <div className={styles.resultActions}>
                                         <button className={styles.downloadBtn} onClick={handleDownload}>
-                                            İndir
+                                            {t('İndir')}
                                         </button>
-                                        <button className={styles.resetBtn} onClick={handleReset}>Yeni Fotoğraf</button>
+                                        <button className={styles.resetBtn} onClick={handleReset}>{t('Yeni Fotoğraf')}</button>
                                     </div>
                                 </>
                             ) : (
                                 <>
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={fileUrl || ''} alt="Önizleme" className={styles.previewImage} />
+                                    <img src={fileUrl || ''} alt={t('Önizleme')} className={styles.previewImage} />
                                     <button className={styles.changeImageBtn} onClick={handleReset}>
-                                        Farklı Görsel Seç
+                                        {t('Farklı Görsel Seç')}
                                     </button>
                                 </>
                             )}
                             {errorText ? <div className={styles.itemErrorText}>{errorText}</div> : null}
                         </div>
                     )}
-                    <ProcessingOverlay active={isProcessing} />
+                    <ProcessingOverlay active={isProcessing} estimatedSeconds={estimatedSeconds} />
                 </div>
 
                 <div className={styles.controlsSidebar}>
@@ -256,10 +291,10 @@ export default function EnhanceClient() {
                                 </div>
                                 <div className={styles.optionText}>
                                     <div className={styles.optionNameRow}>
-                                        <span className={styles.optionName}>Emlak Stüdyosu Seçsin</span>
-                                        <span className={styles.optionCost}>5 kredi</span>
+                                        <span className={styles.optionName}>{t('Studio Estate Seçsin')}</span>
+                                        <span className={styles.optionCost}>{t('5 kredi')}</span>
                                     </div>
-                                    <span className={styles.optionDesc}>Emlak Stüdyosu en iyi ayarları seçsin</span>
+                                    <span className={styles.optionDesc}>{t('Studio Estate en iyi ayarları seçsin')}</span>
                                 </div>
                                 <div className={styles.optionIcon}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -284,11 +319,11 @@ export default function EnhanceClient() {
                             {isProcessing ? (
                                 <>
                                     <span className={styles.spinner} />
-                                    İşleniyor...
+                                    {t('İşleniyor...')}
                                 </>
                             ) : (
                                 <>
-                                    Başlat
+                                    {t('Başlat')}
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                                 </>
                             )}
@@ -300,7 +335,7 @@ export default function EnhanceClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Fotoğraf Geliştirme Örneği"
+                title={t('Fotoğraf Geliştirme Örneği')}
                 summary="Işık, renk dengesi ve netlik yapay zeka ile optimize edilir."
                 beforeSrc="/images/examples/living-empty.png"
                 afterSrc="/images/examples/living-furnished.png"
@@ -420,7 +455,7 @@ const OPTIONS = [
 ];
 
 const OPTION_LABELS: Record<string, string> = {
-    auto: 'Emlak Stüdyosu Seçsin',
+    auto: 'Studio Estate Seçsin',
     lighting: 'Işık Düzeltme',
     color: 'Renk Canlandırma',
     sharpness: 'Ultra Netlik',

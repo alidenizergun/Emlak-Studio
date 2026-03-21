@@ -1,20 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import ImageUploader from '@/components/ImageUploader';
+import { useEffect, useMemo, useState } from 'react';
+import ImageUploader, { type ImageValidationSummary } from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
+import ValidationScorePopup from '@/components/ValidationScorePopup';
+import { getStoredUserId } from '@/lib/client-auth';
+import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
+import { useI18n } from '@/components/LanguageProvider';
 import styles from './SanalTadilat.module.css';
 
 export default function SanalTadilatClient() {
+    const { t } = useI18n();
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [instructions, setInstructions] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [result, setResult] = useState<{ before: string; after: string } | null>(null);
+    const [result, setResult] = useState<{ before: string; after: string; runId: string } | null>(null);
+    const [validationSummary, setValidationSummary] = useState<ImageValidationSummary | null>(null);
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
+    const estimatedSeconds = useMemo(
+        () =>
+            estimateToolEtaSeconds({
+                toolId: 'virtual-renovation',
+                inputBytes: file?.size,
+                complexity: 1.06 + Math.min(instructions.trim().length / 360, 0.34),
+                fallbackSeconds: 70,
+            }),
+        [file?.size, instructions]
+    );
 
     useEffect(() => {
         setMounted(true);
@@ -33,21 +49,30 @@ export default function SanalTadilatClient() {
         setFile(selected);
         setFileUrl(URL.createObjectURL(selected));
         setResult(null);
+        setValidationSummary((current) => current);
     };
 
     const handleGenerate = async () => {
         if (!file) return;
+        const startedAt = Date.now();
         setIsProcessing(true);
         setResult(null);
         try {
-            const phone = window.localStorage.getItem('emlak_user_phone') || '';
+            const userId = getStoredUserId();
             const formData = new FormData();
             formData.append('image', file);
             if (instructions.trim()) formData.append('instructions', instructions.trim());
-            formData.append('phone', phone);
+            formData.append('phone', userId);
             const response = await fetch('/api/sanal-tadilat', { method: 'POST', body: formData });
             const data = await response.json();
             if (data.success && data.imageUrl) {
+                recordEtaSample({
+                    toolId: 'virtual-renovation',
+                    durationMs: Date.now() - startedAt,
+                    success: true,
+                    inputBytes: file.size,
+                    complexity: 1.06 + Math.min(instructions.trim().length / 360, 0.34),
+                });
                 if (typeof data.credits === 'number' && typeof window !== 'undefined') {
                     window.localStorage.setItem('emlak_credits', String(data.credits));
                     window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
@@ -55,17 +80,17 @@ export default function SanalTadilatClient() {
                     }));
                 }
                 const beforeUrl = URL.createObjectURL(file);
-                setResult({ before: beforeUrl, after: data.imageUrl });
+                setResult({ before: beforeUrl, after: data.imageUrl, runId: String(data.runId || '') });
             } else {
                 if (data?.code === 'INSUFFICIENT_CREDITS') {
-                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    alert(t('Yetersiz kredi. Lütfen kredi yükleyin.'));
                     return;
                 }
-                alert(data.error || 'İşlem başarısız. Lütfen tekrar deneyin.');
+                alert(data.error ? t(data.error) : t('İşlem başarısız. Lütfen tekrar deneyin.'));
             }
         } catch (err) {
             console.error(err);
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            alert(t('Bir hata oluştu. Lütfen tekrar deneyin.'));
         } finally {
             setIsProcessing(false);
         }
@@ -78,12 +103,13 @@ export default function SanalTadilatClient() {
         setFileUrl(null);
         setResult(null);
         setInstructions('');
+        setValidationSummary(null);
     };
 
     const handleDownload = () => {
-        if (!result?.after) return;
+        if (!result?.after || !result?.runId) return;
         const link = document.createElement('a');
-        link.href = result.after;
+        link.href = `/api/stage/history-download?entryId=${encodeURIComponent(`virtual-renovation:${result.runId}`)}&kind=after`;
         link.download = 'sanal-tadilat-sonuc.jpg';
         document.body.appendChild(link);
         link.click();
@@ -93,7 +119,7 @@ export default function SanalTadilatClient() {
     if (!mounted) {
         return (
             <div className={styles.pageContainer} style={{ textAlign: 'center', padding: '3rem' }}>
-                Yükleniyor...
+                {t('Yükleniyor...')}
             </div>
         );
     }
@@ -102,12 +128,12 @@ export default function SanalTadilatClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Tadilat</h1>
+                    <h1 className={styles.title}>{t('Tadilat')}</h1>
                     <p className={styles.description}>
-                        Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.
+                        {t('Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.')}
                     </p>
                     <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        Örnekleri Gör
+                        {t('Örnekleri İnceleyin')}
                     </button>
                 </div>
             </header>
@@ -118,7 +144,10 @@ export default function SanalTadilatClient() {
                         <div className={styles.emptyState}>
                             <ImageUploader
                                 onImageSelect={handleImageSelect}
-                                label="Fotoğrafı Buraya Tıklayıp Yükleyin"
+                                onInvalidSelection={handleReset}
+                                onValidationResult={setValidationSummary}
+                                validationTool="virtual-renovation"
+                                label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                             />
                         </div>
                     ) : (
@@ -128,6 +157,7 @@ export default function SanalTadilatClient() {
                                     <ComparisonSlider
                                         beforeImage={result.before}
                                         afterImage={result.after}
+                                        variant="hero"
                                     />
                                     <div className={styles.resultActions}>
                                         <button className={styles.downloadBtn} onClick={handleDownload}>
@@ -136,23 +166,24 @@ export default function SanalTadilatClient() {
                                                 <polyline points="7 10 12 15 17 10" />
                                                 <line x1="12" y1="15" x2="12" y2="3" />
                                             </svg>
-                                            İndir
+                                            {t('İndir')}
                                         </button>
                                         <button className={styles.resetBtn} onClick={handleReset}>
-                                            Yeni Fotoğraf
+                                            {t('Yeni Fotoğraf')}
                                         </button>
                                     </div>
                                 </div>
                             ) : (
                                 <>
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={fileUrl || ''} alt="Önizleme" className={styles.previewImage} />
+                                    <img src={fileUrl || ''} alt={t('Önizleme')} className={styles.previewImage} />
                                     <button type="button" className={styles.changeImageBtn} onClick={handleReset}>
-                                        Farklı Görsel Seç
+                                        {t('Farklı Görsel Seç')}
                                     </button>
                                 </>
                             )}
-                            <ProcessingOverlay active={isProcessing} />
+                            <ValidationScorePopup summary={validationSummary} />
+                            <ProcessingOverlay active={isProcessing} estimatedSeconds={estimatedSeconds} />
                         </div>
                     )}
                 </div>
@@ -160,17 +191,17 @@ export default function SanalTadilatClient() {
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
-                            <div className={styles.panelTitle}>tadilat</div>
-                            <span className={styles.inlineCost}>2 kredi</span>
+                            <div className={styles.panelTitle}>{t('Tadilat')}</div>
+                            <span className={styles.inlineCost}>{t('2 kredi')}</span>
                         </div>
                         <div className={styles.tadilatQuestionBlock}>
                             <label className={styles.tadilatQuestionLabel} htmlFor="sanal-tadilat-instructions">
-                                Ne tür tadilat istiyorsunuz?
+                                {t('Ne tür tadilat istiyorsunuz?')}
                             </label>
                             <textarea
                                 id="sanal-tadilat-instructions"
                                 className={styles.formTextarea}
-                                placeholder="Örnek: Parkeler değişsin, duvarlar gri renge boyansın, mutfak dolapları yenilensin"
+                                placeholder={t('Örnek: Parkeler değişsin, duvarlar gri renge boyansın, mutfak dolapları yenilensin')}
                                 value={instructions}
                                 onChange={(e) => setInstructions(e.target.value)}
                                 rows={3}
@@ -185,20 +216,20 @@ export default function SanalTadilatClient() {
                             {isProcessing ? (
                                 <>
                                     <span className={styles.spinner} />
-                                    İşleniyor...
+                                    {t('İşleniyor...')}
                                 </>
                             ) : (
                                 <>
-                                    Başlat
+                                    {t('Başlat')}
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
                                 </>
                             )}
                         </button>
-                        <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>Nasıl çalışır?</div>
+                        <div className={styles.panelTitle} style={{ marginTop: '2rem' }}>{t('Nasıl çalışır?')}</div>
                         <div className={styles.tipBlock}>
-                            <p>Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve <strong>Başlat</strong> butonuna basın.</p>
+                            <p>{t('Fotoğrafı yükleyin, nasıl bir tadilat istediğinizi yukarıdaki alana yazın ve Başlat butonuna basın.')}</p>
                         </div>
                     </div>
                 </div>
@@ -206,8 +237,8 @@ export default function SanalTadilatClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Tadilat Örneği"
-                summary="Eski görünümlü alanlar, yeni malzeme ve modern yüzeylerle tadilat sonrası hale dönüştürülür."
+                title={t('Tadilat Örneği')}
+                summary={t('Eski görünümlü alanlar, yeni malzeme ve modern yüzeylerle tadilat sonrası hale dönüştürülür.')}
                 beforeSrc="/images/examples/kitchen-empty.png"
                 afterSrc="/images/examples/kitchen-furnished.png"
             />

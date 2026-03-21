@@ -56,7 +56,13 @@ export function getGeminiImageModels(): string[] {
         .filter(Boolean);
     if (explicit.length > 0) return Array.from(new Set(explicit));
 
-    const primary = process.env.NANO_BANANA_MODEL || process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
-    return Array.from(new Set([primary, 'gemini-3.1-flash-image-preview']));
+    const primary =
+        process.env.NANO_BANANA_MODEL ||
+        process.env.GEMINI_IMAGE_MODEL ||
+        'gemini-3-pro-image-preview';
+    const fallback =
+        process.env.NANO_BANANA_FALLBACK_MODEL ||
+        process.env.GEMINI_IMAGE_FALLBACK_MODEL ||
+        'gemini-2.5-flash-image';
+    return Array.from(new Set([primary, fallback]));
 }
-

@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './Testimonials.module.css';
 import { TESTIMONIALS } from '@/lib/data/testimonials';
+import { useI18n } from '@/components/LanguageProvider';
 
 const Testimonials = () => {
+    const { t } = useI18n();
     const [visibleTestimonials, setVisibleTestimonials] = useState<typeof TESTIMONIALS>([]);
 
     useEffect(() => {
@@ -32,7 +34,7 @@ const Testimonials = () => {
             <div className={`container ${styles.testimonialsContainer}`}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>
-                        Türkiye&apos;nin dört bir yanından emlakçıların deneyimleri
+                        {t("Türkiye'nin dört bir yanından emlakçıların deneyimleri")}
                     </h2>
                 </div>
 
@@ -68,7 +70,7 @@ const Testimonials = () => {
                                     );
                                 })}
                             </div>
-                            <p className={styles.text}>&quot;{testimonial.text}&quot;</p>
+                            <p className={styles.text}>&quot;{t(testimonial.text)}&quot;</p>
                             <div className={styles.authorInfo}>
                                 <p className={styles.authorName}>{testimonial.author}</p>
                                 <p className={styles.authorCompany}>{testimonial.company}</p>

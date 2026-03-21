@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
+import { normalizePhone } from '@/lib/db';
 import {
     canAutoRefundByFeedback,
     getStageRunForFeedback,
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
         const { runId, phone, verdict, note } = await request.json();
         const normalizedVerdict = String(verdict || '').trim() as 'good' | 'bad';
         const normalizedRunId = String(runId || '').trim();
-        const normalizedPhone = String(phone || '').replace(/\D/g, '');
+        const normalizedPhone = normalizePhone(phone);
 
         if (!normalizedRunId || !normalizedPhone || !['good', 'bad'].includes(normalizedVerdict)) {
             return NextResponse.json({ success: false, error: 'Gecersiz feedback verisi' }, { status: 400 });

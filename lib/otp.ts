@@ -87,7 +87,7 @@ async function sendPostaGuverciniSms(toPhone: string, message: string): Promise<
 }
 
 async function sendOtpSms(phone: string, code: string): Promise<void> {
-    const message = `Emlak Stüdyosu doğrulama kodunuz: ${code}. Kod 5 dakika geçerlidir.`;
+    const message = `Studio Estate doğrulama kodunuz: ${code}. Kod 5 dakika geçerlidir.`;
 
     if (process.env.POSTAGUVERCINI_USERNAME && process.env.POSTAGUVERCINI_PASSWORD) {
         await sendPostaGuverciniSms(phone, message);

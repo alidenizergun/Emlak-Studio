@@ -60,7 +60,8 @@ function getMaxProcessSide(tool: 'stage' | 'enhance' | 'remove-object' | 'virtua
 
 function getPostprocessStrength(tool: 'stage' | 'enhance' | 'remove-object' | 'virtual-renovation'): { contrast: number; sharpen: number; saturation: number } {
     if (tool === 'stage') {
-        return { contrast: 0.06, sharpen: 0.35, saturation: 0.04 };
+        // Stage ciktisinda "puslu/tozlu" hissini azaltmak icin mikro-kontrasti ve keskinligi bir tik artir.
+        return { contrast: 0.1, sharpen: 0.43, saturation: 0.05 };
     }
     if (tool === 'remove-object') {
         return { contrast: 0.05, sharpen: 0.3, saturation: 0.03 };

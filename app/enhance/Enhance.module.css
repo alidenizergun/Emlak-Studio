@@ -1,5 +1,5 @@
 .pageContainer {
-    padding-top: 104px;
+    padding-top: var(--page-top-space);
     padding-bottom: 40px;
     background: #f8fafc;
     max-width: 1400px;
@@ -270,6 +270,39 @@
     background: #f8fafc;
     color: #475569;
     font-size: 0.76rem;
+}
+
+.validationSummary {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1e3a8a;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.validationSummaryStrong {
+    font-weight: 800;
+}
+
+.validationSummaryGood {
+    border-color: #86efac;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.validationSummaryMedium {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.validationSummaryLow {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
 }
 
 .infoText {
@@ -672,7 +705,7 @@
 /* Mobile Improvements */
 @media (max-width: 1024px) {
     .pageContainer {
-        padding-top: 80px;
+        padding-top: var(--page-top-space);
         padding-bottom: 20px;
     }
 

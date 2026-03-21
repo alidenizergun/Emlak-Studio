@@ -6,6 +6,7 @@ import Image from 'next/image';
 import ComparisonSlider from './ComparisonSlider';
 import BeforeAfterPopup from './BeforeAfterPopup';
 import styles from './Hero.module.css';
+import { useI18n } from '@/components/LanguageProvider';
 
 const HERO_BEFORE = '/images/hero-empty-room-4k.png';
 const HERO_AFTER = '/images/hero-decorated-4k.png';
@@ -13,7 +14,7 @@ const HERO_AFTER = '/images/hero-decorated-4k.png';
 import { EXAMPLES, POPUP_HINT_SENTENCES, type ExampleItem } from '../lib/examplesData';
 
 const Hero = () => {
-    const [sliderPosition, setSliderPosition] = useState(50);
+    const { t } = useI18n();
     const [heroPopupOpen, setHeroPopupOpen] = useState(false);
     const [popupHintIndex, setPopupHintIndex] = useState(0);
     const [activeExampleIndex, setActiveExampleIndex] = useState(0);
@@ -81,9 +82,9 @@ const Hero = () => {
             <div className={`container ${styles.container}`}>
                 <div className={styles.content}>
                     <h1 className={styles.title}>
-                        Emlak Fotoğraflarınızı <br />
-                        <span className={styles.heroTitleAi}>Akıllı Düzenlemelerle</span> <br />
-                        Güçlendirin
+                        {t('Emlak Fotoğraflarınızı')} <br />
+                        <span className={styles.heroTitleAi}>{t('Akıllı Düzenlemelerle')}</span> <br />
+                        {t('Güçlendirin')}
                         <span className={styles.aiIcon}>
                             <svg width="27" height="27" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2C13.2 8.5 15.5 10.8 22 12C15.5 13.2 13.2 15.5 12 22C10.8 15.5 8.5 13.2 2 12C8.5 10.8 10.8 8.5 12 2Z" fill="url(#paint0_linear_ai)" stroke="url(#paint0_linear_ai)" strokeWidth="1.5" strokeLinejoin="round" />
@@ -99,16 +100,16 @@ const Hero = () => {
                     </h1>
                     <ul className={styles.subtitleList}>
                         <li>
-                            <strong>İlanlarınız Daha Fazla Tıklansın</strong>
-                            <span className={styles.listDesc}>Kaliteli görsellerle ilanınızın tıklanma oranını yükseltin.</span>
+                            <strong>{t('İlanlarınız Daha Fazla Tıklansın')}</strong>
+                            <span className={styles.listDesc}>{t('Kaliteli görsellerle ilanınızın tıklanma oranını yükseltin.')}</span>
                         </li>
                         <li>
-                            <strong>Mülkün Potansiyelini Anında Gösterin</strong>
-                            <span className={styles.listDesc}>Boş alanları saniyeler içinde modern ve gerçekçi şekilde dekore edin.</span>
+                            <strong>{t('Mülkün Potansiyelini Anında Gösterin')}</strong>
+                            <span className={styles.listDesc}>{t('Boş alanları saniyeler içinde modern ve gerçekçi şekilde dekore edin.')}</span>
                         </li>
                         <li>
-                            <strong>Daha Hızlı ve Kârlı Satış Yapın</strong>
-                            <span className={styles.listDesc}>Güçlü görsellerle ilan süresini kısaltın, pazarlık gücünüzü artırın.</span>
+                            <strong>{t('Daha Hızlı ve Kârlı Satış Yapın')}</strong>
+                            <span className={styles.listDesc}>{t('Güçlü görsellerle ilan süresini kısaltın, pazarlık gücünüzü artırın.')}</span>
                         </li>
                     </ul>
                     <div className={styles.actions}>
@@ -123,11 +124,11 @@ const Hero = () => {
                                 <circle cx="8.5" cy="8.5" r="1.5" />
                                 <path d="M21 15l-5-5L5 21" />
                             </svg>
-                            Örnekleri İnceleyin
+                            {t('Örnekleri İnceleyin')}
                         </a>
 
                         <Link href="/register" className={styles.primaryBtn}>
-                            Hemen Ücretsiz Deneyin
+                            {t('Ücretsiz Deneyin')}
                         </Link>
                     </div>
                 </div>
@@ -136,10 +137,13 @@ const Hero = () => {
                         <ComparisonSlider
                             beforeImage={HERO_BEFORE}
                             afterImage={HERO_AFTER}
-                            onPositionChange={setSliderPosition}
-                            hintSlide
-                            hintFullRange
+                            variant="hero"
+                            introHint="once"
                             brightenAfter
+                            labels={{
+                                before: t('Boş Oda'),
+                                after: t('Studio Estate ile Dekorasyon'),
+                            }}
                         />
                         <button
                             type="button"
@@ -158,26 +162,6 @@ const Hero = () => {
                                 <path d="M3 21l7-7" />
                             </svg>
                         </button>
-                        <div className={styles.sliderLabel}>
-                            <span
-                                className={`${styles.labelBefore} ${sliderPosition <= 50 ? styles.labelGlow : ''}`}
-                                style={{
-                                    opacity: sliderPosition > 20 ? 1 : 0,
-                                    transition: 'opacity 0.3s ease, box-shadow 0.3s ease'
-                                }}
-                            >
-                                Boş Oda
-                            </span>
-                            <span
-                                className={`${styles.labelAfter} ${sliderPosition >= 50 ? styles.labelGlow : ''}`}
-                                style={{
-                                    opacity: sliderPosition < 80 ? 1 : 0,
-                                    transition: 'opacity 0.3s ease, box-shadow 0.3s ease'
-                                }}
-                            >
-                                Emlak Stüdyosu ile Dekorasyon
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -187,12 +171,12 @@ const Hero = () => {
                 onClose={() => setHeroPopupOpen(false)}
                 beforeSrc={currentExample.before}
                 afterSrc={currentExample.after}
-                beforeAlt="Boş oda"
-                afterAlt="Yapay zeka ile dekore edilmiş oda"
+                beforeAlt={t('Boş oda')}
+                afterAlt={t('Yapay zeka ile dekore edilmiş oda')}
                 showArrows={true}
                 onPrev={handlePrev}
                 onNext={handleNext}
-                ctaText="Hemen Ücretsiz Deneyin"
+                ctaText={t('Ücretsiz Deneyin')}
                 ctaHref="/register"
                 hintText={POPUP_HINT_SENTENCES[popupHintIndex]}
                 gradientIdPrefix="hero_popup_ai"

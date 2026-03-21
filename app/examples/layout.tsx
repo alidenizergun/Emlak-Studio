@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Örnekler',
-  description: 'Emlak Stüdyosu ile üretilen örnek dönüşümleri inceleyin.',
+  description: 'Studio Estate ile üretilen örnek dönüşümleri inceleyin.',
   alternates: {
     canonical: '/examples',
   },

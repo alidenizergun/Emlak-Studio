@@ -87,7 +87,6 @@ export async function verifyStageArtifacts(
     const horizontalBandRatio = horizontalRun / height;
     const verticalBandRatio = verticalRun / width;
     const midDiffCoverage = midDiffPixels / totalPixels;
-
     const artifactScore = clamp(
         0.52 * horizontalBandRatio + 0.28 * verticalBandRatio + 0.2 * Math.max(0, midDiffCoverage - 0.34),
         0,

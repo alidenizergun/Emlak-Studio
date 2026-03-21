@@ -41,6 +41,8 @@ export async function ensurePersistentSchema(): Promise<void> {
     await sql`
         CREATE TABLE IF NOT EXISTS users (
             phone TEXT PRIMARY KEY,
+            email TEXT UNIQUE,
+            password_hash TEXT,
             created_at BIGINT NOT NULL
         )
     `;
@@ -102,13 +104,94 @@ export async function ensurePersistentSchema(): Promise<void> {
             paid_at BIGINT
         )
     `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS stage_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            request_key TEXT NOT NULL,
+            room_type TEXT NOT NULL,
+            style TEXT NOT NULL,
+            prompt_version TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('success', 'failed', 'blocked')),
+            fail_code TEXT,
+            architecture_score DOUBLE PRECISION,
+            quality_score DOUBLE PRECISION,
+            before_image_url TEXT,
+            after_image_url TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            refunded INTEGER NOT NULL DEFAULT 0,
+            created_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS stage_feedback (
+            id BIGSERIAL PRIMARY KEY,
+            run_id TEXT NOT NULL REFERENCES stage_runs(run_id) ON DELETE CASCADE,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            verdict TEXT NOT NULL CHECK (verdict IN ('good', 'bad')),
+            note TEXT,
+            created_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS listing_text_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            status TEXT NOT NULL CHECK (status IN ('success', 'failed')),
+            fail_code TEXT,
+            quality_score DOUBLE PRECISION,
+            provider TEXT,
+            input_json TEXT,
+            output_text TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            created_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS ai_tour_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            status TEXT NOT NULL CHECK (status IN ('success', 'failed')),
+            fail_code TEXT,
+            quality_score DOUBLE PRECISION,
+            script_input TEXT,
+            script_output TEXT,
+            provider TEXT,
+            video_url TEXT,
+            duration_seconds INTEGER,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            created_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS tool_runs (
+            run_id TEXT PRIMARY KEY,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            tool_id TEXT NOT NULL,
+            status TEXT NOT NULL CHECK (status IN ('success', 'failed')),
+            before_image_url TEXT,
+            after_image_url TEXT,
+            title TEXT,
+            detail TEXT,
+            used_credits INTEGER NOT NULL DEFAULT 0,
+            created_at BIGINT NOT NULL
+        )
+    `;
     await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone_unique ON users(phone)`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT`;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_unique ON users(email)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_credit_ledger_phone_created_at ON credit_ledger(phone, created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_credit_ledger_reason_created_at ON credit_ledger(reason, created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_status_next_billing ON subscriptions(status, next_billing_date)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_otp_codes_expires_at ON otp_codes(expires_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_mock_payment_phone_created_at ON mock_payment_checkouts(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_stage_runs_phone_created_at ON stage_runs(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_stage_feedback_run_id ON stage_feedback(run_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_listing_text_runs_phone_created_at ON listing_text_runs(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_tour_runs_phone_created_at ON ai_tour_runs(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tool_runs_phone_created_at ON tool_runs(phone, created_at DESC)`;
 
     globalForDb.persistentSchemaReady = true;
 }
@@ -117,9 +200,11 @@ export async function ensurePersistentUser(phone: string): Promise<void> {
     if (!persistentEnabled || !phone) return;
     await ensurePersistentSchema();
     const sql = getPersistentSql();
+    const email = phone.includes('@') ? phone : null;
     await sql`
-        INSERT INTO users (phone, created_at)
-        VALUES (${phone}, ${Date.now()})
-        ON CONFLICT (phone) DO NOTHING
+        INSERT INTO users (phone, email, created_at)
+        VALUES (${phone}, ${email}, ${Date.now()})
+        ON CONFLICT (phone) DO UPDATE SET
+            email = COALESCE(EXCLUDED.email, users.email)
     `;
 }

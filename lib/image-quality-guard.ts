@@ -145,6 +145,26 @@ function getProfile(tool: QualityTool = 'stage'): QualityProfile {
     return TOOL_PROFILES[tool] || DEFAULT_PROFILE;
 }
 
+export function scoreInputImageQuality(metrics: ImageMetrics, tool: QualityTool = 'stage'): number {
+    const profile = getProfile(tool);
+    const sizeScore = Math.min(1, Math.min(metrics.width, metrics.height) / Math.max(profile.minSide * 1.8, 1));
+    const sharpnessScore = Math.min(1, metrics.sharpness / Math.max(profile.minSharpness * 3, 0.0001));
+    const contrastScore = Math.min(1, metrics.stdLuma / Math.max(profile.minContrastStd * 2, 0.0001));
+    const exposureCenter = 1 - Math.min(1, Math.abs(metrics.meanLuma - 0.5) / 0.5);
+    const aspectPenalty = metrics.aspect < 0.45 || metrics.aspect > 2.4 ? 0.22 : 0;
+    return Math.max(
+        0,
+        Math.min(
+            1,
+            0.3 * sizeScore +
+            0.3 * sharpnessScore +
+            0.2 * contrastScore +
+            0.2 * exposureCenter -
+            aspectPenalty
+        )
+    );
+}
+
 export async function extractImageMetrics(image: File): Promise<ImageMetrics> {
     return metricsFromFile(image);
 }
@@ -152,22 +172,23 @@ export async function extractImageMetrics(image: File): Promise<ImageMetrics> {
 export async function validateInputImageQuality(image: File, tool: QualityTool = 'stage'): Promise<GuardResult> {
     const profile = getProfile(tool);
     const m = await metricsFromFile(image);
+    const score = scoreInputImageQuality(m, tool);
     if (Math.min(m.width, m.height) < profile.minSide) {
-        return { ok: false, error: `Gorsel cozunurlugu dusuk (min ${profile.minSide}px).`, metrics: m };
+        return { ok: false, error: `Gorsel cozunurlugu dusuk (min ${profile.minSide}px).`, metrics: m, score };
     }
     if (m.meanLuma < 0.08 || m.meanLuma > 0.92) {
-        return { ok: false, error: 'Gorsel asiri karanlik veya asiri parlak.', metrics: m };
+        return { ok: false, error: 'Gorsel asiri karanlik veya asiri parlak.', metrics: m, score };
     }
     if (m.stdLuma < profile.minContrastStd) {
-        return { ok: false, error: 'Gorsel kontrasti cok dusuk.', metrics: m };
+        return { ok: false, error: 'Gorsel kontrasti cok dusuk.', metrics: m, score };
     }
     if (m.sharpness < profile.minSharpness) {
-        return { ok: false, error: 'Gorsel yeterince net degil.', metrics: m };
+        return { ok: false, error: 'Gorsel yeterince net degil.', metrics: m, score };
     }
     if (m.aspect < 0.45 || m.aspect > 2.4) {
-        return { ok: false, error: 'Gorsel en-boy orani uygun degil.', metrics: m };
+        return { ok: false, error: 'Gorsel en-boy orani uygun degil.', metrics: m, score };
     }
-    return { ok: true, metrics: m };
+    return { ok: true, metrics: m, score };
 }
 
 export async function verifyOutputImageQuality(

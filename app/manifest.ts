@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Emlak Stüdyosu',
-    short_name: 'Emlak Stüdyosu',
-    description: 'Emlak Stüdyosu ile fotoğraf geliştirme, dekorasyon ve ilan üretimi araçlarını kullanın.',
+    name: 'Studio Estate',
+    short_name: 'Studio Estate',
+    description: 'Studio Estate ile fotoğraf geliştirme, dekorasyon ve ilan üretimi araçlarını kullanın.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

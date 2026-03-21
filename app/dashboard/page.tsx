@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 export const metadata = {
-    title: 'Yönlendiriliyor - Emlak Stüdyosu',
+    title: 'Yönlendiriliyor - Studio Estate',
     robots: { index: false, follow: false },
 };
 

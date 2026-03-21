@@ -54,19 +54,19 @@ function mapSubscriptionRow(row: Record<string, unknown>): SubscriptionInfo {
     };
 }
 
-export async function getOrCreateSubscription(phoneRaw: string): Promise<SubscriptionInfo> {
-    const phone = normalizePhone(phoneRaw);
-    if (!phone) {
-        throw new Error('Telefon numarası gerekli');
+export async function getOrCreateSubscription(userIdRaw: string): Promise<SubscriptionInfo> {
+    const userId = normalizePhone(userIdRaw);
+    if (!userId) {
+        throw new Error('Hesap bilgisi gerekli');
     }
 
-    const currentCredits = Math.max(0, await getCredits(phone));
+    const currentCredits = Math.max(0, await getCredits(userId));
     if (hasPersistentDb()) {
         await ensurePersistentSchema();
-        await ensurePersistentUser(phone);
+        await ensurePersistentUser(userId);
         const sql = getPersistentSql();
         const existingRows = await sql<Record<string, unknown>[]>`
-            SELECT * FROM subscriptions WHERE phone = ${phone}
+            SELECT * FROM subscriptions WHERE phone = ${userId}
         `;
         if (existingRows[0]) return mapSubscriptionRow(existingRows[0]);
 
@@ -83,14 +83,14 @@ export async function getOrCreateSubscription(phoneRaw: string): Promise<Subscri
             INSERT INTO subscriptions (
                 phone, plan_id, plan_name, monthly_credits, monthly_price, status, start_date, next_billing_date, cancelled_at, last_used_credits
             ) VALUES (
-                ${phone}, ${created.planId}, ${created.planName}, ${created.monthlyCredits}, ${created.monthlyPrice},
+                ${userId}, ${created.planId}, ${created.planName}, ${created.monthlyCredits}, ${created.monthlyPrice},
                 ${created.status}, ${created.startDate}, ${created.nextBillingDate}, NULL, NULL
             )
             ON CONFLICT (phone) DO NOTHING
         `;
 
         const insertedRows = await sql<Record<string, unknown>[]>`
-            SELECT * FROM subscriptions WHERE phone = ${phone}
+            SELECT * FROM subscriptions WHERE phone = ${userId}
         `;
         if (insertedRows[0]) return mapSubscriptionRow(insertedRows[0]);
         return created;
@@ -101,7 +101,7 @@ export async function getOrCreateSubscription(phoneRaw: string): Promise<Subscri
     }
 
     const db = getDb();
-    const existing = db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(phone) as Record<string, unknown> | undefined;
+    const existing = db.prepare(`SELECT * FROM subscriptions WHERE phone = ?`).get(userId) as Record<string, unknown> | undefined;
     if (existing) return mapSubscriptionRow(existing);
 
     const now = new Date();
@@ -118,7 +118,7 @@ export async function getOrCreateSubscription(phoneRaw: string): Promise<Subscri
             phone, plan_id, plan_name, monthly_credits, monthly_price, status, start_date, next_billing_date, cancelled_at, last_used_credits
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)
     `).run(
-        phone,
+        userId,
         created.planId,
         created.planName,
         created.monthlyCredits,
@@ -131,9 +131,9 @@ export async function getOrCreateSubscription(phoneRaw: string): Promise<Subscri
     return created;
 }
 
-export async function setSubscriptionPlan(phoneRaw: string, planId: PlanId): Promise<SubscriptionInfo> {
-    const phone = normalizePhone(phoneRaw);
-    if (!phone) throw new Error('Telefon numarası gerekli');
+export async function setSubscriptionPlan(userIdRaw: string, planId: PlanId): Promise<SubscriptionInfo> {
+    const userId = normalizePhone(userIdRaw);
+    if (!userId) throw new Error('Hesap bilgisi gerekli');
 
     const now = new Date();
     const plan = getPlanDefinition(planId);
@@ -149,13 +149,13 @@ export async function setSubscriptionPlan(phoneRaw: string, planId: PlanId): Pro
 
     if (hasPersistentDb()) {
         await ensurePersistentSchema();
-        await ensurePersistentUser(phone);
+        await ensurePersistentUser(userId);
         const sql = getPersistentSql();
         await sql`
             INSERT INTO subscriptions (
                 phone, plan_id, plan_name, monthly_credits, monthly_price, status, start_date, next_billing_date, cancelled_at, last_used_credits
             ) VALUES (
-                ${phone}, ${subscription.planId}, ${subscription.planName}, ${subscription.monthlyCredits}, ${subscription.monthlyPrice},
+                ${userId}, ${subscription.planId}, ${subscription.planName}, ${subscription.monthlyCredits}, ${subscription.monthlyPrice},
                 'active', ${subscription.startDate}, ${subscription.nextBillingDate}, NULL, NULL
             )
             ON CONFLICT (phone) DO UPDATE SET
@@ -190,7 +190,7 @@ export async function setSubscriptionPlan(phoneRaw: string, planId: PlanId): Pro
             next_billing_date = excluded.next_billing_date,
             cancelled_at = NULL
     `).run(
-        phone,
+        userId,
         subscription.planId,
         subscription.planName,
         subscription.monthlyCredits,
@@ -201,17 +201,17 @@ export async function setSubscriptionPlan(phoneRaw: string, planId: PlanId): Pro
     return subscription;
 }
 
-export async function cancelSubscription(phoneRaw: string): Promise<{
+export async function cancelSubscription(userIdRaw: string): Promise<{
     subscription: SubscriptionInfo;
     credits: number;
     usedCredits: number;
     removedCredits: number;
 }> {
-    const phone = normalizePhone(phoneRaw);
-    if (!phone) throw new Error('Telefon numarası gerekli');
+    const userId = normalizePhone(userIdRaw);
+    if (!userId) throw new Error('Hesap bilgisi gerekli');
 
-    const currentCredits = Math.max(0, await getCredits(phone));
-    const subscription = await getOrCreateSubscription(phone);
+    const currentCredits = Math.max(0, await getCredits(userId));
+    const subscription = await getOrCreateSubscription(userId);
     if (subscription.status === 'cancelled') {
         return {
             subscription,
@@ -227,7 +227,7 @@ export async function cancelSubscription(phoneRaw: string): Promise<{
 
     if (hasPersistentDb()) {
         await ensurePersistentSchema();
-        await ensurePersistentUser(phone);
+        await ensurePersistentUser(userId);
         const sql = getPersistentSql();
         const reserved = await sql.reserve();
         try {
@@ -235,18 +235,18 @@ export async function cancelSubscription(phoneRaw: string): Promise<{
             await reserved`
                 UPDATE subscriptions
                 SET status = 'cancelled', cancelled_at = ${cancelledAt}, last_used_credits = ${usedCredits}
-                WHERE phone = ${phone}
+                WHERE phone = ${userId}
             `;
             await reserved`
                 INSERT INTO credits (phone, balance, updated_at)
-                VALUES (${phone}, 0, ${Date.now()})
+                VALUES (${userId}, 0, ${Date.now()})
                 ON CONFLICT (phone) DO UPDATE SET
                     balance = EXCLUDED.balance,
                     updated_at = EXCLUDED.updated_at
             `;
             await reserved`
                 INSERT INTO credit_ledger (phone, delta, reason, created_at)
-                VALUES (${phone}, ${-remainingCredits}, ${'subscription_cancel_reset'}, ${Date.now()})
+                VALUES (${userId}, ${-remainingCredits}, ${'subscription_cancel_reset'}, ${Date.now()})
             `;
             await reserved`COMMIT`;
         } catch (error: unknown) {
@@ -255,7 +255,7 @@ export async function cancelSubscription(phoneRaw: string): Promise<{
         } finally {
             reserved.release();
         }
-        const refreshed = await getOrCreateSubscription(phone);
+        const refreshed = await getOrCreateSubscription(userId);
         return { subscription: refreshed, credits: 0, usedCredits, removedCredits: remainingCredits };
     }
 
@@ -269,7 +269,7 @@ export async function cancelSubscription(phoneRaw: string): Promise<{
             UPDATE subscriptions
             SET status = 'cancelled', cancelled_at = ?, last_used_credits = ?
             WHERE phone = ?
-        `).run(cancelledAt, usedCredits, phone);
+        `).run(cancelledAt, usedCredits, userId);
 
         db.prepare(`
             INSERT INTO credits (phone, balance, updated_at)
@@ -277,15 +277,15 @@ export async function cancelSubscription(phoneRaw: string): Promise<{
             ON CONFLICT(phone) DO UPDATE SET
                 balance = excluded.balance,
                 updated_at = excluded.updated_at
-        `).run(phone, 0, Date.now());
+        `).run(userId, 0, Date.now());
 
         db.prepare(`
             INSERT INTO credit_ledger (phone, delta, reason, created_at)
             VALUES (?, ?, ?, ?)
-        `).run(phone, -remainingCredits, 'subscription_cancel_reset', Date.now());
+        `).run(userId, -remainingCredits, 'subscription_cancel_reset', Date.now());
     });
     tx();
 
-    const refreshed = await getOrCreateSubscription(phone);
+    const refreshed = await getOrCreateSubscription(userId);
     return { subscription: refreshed, credits: 0, usedCredits, removedCredits: remainingCredits };
 }

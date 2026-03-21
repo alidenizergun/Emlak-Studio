@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { TOOLS } from '@/app/tools/toolsData';
+import { clearStoredAuth, getStoredUserId, isStoredAuthed, persistStoredUserId } from '@/lib/client-auth';
+import { useI18n } from '@/components/LanguageProvider';
 import styles from './Studio.module.css';
 
 const STUDIO_MIN_TOPUP_CREDITS = 10;
@@ -27,26 +29,25 @@ function getToolIdFromParam(param: string | null): string {
 const EnhanceClient = dynamic(() => import('@/app/enhance/EnhanceEditor'), { ssr: false });
 const StageClient = dynamic(() => import('@/app/stage/Stage'), { ssr: false });
 const RemoveObjectClient = dynamic(() => import('@/app/remove-object/RemoveObjectClient'), { ssr: false });
-const IlanMetniClient = dynamic(() => import('@/app/ilan-metni/IlanMetniClient'), { ssr: false });
 const SanalTadilatClient = dynamic(() => import('@/app/sanal-tadilat/SanalTadilatClient'), { ssr: false });
-const AiTourGuideClient = dynamic(() => import('@/app/ai-tour-guide/AiTourGuideClient'), { ssr: false });
+const AiTourGuideComingSoon = dynamic(() => import('@/app/ai-tour-guide/AiTourGuideComingSoon'), { ssr: false });
 
 const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
     'enhance': EnhanceClient,
     'stage': StageClient,
     'remove-object': RemoveObjectClient,
-    'text': IlanMetniClient,
     'renovation': SanalTadilatClient,
-    'ai-tour-guide': AiTourGuideClient,
+    'ai-tour-guide': AiTourGuideComingSoon,
 };
 
 export default function StudioClient() {
+    const { t } = useI18n();
     const router = useRouter();
     const searchParams = useSearchParams();
     const toolParam = searchParams.get('tool');
     const [mounted, setMounted] = useState(false);
     const [credits, setCredits] = useState<number>(0);
-    const [phone, setPhone] = useState('');
+    const [accountId, setAccountId] = useState('');
     const [selectedToolId, setSelectedToolId] = useState<string>(() => getToolIdFromParam(toolParam));
     const [showTopupPanel, setShowTopupPanel] = useState(false);
     const [purchaseAmountInput, setPurchaseAmountInput] = useState('100');
@@ -64,6 +65,11 @@ export default function StudioClient() {
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const cachedCredits = window.localStorage.getItem('emlak_credits');
+        const storedUserId = getStoredUserId();
+        if (storedUserId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setAccountId(storedUserId);
+        }
         if (!cachedCredits) return;
         const parsed = Number(cachedCredits);
         if (Number.isFinite(parsed) && parsed >= 0) {
@@ -94,17 +100,15 @@ export default function StudioClient() {
             if (res.ok && data?.success && typeof data.credits === 'number') {
                 setCredits(data.credits);
                 window.localStorage.setItem('emlak_credits', String(data.credits));
-                if (typeof data.phone === 'string' && data.phone) {
-                    setPhone(data.phone);
-                    window.localStorage.setItem('emlak_user_phone', data.phone);
+                if (typeof data.email === 'string' && data.email) {
+                    setAccountId(data.email);
+                    persistStoredUserId(data.email);
                 }
                 return;
             }
 
             if (res.status === 401 || res.status === 403) {
-                window.localStorage.removeItem('emlak_authed');
-                window.localStorage.removeItem('emlak_user_phone');
-                window.localStorage.removeItem('emlak_credits');
+                clearStoredAuth();
                 router.replace('/login');
             }
         } catch {
@@ -114,7 +118,7 @@ export default function StudioClient() {
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
-        const authed = window.localStorage.getItem('emlak_authed') === '1';
+        const authed = isStoredAuthed();
         if (!authed) {
             router.replace('/login');
             return;
@@ -126,10 +130,10 @@ export default function StudioClient() {
     }, [mounted, refreshCredits, router]);
 
     useEffect(() => {
-        if (!showTopupPanel || !phone) return;
+        if (!showTopupPanel || !accountId) return;
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setTopupLoading(true);
-        fetch(`/api/subscription?phone=${encodeURIComponent(phone)}`)
+        fetch(`/api/subscription?email=${encodeURIComponent(accountId)}`)
             .then((res) => res.json())
             .then((data) => {
                 if (data.success && data.subscription) {
@@ -138,7 +142,7 @@ export default function StudioClient() {
             })
             .catch(() => {})
             .finally(() => setTopupLoading(false));
-    }, [showTopupPanel, phone]);
+    }, [showTopupPanel, accountId]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
@@ -185,7 +189,7 @@ export default function StudioClient() {
     if (!mounted) {
         return (
             <div className={styles.pageContainer}>
-                <div className={styles.loading}>Yükleniyor...</div>
+                <div className={styles.loading}>{t('Yükleniyor...')}</div>
             </div>
         );
     }
@@ -217,16 +221,9 @@ export default function StudioClient() {
     };
 
     const handleTopupPurchase = () => {
-        if (!subscription || !phone || subscription.status === 'cancelled') return;
-        const amount = Math.max(STUDIO_MIN_TOPUP_CREDITS, Math.min(purchaseAmount, STUDIO_MAX_TOPUP_CREDITS));
-        const params = new URLSearchParams({
-            mode: 'topup',
-            plan: subscription.planId,
-            billing: 'monthly',
-            credits: String(amount),
-        });
+        if (!subscription || !accountId || subscription.status === 'cancelled') return;
         setTopupProcessing(true);
-        router.push(`/checkout?${params.toString()}`);
+        router.push('/contact');
     };
 
     return (
@@ -236,10 +233,10 @@ export default function StudioClient() {
                     <div className={styles.sidebarTop}>
                         <div className={styles.sidebarMetaRow}>
                             <div className={styles.sidebarCreditRow}>
-                                <span className={styles.sidebarCreditLabel}>Kalan kredi</span>
+                                <span className={styles.sidebarCreditLabel}>{t('Kalan kredi')}</span>
                                 <span className={styles.sidebarCreditValue}>{credits.toLocaleString('tr-TR')}</span>
                             </div>
-                            <p className={styles.sidebarHelper}>Krediler anlık olarak senkronize edilir.</p>
+                            <p className={styles.sidebarHelper}>{t('Krediler anlık olarak senkronize edilir.')}</p>
                         </div>
                         <div className={styles.sidebarQuickActions}>
                             <button
@@ -247,14 +244,14 @@ export default function StudioClient() {
                                 className={styles.sidebarCta}
                                 onClick={() => setShowTopupPanel((prev) => !prev)}
                             >
-                                Kredi Satın Al
+                                {t('Aktivasyon Talep Et')}
                             </button>
-                            <Link href="/dashboard/settings" className={styles.sidebarSettings}>Ayarlar</Link>
+                            <Link href="/dashboard/settings" className={styles.sidebarSettings}>{t('Ayarlar')}</Link>
                         </div>
                         {showTopupPanel ? (
                             <div className={styles.topupPanel}>
                                 <p className={styles.topupText}>
-                                    İhtiyacınıza göre kredi adedini girin ve hesabınıza anında ekleyin.
+                                    {t('İlk müşteriler için kredi ve paket aktivasyonlarini manuel olarak yapiyoruz. Ihtiyacinizi bize iletin, hesabinizi fatura ile aktive edelim.')}
                                 </p>
                                 <div className={styles.topupRow}>
                                     <input
@@ -270,23 +267,22 @@ export default function StudioClient() {
                                         onBlur={normalizeTopupAmount}
                                         className={styles.topupInput}
                                     />
-                                    <button
-                                        type="button"
-                                        className={styles.topupButton}
-                                        onClick={handleTopupPurchase}
-                                        disabled={topupLoading || topupProcessing || !subscription || subscription.status === 'cancelled'}
-                                    >
-                                        {topupProcessing ? 'Yönlendiriliyor...' : 'Kredi Satın Al'}
-                                    </button>
+                                    <Link href="/contact" className={styles.topupButton}>
+                                        {t('Bizimle Iletisime Gecin')}
+                                    </Link>
                                 </div>
-                                <p className={`${styles.topupText} ${styles.topupTotalText}`}>Toplam ödeme: ₺{totalTopupPrice.toLocaleString('tr-TR')}</p>
+                                <p className={`${styles.topupText} ${styles.topupTotalText}`}>
+                                    {t('Tahmini aylik paket referansi: ₺{amount}').replace('{amount}', totalTopupPrice.toLocaleString('tr-TR'))}
+                                </p>
                                 <p className={`${styles.topupNote} ${styles.topupNoteSpaced}`}>
-                                    Ek kredi satın alımı için minimum {STUDIO_MIN_TOPUP_CREDITS.toLocaleString('tr-TR')}, maksimum {STUDIO_MAX_TOPUP_CREDITS.toLocaleString('tr-TR')} kredi girebilirsiniz.
+                                    {t('Minimum {min}, maksimum {max} kredi ihtiyacinizi belirtebilirsiniz.')
+                                        .replace('{min}', STUDIO_MIN_TOPUP_CREDITS.toLocaleString('tr-TR'))
+                                        .replace('{max}', STUDIO_MAX_TOPUP_CREDITS.toLocaleString('tr-TR'))}
                                 </p>
                             </div>
                         ) : null}
                     </div>
-                    <nav className={styles.toolNav} aria-label="Araçlar">
+                    <nav className={styles.toolNav} aria-label={t('Araçlar')}>
                         {TOOLS.map((tool) => {
                             const isDisabled = !!tool.status;
                             const isActive =
@@ -310,8 +306,8 @@ export default function StudioClient() {
                                         disabled={isDisabled}
                                     >
                                         <span className={styles.toolItemIcon}>{tool.icon}</span>
-                                        <span className={styles.toolItemTitle}>{tool.title}</span>
-                                        {tool.status && <span className={styles.toolBadge}>{tool.status}</span>}
+                                        <span className={styles.toolItemTitle}>{t(tool.title)}</span>
+                                        {tool.status && <span className={styles.toolBadge}>{t(tool.status)}</span>}
                                     </button>
                                     {tool.id === 'ai-tour-guide' ? (
                                         <button
@@ -329,7 +325,7 @@ export default function StudioClient() {
                                                     <circle cx="9" cy="9" r="1.2" />
                                                 </svg>
                                             </span>
-                                            <span className={styles.myPhotosTitle}>Tüm Çalışmalarım</span>
+                                            <span className={styles.myPhotosTitle}>{t('Tüm Çalışmalarım')}</span>
                                         </button>
                                     ) : null}
                                 </div>
@@ -344,7 +340,7 @@ export default function StudioClient() {
                             <ToolComponent />
                         </div>
                     ) : (
-                        <div className={styles.noTool}>Bir araç seçin.</div>
+                        <div className={styles.noTool}>{t('Bir araç seçin.')}</div>
                     )}
                 </main>
             </div>

@@ -3,96 +3,72 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import styles from '../../components/Pricing.module.css';
-import {
-    clearCheckoutSource,
-    savePendingCheckoutSelection,
-    setCheckoutSource,
-    setPostAuthRedirect
-} from '@/lib/checkout';
+import { useI18n } from '@/components/LanguageProvider';
 
 const PRICING_TIERS = [
     {
-        name: "Danışman",
-        id: "danisman",
+        name: 'Danisman',
+        id: 'danisman',
         originalPrice: 2499,
         discountedPrice: 1999,
         yearlyPriceMultiplier: 0.8,
         ilanGorseli: 100,
-        description: "Bireysel emlak danışmanları için başlangıç paketi.",
-        features: [
-            "200 Kredi",
-            "100 görsele YZ çalışması",
-            "Ticari Kullanım İzni"
-        ],
-        cta: "Planı Seç",
-        popular: false
+        description: 'Bireysel emlak danismanlari icin baslangic paketi.',
+        features: ['200 Kredi', '100 gorsele YZ calismasi', 'Ticari Kullanim Izni'],
+        cta: 'Iletisime Gec',
+        popular: false,
     },
     {
-        name: "Ofis",
-        id: "ofis",
+        name: 'Ofis',
+        id: 'ofis',
         originalPrice: 2999,
         discountedPrice: 2499,
         yearlyPriceMultiplier: 0.8,
         ilanGorseli: 200,
-        description: "Ekipler ve emlak ofisleri için ideal çözüm.",
-        features: [
-            "400 Kredi",
-            "200 görsele YZ çalışması",
-            "Tüm AI Modellerine Erişim",
-            "İşlem önceliği",
-            "Ticari Kullanım İzni",
-            "Email ile destek"
-        ],
-        cta: "En Popüler Planı Seç",
-        popular: true
+        description: 'Ekipler ve emlak ofisleri icin ideal cozum.',
+        features: ['400 Kredi', '200 gorsele YZ calismasi', 'Tum AI Modellerine Erisim', 'Islem onceligi', 'Ticari Kullanim Izni', 'Email ile destek'],
+        cta: 'En Cok Tercih Edilen',
+        popular: true,
     },
     {
-        name: "Kurumsal",
-        id: "kurumsal",
+        name: 'Kurumsal',
+        id: 'kurumsal',
         originalPrice: 5999,
         discountedPrice: 4999,
         yearlyPriceMultiplier: 0.8,
         ilanGorseli: 500,
-        description: "Büyük ajanslar ve gelişmiş kurumsal ihtiyaçlar için.",
-        features: [
-            "1000 Kredi",
-            "500 görsele YZ çalışması",
-            "Tüm AI Modellerine Erişim",
-            "Yüksek işlem önceliği",
-            "Özel API Erişimi",
-            "Ticari Kullanım İzni",
-            "7/24 Özel Müşteri Temsilcisi"
-        ],
-        cta: "Planı Seç",
-        popular: false
-    }
+        description: 'Buyuk ajanslar ve gelismis kurumsal ihtiyaclar icin.',
+        features: ['1000 Kredi', '500 gorsele YZ calismasi', 'Tum AI Modellerine Erisim', 'Yuksek islem onceligi', 'Ozel API Hazirligi', 'Ticari Kullanim Izni'],
+        cta: 'Teklif Al',
+        popular: false,
+    },
 ];
 
 const FAQ_ITEMS = [
     {
-        question: "1 kredi ne anlama geliyor?",
-        answer: "Her bir AI işlemi (örneğin bir odayı dekore etmek veya fotoğraf kalitesini artırmak) kredinizi kullanır. Ortalama bir ilan için 5-10 kredi kullanımı yeterli olmaktadır."
+        question: '1 kredi ne anlama geliyor?',
+        answer: 'Her bir AI islemi kredinizi kullanir. Ortalama bir ilan icin 5-10 kredi yeterli olmaktadir.',
     },
     {
-        question: "İstediğim zaman iptal edebilir miyim?",
-        answer: "Evet, taahhüt yok. İstediğiniz zaman panel üzerinden aboneliğinizi dilediğiniz zaman tek tıkla iptal edebilirsiniz."
+        question: 'Istedigim zaman iptal edebilir miyim?',
+        answer: 'Evet. MVP doneminde paket aktivasyonlari manuel ilerledigi icin iptal ve degisiklik taleplerini hizli sekilde destek ekibi uzerinden yonetiyoruz.',
     },
     {
-        question: "Fatura kesiyor musunuz?",
-        answer: "Kesinlikle. Tüm ödemeleriniz için otomatik e-fatura oluşturulur ve email adresinize gönderilir. Şirket gideri olarak gösterebilirsiniz."
+        question: 'Fatura kesiyor musunuz?',
+        answer: 'Evet. Ilk musteriler icin faturalandirmayi manuel yapiyoruz ve aktivasyonu fatura sonrasinda hesabiniza tanimliyoruz.',
     },
     {
-        question: "Kredilerim sonraki aya devreder mi?",
-        answer: "Abonelik planlarındaki krediler her ay yenilenir. Kullanılmayan krediler ay sonunda sıfırlanır, bu yüzden ay içinde aktif kullanmanızı öneririz."
+        question: 'Kredilerim sonraki aya devreder mi?',
+        answer: 'Paket yapisina gore kredi devri ayrintisini teklif sirasinda netlestiriyoruz. MVP doneminde bunu size ozel olarak tanimliyoruz.',
     },
     {
-        question: "Kurumsal ihtiyaçlar için özel plan var mı?",
-        answer: "Eğer aylık 750 kredi size yetmiyorsa, ihtiyaçlarınıza özel bir 'Kurumsal Plus' teklifi hazırlayabiliriz. Bizimle iletişime geçebilirsiniz."
+        question: 'Kurumsal ihtiyaclar icin ozel plan var mi?',
+        answer: 'Evet. Aylik ihtiyaciniza gore size ozel kredi ve kullanim plani hazirlayabiliriz.',
     },
     {
-        question: "Ücretsiz deneme var mı?",
-        answer: "Sisteme kayıt olduğunuzda size hediye edilen ücretsiz kredilerle tüm özellikleri test edebilir, sonuçları kendi gözlerinizle görebilirsiniz."
-    }
+        question: 'Ucretsiz deneme var mi?',
+        answer: 'Kayit oldugunuzda verilen deneme kredileri ile aktif araclari test edebilirsiniz.',
+    },
 ];
 
 const CheckIcon = () => (
@@ -102,21 +78,8 @@ const CheckIcon = () => (
 );
 
 export default function PricingClient() {
+    const { t } = useI18n();
     const [isYearly, setIsYearly] = useState(false);
-    const [isAuthed] = useState(() => (
-        typeof window !== 'undefined' && window.localStorage.getItem('emlak_authed') === '1'
-    ));
-
-    const handleSelectPlan = (planId: string) => {
-        if (!isAuthed) {
-            clearCheckoutSource();
-            return;
-        }
-        const billing = isYearly ? 'yearly' : 'monthly';
-        savePendingCheckoutSelection({ planId, billing });
-        setCheckoutSource('pricing');
-        setPostAuthRedirect('/checkout');
-    };
 
     return (
         <div className={styles.pricingPage}>
@@ -125,96 +88,66 @@ export default function PricingClient() {
             <div className={`container ${styles.container}`}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
-                        <span style={{ display: 'block' }}>Emlak Fotoğraflarınızı</span>
+                        <span style={{ display: 'block' }}>{t('Emlak Fotoğraflarınızı')}</span>
                         <span style={{ display: 'block' }}>
-                            <span className={styles.titleGradient}>Akıllı Düzenlemelerle</span> Güçlendirin
+                            <span className={styles.titleGradient}>{t('Akıllı Düzenlemelerle')}</span> {t('Güçlendirin')}
                         </span>
                     </h1>
                     <p className={styles.subtitle}>
-                        Net fiyat, güçlü görseller. Taahhüt yok. Dilediğiniz an iptal.
+                        {t('MVP doneminde aktivasyonlari manuel yapiyoruz. Paketinizi secelim, faturayi keselim, hesabinizi ayni gun acalim.')}
                     </p>
                 </div>
 
                 <div className={styles.toggleSection}>
                     <div className={styles.toggleContainer}>
-                        <span className={`${styles.toggleLabel} ${!isYearly ? styles.toggleLabelActive : ''}`}>Aylık</span>
+                        <span className={`${styles.toggleLabel} ${!isYearly ? styles.toggleLabelActive : ''}`}>{t('Aylik Referans')}</span>
                         <button
                             className={`${styles.toggleSwitch} ${isYearly ? styles.toggleSwitchActive : ''}`}
                             onClick={() => setIsYearly(!isYearly)}
-                            aria-label="Ödeme periyodu değiştir"
+                            aria-label={t('Paket gosterimini degistir')}
                         >
                             <div className={`${styles.toggleHandle} ${isYearly ? styles.toggleHandleActive : ''}`} />
                         </button>
-                        <span className={`${styles.toggleLabel} ${isYearly ? styles.toggleLabelActive : ''}`}>
-                            Yıllık <span className={styles.saveBadge}>En Avantajlı</span>
-                        </span>
+                        <span className={`${styles.toggleLabel} ${isYearly ? styles.toggleLabelActive : ''}`}>{t('Yillik Referans')}</span>
                     </div>
-                    <div className={styles.annualDiscountBadge}>
-                        🌟 Yıllık ödemede %20 indirim fırsatını kaçırmayın
-                    </div>
+                    <div className={styles.annualDiscountBadge}>{t('MVP ozelinde ilk musterilere esnek teklif hazirliyoruz')}</div>
                 </div>
 
                 <div className={styles.grid}>
                     {PRICING_TIERS.map((tier) => {
-                        const basePrice = tier.discountedPrice;
-                        const originalMonthlyPrice = tier.originalPrice;
-
                         const displayPrice = isYearly
-                            ? Math.round(basePrice * tier.yearlyPriceMultiplier)
-                            : basePrice;
-
-                        // Yıllıkta orijinal fiyat da (karşılaştırma için) yıllık bazda çarpılmalı mı? 
-                        // Genelde aylık karşılaştırma daha etkileyici: "Şu fiyattı, şimdi bu"
-                        const displayOriginalPrice = originalMonthlyPrice;
+                            ? Math.round(tier.discountedPrice * tier.yearlyPriceMultiplier)
+                            : tier.discountedPrice;
 
                         return (
-                            <div
-                                key={tier.id}
-                                className={`${styles.card} ${tier.popular ? styles.popularCard : ''}`}
-                            >
-                                {tier.popular && (
-                                    <div className={styles.popularBadge}>En Çok Tercih Edilen</div>
-                                )}
+                            <div key={tier.id} className={`${styles.card} ${tier.popular ? styles.popularCard : ''}`}>
+                                {tier.popular ? <div className={styles.popularBadge}>{t('En Cok Tercih Edilen')}</div> : null}
 
                                 <div className={styles.cardHeader}>
-                                    <h3 className={styles.tierName}>{tier.name}</h3>
-                                    <p className={styles.tierDesc}>{tier.description}</p>
+                                    <h3 className={styles.tierName}>{t(tier.name)}</h3>
+                                    <p className={styles.tierDesc}>{t(tier.description)}</p>
                                 </div>
 
                                 <div className={styles.priceContainer}>
                                     <span className={styles.currency}>₺</span>
                                     <span className={styles.price}>{displayPrice.toLocaleString('tr-TR')}</span>
-                                    <span className={styles.period}>/ay</span>
+                                    <span className={styles.period}>{isYearly ? t('/ay (yillik referans)') : t('/ay')}</span>
                                 </div>
 
                                 <div className={styles.discountWrapper}>
-                                    <span className={styles.originalPrice}>₺{displayOriginalPrice.toLocaleString('tr-TR')}</span>
-                                    <span className={styles.discountLabel}>Kısa süreliğine %60 İndirimli</span>
+                                    <span className={styles.originalPrice}>₺{tier.originalPrice.toLocaleString('tr-TR')}</span>
+                                    <span className={styles.discountLabel}>{t('Ilk gorusmede netlestirilir')}</span>
                                 </div>
 
-                                {isYearly && (
-                                    <div className={styles.yearlyExtraNote}>
-                                        Yıllık ödemede ek %20 avantajlı
-                                    </div>
-                                )}
-
-                                <Link
-                                    href={
-                                        isAuthed
-                                            ? `/checkout?plan=${encodeURIComponent(tier.id)}&billing=${isYearly ? 'yearly' : 'monthly'}`
-                                            : '/studio'
-                                    }
-                                    onClick={() => handleSelectPlan(tier.id)}
-                                    className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}
-                                >
-                                    {tier.cta}
+                                <Link href={`/contact?plan=${encodeURIComponent(tier.id)}`} className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}>
+                                    {t(tier.cta)}
                                 </Link>
 
                                 <div className={styles.features}>
-                                    <p className={styles.featuresTitle}>Neler Dahil?</p>
+                                    <p className={styles.featuresTitle}>{t('Neler Dahil?')}</p>
                                     <ul className={styles.featureList}>
                                         {tier.features.map((feature, index) => {
-                                            const isIlanGorseli = feature.includes('görsele YZ çalışması');
+                                            const isIlanGorseli = feature.includes('gorsele YZ calismasi');
                                             const perImagePrice = isIlanGorseli && tier.ilanGorseli
                                                 ? (displayPrice / tier.ilanGorseli).toFixed(0)
                                                 : null;
@@ -222,12 +155,10 @@ export default function PricingClient() {
                                                 <li key={index} className={styles.featureItem}>
                                                     <CheckIcon />
                                                     <span>
-                                                        {feature}
-                                                        {perImagePrice != null && (
-                                                            <span className={styles.perImagePrice}>
-                                                                Görsel başına {Number(perImagePrice).toLocaleString('tr-TR')} TL
-                                                            </span>
-                                                        )}
+                                                        {t(feature)}
+                                                        {perImagePrice != null ? (
+                                                            <span className={styles.perImagePrice}>{t('Gorsel basina {amount} TL referansi').replace('{amount}', Number(perImagePrice).toLocaleString('tr-TR'))}</span>
+                                                        ) : null}
                                                     </span>
                                                 </li>
                                             );
@@ -243,22 +174,15 @@ export default function PricingClient() {
             <section className={styles.faqSection}>
                 <div className="container">
                     <div className={styles.faqHeader}>
-                        <h2 className={styles.faqTitle}>Sıkça Sorulan Sorular</h2>
-                        <p className={styles.faqSubtitle}>Aklınıza takılan soruların cevaplarını burada bulabilirsiniz.</p>
+                        <h2 className={styles.faqTitle}>{t('Sikca Sorulan Sorular')}</h2>
+                        <p className={styles.faqSubtitle}>{t('MVP donemindeki paketleme ve aktivasyon surecini burada gorebilirsiniz.')}</p>
                     </div>
 
                     <div className={styles.faqGrid}>
                         {FAQ_ITEMS.map((item, index) => (
                             <div key={index} className={styles.faqCard}>
-                                <h4 className={styles.faqQuestion}>
-                                    <svg className={styles.checkIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: '2px' }}>
-                                        <circle cx="12" cy="12" r="10" />
-                                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                                    </svg>
-                                    {item.question}
-                                </h4>
-                                <p className={styles.faqAnswer}>{item.answer}</p>
+                                <h4 className={styles.faqQuestion}>{t(item.question)}</h4>
+                                <p className={styles.faqAnswer}>{t(item.answer)}</p>
                             </div>
                         ))}
                     </div>

@@ -1,18 +1,16 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import StudioClient from './StudioClient';
+import { buildLocalizedMetadata } from '@/lib/page-metadata';
 
-export const metadata: Metadata = {
-  title: 'Stüdyo',
-  description: 'Tüm araçlara tek ekrandan erişin.',
-  robots: {
+export async function generateMetadata(): Promise<Metadata> {
+  return buildLocalizedMetadata({
+    title: 'Stüdyo',
+    description: 'Tüm araçlara tek ekrandan erişin.',
+    path: '/studio',
     index: false,
-    follow: false,
-  },
-  alternates: {
-    canonical: '/studio',
-  },
-};
+  });
+}
 
 export default function StudioPage() {
   return (

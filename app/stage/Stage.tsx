@@ -2,10 +2,14 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from 'next/navigation';
-import ImageUploader from '@/components/ImageUploader';
+import ImageUploader, { type ImageValidationSummary } from '@/components/ImageUploader';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
+import ValidationScorePopup from '@/components/ValidationScorePopup';
+import { getStoredUserId } from '@/lib/client-auth';
+import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
+import { useI18n } from '@/components/LanguageProvider';
 import styles from './Stage.module.css';
 
 const ROOM_TYPES = [
@@ -259,6 +263,7 @@ function compactDetail(text: string | null | undefined, max = 72): string {
 }
 
 export default function StageClient() {
+    const { t } = useI18n();
     const searchParams = useSearchParams();
     const stageTab = searchParams.get('stageTab');
     const urlTab: 'editor' | 'works' = stageTab === 'works' || stageTab === 'photos' ? 'works' : 'editor';
@@ -269,7 +274,8 @@ export default function StageClient() {
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [customStylePrompt, setCustomStylePrompt] = useState('');
-    const [result, setResult] = useState<{ before: string; after: string } | null>(null);
+    const [result, setResult] = useState<{ before: string; after: string; runId: string } | null>(null);
+    const [validationSummary, setValidationSummary] = useState<ImageValidationSummary | null>(null);
     const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
@@ -284,6 +290,19 @@ export default function StageClient() {
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+    const estimatedSeconds = useMemo(
+        () =>
+            estimateToolEtaSeconds({
+                toolId: 'stage',
+                inputBytes: file?.size,
+                complexity:
+                    1 +
+                    (selectedStyle === 'custom' ? 0.2 : 0.08) +
+                    Math.min(customStylePrompt.trim().length / 320, 0.22),
+                fallbackSeconds: 70,
+            }),
+        [file?.size, selectedStyle, customStylePrompt]
+    );
 
     useEffect(() => {
         setMounted(true);
@@ -303,14 +322,16 @@ export default function StageClient() {
     const handleImageSelect = (selectedFile: File) => {
         setFile(selectedFile);
         setFileUrl(URL.createObjectURL(selectedFile));
+        setValidationSummary((current) => current);
     };
 
     const handleGenerate = async () => {
         if (!file) return;
+        const startedAt = Date.now();
         setIsProcessing(true);
 
         try {
-            const phone = window.localStorage.getItem('emlak_user_phone') || '';
+            const userId = getStoredUserId();
             const formData = new FormData();
             formData.append('image', file);
             formData.append('roomType', selectedRoom!);
@@ -318,7 +339,7 @@ export default function StageClient() {
             if (selectedStyle === 'custom') {
                 formData.append('customStylePrompt', customStylePrompt.trim());
             }
-            formData.append('phone', phone);
+            formData.append('phone', userId);
 
             const response = await fetch('/api/stage', {
                 method: 'POST',
@@ -328,6 +349,16 @@ export default function StageClient() {
             const data = await response.json();
 
             if (data.success) {
+                recordEtaSample({
+                    toolId: 'stage',
+                    durationMs: Date.now() - startedAt,
+                    success: true,
+                    inputBytes: file.size,
+                    complexity:
+                        1 +
+                        (selectedStyle === 'custom' ? 0.2 : 0.08) +
+                        Math.min(customStylePrompt.trim().length / 320, 0.22),
+                });
                 if (typeof data.credits === 'number' && typeof window !== 'undefined') {
                     window.localStorage.setItem('emlak_credits', String(data.credits));
                     window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
@@ -337,17 +368,18 @@ export default function StageClient() {
                 const objectUrl = URL.createObjectURL(file);
                 setResult({
                     before: objectUrl,
-                    after: data.imageUrl
+                    after: data.imageUrl,
+                    runId: String(data.runId || ''),
                 });
             } else {
                 if (data?.code === 'INSUFFICIENT_CREDITS') {
-                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    alert(t('Yetersiz kredi. Lütfen kredi yükleyin.'));
                 }
-                alert('İşlem başarısız: ' + (data.error || 'Bilinmeyen hata'));
+                alert(`${t('İşlem başarısız')}: ` + t(data.error || 'Bilinmeyen hata'));
             }
         } catch (error) {
             console.error('Stage error:', error);
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            alert(t('Bir hata oluştu. Lütfen tekrar deneyin.'));
         } finally {
             setIsProcessing(false);
         }
@@ -360,12 +392,13 @@ export default function StageClient() {
         setSelectedRoom(null);
         setSelectedStyle(null);
         setCustomStylePrompt('');
+        setValidationSummary(null);
     };
 
     const handleDownload = () => {
-        if (result?.after) {
+        if (result?.after && result?.runId) {
             const link = document.createElement('a');
-            link.href = result.after;
+            link.href = buildHistoryDownloadUrl(`stage:${result.runId}`, 'after');
             link.download = 'sanal-dekorasyon.jpg';
             document.body.appendChild(link);
             link.click();
@@ -382,6 +415,9 @@ export default function StageClient() {
         document.body.removeChild(link);
     };
 
+    const buildHistoryDownloadUrl = (entryId: string, kind: 'before' | 'after') =>
+        `/api/stage/history-download?entryId=${encodeURIComponent(entryId)}&kind=${kind}`;
+
     const handleDownloadPair = async (item: {
         entryId: string;
         toolId?: string;
@@ -391,11 +427,11 @@ export default function StageClient() {
         detail?: string | null;
     }) => {
         if (item.beforeImageUrl) {
-            handleDownloadUrl(item.beforeImageUrl, `yuklenen-${item.toolId || 'tool'}-${item.runId}.jpg`);
+            handleDownloadUrl(buildHistoryDownloadUrl(item.entryId, 'before'), `yuklenen-${item.toolId || 'tool'}-${item.runId}.jpg`);
         }
         if (item.afterImageUrl) {
             setTimeout(() => {
-                handleDownloadUrl(item.afterImageUrl as string, `islenmis-${item.toolId || 'tool'}-${item.runId}.jpg`);
+                handleDownloadUrl(buildHistoryDownloadUrl(item.entryId, 'after'), `islenmis-${item.toolId || 'tool'}-${item.runId}.jpg`);
             }, item.beforeImageUrl ? 240 : 0);
             return;
         }
@@ -408,9 +444,9 @@ export default function StageClient() {
     };
 
     const loadHistory = useCallback(async (append = false, offsetOverride = 0) => {
-        const phone = window.localStorage.getItem('emlak_user_phone') || '';
-        if (!phone) {
-            setHistoryError('Geçmiş fotoğrafları görmek için giriş yapın.');
+        const userId = getStoredUserId();
+        if (!userId) {
+            setHistoryError(t('Geçmiş fotoğrafları görmek için giriş yapın.'));
             setHistoryItems([]);
             setHistoryHasMore(false);
             return;
@@ -423,10 +459,10 @@ export default function StageClient() {
         }
         try {
             const offset = append ? Math.max(0, Math.floor(offsetOverride)) : 0;
-            const res = await fetch(`/api/stage/history?phone=${encodeURIComponent(phone)}&limit=200&offset=${offset}`);
+            const res = await fetch(`/api/stage/history?userId=${encodeURIComponent(userId)}&limit=200&offset=${offset}`);
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.success) {
-                throw new Error(data.error || 'Geçmiş getirilemedi');
+                throw new Error(t(data.error || 'Geçmiş getirilemedi'));
             }
             const items: HistoryItem[] = Array.isArray(data.items) ? data.items : [];
             setHistoryHasMore(Boolean(data.hasMore));
@@ -452,7 +488,7 @@ export default function StageClient() {
                 });
             }
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Geçmiş getirilemedi';
+            const message = error instanceof Error ? error.message : t('Geçmiş getirilemedi');
             setHistoryError(message);
         } finally {
             if (append) setHistoryLoadingMore(false);
@@ -462,25 +498,25 @@ export default function StageClient() {
 
     const handleDeleteRuns = async (entryIds: string[]) => {
         if (entryIds.length === 0) return;
-        const confirmed = window.confirm(`Seçili ${entryIds.length} kaydı silmek istediğinizden emin misiniz?`);
+        const confirmed = window.confirm(t('Seçili {count} kaydı silmek istediğinizden emin misiniz?').replace('{count}', String(entryIds.length)));
         if (!confirmed) return;
-        const phone = window.localStorage.getItem('emlak_user_phone') || '';
-        if (!phone) return;
+        const userId = getStoredUserId();
+        if (!userId) return;
         setHistoryDeleting(true);
         try {
             const res = await fetch('/api/stage/history', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, entryIds }),
+                body: JSON.stringify({ userId, entryIds }),
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.success) {
-                throw new Error(data.error || 'Silme işlemi başarısız');
+                throw new Error(t(data.error || 'Silme işlemi başarısız'));
             }
             setSelectedEntryIds(new Set());
             await loadHistory(false);
         } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Silme işlemi başarısız';
+            const message = error instanceof Error ? error.message : t('Silme işlemi başarısız');
             alert(message);
         } finally {
             setHistoryDeleting(false);
@@ -506,7 +542,7 @@ export default function StageClient() {
     }, [activeTab, loadHistory]);
 
     if (!mounted) {
-        return <div className={styles.pageContainer} style={{ textAlign: 'center' }}>Yükleniyor...</div>;
+        return <div className={styles.pageContainer} style={{ textAlign: 'center' }}>{t('Yükleniyor...')}</div>;
     }
 
     return (
@@ -514,12 +550,12 @@ export default function StageClient() {
             {activeTab !== 'works' ? (
                 <header className={styles.header}>
                     <div className={styles.headerContent}>
-                        <h1 className={styles.title}>Dekorasyon</h1>
+                        <h1 className={styles.title}>{t('Dekorasyon')}</h1>
                         <p className={styles.description}>
-                        Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin emlak stüdyosu evinizi dekore etsin.
+                        {t('Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin, Studio Estate evinizi dekore etsin.')}
                     </p>
                     <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        Örnekleri Gör
+                        {t('Örnekleri Gör')}
                     </button>
                     </div>
                 </header>
@@ -530,12 +566,12 @@ export default function StageClient() {
                     <section className={styles.photosPage}>
                         <div className={styles.photosPageHeader}>
                             <div>
-                                <h2 className={styles.photosTitle}>Tüm Çalışmalarım</h2>
-                                <p className={styles.photosSubtitle}>Filtreleyin, seçin, indirin veya silin.</p>
+                                <h2 className={styles.photosTitle}>{t('Tüm Çalışmalarım')}</h2>
+                                <p className={styles.photosSubtitle}>{t('Filtreleyin, seçin, indirin veya silin.')}</p>
                             </div>
                             <div className={styles.photosStats}>
-                                <span>{visibleHistoryItems.length} kayıt</span>
-                                <span>{selectedEntryIds.size} seçili</span>
+                                <span>{visibleHistoryItems.length} {t('kayıt')}</span>
+                                <span>{selectedEntryIds.size} {t('seçili')}</span>
                             </div>
                         </div>
                         <div className={styles.photosFilters}>
@@ -548,7 +584,7 @@ export default function StageClient() {
                                         setHistoryToDate('');
                                     }}
                                 >
-                                    Tümü
+                                    {t('Tümü')}
                                 </button>
                                 <button
                                     className={`${styles.toolFilterBtn} ${selectedQuickRange === '3m' ? styles.toolFilterBtnActive : ''}`}
@@ -558,7 +594,7 @@ export default function StageClient() {
                                         setHistoryToDate(toInputDateValue(Date.now()));
                                     }}
                                 >
-                                    Son 3 Ay
+                                    {t('Son 3 Ay')}
                                 </button>
                                 <button
                                     className={`${styles.toolFilterBtn} ${selectedQuickRange === '30d' ? styles.toolFilterBtnActive : ''}`}
@@ -568,7 +604,7 @@ export default function StageClient() {
                                         setHistoryToDate(toInputDateValue(Date.now()));
                                     }}
                                 >
-                                    Son 30 Gün
+                                    {t('Son 30 Gün')}
                                 </button>
                                 <button
                                     className={`${styles.toolFilterBtn} ${selectedQuickRange === '7d' ? styles.toolFilterBtnActive : ''}`}
@@ -578,7 +614,7 @@ export default function StageClient() {
                                         setHistoryToDate(toInputDateValue(Date.now()));
                                     }}
                                 >
-                                    Son 7 Gün
+                                    {t('Son 7 Gün')}
                                 </button>
                                 <button
                                     className={`${styles.toolFilterBtn} ${selectedQuickRange === 'today' ? styles.toolFilterBtnActive : ''}`}
@@ -588,7 +624,7 @@ export default function StageClient() {
                                         setHistoryToDate(toInputDateValue(Date.now()));
                                     }}
                                 >
-                                    Bugün
+                                    {t('Bugün')}
                                 </button>
                             </div>
                             <div className={styles.toolFilters}>
@@ -599,7 +635,7 @@ export default function StageClient() {
                                         className={`${styles.toolFilterBtn} ${selectedToolFilter === tool.id ? styles.toolFilterBtnActive : ''}`}
                                         onClick={() => setSelectedToolFilter(tool.id)}
                                     >
-                                        {tool.label}
+                                        {t(tool.label)}
                                     </button>
                                 ))}
                             </div>
@@ -618,7 +654,7 @@ export default function StageClient() {
                                             setSelectedEntryIds(new Set(visibleHistoryItems.map((item) => item.entryId)));
                                         }}
                                     />
-                                    <span>Tümünü Seç</span>
+                                    <span>{t('Tümünü Seç')}</span>
                                 </label>
                                 <div className={styles.bulkButtons}>
                                     <button
@@ -634,27 +670,27 @@ export default function StageClient() {
                                                 });
                                         }}
                                     >
-                                        Seçilenleri İndir
+                                        {t('Seçilenleri İndir')}
                                     </button>
                                     <button
                                         className={styles.photosDangerBtn}
                                         disabled={selectedEntryIds.size === 0 || historyDeleting}
                                         onClick={() => handleDeleteRuns(Array.from(selectedEntryIds))}
                                     >
-                                        {historyDeleting ? 'Siliniyor...' : 'Seçilenleri Sil'}
+                                        {historyDeleting ? t('Siliniyor...') : t('Seçilenleri Sil')}
                                     </button>
                                 </div>
                             </div>
                         )}
-                        {historyLoading && <div className={styles.historyInfo}>Geçmiş yükleniyor...</div>}
+                        {historyLoading && <div className={styles.historyInfo}>{t('Geçmiş yükleniyor...')}</div>}
                         {!historyLoading && historyError && <div className={styles.historyInfo}>{historyError}</div>}
                         {!historyLoading && !historyError && historyItems.length === 0 && (
-                            <div className={styles.historyInfo}>Henüz işlenmiş fotoğraf bulunmuyor.</div>
+                            <div className={styles.historyInfo}>{t('Henüz işlenmiş fotoğraf bulunmuyor.')}</div>
                         )}
                         {!historyLoading && !historyError && historyItems.length > 0 && (
                             <div className={styles.photosBody}>
                                 {visibleHistoryItems.length === 0 ? (
-                                    <div className={styles.historyInfo}>Bu tarih aralığında çalışma bulunamadı.</div>
+                                    <div className={styles.historyInfo}>{t('Bu tarih aralığında çalışma bulunamadı.')}</div>
                                 ) : (
                                     <div className={styles.photoGrid}>
                                         {visibleHistoryItems.map((item) => (
@@ -677,53 +713,53 @@ export default function StageClient() {
                                                             <span>{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
                                                         </label>
                                                         <span className={styles.photoMeta}>
-                                                            {TOOL_LABEL_BY_ID[item.toolId] || item.title || 'Çalışma'}
+                                                            {t(TOOL_LABEL_BY_ID[item.toolId] || item.title || 'Çalışma')}
                                                             {item.toolId === 'stage'
-                                                                ? ` • ${(ROOM_TYPE_LABEL_BY_ID[item.roomType || ''] || item.roomType || '')} • ${(STYLE_LABEL_BY_ID[item.style || ''] || item.style || '')}`
+                                                                ? ` • ${t(ROOM_TYPE_LABEL_BY_ID[item.roomType || ''] || item.roomType || '')} • ${t(STYLE_LABEL_BY_ID[item.style || ''] || item.style || '')}`
                                                                 : item.detail ? ` • ${compactDetail(item.detail, 72)}` : ''}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div className={styles.pairGrid}>
                                                     <div className={styles.pairFrame}>
-                                                        <span className={styles.frameLabel}>Yüklenen</span>
+                                                        <span className={styles.frameLabel}>{t('Yüklenen')}</span>
                                                         <div className={styles.photoThumbWrap}>
                                                             {item.beforeImageUrl ? (
                                                                 // eslint-disable-next-line @next/next/no-img-element
                                                                 <img
                                                                     src={item.beforeImageUrl}
-                                                                    alt="Yüklenen fotoğraf"
+                                                                    alt={t('Yüklenen fotoğraf')}
                                                                     className={styles.photoThumb}
                                                                     onClick={() => setPreviewImageUrl(item.beforeImageUrl)}
                                                                 />
                                                             ) : (
-                                                                <div className={styles.photoPlaceholder}>Görsel yok</div>
+                                                                <div className={styles.photoPlaceholder}>{t('Görsel yok')}</div>
                                                             )}
                                                         </div>
                                                     </div>
                                                     <div className={styles.pairFrame}>
-                                                        <span className={styles.frameLabel}>Çıktı</span>
+                                                        <span className={styles.frameLabel}>{t('Çıktı')}</span>
                                                         <div className={styles.photoThumbWrap}>
                                                             {item.afterImageUrl ? (
                                                                 // eslint-disable-next-line @next/next/no-img-element
                                                                 <img
                                                                     src={item.afterImageUrl}
-                                                                    alt="İşlenmiş fotoğraf"
+                                                                    alt={t('İşlenmiş fotoğraf')}
                                                                     className={styles.photoThumb}
                                                                     onClick={() => setPreviewImageUrl(item.afterImageUrl)}
                                                                 />
                                                             ) : (
-                                                                <div className={styles.photoPlaceholder}>{item.detail ? 'Metin çıktısı indirilebilir' : 'Görsel yok'}</div>
+                                                                <div className={styles.photoPlaceholder}>{item.detail ? t('Metin çıktısı indirilebilir') : t('Görsel yok')}</div>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className={styles.photoCardActionsStack}>
                                                     <button className={styles.photosPrimaryBtn} onClick={() => handleDownloadPair(item)}>
-                                                        İndir
+                                                        {t('İndir')}
                                                     </button>
                                                     <button className={styles.photosDangerBtn} onClick={() => handleDeleteRuns([item.entryId])}>
-                                                        Sil
+                                                        {t('Sil')}
                                                     </button>
                                                 </div>
                                             </article>
@@ -738,7 +774,7 @@ export default function StageClient() {
                                             onClick={() => loadHistory(true, historyItems.length)}
                                             disabled={historyLoadingMore}
                                         >
-                                            {historyLoadingMore ? 'Yükleniyor...' : 'Daha fazla yükle'}
+                                            {historyLoadingMore ? t('Yükleniyor...') : t('Daha fazla yükle')}
                                         </button>
                                     </div>
                                 )}
@@ -753,14 +789,17 @@ export default function StageClient() {
                                 <div className={styles.emptyState}>
                                     <ImageUploader
                                         onImageSelect={handleImageSelect}
-                                        label="Fotoğrafı Buraya Tıklayıp Yükleyin"
+                                        onInvalidSelection={handleReset}
+                                        onValidationResult={setValidationSummary}
+                                        validationTool="stage"
+                                label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                                     />
                                 </div>
                             ) : (
                                 <div className={styles.previewContainer}>
                                     {result ? (
                                         <div style={{ width: '100%', height: '100%' }}>
-                                            <ComparisonSlider beforeImage={result.before} afterImage={result.after} />
+                                            <ComparisonSlider beforeImage={result.before} afterImage={result.after} variant="hero" />
                                             <div className={styles.resultActions}>
                                                 <button className={styles.downloadBtn} onClick={handleDownload}>
                                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -768,9 +807,9 @@ export default function StageClient() {
                                                         <polyline points="7 10 12 15 17 10" />
                                                         <line x1="12" y1="15" x2="12" y2="3" />
                                                     </svg>
-                                                    İndir
+                                                    {t('İndir')}
                                                 </button>
-                                                <button className={styles.resetBtn} onClick={handleReset}>Yeni Fotoğraf</button>
+                                                <button className={styles.resetBtn} onClick={handleReset}>{t('Yeni Fotoğraf')}</button>
                                             </div>
                                         </div>
                                     ) : (
@@ -778,18 +817,19 @@ export default function StageClient() {
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
                                                 src={fileUrl || ''}
-                                                alt="Önizleme"
+                                                alt={t('Önizleme')}
                                                 className={styles.previewImage}
                                             />
                                             <button
                                                 className={styles.changeImageBtn}
-                                                onClick={() => setFile(null)}
+                                                onClick={handleReset}
                                             >
-                                                Farklı Görsel Seç
+                                                {t('Farklı Görsel Seç')}
                                             </button>
                                         </>
                                     )}
-                                    <ProcessingOverlay active={isProcessing} />
+                                    <ValidationScorePopup summary={validationSummary} />
+                                    <ProcessingOverlay active={isProcessing} estimatedSeconds={estimatedSeconds} />
                                 </div>
                             )}
                         </div>
@@ -800,7 +840,7 @@ export default function StageClient() {
                         <div className={styles.optionsArea} style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             <div className={styles.functionalStep}>
                                 <div className={styles.stepHeader}>
-                                    <label className={styles.label}>Oda Tipi</label>
+                                    <label className={styles.label}>{t('Oda Tipi')}</label>
                                 </div>
                                 <div className={styles.controlGroup}>
                                     <div className={styles.roomGrid}>
@@ -813,7 +853,7 @@ export default function StageClient() {
                                                 }}
                                             >
                                                 <div className={styles.roomIcon}>{room.icon}</div>
-                                                <span>{room.label}</span>
+                                                <span>{t(room.label)}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -822,8 +862,8 @@ export default function StageClient() {
 
                             <div className={styles.functionalStep}>
                                 <div className={styles.stepHeader}>
-                                    <label className={styles.label}>Tasarım Tarzı</label>
-                                    <span className={styles.stepCost}>2 Kredi</span>
+                                    <label className={styles.label}>{t('Tasarım Tarzı')}</label>
+                                    <span className={styles.stepCost}>{t('2 Kredi')}</span>
                                 </div>
                                 <div className={styles.controlGroup}>
                                     <div className={styles.styleGrid}>
@@ -837,15 +877,15 @@ export default function StageClient() {
                                                 }}
                                             >
                                                 <div className={styles.styleIcon}>{style.icon}</div>
-                                                <span>{style.label}</span>
+                                                <span>{t(style.label)}</span>
                                             </button>
                                         ))}
                                         <div className={styles.customStyleWrap}>
-                                            <label htmlFor="custom-style-prompt" className={styles.customStyleLabel}>Özel tarz isteği</label>
+                                            <label htmlFor="custom-style-prompt" className={styles.customStyleLabel}>{t('Özel tarz isteği')}</label>
                                             <textarea
                                                 id="custom-style-prompt"
                                                 className={styles.customStyleInput}
-                                                placeholder="Örn: Japandi, açık meşe tonları, sade ve ferah..."
+                                                placeholder={t('Örn: Japandi, açık meşe tonları, sade ve ferah...')}
                                                 value={customStylePrompt}
                                                 onChange={(event) => {
                                                     const next = event.target.value;
@@ -869,11 +909,11 @@ export default function StageClient() {
                             {isProcessing ? (
                                 <>
                                     <span className={styles.spinner} />
-                                    Dekore Ediliyor...
+                                    {t('Dekore Ediliyor...')}
                                 </>
                             ) : (
                                 <>
-                                    Başlat
+                                    {t('Başlat')}
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M5 12h14M12 5l7 7-7 7" />
                                     </svg>
@@ -895,12 +935,12 @@ export default function StageClient() {
                             setPreviewImageUrl(null);
                         }}
                     >
-                        Kapat
+                        {t('Kapat')}
                     </button>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={previewImageUrl}
-                        alt="Büyük önizleme"
+                        alt={t('Büyük önizleme')}
                         className={styles.lightboxImage}
                         onClick={(event) => event.stopPropagation()}
                     />
@@ -909,7 +949,7 @@ export default function StageClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Dekorasyon Örneği"
+                title={t('Dekorasyon Örneği')}
                 summary="Boş oda fotoğrafına seçtiğiniz oda tipi ve tarz doğrultusunda sanal mobilyalama uygulanır."
                 beforeSrc="/images/examples/bedroom-empty.png"
                 afterSrc="/images/examples/bedroom-furnished.png"

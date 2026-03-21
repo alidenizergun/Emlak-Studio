@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
+import { getStoredUserId } from '@/lib/client-auth';
+import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
+import { useI18n } from '@/components/LanguageProvider';
 import styles from './IlanMetni.module.css';
 
 export interface IlanBilgileri {
@@ -33,6 +36,7 @@ const defaultForm: IlanBilgileri = {
 };
 
 export default function IlanMetniClient() {
+    const { t } = useI18n();
     const [file, setFile] = useState<File | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [form, setForm] = useState<IlanBilgileri>(defaultForm);
@@ -44,6 +48,21 @@ export default function IlanMetniClient() {
     const [feedbackSent, setFeedbackSent] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isExampleOpen, setIsExampleOpen] = useState(false);
+    const filledFieldCount = useMemo(
+        () =>
+            Object.values(form).filter((value) => typeof value === 'string' && value.trim().length > 0).length,
+        [form]
+    );
+    const estimatedSeconds = useMemo(
+        () =>
+            estimateToolEtaSeconds({
+                toolId: 'listing-text',
+                inputBytes: file?.size,
+                complexity: 1 + filledFieldCount * 0.07,
+                fallbackSeconds: 18,
+            }),
+        [file?.size, filledFieldCount]
+    );
 
     useEffect(() => {
         setMounted(true);
@@ -70,18 +89,26 @@ export default function IlanMetniClient() {
 
     const runGenerate = async () => {
         if (!file) return;
+        const startedAt = Date.now();
         setIsProcessing(true);
         setResultText(null);
         setFeedbackSent(false);
         try {
-            const phone = window.localStorage.getItem('emlak_user_phone') || '';
+            const userId = getStoredUserId();
             const formData = new FormData();
             formData.append('image', file);
             formData.append('ilanBilgileri', JSON.stringify(form));
-            formData.append('phone', phone);
+            formData.append('phone', userId);
             const response = await fetch('/api/ilan-metni', { method: 'POST', body: formData });
             const data = await response.json();
             if (data.success && data.text) {
+                recordEtaSample({
+                    toolId: 'listing-text',
+                    durationMs: Date.now() - startedAt,
+                    success: true,
+                    inputBytes: file.size,
+                    complexity: 1 + filledFieldCount * 0.07,
+                });
                 if (typeof data.credits === 'number' && typeof window !== 'undefined') {
                     window.localStorage.setItem('emlak_credits', String(data.credits));
                     window.dispatchEvent(new CustomEvent('emlak:credits-updated', {
@@ -95,13 +122,13 @@ export default function IlanMetniClient() {
             } else {
                 if (data?.code === 'INSUFFICIENT_CREDITS') {
                     setResultText(null);
-                    alert('Yetersiz kredi. Lütfen kredi yükleyin.');
+                    alert(t('Yetersiz kredi. Lütfen kredi yükleyin.'));
                     return;
                 }
-                setResultText(data.error || 'Metin oluşturulamadı. Lütfen tekrar deneyin.');
+                setResultText(data.error ? t(data.error) : t('Metin oluşturulamadı. Lütfen tekrar deneyin.'));
             }
         } catch {
-            setResultText('Bir hata oluştu. Lütfen tekrar deneyin.');
+            setResultText(t('Bir hata oluştu. Lütfen tekrar deneyin.'));
         } finally {
             setIsProcessing(false);
         }
@@ -125,21 +152,21 @@ export default function IlanMetniClient() {
 
     const sendFeedback = async (verdict: 'good' | 'bad', note = '') => {
         if (!latestRunId) return;
-        const phone = window.localStorage.getItem('emlak_user_phone') || '';
-        if (!phone) return;
+        const userId = getStoredUserId();
+        if (!userId) return;
         const response = await fetch('/api/ilan-metni/feedback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 runId: latestRunId,
-                phone,
+                phone: userId,
                 verdict,
                 note,
             }),
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.success) {
-            throw new Error(data.error || 'Geri bildirim gönderilemedi');
+            throw new Error(data.error ? t(data.error) : t('Geri bildirim gönderilemedi'));
         }
         setFeedbackSent(true);
     };
@@ -158,7 +185,7 @@ export default function IlanMetniClient() {
     if (!mounted) {
         return (
             <div className={styles.pageContainer} style={{ textAlign: 'center', padding: '3rem' }}>
-                Yükleniyor...
+                {t('Yükleniyor...')}
             </div>
         );
     }
@@ -169,10 +196,10 @@ export default function IlanMetniClient() {
                 <div className={styles.headerContent}>
                     <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
                     <p className={styles.description}>
-                        Fotoğrafları yükleyin ve ilan bilgilerini girin; emlak stüdyosu profesyonel ilan metni üretsin.
+                        {t('Fotoğrafları yükleyin ve ilan bilgilerini girin; Studio Estate profesyonel ilan metni üretsin.')}
                     </p>
                     <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        Örnekleri Gör
+                        {t('Örnekleri Gör')}
                     </button>
                 </div>
             </header>
@@ -183,7 +210,7 @@ export default function IlanMetniClient() {
                         <div className={styles.emptyState}>
                             <ImageUploader
                                 onImageSelect={handleImageSelect}
-                                label="Fotoğrafları Buraya Tıklayıp Yükleyin"
+                                label={t('Fotoğrafları Buraya Tıklayıp Yükleyin')}
                             />
                         </div>
                     ) : (
@@ -192,7 +219,7 @@ export default function IlanMetniClient() {
                                 <div className={styles.resultTextWrap}>
                                     {qualityScore !== null ? (
                                         <div className={styles.qualityBar}>
-                                            <span>Kalite skoru</span>
+                                            <span>{t('Kalite skoru')}</span>
                                             <strong>{(qualityScore * 100).toFixed(0)}%</strong>
                                         </div>
                                     ) : null}
@@ -210,27 +237,27 @@ export default function IlanMetniClient() {
                                             type="button"
                                             className={styles.downloadBtn}
                                             onClick={() => {
-                                                sendFeedback('good', 'Metin başarılı').catch(() => undefined);
+                                                sendFeedback('good', t('Metin başarılı')).catch(() => undefined);
                                             }}
                                         >
-                                            Metin İyi
+                                            {t('Metin İyi')}
                                         </button>
                                         <button
                                             type="button"
                                             className={styles.resetBtn}
                                             onClick={handleImproveAgain}
                                         >
-                                            Yeniden İyileştir
+                                            {t('Yeniden İyileştir')}
                                         </button>
                                         <button
                                             type="button"
                                             className={styles.resetBtn}
                                             onClick={handleReset}
                                         >
-                                            Baştan Başla
+                                            {t('Baştan Başla')}
                                         </button>
                                     </div>
-                                    {feedbackSent ? <div className={styles.feedbackHint}>Geri bildiriminiz kaydedildi. Sonraki metinler bu veriye göre güçlendirilecek.</div> : null}
+                                    {feedbackSent ? <div className={styles.feedbackHint}>{t('Geri bildiriminiz kaydedildi. Sonraki metinler bu veriye göre güçlendirilecek.')}</div> : null}
                                 </div>
                             ) : (
                                 <>
@@ -241,7 +268,7 @@ export default function IlanMetniClient() {
                                     </button>
                                 </>
                             )}
-                            <ProcessingOverlay active={isProcessing} />
+                            <ProcessingOverlay active={isProcessing} estimatedSeconds={estimatedSeconds} />
                         </div>
                     )}
                 </div>

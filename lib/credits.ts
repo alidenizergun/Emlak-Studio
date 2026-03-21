@@ -11,16 +11,19 @@ function toPositiveInt(value: number): number {
     return Math.max(0, Math.ceil(Number(value) || 0));
 }
 
-function phoneVariants(phone: string): string[] {
-    const variants = [phone, `90${phone}`, `0${phone}`];
+function userIdVariants(userId: string): string[] {
+    if (userId.includes('@')) {
+        return [userId];
+    }
+    const variants = [userId, `90${userId}`, `0${userId}`];
     return Array.from(new Set(variants.filter(Boolean)));
 }
 
-function getCreditsFromSqlite(phone: string): number {
+function getCreditsFromSqlite(userId: string): number {
     const db = getDb();
-    const variants = phoneVariants(phone);
+    const variants = userIdVariants(userId);
     let bestBalance = 0;
-    let bestPhone = phone;
+    let bestUserId = userId;
 
     for (const candidate of variants) {
         ensureUser(candidate);
@@ -29,64 +32,64 @@ function getCreditsFromSqlite(phone: string): number {
             const balance = Math.max(0, Number(row.balance || 0));
             if (balance > bestBalance) {
                 bestBalance = balance;
-                bestPhone = candidate;
+                bestUserId = candidate;
             }
         }
     }
 
-    if (bestBalance > 0 && bestPhone !== phone) {
+    if (bestBalance > 0 && bestUserId !== userId) {
         const now = Date.now();
-        ensureUser(phone);
+        ensureUser(userId);
         db.prepare(`
             INSERT INTO credits (phone, balance, updated_at)
             VALUES (?, ?, ?)
             ON CONFLICT(phone) DO UPDATE SET
                 balance = excluded.balance,
                 updated_at = excluded.updated_at
-        `).run(phone, bestBalance, now);
+        `).run(userId, bestBalance, now);
         db.prepare(`
             INSERT INTO credit_ledger (phone, delta, reason, created_at)
             VALUES (?, ?, ?, ?)
-        `).run(phone, 0, `phone_format_migration_from_${bestPhone}`, now);
+        `).run(userId, 0, `phone_format_migration_from_${bestUserId}`, now);
     }
 
-    ensureUser(phone);
+    ensureUser(userId);
     return bestBalance;
 }
 
-export async function getCredits(phoneRaw: string): Promise<number> {
-    const phone = normalizePhone(phoneRaw);
-    if (!phone) return 0;
+export async function getCredits(userIdRaw: string): Promise<number> {
+    const userId = normalizePhone(userIdRaw);
+    if (!userId) return 0;
 
     if (hasPersistentDb()) {
         await ensurePersistentSchema();
-        await ensurePersistentUser(phone);
+        await ensurePersistentUser(userId);
         const sql = getPersistentSql();
-        const variants = phoneVariants(phone);
+        const variants = userIdVariants(userId);
         const rows = await sql<{ phone: string; balance: number }[]>`
             SELECT phone, balance
             FROM credits
             WHERE phone = ANY(${sql.array(variants)})
-            ORDER BY balance DESC, CASE WHEN phone = ${phone} THEN 0 ELSE 1 END
+            ORDER BY balance DESC, CASE WHEN phone = ${userId} THEN 0 ELSE 1 END
         `;
         if (rows[0]) {
             const bestRow = rows[0];
             const balance = Math.max(0, Number(bestRow.balance ?? 0));
-            const foundPhone = String(bestRow.phone || '');
-            const exactRow = rows.find((r) => String(r.phone || '') === phone);
+            const foundUserId = String(bestRow.phone || '');
+            const exactRow = rows.find((r) => String(r.phone || '') === userId);
             const exactBalance = Math.max(0, Number(exactRow?.balance ?? 0));
 
-            if (balance > exactBalance || (foundPhone && foundPhone !== phone)) {
+            if (balance > exactBalance || (foundUserId && foundUserId !== userId)) {
                 await sql`
                     INSERT INTO credits (phone, balance, updated_at)
-                    VALUES (${phone}, ${balance}, ${Date.now()})
+                    VALUES (${userId}, ${balance}, ${Date.now()})
                     ON CONFLICT (phone) DO UPDATE SET
                         balance = EXCLUDED.balance,
                         updated_at = EXCLUDED.updated_at
                 `;
                 await sql`
                     INSERT INTO credit_ledger (phone, delta, reason, created_at)
-                    VALUES (${phone}, ${0}, ${`phone_format_migration_from_${foundPhone}`}, ${Date.now()})
+                    VALUES (${userId}, ${0}, ${`phone_format_migration_from_${foundUserId}`}, ${Date.now()})
                 `;
             }
             return balance;
@@ -94,18 +97,18 @@ export async function getCredits(phoneRaw: string): Promise<number> {
 
         if (isSqliteDevFallbackEnabled()) {
             // Optional local migration path from SQLite into Postgres for development.
-            const sqliteCredits = getCreditsFromSqlite(phone);
+            const sqliteCredits = getCreditsFromSqlite(userId);
             if (sqliteCredits > 0) {
                 await sql`
                     INSERT INTO credits (phone, balance, updated_at)
-                    VALUES (${phone}, ${sqliteCredits}, ${Date.now()})
+                    VALUES (${userId}, ${sqliteCredits}, ${Date.now()})
                     ON CONFLICT (phone) DO UPDATE SET
                         balance = EXCLUDED.balance,
                         updated_at = EXCLUDED.updated_at
                 `;
                 await sql`
                     INSERT INTO credit_ledger (phone, delta, reason, created_at)
-                    VALUES (${phone}, ${sqliteCredits}, ${'sqlite_migration_seed'}, ${Date.now()})
+                    VALUES (${userId}, ${sqliteCredits}, ${'sqlite_migration_seed'}, ${Date.now()})
                 `;
             }
             return sqliteCredits;
@@ -117,7 +120,7 @@ export async function getCredits(phoneRaw: string): Promise<number> {
         throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
     }
 
-    return getCreditsFromSqlite(phone);
+    return getCreditsFromSqlite(userId);
 }
 
 export async function setCredits(phoneRaw: string, targetRaw: number, reason = 'set'): Promise<number> {

@@ -2,14 +2,15 @@ import Hero from "@/components/Hero";
 import Stats from "@/components/Stats";
 import Testimonials from "@/components/Testimonials";
 import type { Metadata } from 'next';
+import { buildLocalizedMetadata } from '@/lib/page-metadata';
 
-export const metadata: Metadata = {
-  title: 'Ana Sayfa',
-  description: 'Emlak Stüdyosu ile emlak görsellerinizi geliştirin, odaları dekore edin ve ilan metni oluşturun.',
-  alternates: {
-    canonical: '/',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return buildLocalizedMetadata({
+    title: 'Ana Sayfa',
+    description: 'Studio Estate ile emlak görsellerinizi geliştirin, odaları dekore edin ve ilan metni oluşturun.',
+    path: '/',
+  });
+}
 
 export default function Home() {
   return (
