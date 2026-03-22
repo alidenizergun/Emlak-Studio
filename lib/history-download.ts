@@ -49,8 +49,6 @@ async function readImageBytes(imageUrl: string): Promise<Buffer> {
     throw new Error('Desteklenmeyen görsel adresi');
 }
 
-type JimpImage = Awaited<ReturnType<typeof Jimp.read>>;
-
 function getExportSpec(subscription: SubscriptionInfo): { maxSide: number; label: '2k' | '4k' } {
     if (subscription.planId === 'kurumsal') {
         return { maxSide: 4096, label: '4k' };
@@ -87,7 +85,6 @@ export async function buildHistoryDownload(userIdRaw: string, entryId: string, k
     const targetHeight = height > width ? exportSpec.maxSide : Math.max(1, Math.round((height / Math.max(width, 1)) * exportSpec.maxSide));
 
     image.resize({ w: targetWidth, h: targetHeight });
-    applyExportCleanup(image, needsUpscale);
 
     const bytes = Buffer.from(await image.getBuffer('image/jpeg'));
 
@@ -97,25 +94,4 @@ export async function buildHistoryDownload(userIdRaw: string, entryId: string, k
         filename,
         planLabel: exportSpec.label,
     };
-}
-
-function applyExportCleanup(image: JimpImage, needsUpscale: boolean): void {
-    image.brightness(0.015);
-    image.contrast(0.06);
-    image.color([
-        { apply: 'saturate', params: [8] },
-    ]);
-    image.convolute(
-        needsUpscale
-            ? [
-                [0, -1, 0],
-                [-1, 5.4, -1],
-                [0, -1, 0],
-            ]
-            : [
-                [0, -0.6, 0],
-                [-0.6, 3.4, -0.6],
-                [0, -0.6, 0],
-            ]
-    );
 }
