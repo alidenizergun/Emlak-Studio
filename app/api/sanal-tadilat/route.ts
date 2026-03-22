@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
 RETRY MODE:
 - Keep perspective and camera framing unchanged.
 - Keep structural geometry stable unless explicitly requested by user.
-- Increase clarity, realism, and listing quality; avoid blur/haze.
+- Increase clarity and realism; avoid blur, haze, and unfinished surfaces.
 ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
-    ? '- Adaptive rule: clean artifacts and avoid semi-transparent/unfinished rendered furniture or finishes.'
+    ? '- Stronger artifact cleanup; no semi-transparent or half-rendered finishes.'
     : ''}`;
             const retry = await generateEditedImageWithNanoBanana({
                 image,
@@ -217,6 +217,6 @@ Rules:
 - Remove visible logos/watermarks naturally.
 - Improve lighting and sharpness to premium listing quality.
 - Do not add people, logos, text, or watermarks.
-- Output must be photorealistic and listing-ready.
+- Output must be photorealistic, clean, and listing-ready.
 `.trim();
 }

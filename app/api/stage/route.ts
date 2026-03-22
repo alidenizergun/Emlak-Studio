@@ -309,22 +309,18 @@ function buildRetryPrompt(basePrompt: string, reason: 'architecture' | 'quality'
         return `${basePrompt}
 
 RETRY MODE (QUALITY):
-- Keep architecture constraints unchanged.
-- Improve local clarity, edge crispness, and balanced exposure.
-- Avoid soft, hazy, low-contrast output.
-- Remove any foggy/milky veil and restore crisp local contrast on walls, floor, and furniture.
-- Remove any semi-transparent remnants, double-exposure artifacts, or incomplete objects.
-- Eliminate any horizontal/vertical ghost band and seam-like overlay.
-- Ensure every furniture edge is complete and fully opaque (no cut/half-rendered parts).`;
+- Keep architecture unchanged.
+- Improve clarity, edge crispness, and balanced exposure.
+- Remove haze, ghosting, seam bands, low contrast, and incomplete objects.
+- Ensure furniture edges are complete and opaque.`;
     }
     return `${basePrompt}
 
 RETRY MODE (ARCHITECTURE):
-- This is a failed previous attempt.
 - Keep window frame geometry, wall corners, ceiling line, and room depth exactly identical.
 - Do not move any fixed architectural/electrical anchor point.
 - Do not alter camera pose, focal perspective, or room proportions.
-- Do not add any new wall/partition/vertical plane. Right-side geometry and edge lines must be pixel-faithful to input.
+- Do not add any new wall, partition, or vertical plane.
 - Prioritize architectural fidelity over decoration density.`;
 }
 

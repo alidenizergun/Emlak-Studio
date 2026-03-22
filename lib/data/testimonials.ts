@@ -5,6 +5,8 @@ export interface Testimonial {
     rating?: number;
 }
 
+export type TestimonialLanguage = 'tr' | 'en';
+
 const BASE_TESTIMONIALS: Testimonial[] = [
     { text: "Görseller gerçekten profesyonel görünüyor. Müşterilerden daha fazla geri dönüş alıyorum.", author: "Mehmet Y.", company: "Yılmaz Emlak", rating: 5 },
     { text: "AI dekorasyon özelliği ile boş daireleri daha çekici gösterebiliyorum.", author: "Ayşe K.", company: "Emlak Danışmanı", rating: 4.5 },
@@ -242,18 +244,37 @@ const BASE_TESTIMONIALS: Testimonial[] = [
     { text: "Müşteri ilgisi gözle görülür arttı.", author: "Cemil A.", company: "Fortis Gayrimenkul" }
 ];
 
-// Generate 500 testimonials based on the base list
-export const TESTIMONIALS: Testimonial[] = (() => {
+const BASE_TESTIMONIALS_EN: Testimonial[] = [
+    { text: 'The visuals look genuinely professional. I get more replies from buyers.', author: 'Mehmet Y.', company: 'Yilmaz Real Estate', rating: 5 },
+    { text: 'Virtual staging helps me make empty flats feel much more desirable.', author: 'Ayse K.', company: 'Property Consultant', rating: 4.5 },
+    { text: 'We have seen a very clear improvement in listing performance.', author: 'Ahmet K.', company: 'Prestij Real Estate', rating: 5 },
+    { text: 'Buyers engage much more when they see staged interiors.', author: 'Zeynep A.', company: 'Arslan Realty', rating: 4.5 },
+    { text: 'Preparing premium-looking visuals is now much faster for our team.', author: 'Burak T.', company: 'Avcilar Premium', rating: 5 },
+    { text: 'The enhancement tools saved us meaningful photography costs.', author: 'Elif S.', company: 'Property Consultant', rating: 4.5 },
+    { text: 'Our listings attract more calls after we refresh the photos here.', author: 'Can D.', company: 'Demir Real Estate', rating: 5 },
+    { text: 'AI-enhanced visuals made our office portfolio stand out immediately.', author: 'Selin M.', company: 'VIP Realty', rating: 4.5 },
+    { text: 'Since we started using the platform, our sales process feels stronger.', author: 'Emre K.', company: 'Property Consultant', rating: 5 },
+    { text: 'The images build trust. Clients feel the listings are more premium.', author: 'Deniz B.', company: 'Sisli Premium', rating: 4.5 },
+    { text: 'Even older listings started performing better after the refresh.', author: 'Volkan S.', company: 'Anadolu Real Estate', rating: 5 },
+    { text: 'It is simple to use and the output feels much more market-ready.', author: 'Hakan D.', company: 'Duman Real Estate', rating: 5 },
+];
+
+function expandTestimonials(base: Testimonial[]): Testimonial[] {
     const targetCount = 500;
     const result: Testimonial[] = [];
 
-    // Fill up to targetCount and assign ratings (400 items at 5.0, 100 items at 4.5)
     for (let i = 0; i < targetCount; i++) {
-        const baseItem = BASE_TESTIMONIALS[i % BASE_TESTIMONIALS.length];
-        // First 100 get 4.5, rest get 5
+        const baseItem = base[i % base.length];
         const rating = i < 100 ? 4.5 : 5;
         result.push({ ...baseItem, rating });
     }
 
     return result;
-})();
+}
+
+export const TESTIMONIALS: Testimonial[] = expandTestimonials(BASE_TESTIMONIALS);
+export const TESTIMONIALS_EN: Testimonial[] = expandTestimonials(BASE_TESTIMONIALS_EN);
+
+export function getTestimonials(language: TestimonialLanguage): Testimonial[] {
+    return language === 'en' ? TESTIMONIALS_EN : TESTIMONIALS;
+}

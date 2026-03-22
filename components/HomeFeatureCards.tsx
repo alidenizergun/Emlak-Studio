@@ -24,10 +24,10 @@ const cards = [
         titleRest: 'temiz ve dikkat çekici hale getirin',
         description:
             'Düşük etkili emlak fotoğraflarını daha net, daha dengeli ve daha profesyonel bir sunuma yükseltin.',
-        beforeImage: '/images/hero-before-v17.png',
-        afterImage: '/images/hero-after-v17.png',
-        beforeAlt: 'Fotoğraf geliştirme öncesi oda',
-        afterAlt: 'Fotoğraf geliştirme sonrası aydınlatılmış oda',
+        beforeImage: '/images/home-cards/enhance-before.png',
+        afterImage: '/images/home-cards/enhance-after.png',
+        beforeAlt: 'Fotoğraf geliştirme öncesi düşük ışıklı salon',
+        afterAlt: 'Fotoğraf geliştirme sonrası dengelenmiş salon',
     },
     {
         id: 'remove-object',
@@ -64,7 +64,7 @@ export default function HomeFeatureCards() {
             <div className={`container ${styles.container}`}>
                 <div className={styles.header}>
                     <h2 className={styles.title}>
-                        <span>{t('Tek bir akışta mekanı iyileştirin,')}</span>
+                        <span>{t('Işığı, görüntüyü iyileştirin,')}</span>
                         <span>{t('dekore edin ve yeniden hayal ettirin')}</span>
                     </h2>
                 </div>
@@ -79,7 +79,7 @@ export default function HomeFeatureCards() {
                                     beforeAlt={t(card.beforeAlt)}
                                     afterAlt={t(card.afterAlt)}
                                     preserveAspect={true}
-                                    introHint="once"
+                                    introHint="none"
                                     variant="default"
                                     labels={{ before: t('Önce'), after: t('Sonra') }}
                                 />
@@ -93,7 +93,6 @@ export default function HomeFeatureCards() {
                         </article>
                     ))}
                 </div>
-
             </div>
         </section>
     );

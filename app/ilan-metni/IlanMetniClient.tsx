@@ -194,9 +194,9 @@ export default function IlanMetniClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>İlan Metni Oluşturucu</h1>
+                    <h1 className={styles.title}>{t('İlan Metni Oluşturucu')}</h1>
                     <p className={styles.description}>
-                        {t('Fotoğrafları yükleyin ve ilan bilgilerini girin; Studio Estate profesyonel ilan metni üretsin.')}
+                        {t('Fotoğrafları ve temel ilan bilgilerini kullanarak satışa hazır, akıcı ve profesyonel metinler üretin. Portföyünüzün güçlü yönlerini daha net anlatan, güven veren ve dönüşüm odaklı açıklamaları saniyeler içinde hazırlayın.')}
                     </p>
                     <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                         {t('Örnekleri Gör')}
@@ -419,10 +419,10 @@ export default function IlanMetniClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="İlan Metni Örneği"
-                summary="Girilen ilan bilgilerine göre satışa hazır, akıcı ve profesyonel bir metin üretilir."
+                title={t('İlan Metni Örneği')}
+                summary={t('Girilen ilan bilgilerine göre satışa hazır, akıcı ve profesyonel bir metin üretilir.')}
                 singleSrc="/images/examples/living-furnished.png"
-                sampleText={`Örnek metin:\\nKadıköy'ün merkezinde, 95 m² kullanım alanına sahip ferah 2+1 daire...`}
+                sampleText={t('Örnek metin:\nKadıköy\'ün merkezinde, 95 m² kullanım alanına sahip ferah 2+1 daire...')}
             />
         </div>
     );

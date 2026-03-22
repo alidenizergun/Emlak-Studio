@@ -6,6 +6,7 @@ import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
 import ValidationScorePopup from '@/components/ValidationScorePopup';
+import UploadGuidancePanel from '@/components/UploadGuidancePanel';
 import { getStoredUserId } from '@/lib/client-auth';
 import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
 import { useI18n } from '@/components/LanguageProvider';
@@ -128,13 +129,16 @@ export default function SanalTadilatClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>{t('Sanal Tadilat')}</h1>
-                    <p className={styles.description}>
-                        {t('Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.')}
-                    </p>
-                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        {t('Örnekleri İnceleyin')}
-                    </button>
+                    <div className={styles.headerMain}>
+                        <h1 className={styles.title}>{t('Sanal Tadilat')}</h1>
+                        <p className={styles.description}>
+                            {t('Eski, yıpranmış veya tamamlanmamış alanları modern bitmiş mekanlar gibi gösterin. Duvar, zemin, mutfak ve benzeri yüzeylerdeki dönüşüm potansiyelini alıcıya ve yatırımcıya çok daha net bir gelecek senaryosuyla sunun.')}
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            {t('Örnekleri İnceleyin')}
+                        </button>
+                    </div>
+                    <UploadGuidancePanel />
                 </div>
             </header>
 
@@ -147,6 +151,7 @@ export default function SanalTadilatClient() {
                                 onInvalidSelection={handleReset}
                                 onValidationResult={setValidationSummary}
                                 validationTool="virtual-renovation"
+                                showGuidance={false}
                                 label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                             />
                         </div>

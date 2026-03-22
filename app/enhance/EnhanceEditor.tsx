@@ -7,6 +7,7 @@ import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
 import ValidationScorePopup from '@/components/ValidationScorePopup';
+import UploadGuidancePanel from '@/components/UploadGuidancePanel';
 import { getStoredUserId } from '@/lib/client-auth';
 import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
 import { useI18n } from '@/components/LanguageProvider';
@@ -178,20 +179,23 @@ export default function EnhanceClient() {
     };
 
     const hasFile = Boolean(file);
-    const appliedOptionLabels = result?.appliedOptionsResolved?.map((id) => OPTION_LABELS[id] || id) || [];
+    const appliedOptionLabels = result?.appliedOptionsResolved?.map((id) => t(OPTION_LABELS[id] || id)) || [];
     const showLimitedChangeHint = Boolean(result?.qualityMetrics?.outputScore !== undefined && result.qualityMetrics.outputScore < 0.58);
 
     return (
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>{t('Fotoğraf Geliştirme')}</h1>
-                    <p className={styles.description}>
-                        {t('Studio Estate fotoğraflarınızı analiz eder, ışık ve renk dengesini sağlar, çözünürlüğü 4K kaliteye yükseltir.')}
-                    </p>
-                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        {t('Örnekleri Gör')}
-                    </button>
+                    <div className={styles.headerMain}>
+                        <h1 className={styles.title}>{t('Fotoğraf Geliştirme')}</h1>
+                        <p className={styles.description}>
+                            {t('Studio Estate fotoğraflarınızı analiz eder; ışık, renk dengesi, netlik ve genel sunum kalitesini iyileştirir. Karanlık veya düşük etkili kareleri daha temiz, daha profesyonel ve listeleme için daha güçlü görsellere dönüştürür.')}
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            {t('Örnekleri Gör')}
+                        </button>
+                    </div>
+                    <UploadGuidancePanel />
                 </div>
             </header>
 
@@ -204,6 +208,7 @@ export default function EnhanceClient() {
                                 onInvalidSelection={handleReset}
                                 onValidationResult={setValidationSummary}
                                 validationTool="enhance"
+                                showGuidance={false}
                                 label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                             />
                         </div>
@@ -270,10 +275,10 @@ export default function EnhanceClient() {
                                     </div>
                                     <div className={styles.optionText}>
                                         <div className={styles.optionNameRow}>
-                                            <span className={styles.optionName}>{opt.label}</span>
-                                            <span className={styles.optionCost}>{opt.creditCost}</span>
+                                            <span className={styles.optionName}>{t(opt.label)}</span>
+                                            <span className={styles.optionCost}>{t(opt.creditCost)}</span>
                                         </div>
-                                        <span className={styles.optionDesc}>{opt.desc}</span>
+                                        <span className={styles.optionDesc}>{t(opt.desc)}</span>
                                     </div>
                                     <div className={styles.optionIcon}>{opt.icon}</div>
                                 </div>
@@ -336,7 +341,7 @@ export default function EnhanceClient() {
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
                 title={t('Fotoğraf Geliştirme Örneği')}
-                summary="Işık, renk dengesi ve netlik yapay zeka ile optimize edilir."
+                summary={t('Işık, renk dengesi ve netlik yapay zeka ile optimize edilir.')}
                 beforeSrc="/images/examples/living-empty.png"
                 afterSrc="/images/examples/living-furnished.png"
             />

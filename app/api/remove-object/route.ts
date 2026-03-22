@@ -78,15 +78,13 @@ export async function POST(request: NextRequest) {
 RETRY MODE:
 - Keep architecture, perspective, and room geometry strictly unchanged.
 - Remove only requested objects; do not alter structural lines.
-- Improve clarity and avoid blurry or low-contrast output.
-- Enforce clean inpainting: no ghost traces, no semi-transparent leftovers, no black patches, no double edges.
+- Improve clarity and avoid blur, haze, dark patches, ghost traces, semi-transparent leftovers, and double edges.
 - If mode is "all", output must look like a truly empty room (all movable items removed).
 - If mode is "all", also remove visible decorative lighting fixtures such as chandeliers, pendant lights, sconces, and hanging lamps, while keeping ceiling geometry and fixture connection point architecture intact.
-- If lighting is dark/flat, rebalance exposure and shadows for a bright natural listing look.
-- Rebuild removed regions with continuous floor/wall texture direction and realistic contact shadows.
-- Return one complete edited image only (no partial/failed output).
+- If lighting is dark/flat, rebalance exposure for a bright natural listing look.
+- Rebuild removed regions with continuous texture and realistic contact shadows.
 ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
-    ? '- Adaptive rule: remove semi-transparent traces and double-exposure artifacts around removed zones.'
+    ? '- Stronger cleanup on semi-transparent traces and double-exposure artifacts.'
     : ''}`;
             const retry = await generateEditedImageWithNanoBanana({ image, prompt: retryPrompt });
             const retryFinal = await postprocessListingImage(retry.imageUrl, { tool: 'remove-object' });

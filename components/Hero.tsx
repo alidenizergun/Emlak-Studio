@@ -6,7 +6,6 @@ import ComparisonSlider from './ComparisonSlider';
 import BeforeAfterPopup from './BeforeAfterPopup';
 import styles from './Hero.module.css';
 import { useI18n } from '@/components/LanguageProvider';
-import LocalizedLink from '@/components/LocalizedLink';
 
 const HERO_BEFORE = '/images/hero-empty-room-4k.png';
 const HERO_AFTER = '/images/hero-decorated-4k.png';
@@ -111,26 +110,11 @@ const Hero = () => {
                             <strong>{t('Daha Hızlı ve Kârlı Satış Yapın')}</strong>
                             <span className={styles.listDesc}>{t('Güçlü görsellerle ilan süresini kısaltın, pazarlık gücünüzü artırın.')}</span>
                         </li>
+                        <li>
+                            <strong>{t('Portföyünüzü Rakiplerden Ayırın')}</strong>
+                            <span className={styles.listDesc}>{t('Her ilanda daha güçlü bir ilk izlenim oluşturarak benzer portföyler arasında öne çıkın.')}</span>
+                        </li>
                     </ul>
-                    <div className={styles.actions}>
-                        <LocalizedLink
-                            id="hero-examples-link"
-                            href="/examples"
-                            className={styles.secondaryBtn}
-                            style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="3" width="18" height="18" rx="2" />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <path d="M21 15l-5-5L5 21" />
-                            </svg>
-                            {t('Örnekleri İnceleyin')}
-                        </LocalizedLink>
-
-                        <LocalizedLink href="/register" className={styles.primaryBtn}>
-                            {t('Ücretsiz Deneyin')}
-                        </LocalizedLink>
-                    </div>
                 </div>
                 <div className={styles.visual}>
                     <div className={styles.sliderWrapper}>
@@ -153,7 +137,7 @@ const Hero = () => {
                                 setActiveExampleIndex(0);
                                 setHeroPopupOpen(true);
                             }}
-                            aria-label="Büyüt"
+                            aria-label={t('Büyüt')}
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M15 3h6v6" />
@@ -178,7 +162,7 @@ const Hero = () => {
                 onNext={handleNext}
                 ctaText={t('Ücretsiz Deneyin')}
                 ctaHref="/register"
-                hintText={POPUP_HINT_SENTENCES[popupHintIndex]}
+                hintText={t(POPUP_HINT_SENTENCES[popupHintIndex])}
                 gradientIdPrefix="hero_popup_ai"
                 heightScale={1.1}
             />

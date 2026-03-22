@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import styles from './EnhanceResultModal.module.css';
 import ComparisonSlider from './ComparisonSlider';
+import { useI18n } from '@/components/LanguageProvider';
 
 interface EnhanceResultModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface EnhanceResultModalProps {
 }
 
 const EnhanceResultModal = ({ isOpen, onClose, beforeImage, afterImage }: EnhanceResultModalProps) => {
+    const { t } = useI18n();
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -65,7 +67,7 @@ const EnhanceResultModal = ({ isOpen, onClose, beforeImage, afterImage }: Enhanc
             >
                 <div className={styles.header}>
                     <div className={styles.title}>
-                        Sonuçlarınız Hazır
+                        {t('Sonuçlarınız Hazır')}
                         <span className={styles.badge}>4K ULTRA HD</span>
                     </div>
                     <button className={styles.closeButton} onClick={onClose}>
@@ -81,8 +83,8 @@ const EnhanceResultModal = ({ isOpen, onClose, beforeImage, afterImage }: Enhanc
                         <ComparisonSlider
                             beforeImage={beforeImage}
                             afterImage={afterImage}
-                            beforeAlt="Orijinal"
-                            afterAlt="Geliştirilmiş (4K)"
+                            beforeAlt={t('Orijinal')}
+                            afterAlt={t('Geliştirilmiş (4K)')}
                             preserveAspect={true}
                             variant="hero"
                         />
@@ -91,7 +93,7 @@ const EnhanceResultModal = ({ isOpen, onClose, beforeImage, afterImage }: Enhanc
 
                 <div className={styles.footer}>
                     <button className={`${styles.button} ${styles.secondaryButton}`} onClick={onClose}>
-                        Kapat
+                        {t('Kapat')}
                     </button>
                     <button className={`${styles.button} ${styles.primaryButton}`} onClick={handleDownload}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -99,7 +101,7 @@ const EnhanceResultModal = ({ isOpen, onClose, beforeImage, afterImage }: Enhanc
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        İndir (4K)
+                        {t('İndir (4K)')}
                     </button>
                 </div>
             </div>

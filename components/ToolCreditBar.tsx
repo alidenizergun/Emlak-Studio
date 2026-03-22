@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { isStoredAuthed } from '@/lib/client-auth';
 import styles from './ToolCreditBar.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
+import { useI18n } from '@/components/LanguageProvider';
 
 const CREDITS_KEY = 'emlak_credits';
 
@@ -13,6 +14,7 @@ interface ToolCreditBarProps {
 }
 
 export default function ToolCreditBar({ costLabel }: ToolCreditBarProps) {
+    const { t } = useI18n();
     const [mounted, setMounted] = useState(false);
     const [isAuthed, setIsAuthed] = useState(false);
     const [credits, setCredits] = useState<number | null>(null);
@@ -46,17 +48,17 @@ export default function ToolCreditBar({ costLabel }: ToolCreditBarProps) {
         <div className={styles.wrapper}>
             <div className={styles.bar}>
                 <div className={styles.creditBlock}>
-                    <span className={styles.creditLabel}>Kullanılabilir kredi</span>
+                    <span className={styles.creditLabel}>{t('Kullanılabilir kredi')}</span>
                     <span className={styles.creditValue}>
                         {credits !== null ? credits : '—'}
                     </span>
                 </div>
                 <div className={styles.costBlock}>
-                    <span className={styles.costLabel}>Bu işlem</span>
-                    <span className={styles.costValue}>{costLabel}</span>
+                    <span className={styles.costLabel}>{t('Bu işlem')}</span>
+                    <span className={styles.costValue}>{t(costLabel)}</span>
                 </div>
                 <LocalizedLink href="/pricing" className={styles.ctaBtn}>
-                    Kredi al
+                    {t('Kredi al')}
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>

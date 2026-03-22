@@ -6,6 +6,7 @@ import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
 import ValidationScorePopup from '@/components/ValidationScorePopup';
+import UploadGuidancePanel from '@/components/UploadGuidancePanel';
 import { getStoredUserId } from '@/lib/client-auth';
 import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
 import { useI18n } from '@/components/LanguageProvider';
@@ -154,13 +155,16 @@ export default function RemoveObjectClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>{t('Akıllı Eşya Silme')}</h1>
-                    <p className={styles.description}>
-                        {t('İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin.')}
-                    </p>
-                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        {t('Örnekleri İnceleyin')}
-                    </button>
+                    <div className={styles.headerMain}>
+                        <h1 className={styles.title}>{t('Akıllı Eşya Silme')}</h1>
+                        <p className={styles.description}>
+                            {t('Kadrajdaki istenmeyen eşyaları, dağınıklığı veya dikkat dağıtan objeleri doğal sonuçlarla kaldırın. Mekanın mimarisini koruyarak daha sade, daha ferah ve daha odaklı ilan görselleri hazırlayın.')}
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            {t('Örnekleri İnceleyin')}
+                        </button>
+                    </div>
+                    <UploadGuidancePanel />
                 </div>
             </header>
 
@@ -173,6 +177,7 @@ export default function RemoveObjectClient() {
                                 onInvalidSelection={handleReset}
                                 onValidationResult={setValidationSummary}
                                 validationTool="remove-object"
+                                showGuidance={false}
                                 label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                             />
                         </div>

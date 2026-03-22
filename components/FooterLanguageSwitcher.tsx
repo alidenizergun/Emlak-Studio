@@ -2,8 +2,8 @@
 
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useI18n } from '@/components/LanguageProvider';
-import LocalizedLink from '@/components/LocalizedLink';
 import { swapLocaleInPath } from '@/lib/locale-routing';
+import { LANGUAGE_COOKIE } from '@/lib/i18n';
 import styles from './Footer.module.css';
 
 const LANGUAGES = [
@@ -16,28 +16,29 @@ export default function FooterLanguageSwitcher() {
     const searchParams = useSearchParams();
     const { lang } = useI18n();
     const query = searchParams.toString();
-    const languageLabel = lang === 'en' ? 'Language' : 'Dil';
 
     return (
         <div className={styles.languageBlock}>
-            <span className={styles.languageLabel}>{languageLabel}</span>
-            <div className={styles.languageList}>
-                {LANGUAGES.map((item) => {
-                    const href = `${swapLocaleInPath(pathname, item.code)}${query ? `?${query}` : ''}`;
-                    const active = item.code === lang;
-
-                    return (
-                        <LocalizedLink
-                            key={item.code}
-                            href={href}
-                            className={`${styles.languageOption} ${active ? styles.languageOptionActive : ''}`}
-                            aria-current={active ? 'page' : undefined}
-                        >
-                            <span aria-hidden="true">{item.flag}</span>
-                            <span>{item.label}</span>
-                        </LocalizedLink>
-                    );
-                })}
+            <div className={styles.languageSelectWrap}>
+                <select
+                    className={styles.languageSelect}
+                    aria-label={lang === 'en' ? 'Language' : 'Dil'}
+                    value={lang}
+                    onChange={(event) => {
+                        const nextLang = event.target.value as 'tr' | 'en';
+                        if (nextLang === lang) return;
+                        const nextPath = swapLocaleInPath(pathname, nextLang);
+                        const nextUrl = `${nextPath}${query ? `?${query}` : ''}`;
+                        document.cookie = `${LANGUAGE_COOKIE}=${nextLang}; path=/; SameSite=Lax`;
+                        window.location.assign(nextUrl);
+                    }}
+                >
+                    {LANGUAGES.map((item) => (
+                        <option key={item.code} value={item.code}>
+                            {item.flag} {item.label}
+                        </option>
+                    ))}
+                </select>
             </div>
         </div>
     );

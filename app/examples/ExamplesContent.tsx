@@ -6,6 +6,7 @@ import BeforeAfterPopup from '@/components/BeforeAfterPopup';
 import styles from './Examples.module.css';
 import { EXAMPLES, POPUP_HINT_SENTENCES, type ExampleItem } from '@/lib/examplesData';
 import LocalizedLink from '@/components/LocalizedLink';
+import { useI18n } from '@/components/LanguageProvider';
 
 const CATEGORIES = [
     { id: 'all', label: 'Tümü' },
@@ -18,6 +19,7 @@ const CATEGORIES = [
 ];
 
 export function ExamplesContent() {
+    const { t } = useI18n();
     const [activeCategory, setActiveCategory] = useState('all');
     const [popupExample, setPopupExample] = useState<ExampleItem | null>(null);
     const [ctaHintIndex, setCtaHintIndex] = useState(0);
@@ -83,10 +85,10 @@ export function ExamplesContent() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1 className={styles.title}>
-                    Dönüşüm Örnekleri
+                    {t('Dönüşüm Örnekleri')}
                 </h1>
                 <p className={styles.description}>
-                    Boş ve cansız odaların yapay zeka ile nasıl satışa hazır, büyüleyici yaşam alanlarına dönüştüğünü keşfedin.
+                    {t('Boş ve cansız odaların yapay zeka ile nasıl satışa hazır, büyüleyici yaşam alanlarına dönüştüğünü keşfedin.')}
                 </p>
 
                 {/* Categories Tabs - render as non-interactive placeholders until mount to avoid hydration mismatch */}
@@ -98,7 +100,7 @@ export function ExamplesContent() {
                             onClick={() => setActiveCategory(cat.id)}
                             className={`${styles.tabButton} ${activeCategory === cat.id ? styles.tabButtonActive : ''}`}
                         >
-                            {cat.label}
+                            {t(cat.label)}
                         </button>
                     ))}
                 </div>
@@ -122,7 +124,7 @@ export function ExamplesContent() {
                                     e.stopPropagation();
                                     setPopupExample(ex);
                                 }}
-                                aria-label="Büyüt"
+                                aria-label={t('Büyüt')}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M15 3h6v6" />
@@ -142,8 +144,8 @@ export function ExamplesContent() {
                     onClose={() => setPopupExample(null)}
                     beforeSrc={popupExample.before}
                     afterSrc={popupExample.after}
-                    beforeAlt="Önce"
-                    afterAlt="Studio Estate ile Dekore Edildikten Sonra"
+                    beforeAlt={t('Önce')}
+                    afterAlt={t('Studio Estate ile Dekore Edildikten Sonra')}
                     showArrows={filteredExamples.length > 1}
                     onPrev={(e) => {
                         e.stopPropagation();
@@ -157,9 +159,9 @@ export function ExamplesContent() {
                         const next = idx < filteredExamples.length - 1 ? filteredExamples[idx + 1] : filteredExamples[0];
                         setPopupExample(next);
                     }}
-                    ctaText="Hemen Ücretsiz Deneyin"
+                    ctaText={t('Hemen Ücretsiz Deneyin')}
                     ctaHref="/register"
-                    hintText={POPUP_HINT_SENTENCES[ctaHintIndex]}
+                    hintText={t(POPUP_HINT_SENTENCES[ctaHintIndex])}
                     gradientIdPrefix="examples_popup_ai"
                     heightScale={1.1}
                 />
@@ -167,11 +169,11 @@ export function ExamplesContent() {
 
             <section className={styles.ctaSection}>
                 <LocalizedLink href="/register" className={styles.ctaButton}>
-                    Hemen Ücretsiz Deneyin
+                    {t('Hemen Ücretsiz Deneyin')}
                 </LocalizedLink>
                 <div className={styles.ctaHintWrap}>
                     <p className={styles.ctaHint}>
-                        {POPUP_HINT_SENTENCES[ctaHintIndex]}
+                        {t(POPUP_HINT_SENTENCES[ctaHintIndex])}
                     </p>
                 </div>
             </section>

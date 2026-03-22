@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ImageUploader from '@/components/ImageUploader';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
+import { useI18n } from '@/components/LanguageProvider';
 import { getStoredUserId } from '@/lib/client-auth';
 import styles from './AiTourGuide.module.css';
 
@@ -22,6 +23,7 @@ function isImageLikeUrl(url: string): boolean {
 }
 
 export default function AiTourGuideClient() {
+    const { t } = useI18n();
     const SCRIPT_MAX_LENGTH = 280;
 
     const [file, setFile] = useState<File | null>(null);
@@ -151,7 +153,7 @@ export default function AiTourGuideClient() {
     if (!mounted) {
         return (
             <div className={styles.pageContainer} style={{ textAlign: 'center', padding: '3rem' }}>
-                Yükleniyor...
+                {t('Yükleniyor...')}
             </div>
         );
     }
@@ -160,12 +162,12 @@ export default function AiTourGuideClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>Sanal Sunucu</h1>
+                    <h1 className={styles.title}>{t('Sanal Sunucu')}</h1>
                     <p className={styles.description}>
-                        Tek bir mülk fotoğrafı yükleyin. Sistem 8-10 saniyelik video üretir; kadın sunucu evin içinde konuşarak evi tanıtır.
+                        {t('Tek bir mülk fotoğrafından kısa, sunuculu bir video akışı oluşturun. Anlatım metni ve görsel sunum birlikte çalışarak ilanı daha dikkat çekici, daha anlaşılır ve daha paylaşılabilir bir formata taşır.')}
                     </p>
                     <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        Örnekleri Gör
+                        {t('Örnekleri Gör')}
                     </button>
                 </div>
             </header>
@@ -302,10 +304,10 @@ export default function AiTourGuideClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title="Sanal Sunucu Örneği"
-                summary="Yüklenen görselden 8-10 saniyelik kadın sunuculu video üretilir ve mülk anlatımı sesli şekilde verilir."
+                title={t('Sanal Sunucu Örneği')}
+                summary={t('Yüklenen görselden 8-10 saniyelik kadın sunuculu video üretilir ve mülk anlatımı sesli şekilde verilir.')}
                 singleSrc="/images/examples/living-furnished.png"
-                sampleText={`Örnek anlatım:\nMerhaba, şimdi bu ferah yaşam alanını birlikte geziyoruz...`}
+                sampleText={t('Örnek anlatım:\nMerhaba, şimdi bu ferah yaşam alanını birlikte geziyoruz...')}
             />
         </div>
     );

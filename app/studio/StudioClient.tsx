@@ -7,18 +7,9 @@ import { TOOLS } from '@/app/tools/toolsData';
 import { clearStoredAuth, getStoredUserId, isStoredAuthed, persistStoredUserId } from '@/lib/client-auth';
 import { useI18n } from '@/components/LanguageProvider';
 import styles from './Studio.module.css';
+import headerStyles from '@/components/Header.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
-
-const STUDIO_MIN_TOPUP_CREDITS = 10;
-const STUDIO_MAX_TOPUP_CREDITS = 10000;
-
-interface SubscriptionInfo {
-    planId: 'danisman' | 'ofis' | 'kurumsal';
-    monthlyCredits: number;
-    monthlyPrice: number;
-    status: 'active' | 'cancelled';
-}
 
 const VALID_TOOL_IDS = new Set(TOOLS.map((t) => t.id));
 function getToolIdFromParam(param: string | null): string {
@@ -50,11 +41,6 @@ export default function StudioClient() {
     const [credits, setCredits] = useState<number>(0);
     const [accountId, setAccountId] = useState('');
     const [selectedToolId, setSelectedToolId] = useState<string>(() => getToolIdFromParam(toolParam));
-    const [showTopupPanel, setShowTopupPanel] = useState(false);
-    const [purchaseAmountInput, setPurchaseAmountInput] = useState('100');
-    const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
-    const [topupLoading, setTopupLoading] = useState(false);
-    const [topupProcessing, setTopupProcessing] = useState(false);
     const workspaceRef = useRef<HTMLDivElement>(null);
     const stageTabParam = searchParams.get('stageTab');
 
@@ -131,21 +117,6 @@ export default function StudioClient() {
     }, [lang, mounted, refreshCredits, router]);
 
     useEffect(() => {
-        if (!showTopupPanel || !accountId) return;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setTopupLoading(true);
-        fetch(`/api/subscription?email=${encodeURIComponent(accountId)}`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success && data.subscription) {
-                    setSubscription(data.subscription as SubscriptionInfo);
-                }
-            })
-            .catch(() => {})
-            .finally(() => setTopupLoading(false));
-    }, [showTopupPanel, accountId]);
-
-    useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
 
         const onCreditsUpdated = (event: Event) => {
@@ -197,91 +168,50 @@ export default function StudioClient() {
 
     const ToolComponent = TOOL_COMPONENTS[selectedToolId];
     const isMyPhotosActive = selectedToolId === 'stage' && (stageTabParam === 'works' || stageTabParam === 'photos');
-    const purchaseAmount = Math.floor(Number(purchaseAmountInput) || 0);
-    const perCreditPrice = subscription
-        ? subscription.monthlyPrice / Math.max(subscription.monthlyCredits, 1)
-        : 0;
-    const totalTopupPrice = Math.round(perCreditPrice * purchaseAmount);
-
-    const normalizeTopupAmount = () => {
-        const raw = purchaseAmountInput.replace(/\D/g, '');
-        if (!raw) {
-            setPurchaseAmountInput(String(STUDIO_MIN_TOPUP_CREDITS));
-            return;
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch {
+            // no-op
         }
-        const numericValue = Number(raw);
-        if (numericValue < STUDIO_MIN_TOPUP_CREDITS) {
-            setPurchaseAmountInput(String(STUDIO_MIN_TOPUP_CREDITS));
-            return;
-        }
-        if (numericValue > STUDIO_MAX_TOPUP_CREDITS) {
-            setPurchaseAmountInput(String(STUDIO_MAX_TOPUP_CREDITS));
-            return;
-        }
-        setPurchaseAmountInput(String(numericValue));
-    };
-
-    const handleTopupPurchase = () => {
-        if (!subscription || !accountId || subscription.status === 'cancelled') return;
-        setTopupProcessing(true);
-        router.push('/contact');
+        clearStoredAuth();
+        router.replace(localizePath('/', lang));
     };
 
     return (
         <div className={styles.pageContainer}>
             <div className={styles.mainLayout}>
                 <aside className={styles.sidebar}>
+                    <div className={styles.sidebarBrandWrap}>
+                        <div className={headerStyles.logo}>
+                            <LocalizedLink href="/">
+                                <div className={headerStyles.logoIcon}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src="/logo.png"
+                                        alt="Studio Estate Logo"
+                                        width={64}
+                                        height={64}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                    />
+                                </div>
+                                <div className={headerStyles.logoTextWrapper}>
+                                    <span className={headerStyles.logoBrand}>Studio</span>
+                                    <span className={headerStyles.logoStudio}>
+                                        <span className={headerStyles.logoStudioInner}>Estate</span>
+                                    </span>
+                                </div>
+                            </LocalizedLink>
+                        </div>
+                    </div>
                     <div className={styles.sidebarTop}>
                         <div className={styles.sidebarMetaRow}>
                             <div className={styles.sidebarCreditRow}>
                                 <span className={styles.sidebarCreditLabel}>{t('Kalan kredi')}</span>
-                                <span className={styles.sidebarCreditValue}>{credits.toLocaleString('tr-TR')}</span>
+                                <span className={styles.sidebarCreditValue}>{credits.toLocaleString(lang === 'en' ? 'en-US' : 'tr-TR')}</span>
                             </div>
                             <p className={styles.sidebarHelper}>{t('Krediler anlık olarak senkronize edilir.')}</p>
                         </div>
-                        <div className={styles.sidebarQuickActions}>
-                            <button
-                                type="button"
-                                className={styles.sidebarCta}
-                                onClick={() => setShowTopupPanel((prev) => !prev)}
-                            >
-                                {t('Aktivasyon Talep Et')}
-                            </button>
-                            <LocalizedLink href="/dashboard/settings" className={styles.sidebarSettings}>{t('Ayarlar')}</LocalizedLink>
-                        </div>
-                        {showTopupPanel ? (
-                            <div className={styles.topupPanel}>
-                                <p className={styles.topupText}>
-                                    {t('İlk müşteriler için kredi ve paket aktivasyonlarini manuel olarak yapiyoruz. Ihtiyacinizi bize iletin, hesabinizi fatura ile aktive edelim.')}
-                                </p>
-                                <div className={styles.topupRow}>
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        pattern="[0-9]*"
-                                        value={purchaseAmountInput}
-                                        onChange={(e) => {
-                                            const digitsOnly = e.target.value.replace(/\D/g, '');
-                                            setPurchaseAmountInput(digitsOnly);
-                                        }}
-                                        onFocus={(e) => e.currentTarget.select()}
-                                        onBlur={normalizeTopupAmount}
-                                        className={styles.topupInput}
-                                    />
-                                    <LocalizedLink href="/contact" className={styles.topupButton}>
-                                        {t('Bizimle Iletisime Gecin')}
-                                    </LocalizedLink>
-                                </div>
-                                <p className={`${styles.topupText} ${styles.topupTotalText}`}>
-                                    {t('Tahmini aylik paket referansi: ₺{amount}').replace('{amount}', totalTopupPrice.toLocaleString('tr-TR'))}
-                                </p>
-                                <p className={`${styles.topupNote} ${styles.topupNoteSpaced}`}>
-                                    {t('Minimum {min}, maksimum {max} kredi ihtiyacinizi belirtebilirsiniz.')
-                                        .replace('{min}', STUDIO_MIN_TOPUP_CREDITS.toLocaleString('tr-TR'))
-                                        .replace('{max}', STUDIO_MAX_TOPUP_CREDITS.toLocaleString('tr-TR'))}
-                                </p>
-                            </div>
-                        ) : null}
                     </div>
                     <nav className={styles.toolNav} aria-label={t('Araçlar')}>
                         {TOOLS.map((tool) => {
@@ -333,6 +263,14 @@ export default function StudioClient() {
                             );
                         })}
                     </nav>
+                    <div className={styles.sidebarFooter}>
+                        <LocalizedLink href="/dashboard/settings" className={styles.sidebarFooterAction}>
+                            {t('Ayarlar')}
+                        </LocalizedLink>
+                        <button type="button" className={styles.sidebarLogout} onClick={handleLogout}>
+                            {t('Çıkış Yap')}
+                        </button>
+                    </div>
                 </aside>
 
                 <main className={styles.workspace} ref={workspaceRef}>

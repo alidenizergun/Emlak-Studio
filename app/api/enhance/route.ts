@@ -90,19 +90,17 @@ function buildRetryPrompt(basePrompt: string, reason: EnhanceFailureReason, boos
         return `${basePrompt}
 
 RETRY MODE (QUALITY):
-- Keep all geometry, lens perspective and room scale identical.
-- Increase clarity, micro-contrast and texture realism.
-- Avoid over-saturation, halos, watercolor or plastic skin/fabric look.
-- Keep photorealistic listing quality.
-${boost ? '- Adaptive rule: enforce stronger anti-haze and anti-ghost cleanup; reject semi-transparent artifacts.' : ''}`;
+- Keep geometry identical.
+- Increase clarity and realism.
+- Remove haze, ghosting, blur, halos, and low-contrast artifacts.
+${boost ? '- Stronger cleanup on haze and semi-transparent artifacts.' : ''}`;
     }
     return `${basePrompt}
 
 RETRY MODE (ARCHITECTURE):
-- Preserve room geometry strictly; do not move any wall/window/door/column.
-- Keep camera pose and perspective exactly unchanged.
+- Preserve walls, windows, doors, columns, and perspective exactly.
 - Prefer conservative enhancement over aggressive edits.
-${boost ? '- Adaptive rule: lock architectural lines and corners more strictly than previous attempt.' : ''}`;
+${boost ? '- Stronger architectural lock than the previous attempt.' : ''}`;
 }
 
 async function runEnhanceAttempt(

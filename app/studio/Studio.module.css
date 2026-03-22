@@ -1,10 +1,12 @@
 .pageContainer {
+    --studio-sidebar-width: 260px;
+    --studio-sidebar-inset: 0.5rem;
+    --studio-sidebar-card-width: calc(100% - (var(--studio-sidebar-inset) * 2));
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     background: #f8fafc;
-    /* Global sabit header için boşluk; Dashboard ile aynı hizaya getir. */
-    padding-top: var(--page-top-space);
+    padding-top: 0;
 }
 
 .loading {
@@ -15,15 +17,20 @@
 }
 
 /* ----- Sol menü (sidebar) üst: Stüdyo, kredi, Kredi al, Ayarlar ----- */
+.sidebarBrandWrap {
+    padding: 1rem var(--studio-sidebar-inset) 0.45rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
 .sidebarTop {
-    padding: 0.75rem 0.75rem 0.72rem;
-    margin: 0.5rem 0.5rem 0.4rem;
-    border: 1px solid #99f6e4;
+    padding: 0.78rem;
+    margin: 0.5rem var(--studio-sidebar-inset) 0.35rem;
+    border: 1px solid #dbe7f4;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    background: #f0fdfa;
+    gap: 0.42rem;
+    background: #f8fafc;
 }
 
 .sidebarMetaRow {
@@ -31,12 +38,6 @@
     flex-direction: column;
     align-items: stretch;
     gap: 0.36rem;
-}
-
-.sidebarQuickActions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.4rem;
 }
 
 .sidebarCreditRow {
@@ -75,125 +76,6 @@
     line-height: 1.35;
 }
 
-.sidebarCta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 0.58rem 0.7rem;
-    background: #d9f4f1;
-    color: #0f766e;
-    border-radius: 11px;
-    font-weight: 500;
-    font-size: 0.82rem;
-    text-decoration: none;
-    border: 1px solid #8de6dd;
-    transition: background 0.2s, border-color 0.2s;
-    cursor: pointer;
-}
-
-.sidebarCta:hover {
-    background: #cdeeea;
-    border-color: #5bd4c8;
-    color: #0f766e;
-}
-
-.topupPanel {
-    border: 1px solid #99f6e4;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 0.62rem;
-    margin-top: 0.1rem;
-}
-
-.topupText {
-    margin: 0.3rem 0 0.48rem;
-    font-size: 0.74rem;
-    line-height: 1.35;
-    color: #64748b;
-}
-
-.topupTotalText {
-    margin-top: 0.95rem;
-}
-
-.topupRow {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.4rem;
-}
-
-.topupInput {
-    width: 100%;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    padding: 0.48rem 0.56rem;
-    font-size: 0.85rem;
-    color: #0f172a;
-    background: #ffffff;
-}
-
-.topupInput:focus {
-    outline: none;
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.12);
-}
-
-.topupButton {
-    border: 1px solid #14b8a6;
-    background: #0d9488;
-    color: #ffffff;
-    border-radius: 10px;
-    padding: 0.48rem 0.62rem;
-    font-size: 0.76rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.topupButton:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.topupNote {
-    margin: 0.3rem 0 0;
-    font-size: 0.7rem;
-    line-height: 1.35;
-    color: #64748b;
-}
-
-.topupPricingNote {
-    margin-bottom: 0.85rem;
-}
-
-.topupNoteSpaced {
-    margin-top: 0.95rem;
-}
-
-.sidebarSettings {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 0.58rem 0.7rem;
-    background: #d9f4f1;
-    color: #0f766e;
-    border: 1px solid #8de6dd;
-    border-radius: 11px;
-    font-weight: 500;
-    font-size: 0.82rem;
-    text-decoration: none;
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.sidebarSettings:hover {
-    background: #cdeeea;
-    border-color: #5bd4c8;
-    color: #0f766e;
-}
-
 /* ----- Ana layout: sidebar + workspace ----- */
 /* Üst içerik hizası: sağdaki araç başlığı (Fotoğraf Geliştirme Stüdyosu vb.) soldaki "Stüdyo" yazısıyla aynı seviyede. */
 .mainLayout {
@@ -205,7 +87,7 @@
 }
 
 .sidebar {
-    flex: 0 0 260px;
+    flex: 0 0 var(--studio-sidebar-width);
     background: #ffffff;
     border-right: 1px solid #e2e8f0;
     overflow-y: auto;
@@ -217,8 +99,59 @@
 .toolNav {
     display: flex;
     flex-direction: column;
-    padding: 0.75rem 0;
-    flex: 1 1 auto;
+    gap: 0.4rem;
+    padding: 0.5rem 0 0.45rem;
+    flex: 0 0 auto;
+}
+
+.sidebarFooter {
+    margin-top: 1.1rem;
+    padding: 0.45rem 0 0.85rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.42rem;
+}
+
+.sidebarFooterAction,
+.sidebarLogout {
+    width: var(--studio-sidebar-card-width);
+    margin: 0 var(--studio-sidebar-inset);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.82rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #fecaca;
+    background: #fff5f5;
+    color: #b91c1c;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebarFooterAction {
+    border: 1px solid #dbe7f4;
+    background: #f8fafc;
+    color: #334155;
+}
+
+.sidebarFooterAction:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+.sidebarLogout {
+    cursor: pointer;
+}
+
+.sidebarLogout:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
 }
 
 .toolGroup {
@@ -231,9 +164,9 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    width: 100%;
+    width: var(--studio-sidebar-card-width);
     padding: 0.75rem 1rem;
-    margin: 0 0.5rem;
+    margin: 0 var(--studio-sidebar-inset);
     border: none;
     border-radius: 10px;
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
@@ -310,8 +243,8 @@
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    width: calc(100% - 1rem);
-    margin: 0 0.5rem;
+    width: var(--studio-sidebar-card-width);
+    margin: 0 var(--studio-sidebar-inset);
     border: 1px solid #e2e8f0;
     background: #ffffff;
     color: #334155;
@@ -391,7 +324,9 @@
 
 @media (max-width: 1024px) {
     .pageContainer {
-        padding-top: var(--page-top-space);
+        --studio-sidebar-inset: 0.42rem;
+        --studio-sidebar-card-width: calc(100% - (var(--studio-sidebar-inset) * 2));
+        padding-top: 0;
     }
 
     .mainLayout {
@@ -421,10 +356,14 @@
         flex-direction: column;
     }
 
+    .sidebarBrandWrap {
+        padding: 0.45rem var(--studio-sidebar-inset) 0.18rem;
+    }
+
     .sidebarTop {
         padding: 0.34rem 0.45rem 0.24rem;
         gap: 0.22rem;
-        margin: 0.34rem 0.34rem 0.24rem;
+        margin: 0.34rem var(--studio-sidebar-inset) 0.24rem;
         border: 1px solid #99f6e4;
         border-radius: 10px;
         flex-shrink: 0;
@@ -465,77 +404,31 @@
         line-height: 1.2;
     }
 
-    .sidebarQuickActions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.24rem;
-    }
-
-    .sidebarTop .sidebarCta,
-    .sidebarTop .sidebarSettings {
-        width: 100%;
-        justify-content: center;
-        padding: 0.28rem 0.35rem;
-        font-size: 0.6rem;
-        border-radius: 8px;
-        display: inline-flex;
-        line-height: 1.1;
-    }
-
-    .sidebarTop .sidebarCta {
-        background: #ecfeff;
-        border: 1px solid #99f6e4;
-        color: #0f766e;
-    }
-
-    .sidebarTop .sidebarSettings {
-        background: #ecfeff;
-        border: 1px solid #99f6e4;
-        color: #0f766e;
-    }
-
-    .topupPanel {
-        padding: 0.42rem;
-    }
-
-    .topupText,
-    .topupNote {
-        font-size: 0.54rem;
-    }
-
-    .topupPricingNote {
-        margin-bottom: 0.65rem;
-    }
-
-    .topupTotalText {
-        margin-top: 0.75rem;
-    }
-
-    .topupNoteSpaced {
-        margin-top: 0.75rem;
-    }
-
-    .topupInput {
-        font-size: 0.6rem;
-        padding: 0.3rem 0.35rem;
-        border-radius: 8px;
-    }
-
-    .topupButton {
-        font-size: 0.58rem;
-        padding: 0.3rem 0.36rem;
-        border-radius: 8px;
-    }
-
     .toolNav {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 0.24rem;
-        padding: 0.24rem 0.42rem 0.24rem;
+        padding: 0.24rem var(--studio-sidebar-inset) 0.24rem;
         align-content: stretch;
         grid-auto-rows: 1fr;
         flex: 1 1 auto;
         min-height: 0;
+    }
+
+    .sidebarFooter {
+        margin-top: 0;
+        padding: 0.28rem 0 0.42rem;
+        border-top: 1px solid rgba(153, 246, 228, 0.9);
+        background: rgba(240, 253, 250, 0.98);
+    }
+
+    .sidebarFooterAction,
+    .sidebarLogout {
+        width: var(--studio-sidebar-card-width);
+        margin: 0 var(--studio-sidebar-inset);
+        padding: 0.4rem 0.5rem;
+        font-size: 0.66rem;
+        border-radius: 9px;
     }
 
     .toolGroup {

@@ -139,3 +139,46 @@ export async function upsertEmailUser(emailRaw: string, passwordHash: string): P
     ).run(email, passwordHash, email);
     return { email, passwordHash };
 }
+
+export async function ensureOAuthUser(emailRaw: string): Promise<AuthUser> {
+    const email = normalizeEmail(emailRaw);
+    if (!email || !isValidEmail(email)) {
+        throw new Error('Geçerli bir e-posta adresi girin.');
+    }
+
+    const existing = await findUserByEmail(email);
+    if (existing) {
+        return existing;
+    }
+
+    if (hasPersistentDb()) {
+        await ensurePersistentSchema();
+        const sql = getPersistentSql();
+        try {
+            await sql`
+                INSERT INTO users (phone, email, password_hash, created_at)
+                VALUES (${email}, ${email}, ${null}, ${Date.now()})
+            `;
+        } catch (error) {
+            if (error instanceof Error && /unique|duplicate/i.test(error.message)) {
+                const found = await findUserByEmail(email);
+                if (found) return found;
+            }
+            throw error;
+        }
+        return { email, passwordHash: null };
+    }
+
+    if (!isSqliteDevFallbackEnabled()) {
+        throw new Error('Postgres bağlantısı gerekli. Local debug için ALLOW_SQLITE_DEV_FALLBACK=1 ayarlayın.');
+    }
+
+    const db = getDb();
+    ensureUser(email);
+    db.prepare(
+        `UPDATE users
+         SET email = COALESCE(email, ?)
+         WHERE phone = ?`
+    ).run(email, email);
+    return { email, passwordHash: null };
+}

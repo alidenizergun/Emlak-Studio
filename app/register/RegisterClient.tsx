@@ -8,6 +8,7 @@ import { persistStoredUserId } from '@/lib/client-auth';
 import { useI18n } from '@/components/LanguageProvider';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
+import AuthSocialButtons from '@/components/AuthSocialButtons';
 
 function normalizeEmail(value: string): string {
     return value.trim().toLowerCase();
@@ -112,6 +113,17 @@ export default function RegisterClient() {
                         <h1 className={styles.title}>{t('Ücretsiz Başlayın')}</h1>
                         <p className={styles.subtitle}>{t('E-posta adresiniz ve şifreniz ile hesabınızı oluşturun.')}</p>
                     </div>
+
+                    <AuthSocialButtons
+                        className={styles.socialBlock}
+                        dividerClassName={styles.socialDivider}
+                        dividerLineClassName={styles.socialDividerLine}
+                        dividerTextClassName={styles.socialDividerText}
+                        stackClassName={styles.socialStack}
+                        buttonClassName={styles.socialButton}
+                        iconClassName={styles.socialIcon}
+                        onError={(message) => setErrors({ form: t(message) })}
+                    />
 
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.inputGroup}>

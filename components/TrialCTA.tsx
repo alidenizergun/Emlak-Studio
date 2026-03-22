@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import styles from './TrialCTA.module.css';
+import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
 
 const TrialCTA = () => {
+    const { t } = useI18n();
     const [timeLeft, setTimeLeft] = useState(60);
     const [hasStarted, setHasStarted] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -40,28 +43,28 @@ const TrialCTA = () => {
     return (
         <div className={styles.ctaWrapper} ref={containerRef}>
             <div className={styles.ctaContainer}>
-                <h2 className={styles.ctaTitle}>🎯 Sınırlı Süre için Ücretsiz Deneyin!</h2>
+                <h2 className={styles.ctaTitle}>🎯 {t('Sınırlı Süre için Ücretsiz Deneyin!')}</h2>
 
                 <div className={styles.promoText}>
-                    🎁 2 Kredi Hediye 🎁
+                    🎁 {t('2 Kredi Hediye')} 🎁
                 </div>
 
                 <div className={styles.countdown}>
                     {timeLeft > 0 ? (
-                        <span>⏱️ Bu fırsat {timeLeft} saniye içinde sona erecek</span>
+                        <span>{`⏱️ ${t('Bu fırsat {count} saniye içinde sona erecek').replace('{count}', String(timeLeft))}`}</span>
                     ) : (
-                        <span>❌ Fırsat sona erdi!</span>
+                        <span>❌ {t('Fırsat sona erdi!')}</span>
                     )}
                 </div>
 
-                <a
-                    href={isExpired ? undefined : "/register"}
+                <LocalizedLink
+                    href="/register"
                     className={`${styles.ctaButton} ${isExpired ? styles.ctaButtonDisabled : ''}`}
                     onClick={(e) => isExpired && e.preventDefault()}
                     style={{ pointerEvents: isExpired ? 'none' : 'auto' }}
                 >
-                    {isExpired ? '⏰ Fırsat Sona Erdi' : '✨ Ücretsiz Denemeyi Başlat'}
-                </a>
+                    {isExpired ? `⏰ ${t('Fırsat Sona Erdi')}` : `✨ ${t('Ücretsiz Denemeyi Başlat')}`}
+                </LocalizedLink>
             </div>
         </div>
     );

@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import styles from './Suggestions.module.css';
+import { useI18n } from '@/components/LanguageProvider';
 
 export default function SuggestionsClient() {
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -37,47 +39,47 @@ export default function SuggestionsClient() {
   return (
     <div className={`container ${styles.pageContainer}`}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Öneride Bulunun</h1>
+        <h1 className={styles.title}>{t('Öneride Bulunun')}</h1>
         <p className={styles.description}>
-          Studio Estate&apos;nu geliştirmemiz için fikirlerinizi bizimle paylaşın. Eksik gördüğünüz bir özellik veya yeni bir araç öneriniz mi var?
+          {t('Studio Estate’ı geliştirmemiz için fikirlerinizi bizimle paylaşın. Eksik gördüğünüz bir özellik veya yeni bir araç öneriniz mi var?')}
         </p>
       </div>
 
       <div className={styles.formContainer}>
         {status === 'success' ? (
           <div className={styles.successMessage}>
-            <p>Teşekkürler! Öneriniz başarıyla alındı. En kısa sürede değerlendireceğiz.</p>
+            <p>{t('Teşekkürler! Öneriniz başarıyla alındı. En kısa sürede değerlendireceğiz.')}</p>
             <button
               onClick={() => setStatus('idle')}
               className={styles.submitBtn}
               style={{ marginTop: '1rem', width: '100%', background: 'transparent', color: 'var(--primary)', border: '1px solid var(--primary)' }}
             >
-              Yeni Öneri Gönder
+              {t('Yeni Öneri Gönder')}
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formGroup}>
-              <label htmlFor="name" className={styles.label}>Adınız Soyadınız (İsteğe bağlı)</label>
+              <label htmlFor="name" className={styles.label}>{t('Adınız Soyadınız (İsteğe bağlı)')}</label>
               <input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Adınız Soyadınız"
+                placeholder={t('Adınız Soyadınız')}
                 className={styles.input}
                 disabled={status === 'sending'}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>E-posta Adresiniz</label>
+              <label htmlFor="email" className={styles.label}>{t('E-posta Adresiniz')}</label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ornek@email.com"
+                placeholder={t('ornek@email.com')}
                 className={styles.input}
                 required
                 disabled={status === 'sending'}
@@ -85,12 +87,12 @@ export default function SuggestionsClient() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="message" className={styles.label}>Öneriniz / Mesajınız</label>
+              <label htmlFor="message" className={styles.label}>{t('Öneriniz / Mesajınız')}</label>
               <textarea
                 id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Hangi araç veya özelliği ekleyelim? Detaylı açıklayabilir misiniz?"
+                placeholder={t('Hangi araç veya özelliği ekleyelim? Detaylı açıklayabilir misiniz?')}
                 className={styles.textarea}
                 rows={5}
                 required
@@ -100,12 +102,12 @@ export default function SuggestionsClient() {
 
             {status === 'error' && (
               <div className={styles.errorMessage}>
-                Gönderilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.
+                {t('Gönderilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.')}
               </div>
             )}
 
             <button type="submit" className={styles.submitBtn} disabled={status === 'sending'}>
-              {status === 'sending' ? 'Gönderiliyor...' : 'Öneriyi Gönder'}
+              {status === 'sending' ? t('Gönderiliyor...') : t('Öneriyi Gönder')}
             </button>
           </form>
         )}

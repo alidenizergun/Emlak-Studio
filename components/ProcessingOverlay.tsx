@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './ProcessingOverlay.module.css';
+import { useI18n } from '@/components/LanguageProvider';
 
 interface ProcessingOverlayProps {
     active: boolean;
@@ -13,8 +14,8 @@ function formatRemaining(seconds: number): string {
     const safe = Math.max(0, Math.ceil(seconds));
     const minutes = Math.floor(safe / 60);
     const secs = safe % 60;
-    if (minutes <= 0) return `${secs} sn`;
-    return `${minutes} dk ${secs.toString().padStart(2, '0')} sn`;
+    if (minutes <= 0) return `${secs}s`;
+    return `${minutes}m ${secs.toString().padStart(2, '0')}s`;
 }
 
 export default function ProcessingOverlay({
@@ -22,6 +23,7 @@ export default function ProcessingOverlay({
     message = 'İşlem sürüyor',
     estimatedSeconds = 45,
 }: ProcessingOverlayProps) {
+    const { t } = useI18n();
     const [startedAt, setStartedAt] = useState<number | null>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -51,10 +53,10 @@ export default function ProcessingOverlay({
     const remainingSeconds = Math.max(0, estimatedSeconds - elapsedSeconds);
     const etaText =
         startedAt === null
-            ? `Tahmini kalan süre: ${formatRemaining(estimatedSeconds)}`
+            ? t('Tahmini kalan süre: {time}').replace('{time}', formatRemaining(estimatedSeconds))
             : remainingSeconds > 0
-                ? `Tahmini kalan süre: ${formatRemaining(remainingSeconds)}`
-                : 'Son dokunuşlar yapılıyor...';
+                ? t('Tahmini kalan süre: {time}').replace('{time}', formatRemaining(remainingSeconds))
+                : t('Son dokunuşlar yapılıyor...');
 
     if (!active) return null;
 
@@ -62,7 +64,7 @@ export default function ProcessingOverlay({
         <div className={styles.overlay} role="status" aria-live="polite">
             <div className={styles.card}>
                 <p className={styles.text}>
-                    {message} <span className={styles.hourglass}>⏳</span>
+                    {t(message)} <span className={styles.hourglass}>⏳</span>
                 </p>
                 <p className={styles.eta}>{etaText}</p>
                 <div className={styles.progressTrack} aria-hidden="true">

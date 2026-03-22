@@ -1,33 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import styles from './Testimonials.module.css';
-import { TESTIMONIALS } from '@/lib/data/testimonials';
+import { getTestimonials, type Testimonial } from '@/lib/data/testimonials';
 import { useI18n } from '@/components/LanguageProvider';
 
 const Testimonials = () => {
-    const { t } = useI18n();
-    const [visibleTestimonials, setVisibleTestimonials] = useState<typeof TESTIMONIALS>([]);
+    const { t, lang } = useI18n();
+    const [visibleTestimonials, setVisibleTestimonials] = useState<Testimonial[]>([]);
 
     useEffect(() => {
+        const sourceTestimonials = getTestimonials(lang);
+
         // Randomly select 4 testimonials to display initially (defer to satisfy lint: no sync setState in effect)
-        const t = setTimeout(() => {
-            const shuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
+        const timeoutId = setTimeout(() => {
+            const shuffled = [...sourceTestimonials].sort(() => Math.random() - 0.5);
             setVisibleTestimonials(shuffled.slice(0, 4));
         }, 0);
 
         // Rotate every 8 seconds
         const interval = setInterval(() => {
-            const shuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
+            const shuffled = [...sourceTestimonials].sort(() => Math.random() - 0.5);
             setVisibleTestimonials(shuffled.slice(0, 4));
         }, 8000);
 
         return () => {
-            clearTimeout(t);
+            clearTimeout(timeoutId);
             clearInterval(interval);
         };
-    }, []);
+    }, [lang]);
 
     return (
         <section className={styles.testimonialsSection}>
@@ -70,7 +71,7 @@ const Testimonials = () => {
                                     );
                                 })}
                             </div>
-                            <p className={styles.text}>&quot;{t(testimonial.text)}&quot;</p>
+                            <p className={styles.text}>&quot;{testimonial.text}&quot;</p>
                             <div className={styles.authorInfo}>
                                 <p className={styles.authorName}>{testimonial.author}</p>
                                 <p className={styles.authorCompany}>{testimonial.company}</p>

@@ -1,9 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import type { CSSProperties } from 'react';
 import styles from './BeforeAfterPopup.module.css';
+import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
 
 export type BeforeAfterPopupProps = {
     open: boolean;
@@ -76,6 +77,7 @@ export function BeforeAfterPopup({
     gradientIdPrefix = 'popup_ai',
     heightScale = 1,
 }: BeforeAfterPopupProps) {
+    const { t } = useI18n();
     if (!open) return null;
 
     const gradientId = `${gradientIdPrefix}_gradient`;
@@ -87,10 +89,10 @@ export function BeforeAfterPopup({
             onClick={onClose}
             role="dialog"
             aria-modal="true"
-            aria-label="Önce ve sonra karşılaştırması"
+            aria-label={t('Önce ve sonra karşılaştırması')}
         >
             <div className={styles.popup} style={popupStyle} onClick={(e) => e.stopPropagation()}>
-                <button type="button" className={styles.popupClose} onClick={onClose} aria-label="Kapat">
+                <button type="button" className={styles.popupClose} onClick={onClose} aria-label={t('Kapat')}>
                     {CLOSE_SVG}
                 </button>
 
@@ -103,7 +105,7 @@ export function BeforeAfterPopup({
                                 e.stopPropagation();
                                 onPrev?.(e);
                             }}
-                            aria-label="Önceki örnek"
+                            aria-label={t('Önceki örnek')}
                         >
                             {ARROW_LEFT_SVG}
                         </button>
@@ -114,7 +116,7 @@ export function BeforeAfterPopup({
                                 e.stopPropagation();
                                 onNext?.(e);
                             }}
-                            aria-label="Sonraki örnek"
+                            aria-label={t('Sonraki örnek')}
                         >
                             {ARROW_RIGHT_SVG}
                         </button>
@@ -124,11 +126,11 @@ export function BeforeAfterPopup({
                 <div className={styles.popupInner}>
                     <div className={styles.popupImages}>
                         <div className={styles.popupCol}>
-                            <span className={`${styles.popupBadge} ${styles.popupBadgeBefore}`}>Önce</span>
+                            <span className={`${styles.popupBadge} ${styles.popupBadgeBefore}`}>{t('Önce')}</span>
                             <div className={styles.popupImageWrap}>
                                 <Image
                                     src={beforeSrc}
-                                    alt={beforeAlt}
+                                    alt={t(beforeAlt)}
                                     fill
                                     sizes="(max-width: 1200px) 100vw, 3840px"
                                     className={styles.popupImage}
@@ -141,13 +143,13 @@ export function BeforeAfterPopup({
                         </div>
                         <div className={styles.popupCol}>
                             <span className={`${styles.popupBadge} ${styles.popupBadgeAfter}`}>
-                                Studio Estate ile Dekore Edildikten Sonra
+                                {t('Studio Estate ile Dekore Edildikten Sonra')}
                                 <AI_BADGE_SVG id={gradientId} />
                             </span>
                             <div className={`${styles.popupImageWrap} ${styles.popupImageWrapAfter}`}>
                                 <Image
                                     src={afterSrc}
-                                    alt={afterAlt}
+                                    alt={t(afterAlt)}
                                     fill
                                     sizes="(max-width: 1200px) 100vw, 3840px"
                                     className={styles.popupImage}
@@ -161,12 +163,12 @@ export function BeforeAfterPopup({
                     </div>
                     <footer className={styles.popupFooter}>
                         <div className={styles.popupCtaWrap}>
-                            <Link href={ctaHref} className={styles.popupCta} onClick={onClose}>
-                                {ctaText}
-                            </Link>
+                            <LocalizedLink href={ctaHref} className={styles.popupCta} onClick={onClose}>
+                                {t(ctaText)}
+                            </LocalizedLink>
                             {hintText != null && hintText !== '' && (
                                 <div className={styles.popupCtaHintWrap}>
-                                    <p className={styles.popupCtaHint}>{hintText}</p>
+                                    <p className={styles.popupCtaHint}>{t(hintText)}</p>
                                 </div>
                             )}
                         </div>

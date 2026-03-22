@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './ImageUploader.module.css';
+import { useI18n } from '@/components/LanguageProvider';
 
 type ValidationTool = 'stage' | 'enhance' | 'remove-object' | 'virtual-renovation';
 
@@ -30,6 +31,7 @@ interface ImageUploaderProps {
     maxFiles?: number;
     mini?: boolean;
     validationTool?: ValidationTool;
+    showGuidance?: boolean;
 }
 
 const ImageUploader = ({
@@ -37,13 +39,15 @@ const ImageUploader = ({
     onImagesSelect,
     onInvalidSelection,
     onValidationResult,
-    label = "Fotoğraf Yükle",
+    label = 'Fotoğraf Yükle',
     subtext,
     multiple = false,
     maxFiles = 5,
     mini = false,
     validationTool,
+    showGuidance = true,
 }: ImageUploaderProps) => {
+    const { t } = useI18n();
     const [isDragging, setIsDragging] = useState(false);
     const [isValidating, setIsValidating] = useState(false);
     const [validationMessage, setValidationMessage] = useState('');
@@ -97,15 +101,20 @@ const ImageUploader = ({
                 const passed = score !== null ? score >= MIN_VALIDATION_SCORE : true;
                 onValidationResult?.(score === null ? null : { score, passed, nonce: Date.now() });
                 if (!passed) {
-                    setValidationMessage(`Bu fotograf su an isleme uygun degil. En az ${MIN_VALIDATION_SCORE}/100 uygunluk skoru gerekiyor.`);
+                    setValidationMessage(
+                        t('Bu fotoğraf şu an işleme uygun değil. En az {score}/100 uygunluk skoru gerekiyor.').replace(
+                            '{score}',
+                            String(MIN_VALIDATION_SCORE)
+                        )
+                    );
                     clearSelection();
                     return false;
                 }
                 return true;
             }
 
-            const reason = String(data?.error || 'Bu fotoğraf şu an işlem için uygun değil.');
-            const guidance = String(data?.guidance || 'Lütfen daha net ve iyi ışıklandırılmış bir fotoğraf yükleyin.');
+            const reason = String(data?.error || t('Bu fotoğraf şu an işlem için uygun değil.'));
+            const guidance = String(data?.guidance || t('Lütfen daha net ve iyi ışıklandırılmış bir fotoğraf yükleyin.'));
             const score = typeof data?.score === 'number' ? Math.round(data.score * 100) : null;
             setValidationScore(score);
             onValidationResult?.(score === null ? null : { score, passed: false, nonce: Date.now() });
@@ -140,7 +149,7 @@ const ImageUploader = ({
 
             if (multiple) {
                 if (droppedFiles.length > maxFiles) {
-                    alert(`En fazla ${maxFiles} fotoğraf yükleyebilirsiniz.`);
+                    alert(t('En fazla {count} fotoğraf yükleyebilirsiniz.').replace('{count}', String(maxFiles)));
                     clearSelection();
                     return;
                 }
@@ -163,7 +172,7 @@ const ImageUploader = ({
 
             if (multiple) {
                 if (selectedFiles.length > maxFiles) {
-                    alert(`En fazla ${maxFiles} fotoğraf yükleyebilirsiniz.`);
+                    alert(t('En fazla {count} fotoğraf yükleyebilirsiniz.').replace('{count}', String(maxFiles)));
                     clearSelection();
                     return;
                 }
@@ -202,27 +211,31 @@ const ImageUploader = ({
                         </svg>
                     </div>
                 )}
-                <p className={styles.text} style={mini ? { fontSize: '2rem', margin: 0, color: '#94a3b8' } : {}}>{label}</p>
+                <p className={styles.text} style={mini ? { fontSize: '2rem', margin: 0, color: '#94a3b8' } : {}}>{t(label)}</p>
                 {!mini && (
                     <p className={styles.subtext}>
-                        {subtext || (multiple ? `veya sürükleyip bırakın (en fazla ${maxFiles} fotoğraf)` : 'veya sürükleyip bırakın')}
+                        {subtext
+                            ? t(subtext)
+                            : multiple
+                                ? t('veya sürükleyip bırakın (en fazla {count} fotoğraf)').replace('{count}', String(maxFiles))
+                                : t('veya sürükleyip bırakın')}
                     </p>
                 )}
-                {isValidating ? <p className={styles.validationInfo}>Fotoğraf kontrol ediliyor...</p> : null}
+                {isValidating ? <p className={styles.validationInfo}>{t('Fotoğraf kontrol ediliyor...')}</p> : null}
                 {validationMessage ? (
                     <div className={styles.validationErrorBox}>
-                        <p className={styles.validationErrorTitle}>Bu fotoğraf şu an işleme uygun değil</p>
+                        <p className={styles.validationErrorTitle}>{t('Bu fotoğraf şu an işleme uygun değil')}</p>
                         {validationScore !== null ? (
                             <p className={`${styles.validationScoreInline} ${styles[`validationScoreInline${getScoreTone(validationScore)[0].toUpperCase()}${getScoreTone(validationScore).slice(1)}`]}`}>
-                                Uygunluk skoru: {validationScore}/100
+                                {t('Uygunluk skoru: {score}/100').replace('{score}', String(validationScore))}
                             </p>
                         ) : null}
                         <p className={styles.validationError}>{validationMessage}</p>
                     </div>
                 ) : null}
-                {!mini && validationTool ? (
+                {!mini && validationTool && showGuidance ? (
                     <div className={styles.qualityChecklist}>
-                        <p className={styles.qualityChecklistTitle}>Daha iyi sonuç için</p>
+                        <p className={styles.qualityChecklistTitle}>{t('Daha iyi sonuç için')}</p>
                         <div className={styles.examplePanel}>
                             <div className={styles.exampleThumbWrap}>
                                 <button
@@ -232,22 +245,22 @@ const ImageUploader = ({
                                         e.stopPropagation();
                                         setIsExampleOpen(true);
                                     }}
-                                    aria-label="İyi örnek fotoğrafı büyüt"
+                                    aria-label={t('İyi örnek fotoğrafı büyüt')}
                                 >
                                     <img
                                         src="/images/hero-before-v17.png"
-                                        alt="İyi fotoğraf örneği"
+                                        alt={t('İyi fotoğraf örneği')}
                                         className={styles.exampleThumb}
                                     />
                                 </button>
-                                <span className={styles.exampleBadge}>İyi Örnek</span>
+                                <span className={styles.exampleBadge}>{t('İyi Örnek')}</span>
                             </div>
                             <div className={styles.examplePanelContent}>
                                 <ul className={styles.qualityChecklistList}>
-                                    <li>Net ve titreşimsiz fotoğraf kullanın</li>
-                                    <li>Oda iyi aydınlatılmış olsun</li>
-                                    <li>Duvarlar ve zemin kadrajda açık görünsün</li>
-                                    <li>Çok düşük çözünürlüklü veya aşırı sıkıştırılmış görsel kullanmayın</li>
+                                    <li>{t('Net ve titreşimsiz fotoğraf kullanın')}</li>
+                                    <li>{t('Oda iyi aydınlatılmış olsun')}</li>
+                                    <li>{t('Duvarlar ve zemin kadrajda açık görünsün')}</li>
+                                    <li>{t('Çok düşük çözünürlüklü veya aşırı sıkıştırılmış görsel kullanmayın')}</li>
                                 </ul>
                             </div>
                         </div>
@@ -270,17 +283,17 @@ const ImageUploader = ({
                             type="button"
                             className={styles.exampleLightboxClose}
                             onClick={() => setIsExampleOpen(false)}
-                            aria-label="Kapat"
+                            aria-label={t('Kapat')}
                         >
                             ×
                         </button>
                         <img
                             src="/images/hero-before-v17.png"
-                            alt="İyi fotoğraf örneği büyük önizleme"
+                            alt={t('İyi fotoğraf örneği büyük önizleme')}
                             className={styles.exampleLightboxImage}
                         />
                         <div className={styles.exampleLightboxCaption}>
-                            Bu örnek; net çizgiler, dengeli ışık ve odanın tamamını gösteren kadraj sayesinde araçlar için uygundur.
+                            {t('Bu örnek; net çizgiler, dengeli ışık ve odanın tamamını gösteren kadraj sayesinde araçlar için uygundur.')}
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import { useI18n } from '@/components/LanguageProvider';
 import styles from './ComparisonSlider.module.css';
 
 /** Tüm sitedeki slider handle ikonu — beyaz arka plan üzerinde koyu stroke (currentColor). */
@@ -51,6 +52,7 @@ const ComparisonSlider = ({
     introHint = 'none',
     labels,
 }: ComparisonSliderProps) => {
+    const { t } = useI18n();
     const [isResizing, setIsResizing] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
     const [displayBeforeImage, setDisplayBeforeImage] = useState(beforeImage);
@@ -62,6 +64,11 @@ const ComparisonSlider = ({
     const sliderRef = useRef<HTMLDivElement>(null);
     const hintPlayedRef = useRef(false);
     const heroVariant = variant === 'hero';
+    const resolvedBeforeAlt = t(beforeAlt);
+    const resolvedAfterAlt = t(afterAlt);
+    const resolvedLabels = labels
+        ? { before: t(labels.before), after: t(labels.after) }
+        : { before: t('Önce'), after: t('Sonra') };
 
     const handleMouseDown = () => setIsResizing(true);
     const handleMouseUp = () => setIsResizing(false);
@@ -317,7 +324,7 @@ const ComparisonSlider = ({
             >
                 <div
                     role="img"
-                    aria-label={afterAlt}
+                    aria-label={resolvedAfterAlt}
                     className={`${styles.heroImage} ${styles.heroImageLayer}`}
                     style={{ backgroundImage: `url("${safeAfterImage}")` }}
                 />
@@ -338,7 +345,7 @@ const ComparisonSlider = ({
                 >
                     <div
                         role="img"
-                        aria-label={beforeAlt}
+                        aria-label={resolvedBeforeAlt}
                         className={`${styles.heroImage} ${styles.heroImageLayer}`}
                         style={{ backgroundImage: `url("${displayBeforeImage}")` }}
                     />
@@ -350,7 +357,7 @@ const ComparisonSlider = ({
                 style={{ left: `${safePosition}%` }}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleMouseDown}
-                aria-label="Karsilastirma ayiracini kaydir"
+                aria-label={t('Karşılaştırma ayıracını kaydır')}
             >
                 <div className={styles.handleLine} />
                 <div className={styles.handleCircle}>
@@ -359,8 +366,8 @@ const ComparisonSlider = ({
             </button>
             {labels ? (
                 <div className={`${styles.labels} ${variant === 'hero' ? styles.labelsHero : ''}`}>
-                    <span className={`${styles.labelChip} ${styles.labelChipBefore}`}>{labels.before}</span>
-                    <span className={`${styles.labelChip} ${styles.labelChipAfter}`}>{labels.after}</span>
+                    <span className={`${styles.labelChip} ${styles.labelChipBefore}`}>{resolvedLabels.before}</span>
+                    <span className={`${styles.labelChip} ${styles.labelChipAfter}`}>{resolvedLabels.after}</span>
                 </div>
             ) : null}
         </div>

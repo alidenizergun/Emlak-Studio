@@ -129,6 +129,10 @@ const Header = () => {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isMenuOpen]);
 
+    if (isStudioPage) {
+        return null;
+    }
+
     return (
         <header className={styles.header}>
             <div className={`container ${styles.container}`}>
@@ -176,15 +180,15 @@ const Header = () => {
                                                     {tool.status ? (
                                                         <span className={`${styles.navLink} ${styles.navLinkDisabled}`} aria-disabled="true">
                                                             <span className={styles.navIcon}>{tool.icon}</span>
-                                                            <span className={`${styles.navTextGroup} ${tool.id === 'ai-tour-guide' ? styles.navTextGroupInline : ''}`}>
-                                                                <span className={`${styles.navLabel} ${tool.id === 'ai-tour-guide' ? styles.navLabelSingleLine : ''}`}>{t(tool.title)}</span>
+                                                            <span className={styles.navTextGroup}>
+                                                                <span className={styles.navLabel}>{t(tool.title)}</span>
                                                                 <span className={styles.inlineBadge}>{t(tool.status)}</span>
                                                             </span>
                                                         </span>
                                                     ) : (
                                                         <LocalizedLink href={href} className={styles.navLink}>
                                                             <span className={styles.navIcon}>{tool.icon}</span>
-                                                            <span className={`${styles.navLabel} ${tool.id === 'ai-tour-guide' ? styles.navLabelSingleLine : ''}`}>{t(tool.title)}</span>
+                                                            <span className={styles.navLabel}>{t(tool.title)}</span>
                                                         </LocalizedLink>
                                                     )}
                                                 </li>

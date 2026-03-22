@@ -7,6 +7,7 @@ import ComparisonSlider from '@/components/ComparisonSlider';
 import ToolExamplePopup from '@/components/ToolExamplePopup';
 import ProcessingOverlay from '@/components/ProcessingOverlay';
 import ValidationScorePopup from '@/components/ValidationScorePopup';
+import UploadGuidancePanel from '@/components/UploadGuidancePanel';
 import { getStoredUserId } from '@/lib/client-auth';
 import { estimateToolEtaSeconds, recordEtaSample } from '@/lib/client-eta';
 import { useI18n } from '@/components/LanguageProvider';
@@ -263,7 +264,7 @@ function compactDetail(text: string | null | undefined, max = 72): string {
 }
 
 export default function StageClient() {
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
     const searchParams = useSearchParams();
     const stageTab = searchParams.get('stageTab');
     const urlTab: 'editor' | 'works' = stageTab === 'works' || stageTab === 'photos' ? 'works' : 'editor';
@@ -550,13 +551,16 @@ export default function StageClient() {
             {activeTab !== 'works' ? (
                 <header className={styles.header}>
                     <div className={styles.headerContent}>
+                        <div className={styles.headerMain}>
                         <h1 className={styles.title}>{t('Sanal Dekorasyon')}</h1>
                         <p className={styles.description}>
-                        {t('Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin, Studio Estate evinizi dekore etsin.')}
-                    </p>
-                    <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                        {t('Örnekleri Gör')}
-                    </button>
+                            {t('Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin; Studio Estate mekanı mimariyi koruyarak daha sıcak, daha yaşanmış ve daha ikna edici bir sunuma dönüştürsün.')}
+                        </p>
+                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                            {t('Örnekleri Gör')}
+                        </button>
+                        </div>
+                        <UploadGuidancePanel />
                     </div>
                 </header>
             ) : null}
@@ -710,7 +714,7 @@ export default function StageClient() {
                                                                     });
                                                                 }}
                                                             />
-                                                            <span>{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
+                                                            <span>{new Date(item.createdAt).toLocaleString(lang === 'en' ? 'en-US' : 'tr-TR')}</span>
                                                         </label>
                                                         <span className={styles.photoMeta}>
                                                             {t(TOOL_LABEL_BY_ID[item.toolId] || item.title || 'Çalışma')}
@@ -792,7 +796,8 @@ export default function StageClient() {
                                         onInvalidSelection={handleReset}
                                         onValidationResult={setValidationSummary}
                                         validationTool="stage"
-                                label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
+                                        showGuidance={false}
+                                        label={t('Fotoğrafı Buraya Tıklayıp Yükleyin')}
                                     />
                                 </div>
                             ) : (
@@ -950,7 +955,7 @@ export default function StageClient() {
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
                 title={t('Sanal Dekorasyon Örneği')}
-                summary="Boş oda fotoğrafına seçtiğiniz oda tipi ve tarz doğrultusunda sanal mobilyalama uygulanır."
+                summary={t('Boş oda fotoğrafına seçtiğiniz oda tipi ve tarz doğrultusunda sanal mobilyalama uygulanır.')}
                 beforeSrc="/images/examples/bedroom-empty.png"
                 afterSrc="/images/examples/bedroom-furnished.png"
             />
