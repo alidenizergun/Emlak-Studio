@@ -22,20 +22,33 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'E-posta ve şifre gerekli.' }, { status: 400 });
         }
 
+        if (isPasswordlessLogin) {
+            const token = createSessionToken(passwordlessEmail);
+            const response = NextResponse.json({ success: true, email: passwordlessEmail });
+            response.cookies.set({
+                name: getSessionCookieName(),
+                value: token,
+                httpOnly: true,
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+                maxAge: getSessionTtlSeconds(),
+            });
+            return response;
+        }
+
         const user = await findUserByEmail(email);
         if (!user) {
             return NextResponse.json({ success: false, error: 'E-posta veya şifre hatalı.' }, { status: 401 });
         }
 
-        if (!isPasswordlessLogin) {
-            if (!user.passwordHash) {
-                return NextResponse.json({ success: false, error: 'E-posta veya şifre hatalı.' }, { status: 401 });
-            }
+        if (!user.passwordHash) {
+            return NextResponse.json({ success: false, error: 'E-posta veya şifre hatalı.' }, { status: 401 });
+        }
 
-            const valid = await verifyPassword(password, user.passwordHash);
-            if (!valid) {
-                return NextResponse.json({ success: false, error: 'E-posta veya şifre hatalı.' }, { status: 401 });
-            }
+        const valid = await verifyPassword(password, user.passwordHash);
+        if (!valid) {
+            return NextResponse.json({ success: false, error: 'E-posta veya şifre hatalı.' }, { status: 401 });
         }
 
         const token = createSessionToken(user.email);
