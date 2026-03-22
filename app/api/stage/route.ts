@@ -7,7 +7,7 @@ import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
 import { verifyStageArtifacts } from '@/lib/stage-artifact-guard';
 import {
-    validateInputImageQuality,
+    validateInputImageForProcessing,
     verifyOutputImageQuality,
 } from '@/lib/image-quality-guard';
 import { normalizeImageForStage } from '@/lib/image-normalization';
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         const normalized = await normalizeImageForStage(image);
         const normalizedImage = normalized.image;
         const beforeImageUrl = await fileToDataUrl(normalizedImage);
-        const inputQuality = await validateInputImageQuality(normalizedImage, 'stage');
+        const inputQuality = await validateInputImageForProcessing(normalizedImage, 'stage');
         if (!inputQuality.ok) {
             trackStageFailure('input_quality', startedAt);
             return NextResponse.json(

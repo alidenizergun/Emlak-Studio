@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import styles from './Tools.module.css';
 import { TOOLS } from './toolsData';
-import { DEFAULT_LANGUAGE, translateText } from '@/lib/i18n';
+import { translateText } from '@/lib/i18n';
 import { buildLocalizedMetadata } from '@/lib/page-metadata';
+import { getCurrentLanguage } from '@/lib/server-language';
+import { localizePath } from '@/lib/locale-routing';
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildLocalizedMetadata({
@@ -14,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ToolsPage() {
-  const lang = DEFAULT_LANGUAGE;
+  const lang = await getCurrentLanguage();
   return (
     <div className={`container ${styles.pageContainer}`}>
       <div className={styles.header}>
@@ -42,9 +43,9 @@ export default async function ToolsPage() {
               {cardContent}
             </span>
           ) : (
-            <Link key={tool.id} href={`/studio?tool=${encodeURIComponent(tool.id)}`} className={styles.card}>
+            <a key={tool.id} href={`${localizePath('/studio', lang)}?tool=${encodeURIComponent(tool.id)}`} className={styles.card}>
               {cardContent}
-            </Link>
+            </a>
           );
         })}
       </div>

@@ -35,15 +35,11 @@ function buildListingPrompt(info: IlanBilgileri, lang: Language): string {
     const languageInstruction =
         lang === 'en'
             ? 'Final output must be in English.'
-            : lang === 'es'
-                ? 'Final output must be in Spanish.'
-                : 'Final output must be in Turkish.';
+            : 'Final output must be in Turkish.';
     const featuresHeading =
         lang === 'en'
             ? '"Key Features"'
-            : lang === 'es'
-                ? '"Características Destacadas"'
-                : '"Öne Çıkan Özellikler"';
+            : '"Öne Çıkan Özellikler"';
     return `
 You are a senior real-estate listing copywriter.
 Analyze the user's listing details together with the uploaded property photo and produce high-quality listing copy.
@@ -95,55 +91,50 @@ function cleanModelOutput(text: string): string {
 /** Fallback: API anahtarı yoksa veya model hata verirse yine metin üret. */
 function generateFallbackListingText(info: IlanBilgileri, lang: Language): string {
     const isEnglish = lang === 'en';
-    const isSpanish = lang === 'es';
     const kullanimLabel = isEnglish
         ? info.kullanim === 'kiralik' ? 'For Rent' : 'For Sale'
-        : isSpanish
-            ? info.kullanim === 'kiralik' ? 'En Alquiler' : 'En Venta'
-            : info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
+        : info.kullanim === 'kiralik' ? 'Kiralık' : 'Satılık';
     const parts: string[] = [];
 
     parts.push(
-        isEnglish ? `${kullanimLabel} Residence` : isSpanish ? `${kullanimLabel} Vivienda` : `${kullanimLabel} Konut`
+        isEnglish ? `${kullanimLabel} Residence` : `${kullanimLabel} Konut`
     );
     parts.push('');
 
     if (info.lokasyon) {
-        parts.push(`${isEnglish ? 'Location' : isSpanish ? 'Ubicación' : 'Konum'}: ${info.lokasyon}`);
+        parts.push(`${isEnglish ? 'Location' : 'Konum'}: ${info.lokasyon}`);
         parts.push('');
     }
 
     const ozellikler: string[] = [];
     if (info.metrekare) ozellikler.push(`${info.metrekare} m²`);
-    if (info.odaSayisi) ozellikler.push(isEnglish ? `${info.odaSayisi} rooms` : isSpanish ? `${info.odaSayisi} habitaciones` : `${info.odaSayisi} oda`);
-    if (info.banyoSayisi) ozellikler.push(isEnglish ? `${info.banyoSayisi} bathrooms` : isSpanish ? `${info.banyoSayisi} baños` : `${info.banyoSayisi} banyo`);
+    if (info.odaSayisi) ozellikler.push(isEnglish ? `${info.odaSayisi} rooms` : `${info.odaSayisi} oda`);
+    if (info.banyoSayisi) ozellikler.push(isEnglish ? `${info.banyoSayisi} bathrooms` : `${info.banyoSayisi} banyo`);
     if (info.kat) ozellikler.push(info.kat);
-    if (info.binaYasi) ozellikler.push(`${isEnglish ? 'Building age' : isSpanish ? 'Antigüedad del edificio' : 'Bina yaşı'}: ${info.binaYasi}`);
-    if (info.isitma) ozellikler.push(`${isEnglish ? 'Heating' : isSpanish ? 'Calefacción' : 'Isınma'}: ${info.isitma}`);
+    if (info.binaYasi) ozellikler.push(`${isEnglish ? 'Building age' : 'Bina yaşı'}: ${info.binaYasi}`);
+    if (info.isitma) ozellikler.push(`${isEnglish ? 'Heating' : 'Isınma'}: ${info.isitma}`);
 
     if (ozellikler.length > 0) {
-        parts.push(isEnglish ? 'Features:' : isSpanish ? 'Características:' : 'Özellikler:');
+        parts.push(isEnglish ? 'Features:' : 'Özellikler:');
         parts.push(ozellikler.join(' • '));
         parts.push('');
     }
 
     if (info.fiyat) {
-        parts.push(`${isEnglish ? 'Price' : isSpanish ? 'Precio' : 'Fiyat'}: ${info.fiyat}`);
+        parts.push(`${isEnglish ? 'Price' : 'Fiyat'}: ${info.fiyat}`);
         parts.push('');
     }
 
-    parts.push(isEnglish ? 'Description:' : isSpanish ? 'Descripción:' : 'Açıklama:');
+    parts.push(isEnglish ? 'Description:' : 'Açıklama:');
     parts.push(
         isEnglish
             ? 'This is a draft listing prepared from the details you provided and the uploaded photos. The text can be further enriched with room usage and standout details inferred from the visuals.'
-            : isSpanish
-                ? 'Este es un borrador del anuncio preparado a partir de los datos proporcionados y las fotos subidas. El texto puede enriquecerse aún más con los usos de las estancias y detalles destacados inferidos de las imágenes.'
-                : 'Bu mülk, verdiğiniz bilgiler ve yüklediğiniz fotoğraflara göre hazırlanmış bir ilan taslağıdır. Yapay zeka entegrasyonu ile fotoğraflardan oda kullanımları ve öne çıkan detaylar otomatik eklenerek metin zenginleştirilecektir.'
+            : 'Bu mülk, verdiğiniz bilgiler ve yüklediğiniz fotoğraflara göre hazırlanmış bir ilan taslağıdır. Yapay zeka entegrasyonu ile fotoğraflardan oda kullanımları ve öne çıkan detaylar otomatik eklenerek metin zenginleştirilecektir.'
     );
 
     if (info.ekNotlar) {
         parts.push('');
-        parts.push(isEnglish ? 'Additional notes:' : isSpanish ? 'Notas adicionales:' : 'Ek bilgiler:');
+        parts.push(isEnglish ? 'Additional notes:' : 'Ek bilgiler:');
         parts.push(info.ekNotlar);
     }
 

@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
+import { buildLocalizedMetadata } from '@/lib/page-metadata';
 
-export const metadata: Metadata = {
-  title: 'Örnekler',
-  description: 'Studio Estate ile üretilen örnek dönüşümleri inceleyin.',
-  alternates: {
-    canonical: '/examples',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return buildLocalizedMetadata({
+    title: 'Örnekler',
+    description: 'Studio Estate ile üretilen örnek dönüşümleri inceleyin.',
+    path: '/examples',
+  });
+}
 
 export default function ExamplesLayout({
   children,

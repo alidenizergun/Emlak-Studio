@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
 import styles from './Subscription.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
+import { localizePath } from '@/lib/locale-routing';
+import { useI18n } from '@/components/LanguageProvider';
 
 interface SubscriptionInfo {
     planId: 'danisman' | 'ofis' | 'kurumsal';
@@ -27,6 +29,7 @@ function formatDate(iso: string): string {
 }
 
 export default function SubscriptionClient() {
+    const { lang } = useI18n();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -45,7 +48,7 @@ export default function SubscriptionClient() {
 
         const authed = isStoredAuthed();
         if (!authed) {
-            router.replace('/login');
+            router.replace(localizePath('/login', lang));
             return;
         }
 
@@ -71,7 +74,7 @@ export default function SubscriptionClient() {
             })
             .catch(() => setError('Paket bilgileri alinamadi.'))
             .finally(() => setLoading(false));
-    }, [router]);
+    }, [lang, router]);
 
     const statusText = useMemo(() => {
         if (!subscription) return '-';
@@ -175,8 +178,8 @@ export default function SubscriptionClient() {
                             </div>
                         </div>
                         <div className={styles.headerActions}>
-                            <Link href="/pricing" className={styles.linkBtn}>Paketleri Gor</Link>
-                            <Link href="/contact" className={styles.linkBtn}>Iletisime Gec</Link>
+                            <LocalizedLink href="/pricing" className={styles.linkBtn}>Paketleri Gor</LocalizedLink>
+                            <LocalizedLink href="/contact" className={styles.linkBtn}>Iletisime Gec</LocalizedLink>
                             <button
                                 type="button"
                                 className={styles.linkBtn}
@@ -210,12 +213,12 @@ export default function SubscriptionClient() {
                                         Kredi ihtiyaciniza gore daha uygun bir manuel plan tanimlayabiliriz. Yine de devam etmek isterseniz mevcut paketi kapatabiliriz.
                                     </p>
                                     <div className={styles.modalActions}>
-                                        <Link href="/contact" className={styles.modalSecondaryBtn}>
+                                        <LocalizedLink href="/contact" className={styles.modalSecondaryBtn}>
                                             Destek ile Goruş
-                                        </Link>
-                                        <Link href="/pricing" className={styles.modalSecondaryBtn}>
+                                        </LocalizedLink>
+                                        <LocalizedLink href="/pricing" className={styles.modalSecondaryBtn}>
                                             Paketleri Incele
-                                        </Link>
+                                        </LocalizedLink>
                                     </div>
                                     <div className={styles.modalFooter}>
                                         <button

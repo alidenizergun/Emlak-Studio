@@ -5,15 +5,18 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { LanguageProvider } from '@/components/LanguageProvider';
 import { buildOrganizationSchema, buildSoftwareApplicationSchema, buildWebsiteSchema } from '@/lib/seo/structured-data';
-import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_URL } from '@/lib/seo/site';
-import { DEFAULT_LANGUAGE, translateText } from '@/lib/i18n';
+import { DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/seo/site';
+import { LANGUAGE_LOCALES, translateText } from '@/lib/i18n';
+import { getCurrentLanguage } from '@/lib/server-language';
+import { localizePath } from '@/lib/locale-routing';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const lang = DEFAULT_LANGUAGE;
+  const lang = await getCurrentLanguage();
   const description = translateText(lang, SITE_DESCRIPTION);
   const productTitle = translateText(lang, 'Emlak Fotoğraf ve İçerik Araçları');
+  const homePath = localizePath('/', lang);
   return {
     metadataBase: new URL(SITE_URL),
     title: {
@@ -33,14 +36,18 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: SITE_NAME,
     publisher: SITE_NAME,
     alternates: {
-      canonical: '/',
+      canonical: homePath,
+      languages: {
+        tr: localizePath('/', 'tr'),
+        en: localizePath('/', 'en'),
+      },
     },
     openGraph: {
       title: `${SITE_NAME} | ${productTitle}`,
       description,
-      url: SITE_URL,
+      url: `${SITE_URL}${homePath}`,
       siteName: SITE_NAME,
-      locale: SITE_LOCALE,
+      locale: LANGUAGE_LOCALES[lang],
       type: 'website',
       images: [
         {
@@ -76,7 +83,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const lang = DEFAULT_LANGUAGE;
+  const lang = await getCurrentLanguage();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [buildOrganizationSchema(), buildWebsiteSchema(), buildSoftwareApplicationSchema()],

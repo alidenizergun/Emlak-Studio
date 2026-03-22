@@ -126,13 +126,13 @@ function statusLabel(status: SubscriptionStatus): string {
 
 function toolLabel(toolId: string): string {
   switch (toolId) {
-    case 'stage': return 'Dekorasyon';
+    case 'stage': return 'Sanal Dekorasyon';
     case 'listing-text': return 'İlan Metni';
     case 'ai-tour-guide': return 'Sanal Sunucu';
     case 'enhance': return 'Fotoğraf Geliştirme';
     case 'remove-object': return 'Akıllı Eşya Silme';
     case 'virtual-renovation':
-    case 'sanal-tadilat': return 'Tadilat';
+    case 'sanal-tadilat': return 'Sanal Tadilat';
     default: return toolId;
   }
 }

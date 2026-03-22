@@ -128,7 +128,7 @@ export default function SanalTadilatClient() {
         <div className={styles.pageContainer}>
             <header className={styles.header}>
                 <div className={styles.headerContent}>
-                    <h1 className={styles.title}>{t('Tadilat')}</h1>
+                    <h1 className={styles.title}>{t('Sanal Tadilat')}</h1>
                     <p className={styles.description}>
                         {t('Duvarları, zeminleri veya mutfakları tamamen yenileyin. Fotoğrafı yükleyin, yapay zeka tadilat sonrası görünümü oluştursun.')}
                     </p>
@@ -191,7 +191,7 @@ export default function SanalTadilatClient() {
                 <div className={styles.controlsSidebar}>
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
-                            <div className={styles.panelTitle}>{t('Tadilat')}</div>
+                            <div className={styles.panelTitle}>{t('Sanal Tadilat')}</div>
                             <span className={styles.inlineCost}>{t('2 kredi')}</span>
                         </div>
                         <div className={styles.tadilatQuestionBlock}>
@@ -237,7 +237,7 @@ export default function SanalTadilatClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title={t('Tadilat Örneği')}
+                title={t('Sanal Tadilat Örneği')}
                 summary={t('Eski görünümlü alanlar, yeni malzeme ve modern yüzeylerle tadilat sonrası hale dönüştürülür.')}
                 beforeSrc="/images/examples/kitchen-empty.png"
                 afterSrc="/images/examples/kitchen-furnished.png"

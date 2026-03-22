@@ -1,13 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { TOOLS } from '@/app/tools/toolsData';
 import { clearStoredAuth, getStoredUserId, isStoredAuthed, persistStoredUserId } from '@/lib/client-auth';
 import { useI18n } from '@/components/LanguageProvider';
 import styles from './Studio.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
+import { localizePath } from '@/lib/locale-routing';
 
 const STUDIO_MIN_TOPUP_CREDITS = 10;
 const STUDIO_MAX_TOPUP_CREDITS = 10000;
@@ -41,7 +42,7 @@ const TOOL_COMPONENTS: Record<string, React.ComponentType> = {
 };
 
 export default function StudioClient() {
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
     const router = useRouter();
     const searchParams = useSearchParams();
     const toolParam = searchParams.get('tool');
@@ -109,25 +110,25 @@ export default function StudioClient() {
 
             if (res.status === 401 || res.status === 403) {
                 clearStoredAuth();
-                router.replace('/login');
+                router.replace(localizePath('/login', lang));
             }
         } catch {
             // no-op
         }
-    }, [router]);
+    }, [lang, router]);
 
     useEffect(() => {
         if (!mounted || typeof window === 'undefined') return;
         const authed = isStoredAuthed();
         if (!authed) {
-            router.replace('/login');
+            router.replace(localizePath('/login', lang));
             return;
         }
         const frameId = window.requestAnimationFrame(() => {
             refreshCredits();
         });
         return () => window.cancelAnimationFrame(frameId);
-    }, [mounted, refreshCredits, router]);
+    }, [lang, mounted, refreshCredits, router]);
 
     useEffect(() => {
         if (!showTopupPanel || !accountId) return;
@@ -246,7 +247,7 @@ export default function StudioClient() {
                             >
                                 {t('Aktivasyon Talep Et')}
                             </button>
-                            <Link href="/dashboard/settings" className={styles.sidebarSettings}>{t('Ayarlar')}</Link>
+                            <LocalizedLink href="/dashboard/settings" className={styles.sidebarSettings}>{t('Ayarlar')}</LocalizedLink>
                         </div>
                         {showTopupPanel ? (
                             <div className={styles.topupPanel}>
@@ -267,9 +268,9 @@ export default function StudioClient() {
                                         onBlur={normalizeTopupAmount}
                                         className={styles.topupInput}
                                     />
-                                    <Link href="/contact" className={styles.topupButton}>
+                                    <LocalizedLink href="/contact" className={styles.topupButton}>
                                         {t('Bizimle Iletisime Gecin')}
-                                    </Link>
+                                    </LocalizedLink>
                                 </div>
                                 <p className={`${styles.topupText} ${styles.topupTotalText}`}>
                                     {t('Tahmini aylik paket referansi: ₺{amount}').replace('{amount}', totalTopupPrice.toLocaleString('tr-TR'))}
@@ -301,7 +302,7 @@ export default function StudioClient() {
                                             if (tool.id === 'stage') {
                                                 params.set('stageTab', 'editor');
                                             }
-                                            router.replace(`/studio?${params.toString()}`, { scroll: false });
+                                            router.replace(`${localizePath('/studio', lang)}?${params.toString()}`, { scroll: false });
                                         }}
                                         disabled={isDisabled}
                                     >
@@ -315,7 +316,7 @@ export default function StudioClient() {
                                             className={`${styles.myPhotosItem} ${isMyPhotosActive ? styles.myPhotosItemActive : ''}`}
                                             onClick={() => {
                                                 setSelectedToolId('stage');
-                                                router.replace('/studio?tool=stage&stageTab=works', { scroll: false });
+                                                router.replace(`${localizePath('/studio', lang)}?tool=stage&stageTab=works`, { scroll: false });
                                             }}
                                         >
                                             <span className={styles.myPhotosIcon} aria-hidden="true">

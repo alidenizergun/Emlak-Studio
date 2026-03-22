@@ -5,13 +5,13 @@ import styles from './ValidationScorePopup.module.css';
 import type { ImageValidationSummary } from '@/components/ImageUploader';
 
 function getTone(score: number): 'good' | 'medium' | 'low' {
-    if (score >= 80) return 'good';
+    if (score >= 70) return 'good';
     if (score >= 60) return 'medium';
     return 'low';
 }
 
 function getLabel(score: number): string {
-    if (score >= 80) return 'Harika';
+    if (score >= 70) return 'Harika';
     if (score >= 60) return 'İdare eder';
     return 'Zayıf';
 }
@@ -23,36 +23,27 @@ interface ValidationScorePopupProps {
 const POPUP_DURATION_SECONDS = 10;
 
 export default function ValidationScorePopup({ summary }: ValidationScorePopupProps) {
-    const [visible, setVisible] = useState(false);
-    const [remaining, setRemaining] = useState(POPUP_DURATION_SECONDS);
+    const [now, setNow] = useState(() => Date.now());
 
     useEffect(() => {
-        if (!summary || !summary.passed) {
-            setVisible(false);
-            return;
-        }
+        if (!summary || !summary.passed) return;
 
-        setVisible(true);
-        setRemaining(POPUP_DURATION_SECONDS);
-
-        const startedAt = Date.now();
         const interval = window.setInterval(() => {
-            const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-            const next = Math.max(0, POPUP_DURATION_SECONDS - elapsed);
-            setRemaining(next);
-            if (next <= 0) {
-                setVisible(false);
-                window.clearInterval(interval);
-            }
+            setNow(Date.now());
         }, 250);
 
         return () => window.clearInterval(interval);
-    }, [summary?.nonce]);
+    }, [summary]);
 
     const tone = useMemo(() => (summary ? getTone(summary.score) : 'medium'), [summary]);
     const label = useMemo(() => (summary ? getLabel(summary.score) : ''), [summary]);
+    const remaining = useMemo(() => {
+        if (!summary || !summary.passed) return 0;
+        const elapsed = Math.floor((Math.max(now, summary.nonce) - summary.nonce) / 1000);
+        return Math.max(0, POPUP_DURATION_SECONDS - elapsed);
+    }, [now, summary]);
 
-    if (!summary || !summary.passed || !visible) return null;
+    if (!summary || !summary.passed || remaining <= 0) return null;
 
     return (
         <div className={`${styles.popup} ${styles[tone]}`}>

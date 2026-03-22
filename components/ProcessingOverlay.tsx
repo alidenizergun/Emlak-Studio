@@ -27,17 +27,25 @@ export default function ProcessingOverlay({
 
     useEffect(() => {
         if (!active) {
-            setStartedAt(null);
-            setElapsedSeconds(0);
-            return;
+            const resetTimer = window.setTimeout(() => {
+                setStartedAt(null);
+                setElapsedSeconds(0);
+            }, 0);
+            return () => window.clearTimeout(resetTimer);
         }
+
         const now = Date.now();
-        setStartedAt(now);
-        setElapsedSeconds(0);
+        const startTimer = window.setTimeout(() => {
+            setStartedAt(now);
+            setElapsedSeconds(0);
+        }, 0);
         const timer = window.setInterval(() => {
             setElapsedSeconds(Math.floor((Date.now() - now) / 1000));
         }, 1000);
-        return () => window.clearInterval(timer);
+        return () => {
+            window.clearTimeout(startTimer);
+            window.clearInterval(timer);
+        };
     }, [active]);
 
     const remainingSeconds = Math.max(0, estimatedSeconds - elapsedSeconds);

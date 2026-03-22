@@ -5,7 +5,7 @@ import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
-import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image-quality-guard';
+import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
 import { postprocessListingImage } from '@/lib/output-postprocess';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         }
         const authError = requireAuthPhone(request, phone);
         if (authError) return authError;
-        const inputQuality = await validateInputImageQuality(image, 'virtual-renovation');
+        const inputQuality = await validateInputImageForProcessing(image, 'virtual-renovation');
         if (!inputQuality.ok) {
             return NextResponse.json(
                 { success: false, code: 'INPUT_QUALITY_LOW', error: inputQuality.error },
@@ -131,7 +131,7 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
             toolId: 'virtual-renovation',
             beforeImageUrl,
             afterImageUrl: finalizedImageUrl,
-            title: 'Tadilat',
+            title: 'Sanal Tadilat',
             detail: instructions || 'Genel tadilat uygulandı',
             usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
         });

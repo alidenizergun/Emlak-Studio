@@ -11,8 +11,10 @@ export interface ImageValidationSummary {
     nonce: number;
 }
 
+const MIN_VALIDATION_SCORE = 70;
+
 function getScoreTone(score: number): 'good' | 'medium' | 'low' {
-    if (score >= 80) return 'good';
+    if (score >= 70) return 'good';
     if (score >= 60) return 'medium';
     return 'low';
 }
@@ -92,7 +94,13 @@ const ImageUploader = ({
                 setValidationMessage('');
                 const score = typeof data?.score === 'number' ? Math.round(data.score * 100) : null;
                 setValidationScore(score);
-                onValidationResult?.(score === null ? null : { score, passed: true, nonce: Date.now() });
+                const passed = score !== null ? score >= MIN_VALIDATION_SCORE : true;
+                onValidationResult?.(score === null ? null : { score, passed, nonce: Date.now() });
+                if (!passed) {
+                    setValidationMessage(`Bu fotograf su an isleme uygun degil. En az ${MIN_VALIDATION_SCORE}/100 uygunluk skoru gerekiyor.`);
+                    clearSelection();
+                    return false;
+                }
                 return true;
             }
 

@@ -46,7 +46,7 @@ export function buildSoftwareApplicationSchema() {
     },
     featureList: [
       'Fotoğraf Geliştirme',
-      'Dekorasyon',
+      'Sanal Dekorasyon',
       'Akıllı Eşya Silme',
       'Sanal Tadilat',
       'İlan Metni Oluşturma',

@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-export type Language = 'tr' | 'en' | 'es';
+export type Language = 'tr' | 'en';
 
 export const LANGUAGE_COOKIE = 'site_lang';
 export const DEFAULT_LANGUAGE: Language = 'tr';
@@ -8,16 +8,14 @@ export const DEFAULT_LANGUAGE: Language = 'tr';
 export const LANGUAGE_OPTIONS: Array<{ value: Language; label: string }> = [
     { value: 'tr', label: '🇹🇷 Türkçe' },
     { value: 'en', label: '🇬🇧 English' },
-    { value: 'es', label: '🇪🇸 Español' },
 ];
 
 export const LANGUAGE_LOCALES: Record<Language, string> = {
     tr: 'tr_TR',
     en: 'en_US',
-    es: 'es_ES',
 };
 
-type TranslationRecord = Partial<Record<Exclude<Language, 'tr'>, string>>;
+type TranslationRecord = Partial<Record<string, string>>;
 
 const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'Studio Estate': { en: 'Studio Estate', es: 'Studio Estate' },
@@ -32,6 +30,7 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'Yasal': { en: 'Legal', es: 'Legal' },
     'Fotoğraf Geliştirme': { en: 'Photo Enhancement', es: 'Mejora Fotográfica' },
     'Dekorasyon': { en: 'Virtual Staging', es: 'Home Staging Virtual' },
+    'Sanal Dekorasyon': { en: 'Virtual Staging', es: 'Home Staging Virtual' },
     'Tüm araçlar': { en: 'All tools', es: 'Todas las herramientas' },
     'Hakkımızda': { en: 'About Us', es: 'Sobre Nosotros' },
     'Yardım Merkezi': { en: 'Help Center', es: 'Centro de Ayuda' },
@@ -56,6 +55,7 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'Akıllı Eşya Silme': { en: 'Smart Object Removal', es: 'Eliminación Inteligente de Objetos' },
     'İlan Metni Oluşturucu': { en: 'Listing Copy Generator', es: 'Generador de Textos para Anuncios' },
     'Tadilat': { en: 'Virtual Renovation', es: 'Renovación Virtual' },
+    'Sanal Tadilat': { en: 'Virtual Renovation', es: 'Renovación Virtual' },
     'Sanal Sunucu': { en: 'Virtual Presenter', es: 'Presentador Virtual' },
     'Boş odaları Studio Estate ile istediğiniz tarz mobilyalarla döşeyin.': {
         en: 'Stage empty rooms with Studio Estate using the furniture style you choose.',
@@ -111,6 +111,8 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'Örnekleri İnceleyin': { en: 'Browse Examples', es: 'Ver Ejemplos' },
     'Boş Oda': { en: 'Empty Room', es: 'Habitación Vacía' },
     'Studio Estate ile Dekorasyon': { en: 'Staged with Studio Estate', es: 'Decorado con Studio Estate' },
+    'Sanal Dekorasyon Örneği': { en: 'Virtual Staging Example', es: 'Ejemplo de Home Staging Virtual' },
+    'Sanal Tadilat Örneği': { en: 'Renovation Example', es: 'Ejemplo de Renovación' },
     'Boş oda': { en: 'Empty room', es: 'Habitación vacía' },
     'Yapay zeka ile dekore edilmiş oda': { en: 'AI-staged room', es: 'Habitación decorada con IA' },
     'Studio Estate\'in avantajları': { en: 'Why Studio Estate Works', es: 'Ventajas de Studio Estate' },
@@ -349,6 +351,7 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
         es: 'Se admiten JPG, PNG y WebP. La resolución mínima recomendada es 800x600. Después de subir la imagen, puedes marcar opciones como escalado, brillo y nitidez y comenzar con "Aplicar Seleccionados".',
     },
     'Dekorasyon\'da oda tipi ve tarz nasıl seçilir?': { en: 'How do I choose the room type and style in Virtual Staging?', es: '¿Cómo elijo el tipo de estancia y el estilo en Home Staging Virtual?' },
+    'Sanal Dekorasyon\'da oda tipi ve tarz nasıl seçilir?': { en: 'How do I choose the room type and style in Virtual Staging?', es: '¿Cómo elijo el tipo de estancia y el estilo en Home Staging Virtual?' },
     'Boş oda fotoğrafınızı yükledikten sonra "Oda Tipi" (Salon, Yatak Odası, Mutfak vb.) ve "Dekorasyon Tarzı" (Modern, Klasik, Minimal vb.) alanlarından seçim yapın. İsterseniz "Studio Estate Seçsin" ile otomatik öneri alabilirsiniz. "Dekorasyon Oluştur" butonuyla işlemi başlatın.': {
         en: 'After uploading your empty-room photo, choose a "Room Type" such as Living Room, Bedroom, or Kitchen, then select a "Staging Style" like Modern, Classic, or Minimal. If you prefer, you can use "Let Studio Estate Decide" for an automatic suggestion. Start the process with "Create Staging".',
         es: 'Después de subir la foto de la habitación vacía, elige un "Tipo de estancia" como salón, dormitorio o cocina y después un "Estilo de decoración" como moderno, clásico o minimalista. Si lo prefieres, puedes usar "Que Studio Estate decida" para recibir una sugerencia automática. Inicia el proceso con "Crear Decoración".',
@@ -471,14 +474,15 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'Özel': { en: 'Custom', es: 'Personalizado' },
     'Dekorasyon Örneği': { en: 'Virtual Staging Example', es: 'Ejemplo de Home Staging Virtual' },
     'Fotoğraf Geliştirme Örneği': { en: 'Photo Enhancement Example', es: 'Ejemplo de Mejora Fotográfica' },
+    'Önce/Sonra sonuçlarını görün': { en: 'See before/after results', es: 'Ver resultados antes/después' },
 };
 
 export function isLanguage(value: string | null | undefined): value is Language {
-    return value === 'tr' || value === 'en' || value === 'es';
+    return value === 'tr' || value === 'en';
 }
 
 export function normalizeLanguage(value: string | null | undefined): Language {
-    return DEFAULT_LANGUAGE;
+    return isLanguage(value) ? value : DEFAULT_LANGUAGE;
 }
 
 export function translateText(lang: Language, text: string): string {
@@ -495,7 +499,7 @@ export function formatText(lang: Language, text: string, params: Record<string, 
 }
 
 export function resolveLanguage(value: string | null | undefined): Language {
-    return DEFAULT_LANGUAGE;
+    return normalizeLanguage(value);
 }
 
 export function getRequestLanguage(request: NextRequest): Language {

@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './Login.module.css';
 import { TESTIMONIALS } from '@/lib/data/testimonials';
 import { persistStoredUserId } from '@/lib/client-auth';
 import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
+import { localizePath } from '@/lib/locale-routing';
 
 function normalizeEmail(value: string): string {
     return value.trim().toLowerCase();
@@ -25,7 +26,7 @@ function persistAuth(email: string): void {
 }
 
 export default function LoginClient() {
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -67,7 +68,7 @@ export default function LoginClient() {
                 return;
             }
             persistAuth(String(data.email || normalizedEmail));
-            router.push('/studio');
+            router.push(localizePath('/studio', lang));
         } catch {
             setErrors({ form: t('Giris basarisiz. Lutfen tekrar deneyin.') });
         } finally {
@@ -158,7 +159,7 @@ export default function LoginClient() {
                     </form>
 
                     <p className={styles.registerLink}>
-                        {t('Hesabınız yok mu?')} <Link href="/register">{t('Ücretsiz kayıt olun')}</Link>
+                        {t('Hesabınız yok mu?')} <LocalizedLink href="/register">{t('Ücretsiz kayıt olun')}</LocalizedLink>
                     </p>
                 </div>
             </div>

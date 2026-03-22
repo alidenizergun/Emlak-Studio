@@ -21,15 +21,8 @@ export const ENHANCE_ICON = (
 
 export const TOOLS: Tool[] = [
     {
-        id: 'enhance',
-        title: 'Fotoğraf Geliştirme',
-        description: 'Düşük çözünürlüklü, karanlık fotoğrafları 4K kalitesine yükseltin.',
-        href: '/enhance',
-        icon: ENHANCE_ICON,
-    },
-    {
         id: 'stage',
-        title: 'Dekorasyon',
+        title: 'Sanal Dekorasyon',
         description: 'Boş odaları Studio Estate ile istediğiniz tarz mobilyalarla döşeyin.',
         href: '/stage',
         icon: (
@@ -44,6 +37,13 @@ export const TOOLS: Tool[] = [
         )
     },
     {
+        id: 'enhance',
+        title: 'Fotoğraf Geliştirme',
+        description: 'Düşük çözünürlüklü, karanlık fotoğrafları 4K kalitesine yükseltin.',
+        href: '/enhance',
+        icon: ENHANCE_ICON,
+    },
+    {
         id: 'remove-object',
         title: 'Akıllı Eşya Silme',
         description: 'İstenmeyen eşyaları, dağınıklığı veya eski mobilyaları saniyeler içinde silin.',
@@ -54,7 +54,7 @@ export const TOOLS: Tool[] = [
     },
     {
         id: 'renovation',
-        title: 'Tadilat',
+        title: 'Sanal Tadilat',
         description: 'Duvarları, zeminleri veya mutfakları tamamen yenileyerek potansiyeli gösterin.',
         href: '/sanal-tadilat',
         icon: (

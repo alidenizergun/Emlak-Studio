@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import styles from './AiTourGuide.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
 
 export default function AiTourGuideComingSoon() {
     return (
@@ -29,8 +29,8 @@ export default function AiTourGuideComingSoon() {
                             Fotoğraf geliştirme, dekorasyon, akıllı eşya silme, tadilat ve ilan metni oluşturucu şu anda aktif. Sanal Sunucu kartı görünür kalacak, ancak işlem başlatmayacak.
                         </p>
                         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
-                            <Link href="/studio?tool=enhance" className={styles.downloadBtn}>Fotoğraf Geliştirme</Link>
-                            <Link href="/studio?tool=stage" className={styles.resetBtn}>Dekorasyon</Link>
+                            <LocalizedLink href="/studio?tool=enhance" className={styles.downloadBtn}>Fotoğraf Geliştirme</LocalizedLink>
+                            <LocalizedLink href="/studio?tool=stage" className={styles.resetBtn}>Sanal Dekorasyon</LocalizedLink>
                         </div>
                     </div>
                 </div>

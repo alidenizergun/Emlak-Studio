@@ -17,7 +17,7 @@ export function LanguageProvider({
     initialLanguage?: Language;
     children: React.ReactNode;
 }) {
-    const lang = DEFAULT_LANGUAGE;
+    const lang = initialLanguage ?? DEFAULT_LANGUAGE;
 
     const value = useMemo<LanguageContextValue>(
         () => ({

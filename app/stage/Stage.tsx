@@ -219,20 +219,20 @@ const STYLE_LABEL_BY_ID = {
     custom: 'Özel',
 } as Record<string, string>;
 const TOOL_LABEL_BY_ID: Record<string, string> = {
-    stage: 'Dekorasyon',
+    stage: 'Sanal Dekorasyon',
     enhance: 'Fotoğraf Geliştirme',
     'remove-object': 'Akıllı Eşya Silme',
-    'virtual-renovation': 'Tadilat',
+    'virtual-renovation': 'Sanal Tadilat',
     'listing-text': 'İlan Metni Oluşturucu',
     'ai-tour-guide': 'Sanal Sunucu',
 };
 const TOOL_FILTER_OPTIONS: Array<{ id: string; label: string }> = [
     { id: 'all', label: 'Tümü' },
     { id: 'enhance', label: 'Fotoğraf Geliştirme' },
-    { id: 'stage', label: 'Dekorasyon' },
+    { id: 'stage', label: 'Sanal Dekorasyon' },
     { id: 'remove-object', label: 'Akıllı Eşya Silme' },
     { id: 'listing-text', label: 'İlan Metni' },
-    { id: 'virtual-renovation', label: 'Tadilat' },
+    { id: 'virtual-renovation', label: 'Sanal Tadilat' },
     { id: 'ai-tour-guide', label: 'Sanal Sunucu' },
 ];
 
@@ -550,7 +550,7 @@ export default function StageClient() {
             {activeTab !== 'works' ? (
                 <header className={styles.header}>
                     <div className={styles.headerContent}>
-                        <h1 className={styles.title}>{t('Dekorasyon')}</h1>
+                        <h1 className={styles.title}>{t('Sanal Dekorasyon')}</h1>
                         <p className={styles.description}>
                         {t('Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin, Studio Estate evinizi dekore etsin.')}
                     </p>
@@ -949,7 +949,7 @@ export default function StageClient() {
             <ToolExamplePopup
                 isOpen={isExampleOpen}
                 onClose={() => setIsExampleOpen(false)}
-                title={t('Dekorasyon Örneği')}
+                title={t('Sanal Dekorasyon Örneği')}
                 summary="Boş oda fotoğrafına seçtiğiniz oda tipi ve tarz doğrultusunda sanal mobilyalama uygulanır."
                 beforeSrc="/images/examples/bedroom-empty.png"
                 afterSrc="/images/examples/bedroom-furnished.png"

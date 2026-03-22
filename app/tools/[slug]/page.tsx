@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { TOOLS } from '../toolsData';
 import { DEFAULT_OG_IMAGE, SITE_NAME, absoluteUrl } from '@/lib/seo/site';
+import { buildLocalizedMetadata } from '@/lib/page-metadata';
+import { getCurrentLanguage } from '@/lib/server-language';
+import { localizePath } from '@/lib/locale-routing';
 
 export async function generateStaticParams() {
     return TOOLS.filter(t => t.href.startsWith('/tools/')).map((tool) => ({
@@ -15,20 +17,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const tool = TOOLS.find((t) => t.id === slug && t.href.startsWith('/tools/'));
 
     if (!tool) {
-        return {
+        return buildLocalizedMetadata({
             title: 'Araç Bulunamadı',
-            robots: { index: false, follow: false },
-        };
+            description: 'İstenen araç bulunamadı.',
+            path: `/tools/${slug}`,
+            index: false,
+        });
     }
 
     const canonical = `/tools/${tool.id}`;
-    return {
-        title: `${tool.title}`,
+    const metadata = await buildLocalizedMetadata({
+        title: tool.title,
         description: tool.description,
-        alternates: {
-            canonical,
-        },
+        path: canonical,
+        images: [DEFAULT_OG_IMAGE],
+    });
+    return {
+        ...metadata,
         openGraph: {
+            ...metadata.openGraph,
             title: `${tool.title} | ${SITE_NAME}`,
             description: tool.description,
             url: absoluteUrl(canonical),
@@ -40,6 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ToolDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const tool = TOOLS.find((t) => t.id === slug && t.href.startsWith('/tools/'));
+    const lang = await getCurrentLanguage();
 
     if (!tool) {
         notFound();
@@ -47,10 +55,10 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
 
     return (
         <div className="container" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
-            <Link href="/tools" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', marginBottom: '30px', fontWeight: 500 }}>
+            <a href={localizePath('/tools', lang)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', marginBottom: '30px', fontWeight: 500 }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
                 Tüm Araçlara Dön
-            </Link>
+            </a>
 
             <div style={{ background: 'var(--card-bg)', borderRadius: '24px', border: '1px solid var(--card-border)', padding: '60px', textAlign: 'center', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.05)' }}>
                 <div style={{ width: '80px', height: '80px', background: 'rgba(37, 99, 235, 0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 30px', color: 'var(--primary)' }}>

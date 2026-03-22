@@ -191,6 +191,23 @@ export async function validateInputImageQuality(image: File, tool: QualityTool =
     return { ok: true, metrics: m, score };
 }
 
+export async function validateInputImageForProcessing(
+    image: File,
+    tool: QualityTool = 'stage',
+    minScore = Number(process.env.MIN_VALIDATION_SCORE || 0.7)
+): Promise<GuardResult> {
+    const result = await validateInputImageQuality(image, tool);
+    if (result.ok) return result;
+    if (typeof result.score === 'number' && result.score >= minScore) {
+        return {
+            ok: true,
+            metrics: result.metrics,
+            score: result.score,
+        };
+    }
+    return result;
+}
+
 export async function verifyOutputImageQuality(
     inputImage: File,
     outputDataUrl: string,

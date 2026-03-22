@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import Link from 'next/link';
 import ComparisonSlider from '@/components/ComparisonSlider';
 import BeforeAfterPopup from '@/components/BeforeAfterPopup';
 import styles from './Examples.module.css';
 import { EXAMPLES, POPUP_HINT_SENTENCES, type ExampleItem } from '@/lib/examplesData';
+import LocalizedLink from '@/components/LocalizedLink';
 
 const CATEGORIES = [
     { id: 'all', label: 'Tümü' },
@@ -166,9 +166,9 @@ export function ExamplesContent() {
             )}
 
             <section className={styles.ctaSection}>
-                <Link href="/register" className={styles.ctaButton}>
+                <LocalizedLink href="/register" className={styles.ctaButton}>
                     Hemen Ücretsiz Deneyin
-                </Link>
+                </LocalizedLink>
                 <div className={styles.ctaHintWrap}>
                     <p className={styles.ctaHint}>
                         {POPUP_HINT_SENTENCES[ctaHintIndex]}

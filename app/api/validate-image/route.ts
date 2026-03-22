@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateInputImageQuality, type QualityTool } from '@/lib/image-quality-guard';
+import {
+    extractImageMetrics,
+    scoreInputImageQuality,
+    validateInputImageForProcessing,
+    type QualityTool,
+} from '@/lib/image-quality-guard';
 import { validateUploadedImage } from '@/lib/upload-guard';
+
+const MIN_VALIDATION_SCORE = Number(process.env.MIN_VALIDATION_SCORE || 0.7);
 
 function normalizeTool(value: string): QualityTool {
     if (value === 'enhance' || value === 'remove-object' || value === 'virtual-renovation') {
@@ -32,6 +39,9 @@ function buildGuidance(error: string): string {
     if (text.includes('boyutu cok buyuk')) {
         return 'Dosya boyutunu azaltip tekrar deneyin. Mumkunse kaliteyi cok dusurmeden yeniden disa aktarilmis bir gorsel kullanin.';
     }
+    if (text.includes('uygunluk skoru dusuk')) {
+        return 'Lutfen en az 70/100 uygunluk skoruna ulasan, daha net ve dengeli isikta bir fotograf yukleyin.';
+    }
     return 'Lutfen daha net, iyi isiklandirilmis ve odayi tam gosteren bir fotograf yukleyin.';
 }
 
@@ -56,21 +66,42 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const qualityCheck = await validateInputImageQuality(image, tool);
+        const metrics = await extractImageMetrics(image);
+        const score = scoreInputImageQuality(metrics, tool);
+
+        if (score >= MIN_VALIDATION_SCORE) {
+            return NextResponse.json({ success: true, metrics, score });
+        }
+
+        const qualityCheck = await validateInputImageForProcessing(image, tool);
         if (!qualityCheck.ok) {
             return NextResponse.json(
                 {
                     success: false,
                     error: qualityCheck.error,
                     guidance: buildGuidance(String(qualityCheck.error || '')),
-                    metrics: qualityCheck.metrics,
-                    score: qualityCheck.score,
+                    metrics,
+                    score,
                 },
                 { status: 200 }
             );
         }
 
-        return NextResponse.json({ success: true, metrics: qualityCheck.metrics, score: qualityCheck.score });
+        if (score < MIN_VALIDATION_SCORE) {
+            const error = `Fotograf uygunluk skoru dusuk (min ${Math.round(MIN_VALIDATION_SCORE * 100)}/100).`;
+            return NextResponse.json(
+                {
+                    success: false,
+                    error,
+                    guidance: buildGuidance(error),
+                    metrics,
+                    score,
+                },
+                { status: 200 }
+            );
+        }
+
+        return NextResponse.json({ success: true, metrics, score });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Gorsel dogrulanamadi';
         return NextResponse.json({ success: false, error: message, guidance: buildGuidance(message) }, { status: 500 });

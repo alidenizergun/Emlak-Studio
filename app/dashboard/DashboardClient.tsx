@@ -1,15 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TOOLS } from '@/app/tools/toolsData';
 import { useI18n } from '@/components/LanguageProvider';
 import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
 import styles from './Dashboard.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
+import { localizePath } from '@/lib/locale-routing';
 
 export default function DashboardClient() {
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
     const router = useRouter();
     const [credits, setCredits] = useState<number | null>(null);
 
@@ -17,7 +18,7 @@ export default function DashboardClient() {
         if (typeof window === 'undefined') return;
         const authed = isStoredAuthed();
         if (!authed) {
-            router.replace('/login');
+            router.replace(localizePath('/login', lang));
             return;
         }
         const email = getStoredUserId();
@@ -32,7 +33,7 @@ export default function DashboardClient() {
                 })
                 .catch(() => {});
         }
-    }, [router]);
+    }, [lang, router]);
 
     return (
         <div className={styles.pageContainer}>
@@ -51,10 +52,10 @@ export default function DashboardClient() {
                                 <span className={styles.krediValue}>{credits !== null ? credits : '—'}</span>
                             </div>
                             <div className={styles.accountActions}>
-                                <Link href="/pricing" className={styles.accountBtn}>
+                                <LocalizedLink href="/pricing" className={styles.accountBtn}>
                                     {t('Paketleri Gör')}
-                                </Link>
-                                <Link href="/dashboard/settings" className={styles.accountBtnSecondary}>{t('Ayarlar')}</Link>
+                                </LocalizedLink>
+                                <LocalizedLink href="/dashboard/settings" className={styles.accountBtnSecondary}>{t('Ayarlar')}</LocalizedLink>
                             </div>
                         </div>
                         <p className={styles.accountNote}>
@@ -92,9 +93,9 @@ export default function DashboardClient() {
                                     {content}
                                 </span>
                             ) : (
-                                <Link key={tool.id} href={tool.href} className={styles.toolCard}>
+                                <LocalizedLink key={tool.id} href={tool.href} className={styles.toolCard}>
                                     {content}
-                                </Link>
+                                </LocalizedLink>
                             );
                         })}
                     </div>

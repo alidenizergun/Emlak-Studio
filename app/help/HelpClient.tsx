@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import styles from "./Help.module.css";
 import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
 
 const CATEGORIES = [
     {
@@ -30,7 +30,7 @@ const CATEGORIES = [
         ),
     },
     {
-        title: "Dekorasyon",
+        title: "Sanal Dekorasyon",
         description: "Oda tipi, tarz seçimi ve sonuç indirme.",
         href: "#sanal-dekorasyon",
         icon: (
@@ -78,7 +78,7 @@ const FAQ_ITEMS = [
         answer: "JPG, PNG ve WebP formatları desteklenmektedir. Önerilen minimum çözünürlük 800x600’dür. Yükleme sonrası çözünürlük yükseltme, parlaklık ve netlik gibi seçenekleri işaretleyip \"Seçilenleri Uygula\" ile işlemi başlatabilirsiniz.",
     },
     {
-        question: "Dekorasyon'da oda tipi ve tarz nasıl seçilir?",
+        question: "Sanal Dekorasyon'da oda tipi ve tarz nasıl seçilir?",
         answer: "Boş oda fotoğrafınızı yükledikten sonra \"Oda Tipi\" (Salon, Yatak Odası, Mutfak vb.) ve \"Dekorasyon Tarzı\" (Modern, Klasik, Minimal vb.) alanlarından seçim yapın. İsterseniz \"Studio Estate Seçsin\" ile otomatik öneri alabilirsiniz. \"Dekorasyon Oluştur\" butonuyla işlemi başlatın.",
     },
     {
@@ -129,11 +129,11 @@ export default function HelpClient() {
 
             <section className={styles.categories} aria-label="Yardım kategorileri">
                 {CATEGORIES.map((cat) => (
-                    <Link key={cat.title} href={cat.href} className={styles.card}>
+                    <LocalizedLink key={cat.title} href={cat.href} className={styles.card}>
                         <div className={styles.cardIcon}>{cat.icon}</div>
                         <h2 className={styles.cardTitle}>{t(cat.title)}</h2>
                         <p className={styles.cardDesc}>{t(cat.description)}</p>
-                    </Link>
+                    </LocalizedLink>
                 ))}
             </section>
 
@@ -190,13 +190,13 @@ export default function HelpClient() {
                 <p className={styles.ctaText}>
                     {t('Destek ekibimiz size yardımcı olmaktan mutluluk duyar. İletişim sayfamızdan bize ulaşın.')}
                 </p>
-                <Link href="/contact" className={styles.ctaButton}>
+                <LocalizedLink href="/contact" className={styles.ctaButton}>
                     {t('İletişime Geç')}
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5 12h14" />
                         <path d="m12 5 7 7-7 7" />
                     </svg>
-                </Link>
+                </LocalizedLink>
             </div>
         </div>
     );

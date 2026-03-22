@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, type CSSProperties } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './Header.module.css';
 import { clearStoredAuth, isStoredAuthed } from '@/lib/client-auth';
 import { TOOLS, ENHANCE_ICON } from '@/app/tools/toolsData';
 import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
+import { localizePath, stripLocalePrefix } from '@/lib/locale-routing';
 
 const HEADER_NAV_ITEMS = [
     { type: 'tool', id: 'stage' },
@@ -15,7 +16,7 @@ const HEADER_NAV_ITEMS = [
     { type: 'tool', id: 'ai-tour-guide' },
     { type: 'tool', id: 'enhance' },
     { type: 'tool', id: 'renovation' },
-    { type: 'link', id: 'pricing' },
+    { type: 'link', id: 'examples' },
 ] as const;
 
 // Icons for Mobile Menu (ENHANCE_ICON tek kaynak — hydration uyumu)
@@ -36,6 +37,13 @@ const Icons = {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
     ),
+    Examples: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15l-5-5L5 21" />
+        </svg>
+    ),
     Close: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -50,10 +58,11 @@ const Icons = {
 };
 
 const Header = () => {
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
     const pathname = usePathname();
-    const isBillingPage = pathname?.startsWith('/checkout');
-    const isStudioPage = pathname?.startsWith('/studio');
+    const routePath = stripLocalePrefix(pathname || '/').path;
+    const isBillingPage = routePath.startsWith('/checkout');
+    const isStudioPage = routePath.startsWith('/studio');
     const useNeutralPrivateBtnStyle = isBillingPage || isStudioPage;
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -96,7 +105,7 @@ const Header = () => {
         } catch {}
         setIsAuthed(false);
         setIsMenuOpen(false);
-        router.push('/');
+        router.push(localizePath('/', lang));
     };
 
     // Close menu when resizing to desktop
@@ -127,7 +136,7 @@ const Header = () => {
                     <div className={styles.topRow}>
                         <div className={styles.brandAndNav}>
                             <div className={styles.logo}>
-                                <Link href="/">
+                                <LocalizedLink href="/">
                                     <div className={styles.logoIcon}>
                                         <Image
                                             src="/logo.png"
@@ -142,7 +151,7 @@ const Header = () => {
                                         <span className={styles.logoBrand}>Studio</span>
                                         <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Estate</span></span>
                                     </div>
-                                </Link>
+                                </LocalizedLink>
                             </div>
 
                             <div className={styles.inlineNavWrap}>
@@ -152,10 +161,10 @@ const Header = () => {
                                             if (item.type === 'link') {
                                                 return (
                                                     <li key={item.id} className={styles.navToolItem}>
-                                                        <Link href="/pricing" className={styles.navLink}>
-                                                            <span className={styles.navIcon}>{Icons.Pricing}</span>
-                                                            <span className={styles.navLabel}>{t('Fiyatlandırma')}</span>
-                                                        </Link>
+                                                        <LocalizedLink href="/examples" className={styles.navLink}>
+                                                            <span className={styles.navIcon}>{Icons.Examples}</span>
+                                                            <span className={styles.navLabel}>{t('Örnekleri İnceleyin')}</span>
+                                                        </LocalizedLink>
                                                     </li>
                                                 );
                                             }
@@ -173,10 +182,10 @@ const Header = () => {
                                                             </span>
                                                         </span>
                                                     ) : (
-                                                        <Link href={href} className={styles.navLink}>
+                                                        <LocalizedLink href={href} className={styles.navLink}>
                                                             <span className={styles.navIcon}>{tool.icon}</span>
                                                             <span className={`${styles.navLabel} ${tool.id === 'ai-tour-guide' ? styles.navLabelSingleLine : ''}`}>{t(tool.title)}</span>
-                                                        </Link>
+                                                        </LocalizedLink>
                                                     )}
                                                 </li>
                                             );
@@ -189,18 +198,18 @@ const Header = () => {
                         <div className={`${styles.cta} ${styles.desktopCta}`}>
                             {isAuthed ? (
                                 <>
-                                    <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.loginBtn : styles.registerBtn}>{t('Stüdyo')}</Link>
+                                    <LocalizedLink href="/studio" className={useNeutralPrivateBtnStyle ? styles.loginBtn : styles.registerBtn}>{t('Stüdyo')}</LocalizedLink>
                                     <button type="button" className={styles.loginBtn} onClick={handleLogout}>
                                         {t('Çıkış Yap')}
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <Link href="/login" className={styles.loginBtn}>{t('Giriş Yap')}</Link>
+                                    <LocalizedLink href="/login" className={styles.loginBtn}>{t('Giriş Yap')}</LocalizedLink>
                                     <div className={styles.registerWrapper}>
-                                        <Link href="/register" className={styles.registerBtn}>
+                                        <LocalizedLink href="/register" className={styles.registerBtn}>
                                             {t('Ücretsiz Deneyin')}
-                                        </Link>
+                                        </LocalizedLink>
                                     </div>
                                 </>
                             )}
@@ -234,7 +243,7 @@ const Header = () => {
                 <div className={`${styles.mobileMenu} ${isMenuOpen ? styles.mobileMenuOpen : ''}`}>
                     <div className={styles.mobileMenuHeader}>
                         <div className={styles.logo}>
-                            <Link href="/" onClick={() => setIsMenuOpen(false)}>
+                            <LocalizedLink href="/" onClick={() => setIsMenuOpen(false)}>
                                 <div className={styles.logoIcon}>
                                     <Image
                                         src="/logo.png"
@@ -248,7 +257,7 @@ const Header = () => {
                                     <span className={styles.logoBrand}>Studio</span>
                                     <span className={styles.logoStudio}><span className={styles.logoStudioInner}>Estate</span></span>
                                 </div>
-                            </Link>
+                            </LocalizedLink>
                         </div>
                         <button className={styles.menuCloseBtn} onClick={() => setIsMenuOpen(false)}>
                             {Icons.Close}
@@ -259,13 +268,13 @@ const Header = () => {
                         {HEADER_NAV_ITEMS.map((item) => {
                             if (item.type === 'link') {
                                 return (
-                                    <Link key={item.id} href="/pricing" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
-                                        <div className={styles.mobileIconWrapper}>{Icons.Pricing}</div>
+                                    <LocalizedLink key={item.id} href="/examples" className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                                        <div className={styles.mobileIconWrapper}>{Icons.Examples}</div>
                                         <div className={styles.mobileLinkContent}>
-                                            <span className={styles.mobileLinkLabel}>{t('Fiyatlandırma')}</span>
-                                            <span className={styles.mobileLinkDesc}>{t('Paketleri Gör')}</span>
+                                            <span className={styles.mobileLinkLabel}>{t('Örnekleri İnceleyin')}</span>
+                                            <span className={styles.mobileLinkDesc}>{t('Önce/Sonra sonuçlarını görün')}</span>
                                         </div>
-                                    </Link>
+                                    </LocalizedLink>
                                 );
                             }
                             const tool = TOOLS.find((entry) => entry.id === item.id);
@@ -288,9 +297,9 @@ const Header = () => {
                                     {content}
                                 </span>
                             ) : (
-                                <Link key={tool.id} href={href} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
+                                <LocalizedLink key={tool.id} href={href} className={styles.mobileNavLink} onClick={() => setIsMenuOpen(false)}>
                                     {content}
-                                </Link>
+                                </LocalizedLink>
                             );
                         })}
 
@@ -298,9 +307,9 @@ const Header = () => {
                             {isAuthed ? (
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
-                                        <Link href="/studio" className={useNeutralPrivateBtnStyle ? styles.mobileLoginBtn : styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
+                                        <LocalizedLink href="/studio" className={useNeutralPrivateBtnStyle ? styles.mobileLoginBtn : styles.mobileRegisterBtn} onClick={() => setIsMenuOpen(false)}>
                                             {t('Stüdyo')}
-                                        </Link>
+                                        </LocalizedLink>
                                     </div>
                                     <button type="button" className={styles.mobileLoginBtn} onClick={handleLogout}>
                                         {t('Çıkış Yap')}
@@ -309,9 +318,9 @@ const Header = () => {
                             ) : (
                                 <>
                                     <div className={styles.mobileRegisterWrapper}>
-                                        <Link href="/register" className={styles.mobileRegisterBtn}>✨ {t('Ücretsiz Deneyin')}</Link>
+                                        <LocalizedLink href="/register" className={styles.mobileRegisterBtn}>✨ {t('Ücretsiz Deneyin')}</LocalizedLink>
                                     </div>
-                                    <Link href="/login" className={styles.mobileLoginBtn}>{t('Giriş Yap')}</Link>
+                                    <LocalizedLink href="/login" className={styles.mobileLoginBtn}>{t('Giriş Yap')}</LocalizedLink>
                                 </>
                             )}
                         </div>
@@ -319,9 +328,9 @@ const Header = () => {
 
                     <div className={styles.mobileMenuFooter} style={{ "--i": "4" } as CSSProperties}>
                         <div className={styles.footerLinks}>
-                            <Link href="/help" className={styles.footerLink}>
+                            <LocalizedLink href="/help" className={styles.footerLink}>
                                 {Icons.Support} <span>{t('Yardım Merkezi')}</span>
-                            </Link>
+                            </LocalizedLink>
                         </div>
                         <div className={styles.footerBrand}>
                             <p>© 2026 Studio Estate. {t('Tüm hakları saklıdır.')}</p>

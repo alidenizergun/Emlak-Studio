@@ -7,7 +7,7 @@ import { getEnhanceCreditCost } from '@/lib/tool-credit-costs';
 import { buildEnhancePrompt } from '@/app/enhance/prompts';
 import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
-import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image-quality-guard';
+import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
 import { analyzeEnhancePreflight, resolveAutoEnhanceOptions } from '@/lib/enhance-preflight';
 import { verifyEnhanceQualityContract } from '@/lib/enhance-quality-contract';
 import { isDataUrlLikelyBlack, postprocessListingImage } from '@/lib/output-postprocess';
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const inputQuality = await validateInputImageQuality(sourceToFile(source), 'enhance');
+        const inputQuality = await validateInputImageForProcessing(sourceToFile(source), 'enhance');
         if (!inputQuality.ok) {
             return NextResponse.json(
                 { success: false, code: 'INPUT_QUALITY_LOW', error: inputQuality.error, creditCharged: false },

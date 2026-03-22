@@ -1,8 +1,9 @@
-import Link from 'next/link';
 import styles from './Contact.module.css';
 import type { Metadata } from 'next';
-import { DEFAULT_LANGUAGE, translateText } from '@/lib/i18n';
+import { translateText } from '@/lib/i18n';
 import { buildLocalizedMetadata } from '@/lib/page-metadata';
+import { getCurrentLanguage } from '@/lib/server-language';
+import { localizePath } from '@/lib/locale-routing';
 
 export async function generateMetadata(): Promise<Metadata> {
     return buildLocalizedMetadata({
@@ -58,7 +59,7 @@ const CHANNELS = [
 ];
 
 export default async function ContactPage() {
-    const lang = DEFAULT_LANGUAGE;
+    const lang = await getCurrentLanguage();
     return (
         <div className={styles.page}>
             <div className={`container ${styles.container}`}>
@@ -95,16 +96,16 @@ export default async function ContactPage() {
                             <h2 className={styles.cardTitle}>{channel.title}</h2>
                             <p className={styles.cardDesc}>{translateText(lang, channel.desc)}</p>
                             <p className={styles.cardMeta}>{translateText(lang, channel.meta)}</p>
-                            <Link href={channel.href} className={styles.cardCta}>
+                            <a href={channel.href.startsWith('/') ? localizePath(channel.href, lang) : channel.href} className={styles.cardCta}>
                                 {translateText(lang, 'Hemen Ulaş')}
-                            </Link>
+                            </a>
                         </article>
                     ))}
                 </section>
 
                 <section className={styles.bottomStrip}>
                     <p>{translateText(lang, 'Çözüm bulamadınız mı?')}</p>
-                    <Link href="/help" className={styles.stripBtn}>{translateText(lang, 'Yardım Merkezine Git')}</Link>
+                    <a href={localizePath('/help', lang)} className={styles.stripBtn}>{translateText(lang, 'Yardım Merkezine Git')}</a>
                 </section>
             </div>
         </div>

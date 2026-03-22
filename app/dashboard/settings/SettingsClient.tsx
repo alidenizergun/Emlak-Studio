@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
 import styles from '../Dashboard.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
+import { localizePath } from '@/lib/locale-routing';
+import { useI18n } from '@/components/LanguageProvider';
 
 const MIN_TOPUP_CREDITS = 1;
 const MAX_TOPUP_CREDITS = 10000;
@@ -51,6 +53,7 @@ function isValidOfficeName(value: string): boolean {
 }
 
 export default function SettingsClient() {
+    const { lang } = useI18n();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [identityDisplay, setIdentityDisplay] = useState<string>('');
@@ -75,7 +78,7 @@ export default function SettingsClient() {
         if (!authed) {
             if (!redirectDone.current) {
                 redirectDone.current = true;
-                router.replace('/login');
+                router.replace(localizePath('/login', lang));
             }
             return;
         }
@@ -99,7 +102,7 @@ export default function SettingsClient() {
         setShowProfileBonusHint(!bonusAlreadyAwarded);
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
-    }, [router]);
+    }, [lang, router]);
 
     useEffect(() => {
         if (!accountId) return;
@@ -216,7 +219,7 @@ export default function SettingsClient() {
 
     const handleTopupPurchase = () => {
         setTopupProcessing(true);
-        router.push('/contact');
+        router.push(localizePath('/contact', lang));
     };
 
     const normalizeTopupAmount = () => {
@@ -311,9 +314,9 @@ export default function SettingsClient() {
                         <p className={styles.accountNote} style={{ marginTop: 0 }}>
                             Paket aktivasyonu ve faturalandirma su anda manuel ilerliyor. Size uygun paketi birlikte belirleyelim.
                         </p>
-                        <Link href="/dashboard/subscription" className={`${styles.accountBtn} ${styles.settingsActionBtn}`} style={{ marginTop: '1.25rem' }}>
+                        <LocalizedLink href="/dashboard/subscription" className={`${styles.accountBtn} ${styles.settingsActionBtn}`} style={{ marginTop: '1.25rem' }}>
                             Paketleri goruntule / aktivasyon talep et
-                        </Link>
+                        </LocalizedLink>
 
                         <div className={styles.topupPanel}>
                             <h3 className={styles.topupTitle}>Ek kredi satın al</h3>
@@ -353,15 +356,15 @@ export default function SettingsClient() {
                     <div className={styles.accountCard} style={{ marginBottom: '1rem' }}>
                         <h2 className={styles.settingsSectionTitle}>Destek</h2>
                         <div className={styles.accountActions} style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-                            <Link href="/help" className={styles.accountBtnSecondary}>
+                            <LocalizedLink href="/help" className={styles.accountBtnSecondary}>
                                 Yardım
-                            </Link>
-                            <Link href="/contact" className={styles.accountBtnSecondary}>
+                            </LocalizedLink>
+                            <LocalizedLink href="/contact" className={styles.accountBtnSecondary}>
                                 İletişim
-                            </Link>
-                            <Link href="/dashboard/admin" className={styles.accountBtnSecondary}>
+                            </LocalizedLink>
+                            <LocalizedLink href="/dashboard/admin" className={styles.accountBtnSecondary}>
                                 Admin Paneli
-                            </Link>
+                            </LocalizedLink>
                         </div>
                     </div>
                 </div>

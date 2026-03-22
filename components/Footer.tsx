@@ -1,8 +1,9 @@
 "use client";
-import Link from 'next/link';
 import Image from 'next/image';
 import styles from './Footer.module.css';
 import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
+import FooterLanguageSwitcher from '@/components/FooterLanguageSwitcher';
 
 const Footer = () => {
     const { t } = useI18n();
@@ -37,10 +38,10 @@ const Footer = () => {
                 <div className={styles.column}>
                     <h4>{t('Ürünler')}</h4>
                     <ul>
-                        <li><Link href="/enhance">{t('Fotoğraf Geliştirme')}</Link></li>
-                        <li><Link href="/stage">{t('Dekorasyon')}</Link></li>
-                        <li><Link href="/remove-object">{t('Akıllı Eşya Silme')}</Link></li>
-                        <li><Link href="/sanal-tadilat">{t('Tadilat')}</Link></li>
+                        <li><LocalizedLink href="/enhance">{t('Fotoğraf Geliştirme')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/stage">{t('Sanal Dekorasyon')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/remove-object">{t('Akıllı Eşya Silme')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/sanal-tadilat">{t('Sanal Tadilat')}</LocalizedLink></li>
                         <li>
                             <span className={styles.soonItem}>
                                 <span>{t('Sanal Sunucu')}</span>
@@ -53,19 +54,21 @@ const Footer = () => {
                 <div className={styles.column}>
                     <h4>{t('Kurumsal')}</h4>
                     <ul>
-                        <li><Link href="/about">{t('Hakkımızda')}</Link></li>
-                        <li><Link href="/help">{t('Yardım Merkezi')}</Link></li>
-                        <li><Link href="/suggestions">{t('Öneriler')}</Link></li>
-                        <li><Link href="/contact">{t('İletişim')}</Link></li>
+                        <li><LocalizedLink href="/about">{t('Hakkımızda')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/help">{t('Yardım Merkezi')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/suggestions">{t('Öneriler')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/pricing">{t('Fiyatlandırma')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/contact">{t('İletişim')}</LocalizedLink></li>
                     </ul>
                 </div>
 
                 <div className={styles.column}>
                     <h4>{t('Yasal')}</h4>
                     <ul>
-                        <li><Link href="/privacy">{t('Gizlilik Politikası')}</Link></li>
-                        <li><Link href="/terms">{t('Kullanım Şartları')}</Link></li>
+                        <li><LocalizedLink href="/privacy">{t('Gizlilik Politikası')}</LocalizedLink></li>
+                        <li><LocalizedLink href="/terms">{t('Kullanım Şartları')}</LocalizedLink></li>
                     </ul>
+                    <FooterLanguageSwitcher />
                 </div>
             </div >
 

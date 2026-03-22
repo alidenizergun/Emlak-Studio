@@ -5,7 +5,7 @@ import { buildLocalizedMetadata } from '@/lib/page-metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildLocalizedMetadata({
-    title: 'Dekorasyon',
+    title: 'Sanal Dekorasyon',
     description: 'Boş odaları Studio Estate ile mimariyi koruyarak dekore edin.',
     path: '/stage',
   });

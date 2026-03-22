@@ -6,7 +6,7 @@ import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
 import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
-import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image-quality-guard';
+import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
 import { postprocessListingImage } from '@/lib/output-postprocess';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         const prompt = clientPrompt || buildRemoveObjectPrompt(mode, userPrompt);
         const adaptivePolicy = getToolAdaptivePolicy('remove-object');
 
-        const inputQuality = await validateInputImageQuality(image, 'remove-object');
+        const inputQuality = await validateInputImageForProcessing(image, 'remove-object');
         if (!inputQuality.ok) {
             return NextResponse.json(
                 { success: false, code: 'INPUT_QUALITY_LOW', error: inputQuality.error },

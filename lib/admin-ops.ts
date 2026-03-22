@@ -303,7 +303,7 @@ function getSqliteDetail(userIdRaw: string): AdminUserDetail | null {
         used_credits,
         refunded,
         created_at,
-        'Dekorasyon' as title,
+        'Sanal Dekorasyon' as title,
         NULL as detail,
         before_image_url,
         after_image_url,
@@ -560,7 +560,7 @@ async function getPersistentDetail(userIdRaw: string): Promise<AdminUserDetail |
     sql.unsafe(`
       SELECT * FROM (
         SELECT run_id, 'stage' as tool_id, status, fail_code, used_credits, refunded, created_at,
-               'Dekorasyon' as title, NULL as detail, before_image_url, after_image_url, room_type, style
+               'Sanal Dekorasyon' as title, NULL as detail, before_image_url, after_image_url, room_type, style
         FROM stage_runs WHERE phone = $1
         UNION ALL
         SELECT run_id, tool_id, status, NULL as fail_code, used_credits, 0 as refunded, created_at,

@@ -161,7 +161,7 @@ export function getUnifiedWorkHistory(
             afterImageUrl: sanitizeHistoryUrl(row.after_image_url, `stage:${row.run_id}`, 'after'),
             roomType: row.room_type,
             style: row.style,
-            title: 'Dekorasyon',
+            title: 'Sanal Dekorasyon',
             detail: null,
         })),
         ...toolRows.map((row) => ({

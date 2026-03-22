@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import ComparisonSlider from './ComparisonSlider';
 import BeforeAfterPopup from './BeforeAfterPopup';
 import styles from './Hero.module.css';
 import { useI18n } from '@/components/LanguageProvider';
+import LocalizedLink from '@/components/LocalizedLink';
 
 const HERO_BEFORE = '/images/hero-empty-room-4k.png';
 const HERO_AFTER = '/images/hero-decorated-4k.png';
@@ -113,7 +113,7 @@ const Hero = () => {
                         </li>
                     </ul>
                     <div className={styles.actions}>
-                        <a
+                        <LocalizedLink
                             id="hero-examples-link"
                             href="/examples"
                             className={styles.secondaryBtn}
@@ -125,11 +125,11 @@ const Hero = () => {
                                 <path d="M21 15l-5-5L5 21" />
                             </svg>
                             {t('Örnekleri İnceleyin')}
-                        </a>
+                        </LocalizedLink>
 
-                        <Link href="/register" className={styles.primaryBtn}>
+                        <LocalizedLink href="/register" className={styles.primaryBtn}>
                             {t('Ücretsiz Deneyin')}
-                        </Link>
+                        </LocalizedLink>
                     </div>
                 </div>
                 <div className={styles.visual}>

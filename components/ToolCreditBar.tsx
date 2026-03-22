@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { isStoredAuthed } from '@/lib/client-auth';
 import styles from './ToolCreditBar.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
 
 const CREDITS_KEY = 'emlak_credits';
 
@@ -55,12 +55,12 @@ export default function ToolCreditBar({ costLabel }: ToolCreditBarProps) {
                     <span className={styles.costLabel}>Bu işlem</span>
                     <span className={styles.costValue}>{costLabel}</span>
                 </div>
-                <Link href="/pricing" className={styles.ctaBtn}>
+                <LocalizedLink href="/pricing" className={styles.ctaBtn}>
                     Kredi al
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
-                </Link>
+                </LocalizedLink>
             </div>
         </div>
     );

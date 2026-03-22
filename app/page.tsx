@@ -1,4 +1,5 @@
 import Hero from "@/components/Hero";
+import HomeFeatureCards from "@/components/HomeFeatureCards";
 import Stats from "@/components/Stats";
 import Testimonials from "@/components/Testimonials";
 import type { Metadata } from 'next';
@@ -17,6 +18,7 @@ export default function Home() {
     <>
       <Hero />
       <Stats />
+      <HomeFeatureCards />
       <Testimonials />
     </>
   );

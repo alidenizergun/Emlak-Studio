@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { normalizeImageForStage } from '@/lib/image-normalization';
-import { validateInputImageQuality, verifyOutputImageQuality } from '@/lib/image-quality-guard';
+import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
 import { applyArchitectureStructureLock } from '@/lib/structure-lock';
 import { postprocessListingImage } from '@/lib/output-postprocess';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
@@ -121,7 +121,7 @@ export async function POST() {
         const inputBuffer = await readFile(absoluteImagePath);
         const sourceFile = toFile(inputBuffer, `${testCase.id}.png`);
         const normalized = await normalizeImageForStage(sourceFile);
-        const inputQuality = await validateInputImageQuality(normalized.image, 'stage');
+        const inputQuality = await validateInputImageForProcessing(normalized.image, 'stage');
 
         const caseDir = path.join(outputDir, testCase.id);
         await mkdir(caseDir, { recursive: true });

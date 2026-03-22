@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import styles from './Checkout.module.css';
+import LocalizedLink from '@/components/LocalizedLink';
 
 export default function CheckoutClient() {
     return (
@@ -28,8 +28,8 @@ export default function CheckoutClient() {
                             <li>Odeme sonrasi hesabinizi ayni gun aktive edelim.</li>
                         </ol>
                         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
-                            <Link href="/contact" className={styles.payBtn}>Iletisime Gec</Link>
-                            <Link href="/pricing" className={styles.payBtn}>Paketlere Geri Don</Link>
+                            <LocalizedLink href="/contact" className={styles.payBtn}>Iletisime Gec</LocalizedLink>
+                            <LocalizedLink href="/pricing" className={styles.payBtn}>Paketlere Geri Don</LocalizedLink>
                         </div>
                     </div>
                 </div>
