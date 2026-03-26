@@ -10,14 +10,47 @@ export interface ImageValidationSummary {
     score: number;
     passed: boolean;
     nonce: number;
+    advisory?: string;
 }
 
-const MIN_VALIDATION_SCORE = 70;
+const MIN_VALIDATION_SCORE = 50;
+const STRONG_VALIDATION_SCORE = 75;
 
 function getScoreTone(score: number): 'good' | 'medium' | 'low' {
-    if (score >= 70) return 'good';
-    if (score >= 60) return 'medium';
+    if (score >= STRONG_VALIDATION_SCORE) return 'good';
+    if (score >= MIN_VALIDATION_SCORE) return 'medium';
     return 'low';
+}
+
+function getValidationCopy(score: number, t: (key: string) => string) {
+    if (score >= STRONG_VALIDATION_SCORE) {
+        return {
+            label: t('Hazır'),
+            title: t('Fotoğraf işlem için uygun görünüyor.'),
+            bullets: [
+                t('Oda sınırları net görünüyor'),
+                t('Işık ve kadraj işleme için yeterli'),
+            ],
+        };
+    }
+    if (score >= MIN_VALIDATION_SCORE) {
+        return {
+            label: t('Sınırda'),
+            title: t('Fotoğraf işlenebilir, ancak sonuç kalitesi sınırlı olabilir.'),
+            bullets: [
+                t('Kontrast veya netlik geliştirilebilir'),
+                t('Sonuçta kalite kaybı görülebilir'),
+            ],
+        };
+    }
+    return {
+        label: t('Uygun değil'),
+        title: t('Bu fotoğraf işlem için uygun değil.'),
+        bullets: [
+            t('Görsel fazla zayıf'),
+            t('Yeniden çekilmiş bir fotoğraf önerilir'),
+        ],
+    };
 }
 
 interface ImageUploaderProps {
@@ -99,7 +132,7 @@ const ImageUploader = ({
                 const score = typeof data?.score === 'number' ? Math.round(data.score * 100) : null;
                 setValidationScore(score);
                 const passed = score !== null ? score >= MIN_VALIDATION_SCORE : true;
-                onValidationResult?.(score === null ? null : { score, passed, nonce: Date.now() });
+                onValidationResult?.(score === null ? null : { score, passed, nonce: Date.now(), advisory: String(data?.advisory || '') });
                 if (!passed) {
                     setValidationMessage(
                         t('Bu fotoğraf şu an işleme uygun değil. En az {score}/100 uygunluk skoru gerekiyor.').replace(
@@ -117,7 +150,7 @@ const ImageUploader = ({
             const guidance = String(data?.guidance || t('Lütfen daha net ve iyi ışıklandırılmış bir fotoğraf yükleyin.'));
             const score = typeof data?.score === 'number' ? Math.round(data.score * 100) : null;
             setValidationScore(score);
-            onValidationResult?.(score === null ? null : { score, passed: false, nonce: Date.now() });
+            onValidationResult?.(score === null ? null : { score, passed: false, nonce: Date.now(), advisory: '' });
             setValidationMessage(`${reason} ${guidance}`.trim());
             clearSelection();
             return false;
@@ -224,13 +257,34 @@ const ImageUploader = ({
                 {isValidating ? <p className={styles.validationInfo}>{t('Fotoğraf kontrol ediliyor...')}</p> : null}
                 {validationMessage ? (
                     <div className={styles.validationErrorBox}>
-                        <p className={styles.validationErrorTitle}>{t('Bu fotoğraf şu an işleme uygun değil')}</p>
-                        {validationScore !== null ? (
-                            <p className={`${styles.validationScoreInline} ${styles[`validationScoreInline${getScoreTone(validationScore)[0].toUpperCase()}${getScoreTone(validationScore).slice(1)}`]}`}>
-                                {t('Uygunluk skoru: {score}/100').replace('{score}', String(validationScore))}
-                            </p>
-                        ) : null}
-                        <p className={styles.validationError}>{validationMessage}</p>
+                        {validationScore !== null ? (() => {
+                            const tone = getScoreTone(validationScore);
+                            const copy = getValidationCopy(validationScore, t);
+                            const markerPosition = `${Math.min(100, Math.max(0, validationScore))}%`;
+                            return (
+                                <>
+                                    <div className={styles.validationHeaderRow}>
+                                        <span className={`${styles.validationBadge} ${styles[`validationBadge${tone[0].toUpperCase()}${tone.slice(1)}`]}`}>{copy.label}</span>
+                                        <span className={styles.validationNumeric}>{String(validationScore)}/100</span>
+                                    </div>
+                                    <div className={styles.validationMeter}>
+                                        <span className={`${styles.validationSegment} ${styles.validationSegmentLow}`} />
+                                        <span className={`${styles.validationSegment} ${styles.validationSegmentMedium}`} />
+                                        <span className={`${styles.validationSegment} ${styles.validationSegmentGood}`} />
+                                        <span className={styles.validationMarker} style={{ left: markerPosition }} />
+                                    </div>
+                                    <p className={styles.validationErrorTitle}>{copy.title}</p>
+                                    <ul className={styles.validationBullets}>
+                                        {copy.bullets.map((bullet) => (
+                                            <li key={bullet}>{bullet}</li>
+                                        ))}
+                                    </ul>
+                                    <p className={styles.validationGuidance}>{validationMessage}</p>
+                                </>
+                            );
+                        })() : (
+                            <p className={styles.validationError}>{validationMessage}</p>
+                        )}
                     </div>
                 ) : null}
                 {!mini && validationTool && showGuidance ? (

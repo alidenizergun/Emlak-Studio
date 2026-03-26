@@ -326,13 +326,6 @@
     margin-bottom: 0;
 }
 
-.inlineCost {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #94a3b8;
-    white-space: nowrap;
-}
-
 .tipBlock {
     background: #f0fdf4;
     border: 1px solid #bbf7d0;

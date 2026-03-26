@@ -1,0 +1,50 @@
+Task: Stage this home office as a single ultra-photorealistic real-estate photo.
+STRICT ARCHITECTURE RULES:
+- Never change room dimensions, wall positions, ceiling geometry, window or door locations, openings, structural contours, or camera perspective.
+- Never invent new walls, partitions, bulkheads, columns, vertical planes, or fake depth surfaces anywhere in the frame.
+- Keep floor pattern direction, wall termination lines, corner joins, and all architectural anchors identical to the input.
+
+ROOM FUNCTION PLAN:
+- Stage it as a focused work room optimized for productivity and listing clarity.
+- Focal-point rule: Anchor the room with a desk zone and one secondary storage or shelving support.
+- Must-have rule: Include an ergonomic desk setup, work chair, and restrained storage or task-lighting support.
+- Avoid rule: Avoid decorative lounge staging overpowering the work function.
+- Circulation rule: Keep approach to the desk clear and maintain readable floor space.
+- Scale rule: Use slim, efficient furniture footprints to avoid crowding.
+
+STYLE PLAN:
+- Create a pared-back interior where function and negative space lead.
+- Palette: Use off-white, stone, taupe, and quiet monochrome transitions.
+- Materials: Favor smooth matte finishes, clean wood, quiet stone, and low-texture upholstery.
+- Textiles: Use only essential textiles, tightly controlled and visually calm.
+- Accessories: Use extremely few accessories, only when they support scale and realism.
+- Lighting language: Use discreet flush, recessed-looking, or very clean pendant forms.
+- Silhouette language: Prefer crisp geometry, low profiles, and uninterrupted lines.
+- Avoid: Avoid decorative excess, layered patterns, or bulky furniture grouping.
+
+ROOM + STYLE COMPOSITION PLAN:
+- Use a sharply organized work zone with a disciplined desk composition, hidden-feeling storage, and almost no decorative distractions.
+
+STAGING INTENSITY:
+- Intensity mode: balanced.
+- Use a complete but edited furniture composition that reads clearly in listing photos.
+- Use a measured number of accessories with clean grouping logic.
+- Use selective wall decor only when it improves realism and scale balance.
+- Use clear but tasteful style contrast so the chosen style is readable without becoming loud.
+- Restyle lighting enough to reinforce the chosen style while staying believable.
+
+NEGATIVE RULES:
+- Do not overfill the room or make circulation ambiguous.
+- Do not block doors, windows, radiators, built-ins, or key openings.
+- Do not create collage, inset, split-scene, partial-room, or panel-like outputs.
+- Do not leave semi-transparent objects, duplicate outlines, seam bands, or cut furniture.
+- Do not add excessive gallery walls, too many small accessories, or visually noisy decor clusters.
+- If a fixture is restyled, keep its mounting location fixed and make the new fixture style-appropriate.
+- If the room function and style brief conflict, room function wins first and style expression adapts second.
+- Keep any existing text regions stable and do not hallucinate new text.
+- Preserve the input framing exactly.
+- Clean temporary dirt, dust, smudges, and construction residue while keeping original materials intact.
+- All placed objects must be fully opaque, fully rendered, and physically grounded.
+- Version strategy A: architecture-first conservative staging. Preserve room geometry with maximum caution, use cleaner spacing, and allow style expression only after room logic is fully satisfied.
+FINAL OUTPUT RULE:
+- Return one unified, listing-ready furnished image with strong room-function clarity, readable style identity, premium cleanliness, and unchanged architecture.

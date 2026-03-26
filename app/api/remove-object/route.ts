@@ -4,13 +4,12 @@ import { buildRemoveObjectPrompt, type RemoveMode } from '@/app/remove-object/pr
 import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
-import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
-import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
-import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
-import { postprocessListingImage } from '@/lib/output-postprocess';
+import { validateInputImageForProcessing } from '@/lib/image-quality-guard';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
 import { recordToolRun } from '@/lib/work-history';
+import { resolveRemoveObjectModelPolicy } from '@/lib/gemini-tool-policy';
+import { orchestrateVisualGeneration } from '@/lib/gemini-orchestrator';
 
 const ENABLE_REMOVE_RETRY = process.env.REMOVE_OBJECT_ENABLE_AUTO_RETRY !== '0';
 
@@ -67,59 +66,75 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        let generation = await generateEditedImageWithNanoBanana({ image, prompt });
-        let finalizedImageUrl = await postprocessListingImage(generation.imageUrl, { tool: 'remove-object' });
-        let integrity = await verifyArchitectureIntegrity(image, finalizedImageUrl, adaptivePolicy.architectureThreshold);
-        let quality = await verifyOutputImageQuality(image, finalizedImageUrl, 'remove-object');
-
-        if ((!integrity.ok || !quality.ok) && ENABLE_REMOVE_RETRY && adaptivePolicy.retryEnabled) {
-            const retryPrompt = `${prompt}
+        const modelPolicy = resolveRemoveObjectModelPolicy({
+            mode,
+            qualityScore: inputQuality.score,
+            metrics: inputQuality.metrics,
+            userPrompt,
+        });
+        const result = await orchestrateVisualGeneration({
+            image,
+            prompt,
+            preferredModels: modelPolicy.models,
+            tool: 'remove-object',
+            policyClass: modelPolicy.difficulty,
+            policyRationale: modelPolicy.rationale,
+            architectureThreshold: adaptivePolicy.architectureThreshold,
+            retryPrompt:
+                ENABLE_REMOVE_RETRY && adaptivePolicy.retryEnabled
+                    ? (basePrompt) => `${basePrompt}
 
 RETRY MODE:
 - Keep architecture, perspective, and room geometry strictly unchanged.
 - Remove only requested objects; do not alter structural lines.
 - Improve clarity and avoid blur, haze, dark patches, ghost traces, semi-transparent leftovers, and double edges.
-- If mode is "all", output must look like a truly empty room (all movable items removed).
-- If mode is "all", also remove visible decorative lighting fixtures such as chandeliers, pendant lights, sconces, and hanging lamps, while keeping ceiling geometry and fixture connection point architecture intact.
-- If lighting is dark/flat, rebalance exposure for a bright natural listing look.
+- If mode is "all", output must read as a truly empty room.
 - Rebuild removed regions with continuous texture and realistic contact shadows.
 ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
     ? '- Stronger cleanup on semi-transparent traces and double-exposure artifacts.'
-    : ''}`;
-            const retry = await generateEditedImageWithNanoBanana({ image, prompt: retryPrompt });
-            const retryFinal = await postprocessListingImage(retry.imageUrl, { tool: 'remove-object' });
-            const retryIntegrity = await verifyArchitectureIntegrity(image, retryFinal, adaptivePolicy.architectureThreshold);
-            const retryQuality = await verifyOutputImageQuality(image, retryFinal, 'remove-object');
-            if (retryIntegrity.ok && retryQuality.ok) {
-                generation = retry;
-                finalizedImageUrl = retryFinal;
-                integrity = retryIntegrity;
-                quality = retryQuality;
-            }
-        }
+    : ''}`
+                    : undefined,
+            fastRetryPrompt: (basePrompt) => `${basePrompt}
 
-        if (!integrity.ok) {
+FAST RETRY MODE:
+- Keep architecture unchanged.
+- Remove only the requested items.
+- Prefer a clean completed result over aggressive cleanup detail.`,
+        });
+
+        if (!result.ok && result.reason === 'architecture') {
             recordToolAdaptiveOutcome('remove-object', { ok: false, reason: 'architecture' });
             return NextResponse.json(
                 {
                     success: false,
                     code: 'ARCHITECTURE_CHANGED',
-                    error: `Mimari detaylar korunamadi (skor: ${integrity.score.toFixed(2)}). Lutfen tekrar deneyin.`,
-                    architectureScore: integrity.score,
+                    error: result.error || 'Mimari detaylar korunamadı.',
+                    architectureScore: result.architectureScore,
+                    selectedModel: result.telemetry.selectedModel,
+                    selectedModelClass: result.telemetry.selectedPolicyClass,
+                    retryCount: result.telemetry.retryCount,
+                    fallbackUsed: result.telemetry.fallbackUsed,
+                    timing: result.telemetry.timing,
                 },
                 { status: 422 }
             );
         }
-        if (!quality.ok) {
+        if (!result.ok) {
             recordToolAdaptiveOutcome('remove-object', { ok: false, reason: 'quality' });
             return NextResponse.json(
                 {
                     success: false,
                     code: 'OUTPUT_QUALITY_LOW',
-                    error: quality.error || 'Cikti kalite kontrolden gecemedi.',
-                    qualityScore: quality.score,
+                    error: result.error || 'Cikti kalite kontrolden gecemedi.',
+                    qualityScore: result.qualityScore,
+                    artifactScore: result.artifactScore,
+                    selectedModel: result.telemetry.selectedModel,
+                    selectedModelClass: result.telemetry.selectedPolicyClass,
+                    retryCount: result.telemetry.retryCount,
+                    fallbackUsed: result.telemetry.fallbackUsed,
+                    timing: result.telemetry.timing,
                 },
-                { status: 422 }
+                { status: result.reason === 'timeout' ? 504 : 422 }
             );
         }
 
@@ -140,7 +155,7 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
             phone,
             toolId: 'remove-object',
             beforeImageUrl,
-            afterImageUrl: finalizedImageUrl,
+            afterImageUrl: result.imageUrl!,
             title: 'Akıllı Eşya Silme',
             detail: mode === 'all' ? 'Tüm eşyalar silindi' : `İstek: ${userPrompt || 'Belirli eşya silme'}`,
             usedCredits: cost,
@@ -149,17 +164,24 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
         return NextResponse.json({
             success: true,
             runId,
-            imageUrl: finalizedImageUrl,
+            imageUrl: result.imageUrl,
             mode,
             prompt,
             userPrompt: userPrompt || undefined,
-            provider: generation.provider,
-            model: generation.model,
-            fallbackUsed: generation.fallbackUsed,
-            attemptedModels: generation.attemptedModels,
-            attemptLog: process.env.NODE_ENV === 'production' ? undefined : generation.attemptLog,
-            architectureScore: integrity.score,
-            qualityScore: quality.score,
+            provider: result.generation?.provider,
+            model: result.generation?.model,
+            selectedModel: result.telemetry.selectedModel,
+            fallbackUsed: result.telemetry.fallbackUsed,
+            attemptedModels: result.generation?.attemptedModels,
+            attemptLog: process.env.NODE_ENV === 'production' ? undefined : result.generation?.attemptLog,
+            architectureScore: result.architectureScore,
+            qualityScore: result.qualityScore,
+            artifactScore: result.artifactScore,
+            selectedModelClass: result.telemetry.selectedPolicyClass,
+            selectedModelRationale: process.env.NODE_ENV === 'production' ? undefined : modelPolicy.rationale,
+            retryCount: result.telemetry.retryCount,
+            timing: result.telemetry.timing,
+            acceptanceReason: result.telemetry.acceptanceReason,
             credits: creditResult.credits,
             usedCredits: cost,
         });

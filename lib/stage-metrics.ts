@@ -1,4 +1,5 @@
 type FailReason = 'input_quality' | 'room_type' | 'architecture' | 'output_quality' | 'provider' | 'hard_block' | 'other';
+type Difficulty = 'easy' | 'medium' | 'hard';
 
 interface StageMetrics {
     total: number;
@@ -7,6 +8,7 @@ interface StageMetrics {
     success: number;
     failed: number;
     failReasons: Record<FailReason, number>;
+    difficultyCounts: Record<Difficulty, number>;
     totalLatencyMs: number;
 }
 
@@ -25,12 +27,21 @@ const metrics: StageMetrics = {
         hard_block: 0,
         other: 0,
     },
+    difficultyCounts: {
+        easy: 0,
+        medium: 0,
+        hard: 0,
+    },
     totalLatencyMs: 0,
 };
 
 export function trackStageStart(): number {
     metrics.total += 1;
     return Date.now();
+}
+
+export function trackStageDifficulty(difficulty: Difficulty): void {
+    metrics.difficultyCounts[difficulty] += 1;
 }
 
 export function trackStageFirstPassSuccess(): void {
@@ -59,6 +70,7 @@ export function snapshotStageMetrics(): {
     retryRate: number;
     avgLatencyMs: number;
     failReasons: Record<FailReason, number>;
+    difficultyCounts: Record<Difficulty, number>;
 } {
     const total = Math.max(metrics.total, 1);
     return {
@@ -68,5 +80,6 @@ export function snapshotStageMetrics(): {
         retryRate: metrics.retryUsed / total,
         avgLatencyMs: metrics.totalLatencyMs / total,
         failReasons: metrics.failReasons,
+        difficultyCounts: metrics.difficultyCounts,
     };
 }

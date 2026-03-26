@@ -175,15 +175,20 @@ const Header = () => {
                                             const tool = TOOLS.find((entry) => entry.id === item.id);
                                             if (!tool) return null;
                                             const href = isAuthed ? `/studio?tool=${encodeURIComponent(tool.id)}` : tool.href;
+                                            const isHeaderDisabled = tool.id === 'ai-tour-guide';
                                             return (
                                                 <li key={tool.id} className={styles.navToolItem}>
-                                                    {tool.status ? (
+                                                    {tool.status || isHeaderDisabled ? (
                                                         <span className={`${styles.navLink} ${styles.navLinkDisabled}`} aria-disabled="true">
                                                             <span className={styles.navIcon}>{tool.icon}</span>
-                                                            <span className={styles.navTextGroup}>
+                                                            {tool.status ? (
+                                                                <span className={styles.navTextGroup}>
+                                                                    <span className={styles.navLabel}>{t(tool.title)}</span>
+                                                                    <span className={styles.inlineBadge}>{t(tool.status)}</span>
+                                                                </span>
+                                                            ) : (
                                                                 <span className={styles.navLabel}>{t(tool.title)}</span>
-                                                                <span className={styles.inlineBadge}>{t(tool.status)}</span>
-                                                            </span>
+                                                            )}
                                                         </span>
                                                     ) : (
                                                         <LocalizedLink href={href} className={styles.navLink}>
@@ -284,6 +289,7 @@ const Header = () => {
                             const tool = TOOLS.find((entry) => entry.id === item.id);
                             if (!tool) return null;
                             const href = isAuthed ? `/studio?tool=${encodeURIComponent(tool.id)}` : tool.href;
+                            const isHeaderDisabled = tool.id === 'ai-tour-guide';
                             const content = (
                                 <>
                                     <div className={styles.mobileIconWrapper}>{tool.icon}</div>
@@ -296,7 +302,7 @@ const Header = () => {
                                     </div>
                                 </>
                             );
-                            return tool.status ? (
+                            return tool.status || isHeaderDisabled ? (
                                 <span key={tool.id} className={`${styles.mobileNavLink} ${styles.mobileNavLinkDisabled}`} aria-disabled="true">
                                     {content}
                                 </span>

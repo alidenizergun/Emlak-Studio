@@ -156,10 +156,12 @@ export default function RemoveObjectClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.headerMain}>
-                        <h1 className={styles.title}>{t('Akıllı Eşya Silme')}</h1>
-                        <p className={styles.description}>
-                            {t('Kadrajdaki istenmeyen eşyaları, dağınıklığı veya dikkat dağıtan objeleri doğal sonuçlarla kaldırın. Mekanın mimarisini koruyarak daha sade, daha ferah ve daha odaklı ilan görselleri hazırlayın.')}
-                        </p>
+                        <div className={styles.headerBody}>
+                            <h1 className={styles.title}>{t('Akıllı Eşya Silme')}</h1>
+                            <p className={styles.description}>
+                                {t('Kadrajdaki istenmeyen eşyaları, dağınıklığı veya dikkat dağıtan objeleri doğal sonuçlarla kaldırın. Mekanın mimarisini koruyarak daha sade, daha ferah ve daha odaklı ilan görselleri hazırlayın.')}
+                            </p>
+                        </div>
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             {t('Örnekleri İnceleyin')}
                         </button>
@@ -169,7 +171,7 @@ export default function RemoveObjectClient() {
             </header>
 
             <div className={styles.workspace}>
-                <div className={styles.gallerySection}>
+                <div className={styles.gallerySection} data-studio-gallery-anchor>
                     {!file ? (
                         <div className={styles.emptyState}>
                             <ImageUploader
@@ -244,7 +246,6 @@ export default function RemoveObjectClient() {
                                 />
                                 <span className={styles.modeText}>
                                     <span>{t('Tüm eşyaları sil')}</span>
-                                    <span className={styles.modeCost}>{t('2 kredi')}</span>
                                 </span>
                             </label>
                             <label
@@ -261,7 +262,6 @@ export default function RemoveObjectClient() {
                                 />
                                 <span className={styles.modeText}>
                                     <span>{t('Belirli eşyaları aşağıdaki metne göre sil')}</span>
-                                    <span className={styles.modeCost}>{t('2 kredi')}</span>
                                 </span>
                             </label>
                         </div>
@@ -290,6 +290,7 @@ export default function RemoveObjectClient() {
                         <button
                             type="button"
                             className={styles.processBtn}
+                            data-studio-primary-action
                             onClick={handleProcess}
                             disabled={
                                 !file ||

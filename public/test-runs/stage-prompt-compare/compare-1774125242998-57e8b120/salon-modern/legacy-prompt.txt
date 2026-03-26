@@ -1,0 +1,48 @@
+Task: Furnish this living room with modern, clean-lined furniture with neutral palette and subtle accents.
+STRICT CONSTRAINTS:
+- Never change architectural details under any condition: room dimensions, column positions, wall lines, ceiling geometry, window/door locations, openings, fixed structural contours must remain exactly unchanged.
+- Never invent new architectural surfaces: no new wall, half-wall, divider, partition, niche, beam, column, bulkhead, or fake depth plane anywhere in frame.
+- Do not create any new vertical plane on image edges (especially right side). Existing side geometry must remain identical.
+- Keep original layout, perspective, camera angle, framing, and lens feel.
+- Floor cleanup hard rule: if uploaded floor is dirty, clean it completely (no visible dirt/stain/smudges/dust remains) while preserving original floor material and tile/texture layout.
+- Clean other visible surfaces (remove dirt, stains, smudges, dust) without changing geometry.
+- Remove temporary renovation/construction clutter completely (tools, bags, loose items, debris) and leave no semi-visible traces.
+- Improve lighting, exposure and sharpness to premium real-estate quality without geometric changes.
+- Decoration density must be medium. Do not overfill the room.
+- Place furniture with realistic interior-design logic based on room geometry:
+  - Keep clear walking paths and entry circulation.
+  - Respect window and door clearance; do not block openings.
+  - Match furniture scale to room size; avoid oversized pieces.
+  - Avoid object collisions, clipping, floating, or impossible spacing.
+  - Anchor large items to plausible walls and keep visual balance.
+- Room-type layout blueprint:
+  - establish a social focal layout (sofa + table + media/storage) with balanced spacing and open circulation.
+- Required room function signature:
+  - sofa-centered seating composition, support table(s), and media/storage anchor.
+- Style signature cues:
+  - clean straight silhouettes, restrained accents, clear negative space.
+- Furniture and decor must be fully opaque and physically grounded. No transparent, ghosted, floating, or double-exposure objects.
+- Every placed object must be fully rendered and physically consistent with floor/wall contact and shadows.
+- Never output semi-transparent overlay bands, stitched seams, scanline-like strips, or partial cut objects.
+- Remove all residual imprints from replaced objects (no faded silhouettes, no duplicate outlines, no echo edges).
+- Do not leave horizontal or vertical blending bands across walls, furniture, TV area, or floor.
+- Never duplicate ceiling fixtures or leave double-contour traces around chandelier/pendant anchors.
+- If any object is uncertain, omit it instead of rendering a partial/transparent version.
+- For dressing room tasks, include a complete modern dressing setup (wardrobe modules, mirror, bench/ottoman, organized storage accents) while keeping architecture fixed.
+- Curtains/blinds/tulle may be added on existing windows as decor, but window frame geometry and position must remain unchanged.
+- Lighting fixtures can be restyled by design style (chandelier, pendant, sconces, floor/table lamps), but electrical anchor points and mounting locations must stay fixed.
+- If fixtures are updated, keep physically coherent light behavior (no impossible glow directions, no detached lights).
+- Wall decor is allowed in measured amount: style-matching framed artworks and a subtle wall clock can be added if they fit scale and do not clutter walls.
+- Never place framed artworks on the TV/media focal wall.
+- If other walls are empty, you may place limited artwork on those non-TV walls with balanced spacing.
+- Keep wall accessories proportional and sparse; avoid excessive gallery-wall density.
+- Preserve all existing wall termination lines and corner joins exactly; do not close open areas with added surfaces.
+- Strict anti-haze rule: no fog, no dust veil, no milky low-contrast film over the image.
+- Maintain crisp micro-contrast on furniture/edges while keeping natural realism.
+
+- Keep any existing text regions stable; do not hallucinate new text.
+
+- Emphasize architectural fidelity over decoration richness.
+
+
+Output: one ultra-photorealistic listing-ready image.

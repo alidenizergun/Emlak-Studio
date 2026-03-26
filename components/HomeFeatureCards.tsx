@@ -48,10 +48,10 @@ const cards = [
         titleRest: 'modern bitmiş mekanlar gibi sunun',
         description:
             'Tamamlanmamış ya da eski görünen alanları, yatırımcıya ve alıcıya daha net bir gelecek senaryosuyla gösterin.',
-        beforeImage: '/images/examples/pantry-before.png',
-        afterImage: '/images/examples/pantry-after.png',
-        beforeAlt: 'Sanal tadilat öncesi mekan',
-        afterAlt: 'Sanal tadilat sonrası yenilenmiş mekan',
+        beforeImage: '/images/home-cards/renovation-before.png',
+        afterImage: '/images/home-cards/renovation-after.png',
+        beforeAlt: 'Sanal tadilat öncesi eski giriş alanı',
+        afterAlt: 'Sanal tadilat sonrası yenilenmiş giriş alanı',
     },
 ];
 

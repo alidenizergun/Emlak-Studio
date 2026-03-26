@@ -1,0 +1,21 @@
+{
+  "runId": "4608b8b1-bb18-41e7-8c27-209a6a359e41",
+  "status": "failed",
+  "roomType": "salon",
+  "style": "industrial",
+  "promptVersion": "A",
+  "architectureScore": 0.7353625455329708,
+  "qualityScore": 1,
+  "failCode": "OUTPUT_QUALITY_LOW",
+  "strictArchitectureRescueUsed": false,
+  "model": "gemini-3-pro-image-preview",
+  "fallbackUsed": false,
+  "attemptedModels": [
+    "gemini-3-pro-image-preview"
+  ],
+  "files": {
+    "before": "/test-runs/stage-debug/4608b8b1-bb18-41e7-8c27-209a6a359e41/before.jpg",
+    "after": "/test-runs/stage-debug/4608b8b1-bb18-41e7-8c27-209a6a359e41/after.jpg"
+  },
+  "savedAt": "2026-03-21T19:13:14.508Z"
+}

@@ -32,6 +32,7 @@ interface StylePlan {
     textiles: string;
     accessories: string;
     lighting: string;
+    lightingPriority?: 'soft' | 'balanced' | 'strong';
     silhouette: string;
     avoid: string;
 }
@@ -174,6 +175,7 @@ const DEFAULT_STYLE_PLAN: StylePlan = {
     textiles: 'Keep textiles tidy and minimal.',
     accessories: 'Use only a few supportive accessories.',
     lighting: 'Use simple contemporary fixtures that feel naturally integrated.',
+    lightingPriority: 'soft',
     silhouette: 'Favor clean, readable silhouettes with no exaggerated shapes.',
     avoid: 'Avoid theme-park styling, over-decoration, or visually noisy accents.',
 };
@@ -187,6 +189,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use tailored textiles with low pattern noise and clean folds.',
         accessories: 'Keep accessories edited and sculptural, never busy.',
         lighting: 'Use simple pendant, linear, or flush fixtures with clean geometry.',
+        lightingPriority: 'balanced',
         silhouette: 'Prefer straight lines, slim profiles, and low visual clutter.',
         avoid: 'Avoid ornate classic detailing, heavy rustic mass, or bohemian layering.',
     },
@@ -198,6 +201,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use cozy but light textiles such as woven throws and understated boucle or linen.',
         accessories: 'Use minimal handmade accents and a few natural elements only.',
         lighting: 'Use soft, simple fixtures in light finishes and gentle rounded forms.',
+        lightingPriority: 'soft',
         silhouette: 'Prefer light visual weight, rounded edges, and breathable spacing.',
         avoid: 'Avoid dark industrial heaviness, glossy luxury finishes, or loud color blocking.',
     },
@@ -209,6 +213,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Keep textiles minimal and functional, not plush or ornate.',
         accessories: 'Use only a few utilitarian accents with graphic clarity.',
         lighting: 'Use black or dark bronze utilitarian pendants, track-like fixtures, or simple task lights.',
+        lightingPriority: 'strong',
         silhouette: 'Prefer angular, honest forms with visible structure.',
         avoid: 'Avoid soft bohemian abundance, glossy glam, or ornate classical decoration.',
     },
@@ -220,6 +225,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use layered but controlled textiles with subtle pattern and tactile richness.',
         accessories: 'Use curated handcrafted accessories and greenery sparingly enough for listing realism.',
         lighting: 'Use woven, ceramic, or softly rounded fixtures that feel artisanal.',
+        lightingPriority: 'balanced',
         silhouette: 'Prefer softened silhouettes and natural irregularity without visual mess.',
         avoid: 'Avoid maximal clutter, festival-like color chaos, or too many small props.',
     },
@@ -231,6 +237,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use richer textiles with refined layering and impeccable styling.',
         accessories: 'Use a few upscale statement accents with strict symmetry or composure.',
         lighting: 'Use elegant statement fixtures that feel premium but proportionate to the room.',
+        lightingPriority: 'strong',
         silhouette: 'Prefer sculpted forms, tailored upholstery, and balanced symmetry.',
         avoid: 'Avoid cheap glam, over-shiny metallic excess, or crowded accessories.',
     },
@@ -242,6 +249,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use only essential textiles, tightly controlled and visually calm.',
         accessories: 'Use extremely few accessories, only when they support scale and realism.',
         lighting: 'Use discreet flush, recessed-looking, or very clean pendant forms.',
+        lightingPriority: 'soft',
         silhouette: 'Prefer crisp geometry, low profiles, and uninterrupted lines.',
         avoid: 'Avoid decorative excess, layered patterns, or bulky furniture grouping.',
     },
@@ -253,6 +261,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use tailored drapery and modestly elegant textiles with controlled refinement.',
         accessories: 'Use measured traditional accents and framed art in modest quantity.',
         lighting: 'Use timeless chandeliers, sconces, or table lamps with refined detail.',
+        lightingPriority: 'strong',
         silhouette: 'Prefer graceful profiles, moderate ornament, and classic proportion.',
         avoid: 'Avoid ultra-modern starkness, industrial rawness, or theatrical ornament overload.',
     },
@@ -264,6 +273,7 @@ const STYLE_PLANS: Record<string, StylePlan> = {
         textiles: 'Use cozy layered textiles with visible weave and warmth.',
         accessories: 'Use a few handmade or natural accents with warmth but not clutter.',
         lighting: 'Use warm-toned fixtures with simple rustic character and soft glow.',
+        lightingPriority: 'strong',
         silhouette: 'Prefer sturdy forms with softened edges and crafted feel.',
         avoid: 'Avoid glossy glam, over-ornamented classic pieces, or urban industrial severity.',
     },
@@ -326,6 +336,7 @@ function resolveStylePlan(style: string, customStylePrompt: string): StylePlan {
             textiles: 'Translate the brief into textiles only where the room function supports it; avoid costume-like styling.',
             accessories: 'Use only the accessories needed to express the brief clearly without clutter.',
             lighting: 'Restyle visible fixtures so they support the brief while keeping mounting points fixed.',
+            lightingPriority: 'balanced',
             silhouette: 'Adopt the form language implied by the brief, but keep furniture practical, physically grounded, and scale-appropriate.',
             avoid: 'Do not interpret the custom brief in an exaggerated, theatrical, or impractical way.',
         };
@@ -374,6 +385,12 @@ function buildConstraintBlock(
     const ghostRule = input.antiGhostBoost
         ? 'Enforce zero ghosting. Omit any uncertain object instead of rendering a partial or transparent one.'
         : 'All placed objects must be fully opaque, fully rendered, and physically grounded.';
+    const lightingPriorityRule =
+        stylePlan.lightingPriority === 'strong'
+            ? 'Visible ceiling fixtures should usually be restyled to clearly support the chosen style. Keep the electrical anchor point fixed, but do not leave the original fixture unchanged unless the new style would look implausible.'
+            : stylePlan.lightingPriority === 'balanced'
+                ? 'If a visible ceiling fixture is generic or weakly matched, restyle it so the chosen style reads more clearly while keeping the mounting point fixed.'
+                : 'Restyle visible ceiling fixtures only when the room still feels incomplete without that change; keep the mounting point fixed.';
 
     return [
         'ARCHITECTURE RULES:',
@@ -409,6 +426,7 @@ function buildConstraintBlock(
             intensityPlan.accessoryDensity,
             intensityPlan.wallDecor,
             intensityPlan.lightingEmphasis,
+            lightingPriorityRule,
         ]),
         '',
         'NEGATIVE RULES:',

@@ -41,7 +41,7 @@ export default function StudioClient() {
     const [credits, setCredits] = useState<number>(0);
     const [accountId, setAccountId] = useState('');
     const [selectedToolId, setSelectedToolId] = useState<string>(() => getToolIdFromParam(toolParam));
-    const workspaceRef = useRef<HTMLDivElement>(null);
+    const sidebarRef = useRef<HTMLElement | null>(null);
     const stageTabParam = searchParams.get('stageTab');
 
     useEffect(() => {
@@ -70,14 +70,6 @@ export default function StudioClient() {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedToolId(id);
     }, [searchParams]);
-
-    useEffect(() => {
-        const workspace = workspaceRef.current;
-        if (!workspace) return;
-
-        // Tool değiştiğinde içerik alanını en üste al.
-        workspace.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }, [selectedToolId]);
 
     const refreshCredits = useCallback(async () => {
         try {
@@ -158,6 +150,41 @@ export default function StudioClient() {
         };
     }, [mounted, refreshCredits]);
 
+    useEffect(() => {
+        if (!mounted || typeof window === 'undefined') return;
+
+        const sidebar = sidebarRef.current;
+        if (!sidebar || window.innerWidth <= 1024) {
+            sidebar?.style.removeProperty('--studio-sidebar-height');
+            return;
+        }
+
+        const syncSidebarHeight = () => {
+            const gallery = document.querySelector<HTMLElement>('[data-studio-gallery-anchor]');
+            if (!gallery) {
+                sidebar.style.removeProperty('--studio-sidebar-height');
+                return;
+            }
+
+            const sidebarRect = sidebar.getBoundingClientRect();
+            const galleryRect = gallery.getBoundingClientRect();
+            const nextHeight = Math.max(0, Math.round(galleryRect.bottom - sidebarRect.top));
+            sidebar.style.setProperty('--studio-sidebar-height', `${nextHeight}px`);
+        };
+
+        const frameId = window.requestAnimationFrame(syncSidebarHeight);
+        const resizeObserver = new ResizeObserver(() => syncSidebarHeight());
+        resizeObserver.observe(document.body);
+
+        window.addEventListener('resize', syncSidebarHeight);
+
+        return () => {
+            window.cancelAnimationFrame(frameId);
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', syncSidebarHeight);
+        };
+    }, [mounted, selectedToolId, stageTabParam]);
+
     if (!mounted) {
         return (
             <div className={styles.pageContainer}>
@@ -179,9 +206,9 @@ export default function StudioClient() {
     };
 
     return (
-        <div className={styles.pageContainer}>
+        <div className={`${styles.pageContainer} ${lang === 'en' ? styles.pageContainerEn : ''}`}>
             <div className={styles.mainLayout}>
-                <aside className={styles.sidebar}>
+                <aside ref={sidebarRef} className={styles.sidebar}>
                     <div className={styles.sidebarBrandWrap}>
                         <div className={headerStyles.logo}>
                             <LocalizedLink href="/">
@@ -204,76 +231,82 @@ export default function StudioClient() {
                             </LocalizedLink>
                         </div>
                     </div>
-                    <div className={styles.sidebarTop}>
-                        <div className={styles.sidebarMetaRow}>
-                            <div className={styles.sidebarCreditRow}>
-                                <span className={styles.sidebarCreditLabel}>{t('Kalan kredi')}</span>
-                                <span className={styles.sidebarCreditValue}>{credits.toLocaleString(lang === 'en' ? 'en-US' : 'tr-TR')}</span>
-                            </div>
-                            <p className={styles.sidebarHelper}>{t('Krediler anlık olarak senkronize edilir.')}</p>
-                        </div>
-                    </div>
-                    <nav className={styles.toolNav} aria-label={t('Araçlar')}>
-                        {TOOLS.map((tool) => {
-                            const isDisabled = !!tool.status;
-                            const isActive =
-                                selectedToolId === tool.id &&
-                                !(tool.id === 'stage' && (stageTabParam === 'works' || stageTabParam === 'photos'));
-                            return (
-                                <div key={tool.id} className={styles.toolGroup}>
-                                    <button
-                                        type="button"
-                                        className={`${styles.toolItem} ${isActive ? styles.toolItemActive : ''} ${isDisabled ? styles.toolItemDisabled : ''}`}
-                                        onClick={() => {
-                                            if (isDisabled) return;
-                                            setSelectedToolId(tool.id);
-                                            const params = new URLSearchParams();
-                                            params.set('tool', tool.id);
-                                            if (tool.id === 'stage') {
-                                                params.set('stageTab', 'editor');
-                                            }
-                                            router.replace(`${localizePath('/studio', lang)}?${params.toString()}`, { scroll: false });
-                                        }}
-                                        disabled={isDisabled}
-                                    >
-                                        <span className={styles.toolItemIcon}>{tool.icon}</span>
-                                        <span className={styles.toolItemTitle}>{t(tool.title)}</span>
-                                        {tool.status && <span className={styles.toolBadge}>{t(tool.status)}</span>}
-                                    </button>
-                                    {tool.id === 'ai-tour-guide' ? (
-                                        <button
-                                            type="button"
-                                            className={`${styles.myPhotosItem} ${isMyPhotosActive ? styles.myPhotosItemActive : ''}`}
-                                            onClick={() => {
-                                                setSelectedToolId('stage');
-                                                router.replace(`${localizePath('/studio', lang)}?tool=stage&stageTab=works`, { scroll: false });
-                                            }}
-                                        >
-                                            <span className={styles.myPhotosIcon} aria-hidden="true">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                                                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                                                    <path d="M3 14l5-4 4 3 3-2 6 5" />
-                                                    <circle cx="9" cy="9" r="1.2" />
-                                                </svg>
-                                            </span>
-                                            <span className={styles.myPhotosTitle}>{t('Tüm Çalışmalarım')}</span>
-                                        </button>
-                                    ) : null}
+                    <div className={styles.sidebarRail}>
+                        <div className={styles.sidebarTop}>
+                            <div className={styles.sidebarMetaRow}>
+                                <div className={styles.sidebarCreditRow}>
+                                    <span className={styles.sidebarCreditLabel}>{t('Kalan kredi')}</span>
+                                    <span className={styles.sidebarCreditValue}>{credits.toLocaleString(lang === 'en' ? 'en-US' : 'tr-TR')}</span>
                                 </div>
-                            );
-                        })}
-                    </nav>
-                    <div className={styles.sidebarFooter}>
-                        <LocalizedLink href="/dashboard/settings" className={styles.sidebarFooterAction}>
-                            {t('Ayarlar')}
-                        </LocalizedLink>
-                        <button type="button" className={styles.sidebarLogout} onClick={handleLogout}>
-                            {t('Çıkış Yap')}
-                        </button>
+                                <p className={styles.sidebarHelper}>{t('Krediler anlık olarak senkronize edilir.')}</p>
+                            </div>
+                        </div>
+                        <div className={styles.sidebarToolsPanel}>
+                            <nav className={styles.toolNav} aria-label={t('Araçlar')}>
+                                {TOOLS.map((tool) => {
+                                    const isDisabled = !!tool.status;
+                                    const isActive =
+                                        selectedToolId === tool.id &&
+                                        !(tool.id === 'stage' && (stageTabParam === 'works' || stageTabParam === 'photos'));
+                                    return (
+                                        <div key={tool.id} className={styles.toolGroup}>
+                                            <button
+                                                type="button"
+                                                className={`${styles.toolItem} ${isActive ? styles.toolItemActive : ''} ${isDisabled ? styles.toolItemDisabled : ''}`}
+                                                onClick={() => {
+                                                    if (isDisabled) return;
+                                                    setSelectedToolId(tool.id);
+                                                    const params = new URLSearchParams();
+                                                    params.set('tool', tool.id);
+                                                    if (tool.id === 'stage') {
+                                                        params.set('stageTab', 'editor');
+                                                    }
+                                                    router.replace(`${localizePath('/studio', lang)}?${params.toString()}`, { scroll: false });
+                                                }}
+                                                disabled={isDisabled}
+                                            >
+                                                <span className={styles.toolItemIcon}>{tool.icon}</span>
+                                                <span className={styles.toolItemTitle}>{t(tool.title)}</span>
+                                                {tool.status && <span className={styles.toolBadge}>{t(tool.status)}</span>}
+                                            </button>
+                                            {tool.id === 'ai-tour-guide' ? (
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.myPhotosItem} ${isMyPhotosActive ? styles.myPhotosItemActive : ''}`}
+                                                    onClick={() => {
+                                                        setSelectedToolId('stage');
+                                                        router.replace(`${localizePath('/studio', lang)}?tool=stage&stageTab=works`, { scroll: false });
+                                                    }}
+                                                >
+                                                    <span className={styles.myPhotosIcon} aria-hidden="true">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                                                            <path d="M3 14l5-4 4 3 3-2 6 5" />
+                                                            <circle cx="9" cy="9" r="1.2" />
+                                                        </svg>
+                                                    </span>
+                                                    <span className={styles.myPhotosTitle}>{t('Tüm Çalışmalarım')}</span>
+                                                </button>
+                                            ) : null}
+                                        </div>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+                        <div className={styles.sidebarFooterDock}>
+                            <div className={styles.sidebarFooter}>
+                                <LocalizedLink href="/dashboard/settings" className={styles.sidebarFooterAction}>
+                                    {t('Ayarlar')}
+                                </LocalizedLink>
+                                <button type="button" className={styles.sidebarLogout} onClick={handleLogout}>
+                                    {t('Çıkış Yap')}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </aside>
 
-                <main className={styles.workspace} ref={workspaceRef}>
+                <main className={styles.workspace}>
                     {ToolComponent ? (
                         <div className={styles.workspaceToolWrap}>
                             <ToolComponent />

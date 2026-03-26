@@ -54,6 +54,7 @@ const ComparisonSlider = ({
 }: ComparisonSliderProps) => {
     const { t } = useI18n();
     const [isResizing, setIsResizing] = useState(false);
+    const [isClickJumping, setIsClickJumping] = useState(false);
     const [sliderPosition, setSliderPosition] = useState(50);
     const [displayBeforeImage, setDisplayBeforeImage] = useState(beforeImage);
     const [displayAfterImage, setDisplayAfterImage] = useState(afterImage);
@@ -79,8 +80,12 @@ const ComparisonSlider = ({
         const x = e.clientX - rect.left;
         const pct = (x / rect.width) * 100;
         const clamped = Math.min(100, Math.max(0, pct));
+        setIsClickJumping(true);
         setSliderPosition(clamped);
         onPositionChange?.(clamped);
+        window.requestAnimationFrame(() => {
+            setIsClickJumping(false);
+        });
     };
 
     const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
@@ -353,7 +358,7 @@ const ComparisonSlider = ({
             </div>
             <button
                 type="button"
-                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying && !heroVariant ? styles.sliderHandleHintPlaying : ''} ${hintPlaying ? styles.sliderHandleNoTransition : ''}`}
+                className={`${styles.sliderHandle} ${isResizing ? styles.sliderHandleDragging : ''} ${hintPlaying && !heroVariant ? styles.sliderHandleHintPlaying : ''} ${(hintPlaying || isClickJumping) ? styles.sliderHandleNoTransition : ''}`}
                 style={{ left: `${safePosition}%` }}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleMouseDown}

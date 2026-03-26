@@ -187,10 +187,12 @@ export default function EnhanceClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.headerMain}>
-                        <h1 className={styles.title}>{t('Fotoğraf Geliştirme')}</h1>
-                        <p className={styles.description}>
-                            {t('Studio Estate fotoğraflarınızı analiz eder; ışık, renk dengesi, netlik ve genel sunum kalitesini iyileştirir. Karanlık veya düşük etkili kareleri daha temiz, daha profesyonel ve listeleme için daha güçlü görsellere dönüştürür.')}
-                        </p>
+                        <div className={styles.headerBody}>
+                            <h1 className={styles.title}>{t('Fotoğraf Geliştirme')}</h1>
+                            <p className={styles.description}>
+                                {t('Studio Estate fotoğraflarınızı analiz eder; ışık, renk dengesi, netlik ve genel sunum kalitesini iyileştirir. Karanlık veya düşük etkili kareleri daha temiz, daha profesyonel ve listeleme için daha güçlü görsellere dönüştürür.')}
+                            </p>
+                        </div>
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             {t('Örnekleri Gör')}
                         </button>
@@ -200,7 +202,7 @@ export default function EnhanceClient() {
             </header>
 
             <div className={styles.workspace}>
-                <div className={styles.gallerySection} style={{ position: 'relative' }}>
+                <div className={styles.gallerySection} style={{ position: 'relative' }} data-studio-gallery-anchor>
                     {!hasFile ? (
                         <div className={styles.emptyState}>
                             <ImageUploader
@@ -276,7 +278,6 @@ export default function EnhanceClient() {
                                     <div className={styles.optionText}>
                                         <div className={styles.optionNameRow}>
                                             <span className={styles.optionName}>{t(opt.label)}</span>
-                                            <span className={styles.optionCost}>{t(opt.creditCost)}</span>
                                         </div>
                                         <span className={styles.optionDesc}>{t(opt.desc)}</span>
                                     </div>
@@ -297,7 +298,6 @@ export default function EnhanceClient() {
                                 <div className={styles.optionText}>
                                     <div className={styles.optionNameRow}>
                                         <span className={styles.optionName}>{t('Studio Estate Seçsin')}</span>
-                                        <span className={styles.optionCost}>{t('5 kredi')}</span>
                                     </div>
                                     <span className={styles.optionDesc}>{t('Studio Estate en iyi ayarları seçsin')}</span>
                                 </div>
@@ -318,6 +318,7 @@ export default function EnhanceClient() {
 
                         <button
                             className={`${styles.processBtn} ${isInStudio ? styles.processBtnInStudio : ''}`}
+                            data-studio-primary-action
                             onClick={handleProcess}
                             disabled={isProcessing || !hasFile || selectedOptionCount === 0}
                         >

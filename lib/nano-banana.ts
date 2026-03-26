@@ -39,6 +39,7 @@ interface GenerateEditedImageParams {
     image: File;
     prompt: string;
     allowArchitecturalChanges?: boolean;
+    preferredModels?: string[];
 }
 
 function isQuotaError(error: unknown): boolean {
@@ -138,6 +139,7 @@ export async function generateEditedImageWithNanoBanana({
     image,
     prompt,
     allowArchitecturalChanges = false,
+    preferredModels,
 }: GenerateEditedImageParams): Promise<{
     imageUrl: string;
     model: string;
@@ -163,7 +165,9 @@ export async function generateEditedImageWithNanoBanana({
     const pending = inflightRequests.get(cacheKey);
     if (pending) return pending;
 
-    const modelsToTry = getModelsToTry();
+    const modelsToTry = Array.isArray(preferredModels) && preferredModels.length > 0
+        ? Array.from(new Set(preferredModels)).slice(0, MAX_MODELS_TO_TRY)
+        : getModelsToTry();
     const requestId = crypto.randomUUID().slice(0, 8);
 
     const run = (async (): Promise<CachedResult> => {

@@ -1,0 +1,50 @@
+Task: Stage this child bedroom as a single ultra-photorealistic real-estate photo.
+STRICT ARCHITECTURE RULES:
+- Never change room dimensions, wall positions, ceiling geometry, window or door locations, openings, structural contours, or camera perspective.
+- Never invent new walls, partitions, bulkheads, columns, vertical planes, or fake depth surfaces anywhere in the frame.
+- Keep floor pattern direction, wall termination lines, corner joins, and all architectural anchors identical to the input.
+
+ROOM FUNCTION PLAN:
+- Stage it as a warm, practical child room with sleep, storage, and open play logic.
+- Focal-point rule: Balance a child bed zone with one visible open play surface or activity pocket.
+- Must-have rule: Include a child-appropriate bed, compact storage, and one clear play/study support element.
+- Avoid rule: Avoid overcrowding with toys, loud novelty props, or adult-scale luxury furniture.
+- Circulation rule: Keep a safe open floor pocket and unobstructed walking path.
+- Scale rule: All pieces should feel child-scaled or compact, never oversized.
+
+STYLE PLAN:
+- Deliver a crisp contemporary interior with refined restraint.
+- Palette: Use soft greige, warm white, charcoal, and muted stone accents.
+- Materials: Favor matte lacquer, light-to-medium oak, stone, glass, and subtle brushed metal.
+- Textiles: Use tailored textiles with low pattern noise and clean folds.
+- Accessories: Keep accessories edited and sculptural, never busy.
+- Lighting language: Use simple pendant, linear, or flush fixtures with clean geometry.
+- Silhouette language: Prefer straight lines, slim profiles, and low visual clutter.
+- Avoid: Avoid ornate classic detailing, heavy rustic mass, or bohemian layering.
+
+ROOM + STYLE COMPOSITION PLAN:
+- Use a clean contemporary child room with playful warmth, compact toy/storage control, one defined play surface, and low visual clutter.
+
+STAGING INTENSITY:
+- Intensity mode: balanced.
+- Use a complete but edited furniture composition that reads clearly in listing photos.
+- Use a measured number of accessories with clean grouping logic.
+- Use selective wall decor only when it improves realism and scale balance.
+- Use clear but tasteful style contrast so the chosen style is readable without becoming loud.
+- Restyle lighting enough to reinforce the chosen style while staying believable.
+
+NEGATIVE RULES:
+- Do not overfill the room or make circulation ambiguous.
+- Do not block doors, windows, radiators, built-ins, or key openings.
+- Do not create collage, inset, split-scene, partial-room, or panel-like outputs.
+- Do not leave semi-transparent objects, duplicate outlines, seam bands, or cut furniture.
+- Do not add excessive gallery walls, too many small accessories, or visually noisy decor clusters.
+- If a fixture is restyled, keep its mounting location fixed and make the new fixture style-appropriate.
+- If the room function and style brief conflict, room function wins first and style expression adapts second.
+- Input may contain watermark text. Keep text-zone geometry stable and avoid over-editing around watermark pixels.
+- Preserve the input framing exactly.
+- Clean temporary dirt, dust, smudges, and construction residue while keeping original materials intact.
+- All placed objects must be fully opaque, fully rendered, and physically grounded.
+- Version strategy A: architecture-first conservative staging. Preserve room geometry with maximum caution, use cleaner spacing, and allow style expression only after room logic is fully satisfied.
+FINAL OUTPUT RULE:
+- Return one unified, listing-ready furnished image with strong room-function clarity, readable style identity, premium cleanliness, and unchanged architecture.

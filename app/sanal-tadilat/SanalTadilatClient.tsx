@@ -130,10 +130,12 @@ export default function SanalTadilatClient() {
             <header className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.headerMain}>
-                        <h1 className={styles.title}>{t('Sanal Tadilat')}</h1>
-                        <p className={styles.description}>
-                            {t('Eski, yıpranmış veya tamamlanmamış alanları modern bitmiş mekanlar gibi gösterin. Duvar, zemin, mutfak ve benzeri yüzeylerdeki dönüşüm potansiyelini alıcıya ve yatırımcıya çok daha net bir gelecek senaryosuyla sunun.')}
-                        </p>
+                        <div className={styles.headerBody}>
+                            <h1 className={styles.title}>{t('Sanal Tadilat')}</h1>
+                            <p className={styles.description}>
+                                {t('Eski, yıpranmış veya tamamlanmamış alanları modern bitmiş mekanlar gibi gösterin. Duvar, zemin, mutfak ve benzeri yüzeylerdeki dönüşüm potansiyelini alıcıya ve yatırımcıya çok daha net bir gelecek senaryosuyla sunun.')}
+                            </p>
+                        </div>
                         <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
                             {t('Örnekleri İnceleyin')}
                         </button>
@@ -143,7 +145,7 @@ export default function SanalTadilatClient() {
             </header>
 
             <div className={styles.workspace}>
-                <div className={styles.gallerySection}>
+                <div className={styles.gallerySection} data-studio-gallery-anchor>
                     {!file ? (
                         <div className={styles.emptyState}>
                             <ImageUploader
@@ -197,7 +199,6 @@ export default function SanalTadilatClient() {
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
                             <div className={styles.panelTitle}>{t('Sanal Tadilat')}</div>
-                            <span className={styles.inlineCost}>{t('2 kredi')}</span>
                         </div>
                         <div className={styles.tadilatQuestionBlock}>
                             <label className={styles.tadilatQuestionLabel} htmlFor="sanal-tadilat-instructions">
@@ -215,6 +216,7 @@ export default function SanalTadilatClient() {
                         <button
                             type="button"
                             className={styles.processBtn}
+                            data-studio-primary-action
                             onClick={handleGenerate}
                             disabled={!file || isProcessing}
                         >

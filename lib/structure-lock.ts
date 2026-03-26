@@ -9,7 +9,7 @@ function parseDataUrl(dataUrl: string): { mimeType: string; buffer: Buffer } {
 function buildArchitectureWeight(x: number, y: number, width: number, height: number): number {
     const nx = x / width;
     const ny = y / height;
-    const fixtureEditableZone = nx >= 0.38 && nx <= 0.62 && ny >= 0.03 && ny <= 0.3;
+    const fixtureEditableZone = nx >= 0.28 && nx <= 0.72 && ny >= 0.02 && ny <= 0.36;
 
     let w = 0;
     if (ny <= 0.26) w = Math.max(w, 0.9); // ceiling/cornice band must stay locked
@@ -17,7 +17,10 @@ function buildArchitectureWeight(x: number, y: number, width: number, height: nu
     if (nx >= 0.8 && ny <= 0.98) w = Math.max(w, 0.9); // right wall/partition area gets strongest lock
     if (nx >= 0.15 && nx <= 0.85 && ny >= 0.14 && ny <= 0.62) w = Math.max(w, 0.74); // central structural zone
     if (ny >= 0.72) w = Math.max(w, 0.08); // floor remains editable but minimally anchored
-    if (fixtureEditableZone) w = Math.min(w, 0.18); // let chandelier/pendant styling change while preserving ceiling geometry around it
+    if (fixtureEditableZone) {
+        // Let visible chandeliers/pendants restyle more freely while the surrounding ceiling remains protected.
+        w = ny <= 0.12 ? Math.min(w, 0.28) : Math.min(w, 0.1);
+    }
     return w;
 }
 

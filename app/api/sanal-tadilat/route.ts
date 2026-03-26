@@ -3,13 +3,12 @@ import { randomUUID } from 'crypto';
 import { addCredits, deductCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
-import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
-import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
-import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
-import { postprocessListingImage } from '@/lib/output-postprocess';
+import { validateInputImageForProcessing } from '@/lib/image-quality-guard';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
 import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-adaptive';
+import { resolveRenovationModelPolicy } from '@/lib/renovation-model-policy';
 import { recordToolRun } from '@/lib/work-history';
+import { orchestrateVisualGeneration } from '@/lib/gemini-orchestrator';
 
 const ENABLE_RENOVATION_RETRY = process.env.RENOVATION_ENABLE_AUTO_RETRY !== '0';
 
@@ -46,21 +45,26 @@ export async function POST(request: NextRequest) {
         }
         const adaptivePolicy = getToolAdaptivePolicy('virtual-renovation');
         const allowArchitecturalChanges = hasExplicitArchitectureChangeRequest(instructions);
-        const prompt = buildVirtualRenovationPrompt(instructions, allowArchitecturalChanges);
-        let generation = await generateEditedImageWithNanoBanana({
-            image,
-            prompt,
+        const renovationModelPolicy = resolveRenovationModelPolicy({
+            qualityScore: inputQuality.score,
+            metrics: inputQuality.metrics,
+            instructions,
             allowArchitecturalChanges,
         });
-        let finalizedImageUrl = await postprocessListingImage(generation.imageUrl, { tool: 'virtual-renovation' });
-
-        let integrity = allowArchitecturalChanges
-            ? { ok: true, score: 1 }
-            : await verifyArchitectureIntegrity(image, finalizedImageUrl, adaptivePolicy.architectureThreshold);
-        let quality = await verifyOutputImageQuality(image, finalizedImageUrl, 'virtual-renovation');
-
-        if ((!integrity.ok || !quality.ok) && ENABLE_RENOVATION_RETRY && adaptivePolicy.retryEnabled) {
-            const retryPrompt = `${prompt}
+        const prompt = buildVirtualRenovationPrompt(instructions, allowArchitecturalChanges);
+        const result = await orchestrateVisualGeneration({
+            image,
+            prompt,
+            preferredModels: renovationModelPolicy.models,
+            tool: 'virtual-renovation',
+            policyClass: renovationModelPolicy.difficulty,
+            policyRationale: renovationModelPolicy.rationale,
+            allowArchitecturalChanges,
+            architectureThreshold: adaptivePolicy.architectureThreshold,
+            skipArchitectureGuard: allowArchitecturalChanges,
+            retryPrompt:
+                ENABLE_RENOVATION_RETRY && adaptivePolicy.retryEnabled
+                    ? (basePrompt) => `${basePrompt}
 
 RETRY MODE:
 - Keep perspective and camera framing unchanged.
@@ -68,50 +72,57 @@ RETRY MODE:
 - Increase clarity and realism; avoid blur, haze, and unfinished surfaces.
 ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
     ? '- Stronger artifact cleanup; no semi-transparent or half-rendered finishes.'
-    : ''}`;
-            const retry = await generateEditedImageWithNanoBanana({
-                image,
-                prompt: retryPrompt,
-                allowArchitecturalChanges,
-            });
-            const retryFinal = await postprocessListingImage(retry.imageUrl, { tool: 'virtual-renovation' });
-            const retryIntegrity = allowArchitecturalChanges
-                ? { ok: true, score: 1 }
-                : await verifyArchitectureIntegrity(image, retryFinal, adaptivePolicy.architectureThreshold);
-            const retryQuality = await verifyOutputImageQuality(image, retryFinal, 'virtual-renovation');
-            if (retryIntegrity.ok && retryQuality.ok) {
-                generation = retry;
-                finalizedImageUrl = retryFinal;
-                integrity = retryIntegrity;
-                quality = retryQuality;
-            }
-        }
+    : ''}`
+                    : undefined,
+            fastRetryPrompt: (basePrompt) => `${basePrompt}
 
-        if (!allowArchitecturalChanges) {
-            if (!integrity.ok) {
-                recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'architecture' });
-                return NextResponse.json(
-                    {
-                        success: false,
-                        code: 'ARCHITECTURE_CHANGED',
-                        error: `Mimari detaylar korunamadi (skor: ${integrity.score.toFixed(2)}). Lutfen tekrar deneyin.`,
-                        architectureScore: integrity.score,
-                    },
-                    { status: 422 }
-                );
-            }
+FAST RETRY MODE:
+- Preserve camera framing and structure.
+- Prioritize one clean completed renovation result.
+- Avoid secondary decorative complexity.`,
+        });
+
+        if (!allowArchitecturalChanges && !result.ok && result.reason === 'architecture') {
+            recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'architecture' });
+            return NextResponse.json(
+                {
+                    success: false,
+                    code: 'ARCHITECTURE_CHANGED',
+                    error: result.error || 'Mimari detaylar korunamadı.',
+                    architectureScore: result.architectureScore,
+                    selectedModel: result.telemetry.selectedModel,
+                    selectedModelClass: result.telemetry.selectedPolicyClass,
+                    retryCount: result.telemetry.retryCount,
+                    fallbackUsed: result.telemetry.fallbackUsed,
+                    timing: result.telemetry.timing,
+                },
+                { status: 422 }
+            );
         }
-        if (!quality.ok) {
+        if (!result.ok) {
             recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'quality' });
             return NextResponse.json(
                 {
                     success: false,
                     code: 'OUTPUT_QUALITY_LOW',
-                    error: quality.error || 'Cikti kalite kontrolden gecemedi.',
-                    qualityScore: quality.score,
+                    error: result.error || 'Cikti kalite kontrolden gecemedi.',
+                    qualityScore: result.qualityScore,
+                    artifactScore: result.artifactScore,
+                    selectedModel: result.telemetry.selectedModel,
+                    selectedModelClass: result.telemetry.selectedPolicyClass,
+                    retryCount: result.telemetry.retryCount,
+                    fallbackUsed: result.telemetry.fallbackUsed,
+                    timing: result.telemetry.timing,
                 },
-                { status: 422 }
+                { status: result.reason === 'timeout' ? 504 : 422 }
             );
+        }
+
+        if (!allowArchitecturalChanges) {
+            if (!result.ok) {
+                recordToolAdaptiveOutcome('virtual-renovation', { ok: false, reason: 'architecture' });
+                return NextResponse.json({ success: false, error: 'İşlem başarısız oldu' }, { status: 422 });
+            }
         }
 
         const creditResult = await deductCredits(phone, TOOL_CREDIT_COSTS.virtualRenovation, 'tool_virtual_renovation');
@@ -130,7 +141,7 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
             phone,
             toolId: 'virtual-renovation',
             beforeImageUrl,
-            afterImageUrl: finalizedImageUrl,
+            afterImageUrl: result.imageUrl!,
             title: 'Sanal Tadilat',
             detail: instructions || 'Genel tadilat uygulandı',
             usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
@@ -139,14 +150,21 @@ ${adaptivePolicy.retryPromptBoost || adaptivePolicy.postprocessBoost
         return NextResponse.json({
             success: true,
             runId,
-            imageUrl: finalizedImageUrl,
-            provider: generation.provider,
-            model: generation.model,
-            fallbackUsed: generation.fallbackUsed,
-            attemptedModels: generation.attemptedModels,
-            attemptLog: process.env.NODE_ENV === 'production' ? undefined : generation.attemptLog,
-            architectureScore: allowArchitecturalChanges ? undefined : integrity.score,
-            qualityScore: quality.score,
+            imageUrl: result.imageUrl,
+            provider: result.generation?.provider,
+            model: result.generation?.model,
+            selectedModel: result.telemetry.selectedModel,
+            fallbackUsed: result.telemetry.fallbackUsed,
+            attemptedModels: result.generation?.attemptedModels,
+            attemptLog: process.env.NODE_ENV === 'production' ? undefined : result.generation?.attemptLog,
+            architectureScore: allowArchitecturalChanges ? undefined : result.architectureScore,
+            qualityScore: result.qualityScore,
+            artifactScore: result.artifactScore,
+            selectedModelClass: result.telemetry.selectedPolicyClass,
+            selectedModelRationale: process.env.NODE_ENV === 'production' ? undefined : renovationModelPolicy.rationale,
+            retryCount: result.telemetry.retryCount,
+            timing: result.telemetry.timing,
+            acceptanceReason: result.telemetry.acceptanceReason,
             credits: creditResult.credits,
             usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
         });

@@ -150,6 +150,21 @@ export default function IlanMetniClient() {
         setFeedbackSent(false);
     };
 
+    const handleDownloadText = () => {
+        if (!resultText) return;
+        const blob = new Blob([resultText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const safeLocation = form.lokasyon.trim().toLowerCase().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '');
+        const filename = safeLocation ? `ilan-metni-${safeLocation}.txt` : 'ilan-metni.txt';
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    };
+
     const sendFeedback = async (verdict: 'good' | 'bad', note = '') => {
         if (!latestRunId) return;
         const userId = getStoredUserId();
@@ -236,6 +251,13 @@ export default function IlanMetniClient() {
                                         <button
                                             type="button"
                                             className={styles.downloadBtn}
+                                            onClick={handleDownloadText}
+                                        >
+                                            {t('İndir')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.secondaryBtn}
                                             onClick={() => {
                                                 sendFeedback('good', t('Metin başarılı')).catch(() => undefined);
                                             }}
@@ -277,7 +299,6 @@ export default function IlanMetniClient() {
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
                             <div className={styles.panelTitle}>İlan bilgileri</div>
-                            <span className={styles.inlineCost}>1 kredi</span>
                         </div>
                         <div className={styles.formSection}>
                             <div className={styles.formGroup}>

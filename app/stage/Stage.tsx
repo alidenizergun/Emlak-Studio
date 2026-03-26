@@ -552,13 +552,15 @@ export default function StageClient() {
                 <header className={styles.header}>
                     <div className={styles.headerContent}>
                         <div className={styles.headerMain}>
-                        <h1 className={styles.title}>{t('Sanal Dekorasyon')}</h1>
-                        <p className={styles.description}>
-                            {t('Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin; Studio Estate mekanı mimariyi koruyarak daha sıcak, daha yaşanmış ve daha ikna edici bir sunuma dönüştürsün.')}
-                        </p>
-                        <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
-                            {t('Örnekleri Gör')}
-                        </button>
+                            <div className={styles.headerBody}>
+                                <h1 className={styles.title}>{t('Sanal Dekorasyon')}</h1>
+                                <p className={styles.description}>
+                                    {t('Boş odaları saniyeler içinde mobilyalandırın. Fotoğrafı yükleyin, oda tipini ve tarzını seçin; Studio Estate mekanı mimariyi koruyarak daha sıcak, daha yaşanmış ve daha ikna edici bir sunuma dönüştürsün.')}
+                                </p>
+                            </div>
+                            <button type="button" className={styles.exampleLink} onClick={() => setIsExampleOpen(true)}>
+                                {t('Örnekleri Gör')}
+                            </button>
                         </div>
                         <UploadGuidancePanel />
                     </div>
@@ -788,7 +790,7 @@ export default function StageClient() {
                 ) : (
                     <>
                         {/* LEFT: Canvas/Gallery */}
-                        <div className={styles.gallerySection}>
+                        <div className={styles.gallerySection} data-studio-gallery-anchor>
                             {!file ? (
                                 <div className={styles.emptyState}>
                                     <ImageUploader
@@ -868,7 +870,6 @@ export default function StageClient() {
                             <div className={styles.functionalStep}>
                                 <div className={styles.stepHeader}>
                                     <label className={styles.label}>{t('Tasarım Tarzı')}</label>
-                                    <span className={styles.stepCost}>{t('2 Kredi')}</span>
                                 </div>
                                 <div className={styles.controlGroup}>
                                     <div className={styles.styleGrid}>
@@ -908,6 +909,7 @@ export default function StageClient() {
 
                         <button
                             className={styles.processBtn}
+                            data-studio-primary-action
                             onClick={handleGenerate}
                             disabled={!file || isProcessing || !selectedRoom || !selectedStyle}
                         >

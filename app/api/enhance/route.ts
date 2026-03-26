@@ -5,7 +5,6 @@ import { addCredits, deductCredits, getCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { getEnhanceCreditCost } from '@/lib/tool-credit-costs';
 import { buildEnhancePrompt } from '@/app/enhance/prompts';
-import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
 import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
 import { validateInputImageForProcessing, verifyOutputImageQuality } from '@/lib/image-quality-guard';
 import { analyzeEnhancePreflight, resolveAutoEnhanceOptions } from '@/lib/enhance-preflight';
@@ -23,6 +22,8 @@ import { getToolAdaptivePolicy, recordToolAdaptiveOutcome } from '@/lib/tool-ada
 import { recordToolRun } from '@/lib/work-history';
 import { parseDataUrl as parseUrl } from '@/lib/data-url';
 import { recordEnhanceDiagnostic } from '@/lib/enhance-observability';
+import { resolveEnhanceModelPolicy } from '@/lib/gemini-tool-policy';
+import { generateGeminiWithRecovery } from '@/lib/gemini-orchestrator';
 
 const ENABLE_ENHANCE_RETRY = process.env.ENHANCE_ENABLE_AUTO_RETRY !== '0';
 const PROMPT_VERSION = process.env.ENHANCE_PROMPT_VERSION || 'A';
@@ -54,7 +55,27 @@ interface EnhanceAttemptResult {
     outputQualityScore?: number;
     isBlackOutput?: boolean;
     latencyMs: number;
-    generation: Awaited<ReturnType<typeof generateEditedImageWithNanoBanana>>;
+    generation: {
+        imageUrl: string;
+        model: string;
+        provider: 'nano-banana';
+        fallbackUsed: boolean;
+        attemptedModels: string[];
+        attemptLog: Array<{
+            model: string;
+            attempt: number;
+            status: string;
+            latencyMs: number;
+            message?: string;
+        }>;
+    };
+    telemetry: {
+        retryCount: number;
+        timeoutRecovered: boolean;
+        selectedModel: string;
+        selectedPolicyClass: 'easy' | 'medium' | 'hard';
+        selectedModelRationale?: string[];
+    };
 }
 
 interface SourceImage {
@@ -107,10 +128,27 @@ async function runEnhanceAttempt(
     source: SourceImage,
     prompt: string,
     options: Record<string, boolean>,
-    architectureThreshold?: number
+    architectureThreshold: number | undefined,
+    preferredModels: string[],
+    selectedPolicyClass: 'easy' | 'medium' | 'hard',
+    selectedModelRationale?: string[]
 ): Promise<EnhanceAttemptResult> {
     const startedAt = Date.now();
-    const generation = await generateEditedImageWithNanoBanana({ image: sourceToFile(source), prompt });
+    const generationResult = await generateGeminiWithRecovery({
+        image: sourceToFile(source),
+        prompt,
+        preferredModels,
+        fastRetryPrompt: (basePrompt) => `${basePrompt}
+
+FAST RETRY MODE:
+- Keep architecture and layout unchanged.
+- Prioritize one clean premium enhancement result quickly.
+- Avoid aggressive effect stacking.`,
+    });
+    if (!generationResult.ok || !generationResult.generation) {
+        throw new Error(generationResult.error || 'Gemini enhance generation failed');
+    }
+    const generation = generationResult.generation;
     const finalizedImage = await postprocessListingImage(generation.imageUrl, {
         tool: 'enhance',
         enhanceOptions: options,
@@ -127,6 +165,13 @@ async function runEnhanceAttempt(
             isBlackOutput: true,
             latencyMs: Date.now() - startedAt,
             generation: finalizedGeneration,
+            telemetry: {
+                retryCount: generationResult.retryCount,
+                timeoutRecovered: generationResult.timeoutRecovered,
+                selectedModel: finalizedGeneration.model,
+                selectedPolicyClass,
+                selectedModelRationale,
+            },
         };
     }
 
@@ -139,6 +184,13 @@ async function runEnhanceAttempt(
             outputQualityScore: outputGuard.score,
             latencyMs: Date.now() - startedAt,
             generation: finalizedGeneration,
+            telemetry: {
+                retryCount: generationResult.retryCount,
+                timeoutRecovered: generationResult.timeoutRecovered,
+                selectedModel: finalizedGeneration.model,
+                selectedPolicyClass,
+                selectedModelRationale,
+            },
         };
     }
 
@@ -152,6 +204,13 @@ async function runEnhanceAttempt(
             error: `Mimari detaylar korunamadi (skor: ${integrity.score.toFixed(2)}).`,
             latencyMs: Date.now() - startedAt,
             generation: finalizedGeneration,
+            telemetry: {
+                retryCount: generationResult.retryCount,
+                timeoutRecovered: generationResult.timeoutRecovered,
+                selectedModel: finalizedGeneration.model,
+                selectedPolicyClass,
+                selectedModelRationale,
+            },
         };
     }
 
@@ -167,6 +226,13 @@ async function runEnhanceAttempt(
             error: contract.reason || `Cikti kalite kapisindan gecemedi (skor: ${contract.score.toFixed(2)}).`,
             latencyMs: Date.now() - startedAt,
             generation: finalizedGeneration,
+            telemetry: {
+                retryCount: generationResult.retryCount,
+                timeoutRecovered: generationResult.timeoutRecovered,
+                selectedModel: finalizedGeneration.model,
+                selectedPolicyClass,
+                selectedModelRationale,
+            },
         };
     }
 
@@ -179,6 +245,13 @@ async function runEnhanceAttempt(
         isBlackOutput: false,
         latencyMs: Date.now() - startedAt,
         generation: finalizedGeneration,
+        telemetry: {
+            retryCount: generationResult.retryCount,
+            timeoutRecovered: generationResult.timeoutRecovered,
+            selectedModel: finalizedGeneration.model,
+            selectedPolicyClass,
+            selectedModelRationale,
+        },
     };
 }
 
@@ -241,6 +314,11 @@ export async function POST(request: NextRequest) {
             ? resolveAutoEnhanceOptions(preflight)
             : resolvedManualOptions(normalizedOptions);
         appliedOptionsResolved = Object.keys(appliedOptions);
+        const enhanceModelPolicy = resolveEnhanceModelPolicy({
+            qualityScore: inputQuality.score,
+            metrics: inputQuality.metrics,
+            appliedOptions: appliedOptionsResolved,
+        });
 
         if (appliedOptionsResolved.length === 0) {
             return NextResponse.json(
@@ -304,7 +382,10 @@ export async function POST(request: NextRequest) {
                         source,
                         prompt,
                         appliedOptions,
-                        adaptivePolicy.architectureThreshold
+                        adaptivePolicy.architectureThreshold,
+                        enhanceModelPolicy.models,
+                        enhanceModelPolicy.difficulty,
+                        enhanceModelPolicy.rationale
                     );
                     aiLatencyMs += first.latencyMs;
                     accepted = first;
@@ -320,7 +401,10 @@ export async function POST(request: NextRequest) {
                                 source,
                                 retryPrompt,
                                 appliedOptions,
-                                adaptivePolicy.architectureThreshold
+                                adaptivePolicy.architectureThreshold,
+                                enhanceModelPolicy.models,
+                                enhanceModelPolicy.difficulty,
+                                enhanceModelPolicy.rationale
                             );
                             aiLatencyMs += second.latencyMs;
                             accepted = second.ok ? second : first;
@@ -428,6 +512,16 @@ export async function POST(request: NextRequest) {
                                 message: fallbackReason,
                             },
                         ],
+                    },
+                    telemetry: {
+                        retryCount: 0,
+                        timeoutRecovered: fallbackReason === 'provider_timeout',
+                        selectedModel: `local-safe-enhance-${fallbackReason}`,
+                        selectedPolicyClass: enhanceModelPolicy.difficulty,
+                        selectedModelRationale:
+                            process.env.NODE_ENV === 'production'
+                                ? undefined
+                                : [...enhanceModelPolicy.rationale, 'local fallback path'],
                     },
                 };
             }
@@ -542,6 +636,17 @@ export async function POST(request: NextRequest) {
                 architectureScore: accepted.architectureScore,
                 qualityScore: accepted.qualityScore,
                 contractScore: accepted.contractScore,
+                selectedModel: accepted.telemetry.selectedModel,
+                selectedModelClass: accepted.telemetry.selectedPolicyClass,
+                selectedModelRationale:
+                    process.env.NODE_ENV === 'production' ? undefined : accepted.telemetry.selectedModelRationale,
+                retryCount: accepted.telemetry.retryCount,
+                timeoutRecovered: accepted.telemetry.timeoutRecovered,
+                timing: {
+                    totalMs: Date.now() - requestStartedAt,
+                    aiMs: aiLatencyMs,
+                },
+                acceptanceReason: processingMode === 'fallback_local' ? 'local_fallback' : 'accepted',
                 processingMode,
                 fallbackReason: processingMode === 'fallback_local' ? fallbackReason : undefined,
                 appliedOptions: appliedOptionsResolved,

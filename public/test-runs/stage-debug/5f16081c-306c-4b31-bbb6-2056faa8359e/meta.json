@@ -1,0 +1,21 @@
+{
+  "runId": "5f16081c-306c-4b31-bbb6-2056faa8359e",
+  "status": "failed",
+  "roomType": "living_room",
+  "style": "modern",
+  "promptVersion": "A",
+  "architectureScore": 0.6935694913814728,
+  "qualityScore": 1,
+  "failCode": "OUTPUT_QUALITY_LOW",
+  "strictArchitectureRescueUsed": true,
+  "model": "gemini-3-pro-image-preview",
+  "fallbackUsed": false,
+  "attemptedModels": [
+    "gemini-3-pro-image-preview"
+  ],
+  "files": {
+    "before": "/test-runs/stage-debug/5f16081c-306c-4b31-bbb6-2056faa8359e/before.jpg",
+    "after": "/test-runs/stage-debug/5f16081c-306c-4b31-bbb6-2056faa8359e/after.jpg"
+  },
+  "savedAt": "2026-03-21T18:59:43.561Z"
+}

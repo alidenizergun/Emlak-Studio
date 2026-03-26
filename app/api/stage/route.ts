@@ -3,19 +3,15 @@ import { randomUUID, createHash } from 'crypto';
 import { addCredits, deductCredits, getCredits } from '@/lib/credits';
 import { requireAuthPhone } from '@/lib/auth-guard';
 import { TOOL_CREDIT_COSTS } from '@/lib/tool-credit-costs';
-import { generateEditedImageWithNanoBanana } from '@/lib/nano-banana';
-import { verifyArchitectureIntegrity } from '@/lib/architecture-guard';
-import { verifyStageArtifacts } from '@/lib/stage-artifact-guard';
 import {
     validateInputImageForProcessing,
-    verifyOutputImageQuality,
 } from '@/lib/image-quality-guard';
 import { normalizeImageForStage } from '@/lib/image-normalization';
 import { applyArchitectureStructureLock } from '@/lib/structure-lock';
 import { validateRoomTypeSanity } from '@/lib/room-type-guard';
-import { postprocessListingImage } from '@/lib/output-postprocess';
 import {
     snapshotStageMetrics,
+    trackStageDifficulty,
     trackStageFailure,
     trackStageFirstPassSuccess,
     trackStageRetry,
@@ -29,7 +25,6 @@ import {
     getStageAdaptivePolicy,
     getStagePromptLearning,
     isHardBlocked,
-    noteHardBlockFailure,
     notePromptAttempt,
     readCachedStageResponse,
     recordStageRun,
@@ -37,12 +32,14 @@ import {
     writeCachedStageResponse,
 } from '@/lib/stage-runtime';
 import { generateStagePrompt, resolveStagePromptPlans } from '@/lib/stage-prompt';
+import { resolveStageModelPolicy } from '@/lib/stage-model-policy';
 import { clampText, validateUploadedImage } from '@/lib/upload-guard';
+import { orchestrateVisualGeneration } from '@/lib/gemini-orchestrator';
 
 const STAGE_COST = TOOL_CREDIT_COSTS.stage;
 const ENABLE_STAGE_RETRY = process.env.STAGE_ENABLE_AUTO_RETRY !== '0';
 const ENABLE_STAGE_RESULT_CACHE = false;
-const STAGE_MIN_QUALITY_ACCEPT_SCORE = Number(process.env.STAGE_MIN_QUALITY_ACCEPT_SCORE || 0.44);
+const STAGE_MIN_QUALITY_ACCEPT_SCORE = Number(process.env.STAGE_MIN_QUALITY_ACCEPT_SCORE || 0.5);
 
 export async function POST(request: NextRequest) {
     const startedAt = trackStageStart();
@@ -158,47 +155,112 @@ export async function POST(request: NextRequest) {
             } as const;
             const prompt = generateStagePrompt(promptInput);
             const resolvedPlans = resolveStagePromptPlans(promptInput);
+            const stageModelPolicy = resolveStageModelPolicy({
+                roomType,
+                style,
+                qualityScore: inputQuality.score,
+                metrics: inputQuality.metrics,
+                styleIntensity,
+            });
+            trackStageDifficulty(stageModelPolicy.difficulty);
 
-            const first = await runStageAttempt(
-                normalizedImage,
+            const prepareForEvaluation = async (imageUrl: string) =>
+                applyArchitectureStructureLock(
+                    normalizedImage,
+                    imageUrl,
+                    normalized.watermarkSuspected
+                        ? Math.min(Math.max(0.55, Math.min(0.9, adaptivePolicy.firstLockStrength)), 0.76)
+                        : Math.max(0.55, Math.min(0.9, adaptivePolicy.firstLockStrength))
+                );
+            let accepted = await orchestrateVisualGeneration({
+                image: normalizedImage,
                 prompt,
-                normalized.watermarkSuspected,
-                adaptivePolicy.firstLockStrength,
-                adaptivePolicy.architectureThreshold
-            );
-            let accepted = first;
+                preferredModels: stageModelPolicy.models,
+                tool: 'stage',
+                policyClass: stageModelPolicy.difficulty,
+                policyRationale: stageModelPolicy.rationale,
+                architectureThreshold: adaptivePolicy.architectureThreshold,
+                enableArtifactGuard: true,
+                softQualityMinScore: STAGE_MIN_QUALITY_ACCEPT_SCORE,
+                fastRetryPrompt: buildFastTimeoutPrompt,
+                prepareForEvaluation,
+            });
 
-            if (!accepted.ok && ENABLE_STAGE_RETRY) {
+            if (!accepted.ok && ENABLE_STAGE_RETRY && accepted.reason && accepted.reason !== 'timeout' && accepted.reason !== 'provider') {
                 const budget = consumeRetryBudget(phone);
                 if (budget.allowed) {
                     trackStageRetry();
-                    const retryPrompt = buildRetryPrompt(prompt, accepted.reason || 'architecture');
                     const retryLockStrength =
                         accepted.reason === 'quality'
                             ? adaptivePolicy.retryLockQuality
                             : adaptivePolicy.retryLockArchitecture;
-                    const second = await runStageAttempt(
-                        normalizedImage,
-                        retryPrompt,
-                        normalized.watermarkSuspected,
-                        retryLockStrength,
-                        adaptivePolicy.architectureThreshold
-                    );
-                    const firstQualityScore = Number(first.qualityScore ?? 0);
+                    const retryPrepareForEvaluation = async (imageUrl: string) =>
+                        applyArchitectureStructureLock(
+                            normalizedImage,
+                            imageUrl,
+                            normalized.watermarkSuspected
+                                ? Math.min(Math.max(0.55, Math.min(0.9, retryLockStrength)), 0.76)
+                                : Math.max(0.55, Math.min(0.9, retryLockStrength))
+                        );
+                    const second = await orchestrateVisualGeneration({
+                        image: normalizedImage,
+                        prompt,
+                        preferredModels: stageModelPolicy.models,
+                        tool: 'stage',
+                        policyClass: stageModelPolicy.difficulty,
+                        policyRationale: stageModelPolicy.rationale,
+                        architectureThreshold: adaptivePolicy.architectureThreshold,
+                        enableArtifactGuard: true,
+                        softQualityMinScore: STAGE_MIN_QUALITY_ACCEPT_SCORE,
+                        retryPrompt: buildRetryPrompt,
+                        fastRetryPrompt: buildFastTimeoutPrompt,
+                        prepareForEvaluation: retryPrepareForEvaluation,
+                    });
+                    const firstQualityScore = Number(accepted.qualityScore ?? 0);
                     const secondQualityScore = Number(second.qualityScore ?? 0);
                     accepted =
                         second.ok || secondQualityScore > firstQualityScore
                             ? second
-                            : first;
+                            : accepted;
                 }
             }
+
             if (!accepted.ok) {
-                // Kullanıcı isteği: kalite/mimari eşik takılsa da her işlem sonuç üretsin.
-                accepted = { ...accepted, ok: true, softAccepted: true };
+                notePromptAttempt(promptVersion, false);
+                trackStageFailure(
+                    accepted.reason === 'architecture'
+                        ? 'architecture'
+                        : accepted.reason === 'quality'
+                            ? 'output_quality'
+                            : 'provider',
+                    startedAt
+                );
+                return NextResponse.json(
+                    {
+                        success: false,
+                        code:
+                            accepted.reason === 'architecture'
+                                ? 'ARCHITECTURE_CHANGED'
+                                : accepted.reason === 'quality'
+                                    ? 'OUTPUT_QUALITY_LOW'
+                                    : 'PROVIDER_TIMEOUT',
+                        error: accepted.error || 'İşlem başarısız oldu',
+                        architectureScore: accepted.architectureScore,
+                        qualityScore: accepted.qualityScore,
+                        artifactScore: accepted.artifactScore,
+                        selectedModel: accepted.telemetry.selectedModel,
+                        selectedModelClass: accepted.telemetry.selectedPolicyClass,
+                        retryCount: accepted.telemetry.retryCount,
+                        fallbackUsed: accepted.telemetry.fallbackUsed,
+                        timing: accepted.telemetry.timing,
+                    },
+                    { status: accepted.reason === 'timeout' ? 504 : 422 }
+                );
             }
 
-            if (first.ok) trackStageFirstPassSuccess();
+            if (accepted.telemetry.retryCount === 0) trackStageFirstPassSuccess();
             notePromptAttempt(promptVersion, true);
+            const generation = accepted.generation!;
             const creditResult = await deductCredits(phone, STAGE_COST, 'tool_stage');
             if (!creditResult.ok) {
                 trackStageFailure('other', startedAt);
@@ -218,16 +280,23 @@ export async function POST(request: NextRequest) {
             const response = {
                 success: true as const,
                 runId,
-                imageUrl: accepted.generation.imageUrl,
-                provider: accepted.generation.provider,
-                model: accepted.generation.model,
-                fallbackUsed: accepted.generation.fallbackUsed,
-                attemptedModels: accepted.generation.attemptedModels,
-                attemptLog: process.env.NODE_ENV === 'production' ? undefined : accepted.generation.attemptLog,
+                imageUrl: generation.imageUrl,
+                provider: generation.provider,
+                model: generation.model,
+                selectedModel: accepted.telemetry.selectedModel,
+                fallbackUsed: accepted.telemetry.fallbackUsed,
+                attemptedModels: generation.attemptedModels,
+                attemptLog: process.env.NODE_ENV === 'production' ? undefined : generation.attemptLog,
                 promptVersion,
                 architectureScore: accepted.architectureScore,
                 qualityScore: accepted.qualityScore,
-                architectureRelaxed: Boolean(accepted.softAccepted),
+                artifactScore: accepted.artifactScore,
+                selectedModelClass: accepted.telemetry.selectedPolicyClass,
+                selectedModelRationale: process.env.NODE_ENV === 'production' ? undefined : accepted.telemetry.selectedModelRationale,
+                retryCount: accepted.telemetry.retryCount,
+                timing: accepted.telemetry.timing,
+                acceptanceReason: accepted.telemetry.acceptanceReason,
+                timeoutRecovered: accepted.telemetry.timeoutRecovered,
                 credits: creditResult.credits,
                 usedCredits: STAGE_COST,
                 cached: false,
@@ -236,18 +305,19 @@ export async function POST(request: NextRequest) {
                 resolvedRoomPlan: process.env.NODE_ENV === 'production' ? undefined : resolvedPlans.roomPlan,
                 resolvedStylePlan: process.env.NODE_ENV === 'production' ? undefined : resolvedPlans.stylePlan,
                 resolvedComboPlan: process.env.NODE_ENV === 'production' ? undefined : resolvedPlans.comboPlan,
+                stageModelPolicy: process.env.NODE_ENV === 'production' ? undefined : stageModelPolicy,
             };
             try {
                 if (ENABLE_STAGE_RESULT_CACHE) {
                     writeCachedStageResponse(operationKey, {
                         success: true,
                         runId,
-                        imageUrl: accepted.generation.imageUrl,
-                        provider: accepted.generation.provider,
-                        model: accepted.generation.model,
-                        fallbackUsed: accepted.generation.fallbackUsed,
-                        attemptedModels: accepted.generation.attemptedModels,
-                        attemptLog: accepted.generation.attemptLog,
+                        imageUrl: generation.imageUrl,
+                        provider: generation.provider,
+                        model: generation.model,
+                        fallbackUsed: generation.fallbackUsed,
+                        attemptedModels: generation.attemptedModels,
+                        attemptLog: generation.attemptLog,
                         promptVersion,
                         architectureScore: accepted.architectureScore,
                         qualityScore: accepted.qualityScore,
@@ -265,7 +335,7 @@ export async function POST(request: NextRequest) {
                     qualityScore: accepted.qualityScore,
                     usedCredits: STAGE_COST,
                     beforeImageUrl,
-                    afterImageUrl: accepted.generation.imageUrl,
+                    afterImageUrl: generation.imageUrl,
                 });
             } catch (persistError) {
                 console.error('Stage persistence warning:', persistError);
@@ -324,101 +394,13 @@ RETRY MODE (ARCHITECTURE):
 - Prioritize architectural fidelity over decoration density.`;
 }
 
-async function runStageAttempt(
-    image: File,
-    prompt: string,
-    watermarkSuspected: boolean,
-    lockStrength = 0.82,
-    architectureThreshold?: number
-): Promise<{
-    ok: boolean;
-    reason?: 'architecture' | 'quality';
-    architectureScore?: number;
-    qualityScore?: number;
-    softAccepted?: boolean;
-    artifactScore?: number;
-    generation: Awaited<ReturnType<typeof generateEditedImageWithNanoBanana>>;
-}> {
-    const generation = await generateEditedImageWithNanoBanana({ image, prompt });
-    const safeLockStrength = Math.max(0.55, Math.min(0.9, lockStrength));
-    const lockedImageUrl = await applyArchitectureStructureLock(
-        image,
-        generation.imageUrl,
-        watermarkSuspected ? Math.min(safeLockStrength, 0.76) : safeLockStrength
-    );
-    const finalizedImageUrl = await postprocessListingImage(lockedImageUrl, { tool: 'stage' });
-    const lockedGeneration = { ...generation, imageUrl: finalizedImageUrl };
-    const threshold = Number.isFinite(Number(architectureThreshold))
-        ? Number(architectureThreshold)
-        : Number(process.env.ARCH_GUARD_THRESHOLD || 0.55);
-    const firstIntegrity = await verifyArchitectureIntegrity(image, lockedGeneration.imageUrl, threshold);
-    let chosenGeneration = lockedGeneration;
-    let chosenIntegrity = firstIntegrity;
+function buildFastTimeoutPrompt(basePrompt: string): string {
+    return `${basePrompt}
 
-    if (!firstIntegrity.ok) {
-        const aggressiveLockStrength = watermarkSuspected ? 0.9 : 0.98;
-        const aggressiveLockedImageUrl = await applyArchitectureStructureLock(
-            image,
-            generation.imageUrl,
-            aggressiveLockStrength
-        );
-        const aggressiveFinalized = await postprocessListingImage(aggressiveLockedImageUrl, { tool: 'stage' });
-        const aggressiveGeneration = { ...generation, imageUrl: aggressiveFinalized };
-        const aggressiveIntegrity = await verifyArchitectureIntegrity(image, aggressiveGeneration.imageUrl, threshold);
-        if (aggressiveIntegrity.score > chosenIntegrity.score) {
-            chosenGeneration = aggressiveGeneration;
-            chosenIntegrity = aggressiveIntegrity;
-        }
-    }
-
-    const quality = await verifyOutputImageQuality(image, chosenGeneration.imageUrl, 'stage');
-    if (!quality.ok) {
-        const score = Number(quality.score ?? 0);
-        if (score >= STAGE_MIN_QUALITY_ACCEPT_SCORE) {
-            return {
-                ok: true,
-                architectureScore: chosenIntegrity.score,
-                qualityScore: score,
-                softAccepted: true,
-                generation: chosenGeneration,
-            };
-        }
-        return {
-            ok: false,
-            reason: 'quality',
-            architectureScore: chosenIntegrity.score,
-            qualityScore: score,
-            generation: chosenGeneration,
-        };
-    }
-    const artifact = await verifyStageArtifacts(image, chosenGeneration.imageUrl);
-    if (!artifact.ok) {
-        return {
-            ok: false,
-            reason: 'quality',
-            architectureScore: chosenIntegrity.score,
-            qualityScore: Math.max(quality.score ?? 0, 0.35),
-            artifactScore: artifact.score,
-            generation: chosenGeneration,
-        };
-    }
-
-    if (chosenIntegrity.ok) {
-        return {
-            ok: true,
-            architectureScore: chosenIntegrity.score,
-            qualityScore: quality.score,
-            artifactScore: artifact.score,
-            generation: chosenGeneration,
-        };
-    }
-
-    return {
-        ok: false,
-        reason: 'architecture',
-        architectureScore: chosenIntegrity.score,
-        qualityScore: quality.score,
-        artifactScore: artifact.score,
-        generation: chosenGeneration,
-    };
+FAST RETRY MODE:
+- Keep architecture unchanged.
+- Use essential furniture only.
+- Keep styling clean and restrained.
+- Avoid dense decor, tiny accessories, and complex secondary edits.
+- Prioritize a complete, photorealistic result quickly.`;
 }

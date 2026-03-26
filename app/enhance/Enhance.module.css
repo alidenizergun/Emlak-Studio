@@ -34,12 +34,20 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 0.72rem;
+    padding: 0.35rem 0;
+}
+
+.headerBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
 }
 
 .title {
-    font-size: 1.65rem;
+    font-size: 1.82rem;
     font-weight: 800;
-    line-height: 1.22;
+    line-height: 1.15;
     letter-spacing: -0.015em;
     margin: 0;
     color: #0f172a;
@@ -47,17 +55,10 @@
 
 .description {
     color: #475569;
-    line-height: 1.45;
-    font-size: 0.95rem;
-    max-width: none;
+    line-height: 1.58;
+    font-size: 1rem;
+    max-width: 68ch;
     margin: 0;
-}
-
-.descriptionRow {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
 }
 
 .exampleLink {
@@ -65,24 +66,24 @@
     align-items: center;
     justify-content: center;
     align-self: flex-start;
-    margin-top: 0.55rem;
     margin-left: 0;
-    padding: 0.58rem 0.7rem;
-    background: #d9f4f1;
-    color: #0f766e;
-    border-radius: 11px;
-    font-weight: 500;
-    font-size: 0.82rem;
+    padding: 0.62rem 0.92rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+    color: #0f172a;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.84rem;
     text-decoration: none;
-    border: 1px solid #8de6dd;
-    transition: background 0.2s, border-color 0.2s;
+    border: 1px solid #c7d8ee;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
     cursor: pointer;
 }
 
 .exampleLink:hover {
-    background: #cdeeea;
-    border-color: #5bd4c8;
-    color: #0f766e;
+    background: linear-gradient(135deg, #e3faf2 0%, #e8f1ff 100%);
+    border-color: #9ec5ef;
+    color: #0f172a;
+    transform: translateY(-1px);
 }
 @media (max-width: 1024px) {
     .headerContent {
@@ -94,20 +95,19 @@
         width: 100%;
     }
 
-    .descriptionRow {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.45rem;
+    .exampleLink {
+        padding: 0.52rem 0.74rem;
+        font-size: 0.76rem;
     }
 
-    .exampleLink {
-        padding: 0.34rem 0.56rem;
-        font-size: 0.72rem;
+    .title {
+        font-size: 1.58rem;
+    }
+
+    .description {
+        font-size: 0.94rem;
     }
 }
-
-
-
 /* Main Workspace Layout */
 .workspace {
     display: flex;
@@ -629,14 +629,6 @@
 .optionName {
     font-weight: 600;
     font-size: 0.85rem;
-}
-
-.optionCost {
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: #94a3b8;
-    opacity: 0.9;
-    white-space: nowrap;
 }
 
 .optionDesc {

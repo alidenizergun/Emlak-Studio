@@ -50,7 +50,7 @@ function edgeMap(gray: Float32Array, width: number, height: number): Float32Arra
 function inArchitectureMask(x: number, y: number, width: number, height: number): boolean {
     const nx = x / width;
     const ny = y / height;
-    const fixtureEditableZone = nx >= 0.38 && nx <= 0.62 && ny >= 0.03 && ny <= 0.3;
+    const fixtureEditableZone = nx >= 0.28 && nx <= 0.72 && ny >= 0.02 && ny <= 0.36;
 
     const topBand = ny <= 0.26;
     const leftBand = nx <= 0.2 && ny <= 0.98;

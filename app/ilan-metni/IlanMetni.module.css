@@ -251,15 +251,7 @@
 .panelTitleRow {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 0.5rem;
-}
-
-.inlineCost {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #94a3b8;
-    white-space: nowrap;
 }
 
 .formSection {
@@ -411,8 +403,9 @@
 .resultActions {
     margin-top: 1rem;
     display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
-    justify-content: center;
+    justify-content: flex-start;
     width: 100%;
 }
 
@@ -430,6 +423,23 @@
 .downloadBtn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.24);
+}
+
+.secondaryBtn {
+    background: #ecfeff;
+    border: 1px solid #bae6fd;
+    color: #0f766e;
+    padding: 0.8rem 1.1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.secondaryBtn:hover {
+    background: #dff7fa;
+    border-color: #7dd3fc;
+    color: #115e59;
 }
 
 .feedbackHint {

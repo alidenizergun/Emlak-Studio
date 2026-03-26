@@ -125,8 +125,8 @@ const Hero = () => {
                             introHint="once"
                             brightenAfter
                             labels={{
-                                before: t('Boş Oda'),
-                                after: t('Studio Estate ile Dekorasyon'),
+                                before: t('Önce'),
+                                after: t('Sonra'),
                             }}
                         />
                         <button

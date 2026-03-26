@@ -1,0 +1,21 @@
+{
+  "runId": "75594ad5-9748-4a10-bb48-2453f10deead",
+  "status": "failed",
+  "roomType": "child_room",
+  "style": "modern",
+  "promptVersion": "B",
+  "architectureScore": 0.5895074858183986,
+  "qualityScore": 0.9275382900342746,
+  "failCode": "OUTPUT_QUALITY_LOW",
+  "strictArchitectureRescueUsed": true,
+  "model": "gemini-3-pro-image-preview",
+  "fallbackUsed": false,
+  "attemptedModels": [
+    "gemini-3-pro-image-preview"
+  ],
+  "files": {
+    "before": "/test-runs/stage-debug/75594ad5-9748-4a10-bb48-2453f10deead/before.jpg",
+    "after": "/test-runs/stage-debug/75594ad5-9748-4a10-bb48-2453f10deead/after.jpg"
+  },
+  "savedAt": "2026-03-21T19:04:28.660Z"
+}

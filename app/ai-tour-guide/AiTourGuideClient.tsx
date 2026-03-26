@@ -254,7 +254,6 @@ export default function AiTourGuideClient() {
                     <div className={styles.panel}>
                         <div className={styles.panelTitleRow}>
                             <div className={styles.panelTitle}>Sanal Sunucu</div>
-                            <span className={styles.inlineCost}>10 kredi</span>
                         </div>
                         <div className={styles.scriptField}>
                             <label htmlFor="ai-script" className={styles.scriptLabel}>

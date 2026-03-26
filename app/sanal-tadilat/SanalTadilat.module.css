@@ -32,12 +32,20 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 0.72rem;
+    padding: 0.35rem 0;
+}
+
+.headerBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
 }
 
 .title {
-    font-size: 1.65rem;
+    font-size: 1.82rem;
     font-weight: 800;
-    line-height: 1.22;
+    line-height: 1.15;
     letter-spacing: -0.015em;
     margin: 0;
     color: #0f172a;
@@ -45,17 +53,10 @@
 
 .description {
     color: #475569;
-    line-height: 1.45;
-    font-size: 0.95rem;
-    max-width: none;
+    line-height: 1.58;
+    font-size: 1rem;
+    max-width: 68ch;
     margin: 0;
-}
-
-.descriptionRow {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
 }
 
 .exampleLink {
@@ -63,24 +64,24 @@
     align-items: center;
     justify-content: center;
     align-self: flex-start;
-    margin-top: 0.55rem;
     margin-left: 0;
-    padding: 0.58rem 0.7rem;
-    background: #d9f4f1;
-    color: #0f766e;
-    border-radius: 11px;
-    font-weight: 500;
-    font-size: 0.82rem;
+    padding: 0.62rem 0.92rem;
+    background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+    color: #0f172a;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.84rem;
     text-decoration: none;
-    border: 1px solid #8de6dd;
-    transition: background 0.2s, border-color 0.2s;
+    border: 1px solid #c7d8ee;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
     cursor: pointer;
 }
 
 .exampleLink:hover {
-    background: #cdeeea;
-    border-color: #5bd4c8;
-    color: #0f766e;
+    background: linear-gradient(135deg, #e3faf2 0%, #e8f1ff 100%);
+    border-color: #9ec5ef;
+    color: #0f172a;
+    transform: translateY(-1px);
 }
 @media (max-width: 1024px) {
     .headerContent {
@@ -92,18 +93,19 @@
         width: 100%;
     }
 
-    .descriptionRow {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.45rem;
+    .exampleLink {
+        padding: 0.52rem 0.74rem;
+        font-size: 0.76rem;
     }
 
-    .exampleLink {
-        padding: 0.34rem 0.56rem;
-        font-size: 0.72rem;
+    .title {
+        font-size: 1.58rem;
+    }
+
+    .description {
+        font-size: 0.94rem;
     }
 }
-
 
 .workspace { display: flex; gap: 1rem; padding: 0 1.5rem; align-items: stretch; min-height: 400px; }
 .gallerySection { flex: 1; min-height: 450px; background: white; border-radius: 24px; border: 1px solid #e2e8f0; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
@@ -116,9 +118,8 @@
 .controlsSidebar { width: 340px; min-height: 450px; position: sticky; top: 90px; display: flex; flex-direction: column; gap: 0; flex-shrink: 0; }
 .panel { flex: 1; min-height: 0; display: flex; flex-direction: column; background: white; border-radius: 20px; border: 1px solid #e2e8f0; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
 .panelTitle { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
-.panelTitleRow { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; }
+.panelTitleRow { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.75rem; }
 .panelTitleRow .panelTitle { margin-bottom: 0; }
-.inlineCost { font-size: 0.75rem; font-weight: 600; color: #94a3b8; white-space: nowrap; }
 .tadilatQuestionBlock { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
 .tadilatQuestionLabel { display: block; font-size: 0.9rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem; }
 .formGroup { margin-bottom: 1rem; }

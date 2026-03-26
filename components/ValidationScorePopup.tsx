@@ -6,8 +6,8 @@ import type { ImageValidationSummary } from '@/components/ImageUploader';
 import { useI18n } from '@/components/LanguageProvider';
 
 function getTone(score: number): 'good' | 'medium' | 'low' {
-    if (score >= 70) return 'good';
-    if (score >= 60) return 'medium';
+    if (score >= 75) return 'good';
+    if (score >= 50) return 'medium';
     return 'low';
 }
 
@@ -34,9 +34,15 @@ export default function ValidationScorePopup({ summary }: ValidationScorePopupPr
     const tone = useMemo(() => (summary ? getTone(summary.score) : 'medium'), [summary]);
     const label = useMemo(() => {
         if (!summary) return '';
-        if (summary.score >= 70) return t('Harika');
-        if (summary.score >= 60) return t('İdare eder');
-        return t('Zayıf');
+        if (summary.score >= 75) return t('Hazır');
+        if (summary.score >= 50) return t('Sınırda');
+        return t('Uygun değil');
+    }, [summary, t]);
+    const title = useMemo(() => {
+        if (!summary) return '';
+        if (summary.score >= 75) return t('Fotoğraf işlem için uygun görünüyor.');
+        if (summary.score >= 50) return t('Fotoğraf işlenebilir, ancak sonuç kalitesi sınırlı olabilir.');
+        return t('Bu fotoğraf işlem için uygun değil.');
     }, [summary, t]);
     const remaining = useMemo(() => {
         if (!summary || !summary.passed) return 0;
@@ -49,10 +55,17 @@ export default function ValidationScorePopup({ summary }: ValidationScorePopupPr
     return (
         <div className={`${styles.popup} ${styles[tone]}`}>
             <div className={styles.topRow}>
-                <span className={styles.label}>{label}</span>
-                <span className={styles.countdown}>{t('{count} sn').replace('{count}', String(remaining))}</span>
+                <span className={`${styles.label} ${styles[`label${tone[0].toUpperCase()}${tone.slice(1)}`]}`}>{label}</span>
+                <span className={styles.numeric}>{t('{score}/100').replace('{score}', String(summary.score))}</span>
             </div>
-            <div className={styles.score}>{t('Fotoğraf uygunluk skoru: {score}/100').replace('{score}', String(summary.score))}</div>
+            <div className={styles.bar}>
+                <span className={`${styles.segment} ${styles.segmentLow}`} />
+                <span className={`${styles.segment} ${styles.segmentMedium}`} />
+                <span className={`${styles.segment} ${styles.segmentGood}`} />
+                <span className={styles.marker} style={{ left: `${summary.score}%` }} />
+            </div>
+            <div className={styles.title}>{title}</div>
+            <div className={styles.countdown}>{t('{count} sn').replace('{count}', String(remaining))}</div>
         </div>
     );
 }
