@@ -136,21 +136,28 @@ FAST RETRY MODE:
         recordToolAdaptiveOutcome('virtual-renovation', { ok: true });
         const runId = randomUUID();
         const beforeImageUrl = await fileToDataUrl(image);
-        recordToolRun({
-            runId,
-            phone,
-            toolId: 'virtual-renovation',
-            beforeImageUrl,
-            afterImageUrl: result.imageUrl!,
-            title: 'Sanal Tadilat',
-            detail: instructions || 'Genel tadilat uygulandı',
-            usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
-        });
+        let responseImageUrl = result.imageUrl;
+        try {
+            recordToolRun({
+                runId,
+                phone,
+                toolId: 'virtual-renovation',
+                beforeImageUrl,
+                afterImageUrl: result.imageUrl!,
+                title: 'Sanal Tadilat',
+                detail: instructions || 'Genel tadilat uygulandı',
+                usedCredits: TOOL_CREDIT_COSTS.virtualRenovation,
+            });
+            const historyEntryId = `virtual-renovation:${runId}`;
+            responseImageUrl = `/api/stage/history-image?entryId=${encodeURIComponent(historyEntryId)}&kind=after`;
+        } catch (persistError) {
+            console.error('Virtual-renovation work-history warning:', persistError);
+        }
 
         return NextResponse.json({
             success: true,
             runId,
-            imageUrl: result.imageUrl,
+            imageUrl: responseImageUrl,
             provider: result.generation?.provider,
             model: result.generation?.model,
             selectedModel: result.telemetry.selectedModel,

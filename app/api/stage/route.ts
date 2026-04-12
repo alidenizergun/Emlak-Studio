@@ -277,10 +277,13 @@ export async function POST(request: NextRequest) {
             chargedCredits = STAGE_COST;
 
             trackStageSuccess(startedAt);
+            const historyEntryId = `stage:${runId}`;
+            const historyImageUrl = `/api/stage/history-image?entryId=${encodeURIComponent(historyEntryId)}&kind=after`;
+
             const response = {
                 success: true as const,
                 runId,
-                imageUrl: generation.imageUrl,
+                imageUrl: historyImageUrl,
                 provider: generation.provider,
                 model: generation.model,
                 selectedModel: accepted.telemetry.selectedModel,
@@ -337,10 +340,15 @@ export async function POST(request: NextRequest) {
                     beforeImageUrl,
                     afterImageUrl: generation.imageUrl,
                 });
+                return NextResponse.json(response);
             } catch (persistError) {
                 console.error('Stage persistence warning:', persistError);
+                return NextResponse.json({
+                    ...response,
+                    // If persistence fails, fall back to the inline data URL so the client can still render.
+                    imageUrl: generation.imageUrl,
+                });
             }
-            return NextResponse.json(response);
         });
     } catch (error: unknown) {
         console.error('Stage API Error:', error);
