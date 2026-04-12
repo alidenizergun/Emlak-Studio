@@ -150,21 +150,28 @@ FAST RETRY MODE:
         recordToolAdaptiveOutcome('remove-object', { ok: true });
         const runId = randomUUID();
         const beforeImageUrl = await fileToDataUrl(image);
-        recordToolRun({
-            runId,
-            phone,
-            toolId: 'remove-object',
-            beforeImageUrl,
-            afterImageUrl: result.imageUrl!,
-            title: 'Akıllı Eşya Silme',
-            detail: mode === 'all' ? 'Tüm eşyalar silindi' : `İstek: ${userPrompt || 'Belirli eşya silme'}`,
-            usedCredits: cost,
-        });
+        let responseImageUrl = result.imageUrl;
+        try {
+            recordToolRun({
+                runId,
+                phone,
+                toolId: 'remove-object',
+                beforeImageUrl,
+                afterImageUrl: result.imageUrl!,
+                title: 'Akıllı Eşya Silme',
+                detail: mode === 'all' ? 'Tüm eşyalar silindi' : `İstek: ${userPrompt || 'Belirli eşya silme'}`,
+                usedCredits: cost,
+            });
+            const historyEntryId = `remove-object:${runId}`;
+            responseImageUrl = `/api/stage/history-image?entryId=${encodeURIComponent(historyEntryId)}&kind=after`;
+        } catch (persistError) {
+            console.error('Remove-object work-history warning:', persistError);
+        }
 
         return NextResponse.json({
             success: true,
             runId,
-            imageUrl: result.imageUrl,
+            imageUrl: responseImageUrl,
             mode,
             prompt,
             userPrompt: userPrompt || undefined,

@@ -609,6 +609,7 @@ export async function POST(request: NextRequest) {
                 }
             }
 
+            let responseImageUrl = accepted.generation.imageUrl;
             try {
                 recordToolRun({
                     runId,
@@ -620,6 +621,8 @@ export async function POST(request: NextRequest) {
                     detail: `Opsiyonlar: ${appliedOptionsResolved.join(', ') || 'auto'}`,
                     usedCredits,
                 });
+                const historyEntryId = `enhance:${runId}`;
+                responseImageUrl = `/api/stage/history-image?entryId=${encodeURIComponent(historyEntryId)}&kind=after`;
             } catch (persistError) {
                 console.error('Enhance work-history warning:', persistError);
             }
@@ -627,7 +630,7 @@ export async function POST(request: NextRequest) {
             const payload = {
                 success: true,
                 runId,
-                imageUrl: accepted.generation.imageUrl,
+                imageUrl: responseImageUrl,
                 provider: accepted.generation.provider,
                 model: accepted.generation.model,
                 fallbackUsed: accepted.generation.fallbackUsed,

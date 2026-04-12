@@ -143,12 +143,6 @@ function generateFallbackListingText(info: IlanBilgileri, lang: Language): strin
 
 export async function POST(request: NextRequest) {
     const lang = getRequestLanguage(request);
-    return NextResponse.json(
-        { success: false, code: 'FEATURE_DISABLED', error: translateText(lang, 'İlan metni özelliği şu anda kullanılamıyor.') },
-        { status: 410 }
-    );
-
-    /*
     let chargedPhone = '';
     let chargedCredits = 0;
     let infoForFailure: IlanBilgileri = {};
@@ -321,7 +315,6 @@ export async function POST(request: NextRequest) {
         const message = error instanceof Error ? error.message : 'İşlem başarısız oldu';
         return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
-    */
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
