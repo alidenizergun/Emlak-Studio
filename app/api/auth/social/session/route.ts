@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ensureOAuthUser, normalizeEmail } from '@/lib/auth-users';
 import { createSessionToken, getSessionCookieName, getSessionTtlSeconds } from '@/lib/session';
 
+class SocialSessionError extends Error {
+    status: number;
+
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = 'SocialSessionError';
+        this.status = status;
+    }
+}
+
 function getSupabaseUrl(): string {
     return String(process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/\/+$/, '');
 }
@@ -17,13 +27,13 @@ function getSupabaseAnonKey(): string {
 async function resolveSupabaseUserEmail(accessTokenRaw: string): Promise<string> {
     const accessToken = String(accessTokenRaw || '').trim();
     if (!accessToken) {
-        throw new Error('Sosyal giriş için doğrulama jetonu gerekli.');
+        throw new SocialSessionError('Sosyal giriş için doğrulama jetonu gerekli.', 400);
     }
 
     const supabaseUrl = getSupabaseUrl();
     const supabaseAnonKey = getSupabaseAnonKey();
     if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Sosyal giriş yapılandırması eksik.');
+        throw new SocialSessionError('Sosyal giriş yapılandırması eksik.', 500);
     }
 
     const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
@@ -37,12 +47,13 @@ async function resolveSupabaseUserEmail(accessTokenRaw: string): Promise<string>
 
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-        throw new Error('Sosyal giriş doğrulanamadı.');
+        const status = response.status >= 500 ? 502 : 401;
+        throw new SocialSessionError('Sosyal giriş doğrulanamadı.', status);
     }
 
     const email = normalizeEmail(payload?.email);
     if (!email || !email.includes('@')) {
-        throw new Error('Sosyal girişte doğrulanmış bir e-posta bulunamadı.');
+        throw new SocialSessionError('Sosyal girişte doğrulanmış bir e-posta bulunamadı.', 401);
     }
     return email;
 }
@@ -68,6 +79,7 @@ export async function POST(request: NextRequest) {
         return response;
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Sosyal giriş tamamlanamadı.';
-        return NextResponse.json({ success: false, error: message }, { status: 500 });
+        const status = error instanceof SocialSessionError ? error.status : 500;
+        return NextResponse.json({ success: false, error: message }, { status });
     }
 }
