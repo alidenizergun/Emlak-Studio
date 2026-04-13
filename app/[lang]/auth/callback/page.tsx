@@ -44,16 +44,24 @@ export default function AuthCallbackPage() {
                 const { data, error: userError } = await supabase.auth.getUser();
                 if (userError) throw userError;
 
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError) throw sessionError;
+
                 const email = String(data.user?.email || '').trim().toLowerCase();
                 if (!email) {
                     throw new Error(t('Sosyal girişten geçerli bir e-posta alınamadı.'));
+                }
+
+                const accessToken = String(sessionData.session?.access_token || '').trim();
+                if (!accessToken) {
+                    throw new Error(t('Sosyal giriş doğrulama jetonu alınamadı.'));
                 }
 
                 const res = await fetch('/api/auth/social/session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        email,
+                        accessToken,
                         provider: data.user?.app_metadata?.provider || 'oauth',
                     }),
                 });

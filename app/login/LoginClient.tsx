@@ -18,10 +18,6 @@ function isValidEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
 }
 
-function isPasswordlessLoginEmail(value: string): boolean {
-    return normalizeEmail(value) === 'alidenizergun@gmail.com';
-}
-
 function persistAuth(email: string): void {
     persistStoredUserId(email);
 }
@@ -46,10 +42,9 @@ export default function LoginClient() {
         e.preventDefault();
         const normalizedEmail = normalizeEmail(email);
         const nextErrors: Record<string, string> = {};
-        const passwordlessLogin = isPasswordlessLoginEmail(normalizedEmail);
 
         if (!isValidEmail(normalizedEmail)) nextErrors.email = t('Gecerli bir e-posta adresi girin');
-        if (!passwordlessLogin && password.length < 8) nextErrors.password = t('Sifre en az 8 karakter olmali');
+        if (password.length < 8) nextErrors.password = t('Sifre en az 8 karakter olmali');
         if (Object.keys(nextErrors).length > 0) {
             setErrors(nextErrors);
             return;
@@ -157,7 +152,7 @@ export default function LoginClient() {
                                     if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
                                 }}
                                 className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
-                                placeholder={isPasswordlessLoginEmail(email) ? t('Bu hesap için boş bırakabilirsiniz') : t('En az 8 karakter')}
+                                placeholder={t('En az 8 karakter')}
                                 autoComplete="current-password"
                             />
                             {errors.password ? <span className={styles.errorText}>{errors.password}</span> : null}

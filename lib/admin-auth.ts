@@ -20,7 +20,7 @@ export function getOwnerAdminEmail(): string {
     const configuredAdmins = getConfiguredAdminEmails();
     if (configuredAdmins[0]) return configuredAdmins[0];
 
-    return 'alidenizergun@gmail.com';
+    return '';
 }
 
 export function isAdminUser(userId: string | null | undefined): boolean {
