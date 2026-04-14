@@ -189,13 +189,14 @@ Likely files:
 2. Respect blockers before starting implementation.
 3. When you start active implementation on an assigned issue, move it to `In Progress`.
 4. If implementation is blocked, move the issue to the appropriate blocked state if the team uses one; otherwise leave the state unchanged and add a blocker comment immediately.
-5. When work is complete, move the issue to `Done` only after code, verification, and handoff notes are complete.
-6. When work is complete, add a concise issue comment with:
+5. When implementation is complete but the work is still awaiting review or merge, move the issue to `In Review`.
+6. Move an issue to `Done` only after the work is merged or the user explicitly says to treat it as landed.
+7. When work is complete, add a concise issue comment with:
    - what changed
    - files changed
    - verification run
    - remaining risks or follow-ups
-7. If blocked, comment with the exact blocker and stop.
+8. If blocked, comment with the exact blocker and stop.
 
 ## Done Criteria
 An issue is done only when:
@@ -203,7 +204,7 @@ An issue is done only when:
 2. Required checks were run, or the exact verification gap is documented
 3. The diff stays within issue scope
 4. Any schema or API contract changes are backward-compatible or intentionally documented
-5. The Linear issue state reflects reality (`Done` for completed work, or the appropriate blocked/in-progress state)
+5. The Linear issue state reflects reality (`In Review` for completed but unmerged work, `Done` only for landed work, or the appropriate blocked/in-progress state)
 6. A Linear update or handoff note is ready
 
 ## Escalation Rules
