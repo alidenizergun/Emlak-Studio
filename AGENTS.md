@@ -187,12 +187,15 @@ Likely files:
 ## Linear Workflow
 1. Work from the assigned child issue only.
 2. Respect blockers before starting implementation.
-3. When work is complete, add a concise issue comment with:
+3. When you start active implementation on an assigned issue, move it to `In Progress`.
+4. If implementation is blocked, move the issue to the appropriate blocked state if the team uses one; otherwise leave the state unchanged and add a blocker comment immediately.
+5. When work is complete, move the issue to `Done` only after code, verification, and handoff notes are complete.
+6. When work is complete, add a concise issue comment with:
    - what changed
    - files changed
    - verification run
    - remaining risks or follow-ups
-4. If blocked, comment with the exact blocker and stop.
+7. If blocked, comment with the exact blocker and stop.
 
 ## Done Criteria
 An issue is done only when:
@@ -200,7 +203,8 @@ An issue is done only when:
 2. Required checks were run, or the exact verification gap is documented
 3. The diff stays within issue scope
 4. Any schema or API contract changes are backward-compatible or intentionally documented
-5. A Linear update or handoff note is ready
+5. The Linear issue state reflects reality (`Done` for completed work, or the appropriate blocked/in-progress state)
+6. A Linear update or handoff note is ready
 
 ## Escalation Rules
 Stop and ask before proceeding if:
