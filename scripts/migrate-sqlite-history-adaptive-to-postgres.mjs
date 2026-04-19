@@ -26,14 +26,41 @@ function tableExists(sqlite, table) {
   return Boolean(row?.name);
 }
 
-function readRows(sqlite, table, query) {
+function quoteIdentifier(identifier) {
+  return `"${String(identifier).replaceAll('"', '""')}"`;
+}
+
+function tableColumns(sqlite, table) {
   if (!tableExists(sqlite, table)) {
+    return null;
+  }
+
+  const rows = asRows(sqlite.prepare(`PRAGMA table_info(${quoteIdentifier(table)})`).all());
+  return new Set(rows.map((row) => String(row.name)));
+}
+
+function readRows(sqlite, table, columns) {
+  const existingColumns = tableColumns(sqlite, table);
+  if (!existingColumns) {
     return { exists: false, rows: [] };
   }
 
+  const selectList = columns
+    .map((column) => {
+      const config = typeof column === 'string' ? { name: column } : column;
+      const alias = quoteIdentifier(config.name);
+
+      if (existingColumns.has(config.name)) {
+        return alias;
+      }
+
+      return `${config.fallback ?? 'NULL'} AS ${alias}`;
+    })
+    .join(', ');
+
   return {
     exists: true,
-    rows: asRows(sqlite.prepare(query).all()),
+    rows: asRows(sqlite.prepare(`SELECT ${selectList} FROM ${quoteIdentifier(table)}`).all()),
   };
 }
 
@@ -192,13 +219,18 @@ async function ensureUsers(tx, sqlite, phones) {
   const sqliteUsers = new Map();
 
   if (tableExists(sqlite, 'users')) {
-    const placeholders = phoneList.map(() => '?').join(', ');
-    const rows = asRows(
-      sqlite.prepare(`SELECT phone, email, created_at FROM users WHERE phone IN (${placeholders})`).all(...phoneList)
+    const phoneSet = new Set(phoneList);
+    const { rows } = readRows(
+      sqlite,
+      'users',
+      ['phone', { name: 'email' }, { name: 'created_at' }]
     );
 
     for (const row of rows) {
-      sqliteUsers.set(String(row.phone), row);
+      const phone = String(row.phone || '').trim();
+      if (phoneSet.has(phone)) {
+        sqliteUsers.set(phone, row);
+      }
     }
   }
 
@@ -220,7 +252,11 @@ async function ensureUsers(tx, sqlite, phones) {
 
 async function migrateAdaptivePolicies(tx, sqlite) {
   for (const table of adaptiveTables) {
-    const { exists, rows } = readRows(sqlite, table, `SELECT policy_key, policy_json, updated_at FROM ${table}`);
+    const { exists, rows } = readRows(
+      sqlite,
+      table,
+      ['policy_key', 'policy_json', { name: 'updated_at' }]
+    );
 
     if (!exists) {
       console.log(`${table}: skipped (table not found)`);
@@ -267,43 +303,109 @@ async function main() {
       const { exists: stageRunsExists, rows: stageRows } = readRows(
         sqlite,
         'stage_runs',
-        `SELECT run_id, phone, request_key, room_type, style, prompt_version, status, fail_code,
-                architecture_score, quality_score, before_image_url, after_image_url, used_credits, refunded, created_at
-           FROM stage_runs`
+        [
+          'run_id',
+          'phone',
+          { name: 'request_key', fallback: "''" },
+          { name: 'room_type', fallback: "''" },
+          { name: 'style', fallback: "''" },
+          { name: 'prompt_version', fallback: "''" },
+          { name: 'status', fallback: "'failed'" },
+          { name: 'fail_code' },
+          { name: 'architecture_score' },
+          { name: 'quality_score' },
+          { name: 'before_image_url' },
+          { name: 'after_image_url' },
+          { name: 'used_credits', fallback: '0' },
+          { name: 'refunded', fallback: '0' },
+          { name: 'created_at' },
+        ]
       );
       const { exists: stageFeedbackExists, rows: stageFeedbackRows } = readRows(
         sqlite,
         'stage_feedback',
-        `SELECT id, run_id, phone, verdict, note, created_at FROM stage_feedback`
+        [
+          { name: 'id', fallback: 'rowid' },
+          'run_id',
+          'phone',
+          { name: 'verdict', fallback: "'bad'" },
+          { name: 'note' },
+          { name: 'created_at' },
+        ]
       );
       const { exists: toolRunsExists, rows: toolRows } = readRows(
         sqlite,
         'tool_runs',
-        `SELECT run_id, phone, tool_id, status, before_image_url, after_image_url, title, detail, used_credits, created_at
-           FROM tool_runs`
+        [
+          'run_id',
+          'phone',
+          { name: 'tool_id', fallback: "'unknown'" },
+          { name: 'status', fallback: "'failed'" },
+          { name: 'before_image_url' },
+          { name: 'after_image_url' },
+          { name: 'title' },
+          { name: 'detail' },
+          { name: 'used_credits', fallback: '0' },
+          { name: 'created_at' },
+        ]
       );
       const { exists: aiTourRunsExists, rows: aiTourRows } = readRows(
         sqlite,
         'ai_tour_runs',
-        `SELECT run_id, phone, status, fail_code, quality_score, script_input, script_output, provider, video_url,
-                duration_seconds, used_credits, created_at
-           FROM ai_tour_runs`
+        [
+          'run_id',
+          'phone',
+          { name: 'status', fallback: "'failed'" },
+          { name: 'fail_code' },
+          { name: 'quality_score' },
+          { name: 'script_input' },
+          { name: 'script_output' },
+          { name: 'provider' },
+          { name: 'video_url' },
+          { name: 'duration_seconds' },
+          { name: 'used_credits', fallback: '0' },
+          { name: 'created_at' },
+        ]
       );
       const { exists: aiTourFeedbackExists, rows: aiTourFeedbackRows } = readRows(
         sqlite,
         'ai_tour_feedback',
-        `SELECT id, run_id, phone, verdict, note, created_at FROM ai_tour_feedback`
+        [
+          { name: 'id', fallback: 'rowid' },
+          'run_id',
+          'phone',
+          { name: 'verdict', fallback: "'bad'" },
+          { name: 'note' },
+          { name: 'created_at' },
+        ]
       );
       const { exists: listingTextRunsExists, rows: listingTextRows } = readRows(
         sqlite,
         'listing_text_runs',
-        `SELECT run_id, phone, status, fail_code, quality_score, provider, input_json, output_text, used_credits, created_at
-           FROM listing_text_runs`
+        [
+          'run_id',
+          'phone',
+          { name: 'status', fallback: "'failed'" },
+          { name: 'fail_code' },
+          { name: 'quality_score' },
+          { name: 'provider' },
+          { name: 'input_json' },
+          { name: 'output_text' },
+          { name: 'used_credits', fallback: '0' },
+          { name: 'created_at' },
+        ]
       );
       const { exists: listingTextFeedbackExists, rows: listingTextFeedbackRows } = readRows(
         sqlite,
         'listing_text_feedback',
-        `SELECT id, run_id, phone, verdict, note, created_at FROM listing_text_feedback`
+        [
+          { name: 'id', fallback: 'rowid' },
+          'run_id',
+          'phone',
+          { name: 'verdict', fallback: "'bad'" },
+          { name: 'note' },
+          { name: 'created_at' },
+        ]
       );
 
       const referencedPhones = new Set(
