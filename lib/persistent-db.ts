@@ -134,6 +134,13 @@ export async function ensurePersistentSchema(): Promise<void> {
         )
     `;
     await sql`
+        CREATE TABLE IF NOT EXISTS stage_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
         CREATE TABLE IF NOT EXISTS listing_text_runs (
             run_id TEXT PRIMARY KEY,
             phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
@@ -164,6 +171,23 @@ export async function ensurePersistentSchema(): Promise<void> {
         )
     `;
     await sql`
+        CREATE TABLE IF NOT EXISTS ai_tour_feedback (
+            id BIGSERIAL PRIMARY KEY,
+            run_id TEXT NOT NULL REFERENCES ai_tour_runs(run_id) ON DELETE CASCADE,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            verdict TEXT NOT NULL CHECK (verdict IN ('good', 'bad')),
+            note TEXT,
+            created_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS ai_tour_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
         CREATE TABLE IF NOT EXISTS tool_runs (
             run_id TEXT PRIMARY KEY,
             phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
@@ -177,6 +201,30 @@ export async function ensurePersistentSchema(): Promise<void> {
             created_at BIGINT NOT NULL
         )
     `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS listing_text_feedback (
+            id BIGSERIAL PRIMARY KEY,
+            run_id TEXT NOT NULL REFERENCES listing_text_runs(run_id) ON DELETE CASCADE,
+            phone TEXT NOT NULL REFERENCES users(phone) ON DELETE CASCADE,
+            verdict TEXT NOT NULL CHECK (verdict IN ('good', 'bad')),
+            note TEXT,
+            created_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS listing_text_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at BIGINT NOT NULL
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS tool_adaptive_policy (
+            policy_key TEXT PRIMARY KEY,
+            policy_json TEXT NOT NULL,
+            updated_at BIGINT NOT NULL
+        )
+    `;
     await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone_unique ON users(phone)`;
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`;
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT`;
@@ -188,9 +236,12 @@ export async function ensurePersistentSchema(): Promise<void> {
     await sql`CREATE INDEX IF NOT EXISTS idx_otp_codes_expires_at ON otp_codes(expires_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_mock_payment_phone_created_at ON mock_payment_checkouts(phone, created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_stage_runs_phone_created_at ON stage_runs(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_stage_runs_status_created_at ON stage_runs(status, created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_stage_feedback_run_id ON stage_feedback(run_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_listing_text_runs_phone_created_at ON listing_text_runs(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_listing_text_feedback_run_id ON listing_text_feedback(run_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_ai_tour_runs_phone_created_at ON ai_tour_runs(phone, created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_ai_tour_feedback_run_id ON ai_tour_feedback(run_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tool_runs_phone_created_at ON tool_runs(phone, created_at DESC)`;
 
     globalForDb.persistentSchemaReady = true;

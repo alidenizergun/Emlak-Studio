@@ -22,7 +22,8 @@
     "test:stage-prompt-snapshots": "node --experimental-strip-types scripts/stage-prompt-snapshots.mjs",
     "cap:sync": "npx cap sync ios",
     "cap:add:ios": "npx cap add ios",
-    "cap:open:ios": "npx cap open ios"
+    "cap:open:ios": "npx cap open ios",
+    "migrate:sqlite-history-adaptive": "node scripts/migrate-sqlite-history-adaptive-to-postgres.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
