@@ -30,31 +30,33 @@ export function isStoredAuthed(): boolean {
     return window.localStorage.getItem(AUTH_FLAG_KEY) === '1';
 }
 
-export type AuthSessionState = 'valid' | 'invalid' | 'unknown';
+export type AuthSessionState =
+    | { status: 'valid'; email: string }
+    | { status: 'invalid' }
+    | { status: 'unknown' };
 
-export async function reconcileAuthSessionWithServer(): Promise<AuthSessionState> {
-    if (typeof window === 'undefined') return 'unknown';
+export async function reconcileAuthSessionWithServer(signal?: AbortSignal): Promise<AuthSessionState> {
+    if (typeof window === 'undefined') return { status: 'unknown' };
 
     try {
         const response = await fetch('/api/auth/me', {
             method: 'GET',
             credentials: 'include',
             cache: 'no-store',
+            signal,
         });
         const payload = await response.json().catch(() => ({}));
 
         if (response.ok && payload?.success && typeof payload?.email === 'string' && payload.email) {
-            persistStoredUserId(payload.email);
-            return 'valid';
+            return { status: 'valid', email: payload.email };
         }
 
         if (response.status === 401 || response.status === 403) {
-            clearStoredAuth();
-            return 'invalid';
+            return { status: 'invalid' };
         }
 
-        return 'unknown';
+        return { status: 'unknown' };
     } catch {
-        return 'unknown';
+        return { status: 'unknown' };
     }
 }

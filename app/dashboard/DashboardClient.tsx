@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TOOLS } from '@/app/tools/toolsData';
 import { useI18n } from '@/components/LanguageProvider';
-import { getStoredUserId, isStoredAuthed, reconcileAuthSessionWithServer } from '@/lib/client-auth';
+import {
+    clearStoredAuth,
+    getStoredUserId,
+    isStoredAuthed,
+    persistStoredUserId,
+    reconcileAuthSessionWithServer,
+} from '@/lib/client-auth';
 import styles from './Dashboard.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
@@ -19,6 +25,8 @@ export default function DashboardClient() {
 
         let active = true;
 
+        const authController = new AbortController();
+
         async function bootstrapDashboardAuth() {
             const authed = isStoredAuthed();
             if (!authed) {
@@ -26,11 +34,15 @@ export default function DashboardClient() {
                 return;
             }
 
-            const sessionState = await reconcileAuthSessionWithServer();
+            const sessionState = await reconcileAuthSessionWithServer(authController.signal);
             if (!active) return;
-            if (sessionState === 'invalid') {
+            if (sessionState.status === 'invalid') {
+                clearStoredAuth();
                 router.replace(localizePath('/login', lang));
                 return;
+            }
+            if (sessionState.status === 'valid') {
+                persistStoredUserId(sessionState.email);
             }
 
             const email = getStoredUserId();
@@ -52,6 +64,7 @@ export default function DashboardClient() {
 
         return () => {
             active = false;
+            authController.abort();
         };
     }, [lang, router]);
 
