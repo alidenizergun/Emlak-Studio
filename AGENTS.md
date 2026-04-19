@@ -60,6 +60,24 @@ Branching summary:
 3. child issue branches base on `feat/ios-app-store-billing-migration`
 4. child issue branches merge back into `feat/ios-app-store-billing-migration`
 
+Child issue PR metadata:
+1. Open child issue PRs as drafts unless the user explicitly asks for ready-for-review.
+2. PR base branch must be `feat/ios-app-store-billing-migration`.
+3. PR head branch must be the child issue branch, not a generic branch such as `work`.
+4. Do not use a `[codex]` prefix in child issue PR titles.
+5. Use a conventional PR title with the Linear issue key as a suffix.
+6. Preferred examples:
+   - `fix: remove insecure auth shortcuts (STU-9)`
+   - `feat: add trusted /api/me bootstrap (STU-10)`
+   - `feat: add Capacitor iOS shell baseline (STU-18)`
+7. PR body must include:
+   - `Summary`
+   - `Linear Issue`
+   - `Verification`
+   - `Risks / Follow-ups`
+8. The `Linear Issue` section must link the assigned child issue.
+9. If a PR cannot be created on GitHub, do not claim it exists. Comment in Linear with the exact blocker and leave the issue out of `In Review` until a real PR exists or the user explicitly accepts a patch-only handoff.
+
 Commit format:
 1. Use conventional commit prefixes when they fit the change:
    - `feat`
@@ -197,6 +215,13 @@ Likely files:
    - verification run
    - remaining risks or follow-ups
 8. If blocked, comment with the exact blocker and stop.
+
+Parent issue status:
+1. Do not implement parent issues directly.
+2. When any child issue is `In Progress`, `In Review`, or `Done`, move the parent issue to `In Progress` if it is still in backlog.
+3. When all child issues under a parent are `Done`, move the parent issue to `In Review`.
+4. Move a parent issue to `Done` only after the parent scope is merged/landed or the user explicitly says to treat it as landed.
+5. If a parent issue has active children in mixed states, keep the parent in `In Progress`.
 
 ## Done Criteria
 An issue is done only when:
