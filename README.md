@@ -7,7 +7,7 @@ Emlak profesyonelleri için geliştirilmiş, yapay zeka destekli fotoğraf düze
 Bu projeyi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyin:
 
 ### 1. Gereksinimler
-- [Node.js](https://nodejs.org/) (Sürüm 18 veya üzeri önerilir)
+- [Node.js](https://nodejs.org/) (Sürüm 22 veya üzeri gereklidir)
 
 ### 2. Kurulum
 Terminali açın ve proje klasörüne gidin:
@@ -43,6 +43,35 @@ ADMIN_EMAILS=yonetici@ornek.com,digeradmin@ornek.com
 Not:
 - Development ortamında `ADMIN_EMAILS` tanımlı değilse oturum açmış kullanıcı admin panelini test edebilir.
 - Production ortamında `ADMIN_EMAILS` tanımlamanız önerilir.
+
+
+## 📱 Capacitor iOS Shell
+
+Bu repo, iOS native kabuğu için Capacitor yapılandırmasını içerir.
+
+### Gerekli komutlar
+
+```bash
+npm run cap:sync
+npm run cap:open:ios
+```
+
+Gerektiğinde native kabuğu sifirdan yeniden uretmek icin:
+
+```bash
+npm run cap:add:ios
+```
+
+### Sunucu URL davranışı
+
+`capacitor.config.ts`, varsayılan olarak `https://emlak-studio.vercel.app` adresini native WebView içinde açar.
+Gerekirse ortam bazında aşağıdaki değişkenle override edin:
+
+```bash
+CAPACITOR_SERVER_URL=https://your-env.example.com
+```
+
+`NEXT_PUBLIC_SITE_URL` tanimliysa Capacitor onu da fallback olarak kullanir. `ios/` altinda commit edilen baseline Xcode projesi bulunur. `capacitor-shell/` ise hosted WebView kurulumu ve hata fallback'i icin gerekli minimal local bundle'i saglar.
 
 ## ✨ Özellikler
 
