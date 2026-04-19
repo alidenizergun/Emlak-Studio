@@ -219,9 +219,10 @@ Likely files:
 Parent issue status:
 1. Do not implement parent issues directly.
 2. When any child issue is `In Progress`, `In Review`, or `Done`, move the parent issue to `In Progress` if it is still in backlog.
-3. When all child issues under a parent are `Done`, move the parent issue to `In Review`.
-4. Move a parent issue to `Done` only after the parent scope is merged/landed or the user explicitly says to treat it as landed.
-5. If a parent issue has active children in mixed states, keep the parent in `In Progress`.
+3. The agent or owner moving the last remaining child issue to `Done` is responsible for moving the parent issue to `In Review`.
+4. Before moving the parent to `In Review`, confirm every child issue under that parent is `Done`.
+5. Move a parent issue to `Done` only after the parent scope is merged/landed or the user explicitly says to treat it as landed.
+6. If a parent issue has active children in mixed states, keep the parent in `In Progress`.
 
 ## Done Criteria
 An issue is done only when:
