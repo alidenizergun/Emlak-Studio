@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "npm run dev:stable",
     "dev:stable": "rm -rf .next && WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=80 next dev --hostname 0.0.0.0 --port 3000 --webpack",
@@ -39,7 +42,7 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

@@ -7,7 +7,7 @@ Emlak profesyonelleri için geliştirilmiş, yapay zeka destekli fotoğraf düze
 Bu projeyi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyin:
 
 ### 1. Gereksinimler
-- [Node.js](https://nodejs.org/) (Sürüm 18 veya üzeri önerilir)
+- [Node.js](https://nodejs.org/) (Sürüm 22 veya üzeri gereklidir)
 
 ### 2. Kurulum
 Terminali açın ve proje klasörüne gidin:
