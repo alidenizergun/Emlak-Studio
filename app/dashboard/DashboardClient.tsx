@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TOOLS } from '@/app/tools/toolsData';
 import { useI18n } from '@/components/LanguageProvider';
-import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
+import { getStoredUserId, isStoredAuthed, reconcileAuthSessionWithServer } from '@/lib/client-auth';
 import styles from './Dashboard.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
@@ -16,16 +16,30 @@ export default function DashboardClient() {
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const authed = isStoredAuthed();
-        if (!authed) {
-            router.replace(localizePath('/login', lang));
-            return;
-        }
-        const email = getStoredUserId();
-        if (email) {
+
+        let active = true;
+
+        async function bootstrapDashboardAuth() {
+            const authed = isStoredAuthed();
+            if (!authed) {
+                router.replace(localizePath('/login', lang));
+                return;
+            }
+
+            const sessionState = await reconcileAuthSessionWithServer();
+            if (!active) return;
+            if (sessionState === 'invalid') {
+                router.replace(localizePath('/login', lang));
+                return;
+            }
+
+            const email = getStoredUserId();
+            if (!email) return;
+
             fetch(`/api/credits?email=${encodeURIComponent(email)}`)
                 .then((res) => res.json())
                 .then((data) => {
+                    if (!active) return;
                     if (data.success && typeof data.credits === 'number') {
                         setCredits(data.credits);
                         window.localStorage.setItem('emlak_credits', String(data.credits));
@@ -33,6 +47,12 @@ export default function DashboardClient() {
                 })
                 .catch(() => {});
         }
+
+        void bootstrapDashboardAuth();
+
+        return () => {
+            active = false;
+        };
     }, [lang, router]);
 
     return (
