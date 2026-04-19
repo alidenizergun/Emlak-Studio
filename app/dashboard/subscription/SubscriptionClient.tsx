@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
+import {
+    clearStoredAuth,
+    getStoredUserId,
+    isStoredAuthed,
+    persistStoredUserId,
+    reconcileAuthSessionWithServer,
+} from '@/lib/client-auth';
 import styles from './Subscription.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
@@ -46,34 +52,65 @@ export default function SubscriptionClient() {
         setMounted(true);
         if (typeof window === 'undefined') return;
 
-        const authed = isStoredAuthed();
-        if (!authed) {
-            router.replace(localizePath('/login', lang));
-            return;
+        let active = true;
+
+        const authController = new AbortController();
+
+        async function bootstrapSubscriptionAuth() {
+            const authed = isStoredAuthed();
+            if (!authed) {
+                router.replace(localizePath('/login', lang));
+                return;
+            }
+
+            const sessionState = await reconcileAuthSessionWithServer(authController.signal);
+            if (!active) return;
+            if (sessionState.status === 'invalid') {
+                clearStoredAuth();
+                router.replace(localizePath('/login', lang));
+                return;
+            }
+            if (sessionState.status === 'valid') {
+                persistStoredUserId(sessionState.email);
+            }
+
+            const currentAccountId = getStoredUserId();
+            if (!currentAccountId) {
+                setError('Hesap bilgisi bulunamadi.');
+                setLoading(false);
+                return;
+            }
+
+            setAccountId(currentAccountId);
+
+            fetch(`/api/subscription?email=${encodeURIComponent(currentAccountId)}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (!active) return;
+                    if (!data.success) {
+                        setError(data.error || 'Paket bilgileri alinamadi.');
+                        return;
+                    }
+                    setSubscription(data.subscription || null);
+                    setCredits(typeof data.credits === 'number' ? data.credits : 0);
+                    setUsedCredits(typeof data.usedCredits === 'number' ? data.usedCredits : 0);
+                })
+                .catch(() => {
+                    if (!active) return;
+                    setError('Paket bilgileri alinamadi.');
+                })
+                .finally(() => {
+                    if (!active) return;
+                    setLoading(false);
+                });
         }
 
-        const currentAccountId = getStoredUserId();
-        if (!currentAccountId) {
-            setError('Hesap bilgisi bulunamadi.');
-            setLoading(false);
-            return;
-        }
+        void bootstrapSubscriptionAuth();
 
-        setAccountId(currentAccountId);
-
-        fetch(`/api/subscription?email=${encodeURIComponent(currentAccountId)}`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (!data.success) {
-                    setError(data.error || 'Paket bilgileri alinamadi.');
-                    return;
-                }
-                setSubscription(data.subscription || null);
-                setCredits(typeof data.credits === 'number' ? data.credits : 0);
-                setUsedCredits(typeof data.usedCredits === 'number' ? data.usedCredits : 0);
-            })
-            .catch(() => setError('Paket bilgileri alinamadi.'))
-            .finally(() => setLoading(false));
+        return () => {
+            active = false;
+            authController.abort();
+        };
     }, [lang, router]);
 
     const statusText = useMemo(() => {

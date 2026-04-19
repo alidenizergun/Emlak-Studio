@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TOOLS } from '@/app/tools/toolsData';
 import { useI18n } from '@/components/LanguageProvider';
-import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
+import {
+    clearStoredAuth,
+    getStoredUserId,
+    isStoredAuthed,
+    persistStoredUserId,
+    reconcileAuthSessionWithServer,
+} from '@/lib/client-auth';
 import styles from './Dashboard.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
@@ -16,16 +22,36 @@ export default function DashboardClient() {
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const authed = isStoredAuthed();
-        if (!authed) {
-            router.replace(localizePath('/login', lang));
-            return;
-        }
-        const email = getStoredUserId();
-        if (email) {
+
+        let active = true;
+
+        const authController = new AbortController();
+
+        async function bootstrapDashboardAuth() {
+            const authed = isStoredAuthed();
+            if (!authed) {
+                router.replace(localizePath('/login', lang));
+                return;
+            }
+
+            const sessionState = await reconcileAuthSessionWithServer(authController.signal);
+            if (!active) return;
+            if (sessionState.status === 'invalid') {
+                clearStoredAuth();
+                router.replace(localizePath('/login', lang));
+                return;
+            }
+            if (sessionState.status === 'valid') {
+                persistStoredUserId(sessionState.email);
+            }
+
+            const email = getStoredUserId();
+            if (!email) return;
+
             fetch(`/api/credits?email=${encodeURIComponent(email)}`)
                 .then((res) => res.json())
                 .then((data) => {
+                    if (!active) return;
                     if (data.success && typeof data.credits === 'number') {
                         setCredits(data.credits);
                         window.localStorage.setItem('emlak_credits', String(data.credits));
@@ -33,6 +59,13 @@ export default function DashboardClient() {
                 })
                 .catch(() => {});
         }
+
+        void bootstrapDashboardAuth();
+
+        return () => {
+            active = false;
+            authController.abort();
+        };
     }, [lang, router]);
 
     return (
