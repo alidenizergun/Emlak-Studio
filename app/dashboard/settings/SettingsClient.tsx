@@ -2,7 +2,13 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getStoredUserId, isStoredAuthed } from '@/lib/client-auth';
+import {
+    clearStoredAuth,
+    getStoredUserId,
+    isStoredAuthed,
+    persistStoredUserId,
+    reconcileAuthSessionWithServer,
+} from '@/lib/client-auth';
 import styles from '../Dashboard.module.css';
 import LocalizedLink from '@/components/LocalizedLink';
 import { localizePath } from '@/lib/locale-routing';
@@ -74,34 +80,56 @@ export default function SettingsClient() {
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const authed = isStoredAuthed();
-        if (!authed) {
-            if (!redirectDone.current) {
-                redirectDone.current = true;
-                router.replace(localizePath('/login', lang));
+
+        let active = true;
+
+        const authController = new AbortController();
+
+        async function bootstrapSettingsAuth() {
+            const authed = isStoredAuthed();
+            if (!authed) {
+                if (!redirectDone.current) {
+                    redirectDone.current = true;
+                    router.replace(localizePath('/login', lang));
+                }
+                return;
             }
-            return;
+
+            const sessionState = await reconcileAuthSessionWithServer(authController.signal);
+            if (!active) return;
+            if (sessionState.status === 'invalid') {
+                clearStoredAuth();
+                if (!redirectDone.current) {
+                    redirectDone.current = true;
+                    router.replace(localizePath('/login', lang));
+                }
+                return;
+            }
+            if (sessionState.status === 'valid') {
+                persistStoredUserId(sessionState.email);
+            }
+
+            const identity = getStoredUserId();
+            const storedFullName = window.localStorage.getItem('emlak_profile_full_name') || '';
+            const storedOfficeName = window.localStorage.getItem('emlak_profile_office_name') || '';
+            const storedEmail = window.localStorage.getItem('emlak_profile_email') || '';
+            const bonusKey = identity ? `emlak_profile_bonus_awarded_${identity}` : '';
+            const bonusAlreadyAwarded = identity ? window.localStorage.getItem(bonusKey) === '1' : false;
+            setIdentityDisplay(identity ? maskIdentity(identity) : '—');
+            setAccountId(identity || '');
+            setFullName(storedFullName);
+            setOfficeName(storedOfficeName);
+            setEmail(storedEmail);
+            setShowProfileBonusHint(!bonusAlreadyAwarded);
+            setMounted(true);
         }
-        const identity = getStoredUserId();
-        const storedFullName = window.localStorage.getItem('emlak_profile_full_name') || '';
-        const storedOfficeName = window.localStorage.getItem('emlak_profile_office_name') || '';
-        const storedEmail = window.localStorage.getItem('emlak_profile_email') || '';
-        const bonusKey = identity ? `emlak_profile_bonus_awarded_${identity}` : '';
-        const bonusAlreadyAwarded = identity ? window.localStorage.getItem(bonusKey) === '1' : false;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setIdentityDisplay(identity ? maskIdentity(identity) : '—');
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setAccountId(identity || '');
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setFullName(storedFullName);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setOfficeName(storedOfficeName);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setEmail(storedEmail);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setShowProfileBonusHint(!bonusAlreadyAwarded);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setMounted(true);
+
+        void bootstrapSettingsAuth();
+
+        return () => {
+            active = false;
+            authController.abort();
+        };
     }, [lang, router]);
 
     useEffect(() => {
