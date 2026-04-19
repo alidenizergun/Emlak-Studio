@@ -41,6 +41,7 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'veya': { en: 'or' },
     'Google ile devam et': { en: 'Continue with Google' },
     'Apple ile devam et': { en: 'Continue with Apple' },
+    'Apple ile devam et (iOS uygulamasi)': { en: 'Continue with Apple (iOS app)' },
     'Google ile yönlendiriliyor...': { en: 'Redirecting to Google...' },
     'Apple ile yönlendiriliyor...': { en: 'Redirecting to Apple...' },
     'Sosyal giriş şu an yapılandırılmamış. Lütfen Supabase Google ve Apple ayarlarını tamamlayın.': {
@@ -62,6 +63,7 @@ const TEXT_CATALOG: Record<string, TranslationRecord> = {
     'ilan metni oluşturucu': { en: 'listing copy generator', es: 'generador de textos para anuncios' },
     'sanal tadilat': { en: 'virtual renovation', es: 'renovación virtual' },
     'Fiyatlandırma': { en: 'Pricing', es: 'Precios' },
+    'App Store ile devam et': { en: 'Continue with App Store' },
     'Giriş Yap': { en: 'Log In', es: 'Iniciar sesión' },
     'Çıkış Yap': { en: 'Log Out', es: 'Cerrar sesión' },
     'Ücretsiz Deneyin': { en: 'Try for Free', es: 'Pruébalo Gratis' },
