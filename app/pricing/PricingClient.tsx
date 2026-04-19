@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from '../../components/Pricing.module.css';
 import { useI18n } from '@/components/LanguageProvider';
+import { getPricingCtaHref, getRuntimeFeatureGates } from '@/lib/runtime-env';
+import { useRuntimeSnapshot } from '@/lib/use-runtime-env';
 
 const PRICING_TIERS = [
     {
@@ -80,6 +82,8 @@ const CheckIcon = () => (
 export default function PricingClient() {
     const { t } = useI18n();
     const [isYearly, setIsYearly] = useState(false);
+    const runtime = useRuntimeSnapshot();
+    const runtimeGates = useMemo(() => getRuntimeFeatureGates(runtime), [runtime]);
 
     return (
         <div className={styles.pricingPage}>
@@ -139,8 +143,8 @@ export default function PricingClient() {
                                     <span className={styles.discountLabel}>{t('Ilk gorusmede netlestirilir')}</span>
                                 </div>
 
-                                <Link href={`/contact?plan=${encodeURIComponent(tier.id)}`} className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}>
-                                    {t(tier.cta)}
+                                <Link href={getPricingCtaHref(runtime, tier.id)} className={`${styles.ctaButton} ${tier.popular ? styles.popularCta : styles.secondaryCta}`}>
+                                    {runtimeGates.useIOSNativePurchases ? t('App Store ile devam et') : t(tier.cta)}
                                 </Link>
 
                                 <div className={styles.features}>

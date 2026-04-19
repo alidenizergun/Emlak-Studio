@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useI18n } from '@/components/LanguageProvider';
 import { localizePath } from '@/lib/locale-routing';
 import { getSupabaseBrowserClient, isSupabaseBrowserConfigured } from '@/lib/supabase-browser';
+import { getRuntimeFeatureGates } from '@/lib/runtime-env';
+import { useRuntimeSnapshot } from '@/lib/use-runtime-env';
 
 type Provider = 'google' | 'apple';
 
@@ -52,6 +54,8 @@ export default function AuthSocialButtons({
 }: AuthSocialButtonsProps) {
     const { t, lang } = useI18n();
     const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
+    const runtime = useRuntimeSnapshot();
+    const runtimeGates = useMemo(() => getRuntimeFeatureGates(runtime), [runtime]);
 
     const startSocialLogin = async (provider: Provider) => {
         if (!isSupabaseBrowserConfigured()) {
@@ -96,19 +100,21 @@ export default function AuthSocialButtons({
                 <span className={dividerLineClassName} aria-hidden="true" />
             </div>
             <div className={stackClassName}>
-                <button
-                    type="button"
-                    className={buttonClassName}
-                    onClick={() => startSocialLogin('google')}
-                    disabled={loadingProvider !== null}
-                >
-                    <span className={iconClassName}><GoogleIcon /></span>
-                    <span>
-                        {loadingProvider === 'google'
-                            ? t('Google ile yönlendiriliyor...')
-                            : t('Google ile devam et')}
-                    </span>
-                </button>
+                {runtimeGates.hideGoogleAuthOnIOSNative ? null : (
+                    <button
+                        type="button"
+                        className={buttonClassName}
+                        onClick={() => startSocialLogin('google')}
+                        disabled={loadingProvider !== null}
+                    >
+                        <span className={iconClassName}><GoogleIcon /></span>
+                        <span>
+                            {loadingProvider === 'google'
+                                ? t('Google ile yönlendiriliyor...')
+                                : t('Google ile devam et')}
+                        </span>
+                    </button>
+                )}
                 <button
                     type="button"
                     className={buttonClassName}
@@ -119,7 +125,9 @@ export default function AuthSocialButtons({
                     <span>
                         {loadingProvider === 'apple'
                             ? t('Apple ile yönlendiriliyor...')
-                            : t('Apple ile devam et')}
+                            : runtimeGates.useIOSNativeAuth
+                                ? t('Apple ile devam et (iOS uygulamasi)')
+                                : t('Apple ile devam et')}
                     </span>
                 </button>
             </div>
