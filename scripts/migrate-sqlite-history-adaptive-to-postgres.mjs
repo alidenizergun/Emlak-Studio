@@ -278,12 +278,6 @@ async function migrateAdaptivePolicies(tx, sqlite) {
   }
 }
 
-async function resetSequence(tx, table) {
-  await tx.unsafe(
-    `SELECT setval(pg_get_serial_sequence('${table}', 'id'), COALESCE((SELECT MAX(id) FROM ${table}), 0) + 1, false)`
-  );
-}
-
 async function main() {
   const databaseUrl = String(process.env.DATABASE_URL || '').trim();
   if (!databaseUrl) {
@@ -464,21 +458,23 @@ async function main() {
         console.log('stage_feedback: skipped (table not found)');
       } else {
         for (const row of stageFeedbackRows) {
+          const note = row.note ? String(row.note) : null;
+          const createdAt = Number(row.created_at ?? Date.now());
+
           await tx`
-            INSERT INTO stage_feedback (id, run_id, phone, verdict, note, created_at)
-            VALUES (
-              ${Number(row.id)}, ${String(row.run_id)}, ${String(row.phone)}, ${String(row.verdict)},
-              ${row.note ? String(row.note) : null}, ${Number(row.created_at ?? Date.now())}
+            INSERT INTO stage_feedback (run_id, phone, verdict, note, created_at)
+            SELECT ${String(row.run_id)}, ${String(row.phone)}, ${String(row.verdict)}, ${note}, ${createdAt}
+            WHERE NOT EXISTS (
+              SELECT 1
+              FROM stage_feedback
+              WHERE run_id = ${String(row.run_id)}
+                AND phone = ${String(row.phone)}
+                AND verdict = ${String(row.verdict)}
+                AND note IS NOT DISTINCT FROM ${note}
+                AND created_at = ${createdAt}
             )
-            ON CONFLICT (id) DO UPDATE SET
-              run_id = EXCLUDED.run_id,
-              phone = EXCLUDED.phone,
-              verdict = EXCLUDED.verdict,
-              note = EXCLUDED.note,
-              created_at = EXCLUDED.created_at
           `;
         }
-        await resetSequence(tx, 'stage_feedback');
         console.log(`stage_feedback: ${stageFeedbackRows.length} row(s) migrated`);
       }
 
@@ -548,21 +544,23 @@ async function main() {
         console.log('ai_tour_feedback: skipped (table not found)');
       } else {
         for (const row of aiTourFeedbackRows) {
+          const note = row.note ? String(row.note) : null;
+          const createdAt = Number(row.created_at ?? Date.now());
+
           await tx`
-            INSERT INTO ai_tour_feedback (id, run_id, phone, verdict, note, created_at)
-            VALUES (
-              ${Number(row.id)}, ${String(row.run_id)}, ${String(row.phone)}, ${String(row.verdict)},
-              ${row.note ? String(row.note) : null}, ${Number(row.created_at ?? Date.now())}
+            INSERT INTO ai_tour_feedback (run_id, phone, verdict, note, created_at)
+            SELECT ${String(row.run_id)}, ${String(row.phone)}, ${String(row.verdict)}, ${note}, ${createdAt}
+            WHERE NOT EXISTS (
+              SELECT 1
+              FROM ai_tour_feedback
+              WHERE run_id = ${String(row.run_id)}
+                AND phone = ${String(row.phone)}
+                AND verdict = ${String(row.verdict)}
+                AND note IS NOT DISTINCT FROM ${note}
+                AND created_at = ${createdAt}
             )
-            ON CONFLICT (id) DO UPDATE SET
-              run_id = EXCLUDED.run_id,
-              phone = EXCLUDED.phone,
-              verdict = EXCLUDED.verdict,
-              note = EXCLUDED.note,
-              created_at = EXCLUDED.created_at
           `;
         }
-        await resetSequence(tx, 'ai_tour_feedback');
         console.log(`ai_tour_feedback: ${aiTourFeedbackRows.length} row(s) migrated`);
       }
 
@@ -598,21 +596,23 @@ async function main() {
         console.log('listing_text_feedback: skipped (table not found)');
       } else {
         for (const row of listingTextFeedbackRows) {
+          const note = row.note ? String(row.note) : null;
+          const createdAt = Number(row.created_at ?? Date.now());
+
           await tx`
-            INSERT INTO listing_text_feedback (id, run_id, phone, verdict, note, created_at)
-            VALUES (
-              ${Number(row.id)}, ${String(row.run_id)}, ${String(row.phone)}, ${String(row.verdict)},
-              ${row.note ? String(row.note) : null}, ${Number(row.created_at ?? Date.now())}
+            INSERT INTO listing_text_feedback (run_id, phone, verdict, note, created_at)
+            SELECT ${String(row.run_id)}, ${String(row.phone)}, ${String(row.verdict)}, ${note}, ${createdAt}
+            WHERE NOT EXISTS (
+              SELECT 1
+              FROM listing_text_feedback
+              WHERE run_id = ${String(row.run_id)}
+                AND phone = ${String(row.phone)}
+                AND verdict = ${String(row.verdict)}
+                AND note IS NOT DISTINCT FROM ${note}
+                AND created_at = ${createdAt}
             )
-            ON CONFLICT (id) DO UPDATE SET
-              run_id = EXCLUDED.run_id,
-              phone = EXCLUDED.phone,
-              verdict = EXCLUDED.verdict,
-              note = EXCLUDED.note,
-              created_at = EXCLUDED.created_at
           `;
         }
-        await resetSequence(tx, 'listing_text_feedback');
         console.log(`listing_text_feedback: ${listingTextFeedbackRows.length} row(s) migrated`);
       }
 
