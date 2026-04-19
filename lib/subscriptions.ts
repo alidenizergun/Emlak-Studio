@@ -19,6 +19,18 @@ export interface SubscriptionInfo {
     nextBillingDate: string;
     cancelledAt?: string;
     lastUsedCredits?: number;
+    entitlementStatus?: 'active' | 'grace_period' | 'billing_retry' | 'paused' | 'expired' | 'revoked';
+    entitlementSource?: 'legacy' | 'app_store' | 'revenuecat';
+    providerCustomerId?: string;
+    providerSubscriptionId?: string;
+    entitlementId?: string;
+    productId?: string;
+    originalTransactionId?: string;
+    billingEnvironment?: 'sandbox' | 'production';
+    autoRenews?: boolean;
+    currentPeriodStart?: string;
+    currentPeriodEnd?: string;
+    entitlementUpdatedAt?: string;
 }
 
 function addOneMonthIso(date: Date): string {
@@ -51,6 +63,18 @@ function mapSubscriptionRow(row: Record<string, unknown>): SubscriptionInfo {
         nextBillingDate: String(row.next_billing_date),
         cancelledAt: row.cancelled_at ? String(row.cancelled_at) : undefined,
         lastUsedCredits: typeof row.last_used_credits === 'number' ? Number(row.last_used_credits) : undefined,
+        entitlementStatus: row.entitlement_status ? String(row.entitlement_status) as SubscriptionInfo['entitlementStatus'] : undefined,
+        entitlementSource: row.entitlement_source ? String(row.entitlement_source) as SubscriptionInfo['entitlementSource'] : undefined,
+        providerCustomerId: row.provider_customer_id ? String(row.provider_customer_id) : undefined,
+        providerSubscriptionId: row.provider_subscription_id ? String(row.provider_subscription_id) : undefined,
+        entitlementId: row.entitlement_id ? String(row.entitlement_id) : undefined,
+        productId: row.product_id ? String(row.product_id) : undefined,
+        originalTransactionId: row.original_transaction_id ? String(row.original_transaction_id) : undefined,
+        billingEnvironment: row.billing_environment ? String(row.billing_environment) as SubscriptionInfo['billingEnvironment'] : undefined,
+        autoRenews: typeof row.auto_renews === 'number' ? row.auto_renews === 1 : (typeof row.auto_renews === 'boolean' ? row.auto_renews : undefined),
+        currentPeriodStart: row.current_period_start ? String(row.current_period_start) : undefined,
+        currentPeriodEnd: row.current_period_end ? String(row.current_period_end) : undefined,
+        entitlementUpdatedAt: row.entitlement_updated_at ? String(row.entitlement_updated_at) : undefined,
     };
 }
 

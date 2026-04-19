@@ -73,7 +73,37 @@ export async function ensurePersistentSchema(): Promise<void> {
             start_date TEXT NOT NULL,
             next_billing_date TEXT NOT NULL,
             cancelled_at TEXT,
-            last_used_credits INTEGER
+            last_used_credits INTEGER,
+            entitlement_status TEXT CHECK (entitlement_status IN ('active', 'grace_period', 'billing_retry', 'paused', 'expired', 'revoked')),
+            entitlement_source TEXT CHECK (entitlement_source IN ('legacy', 'app_store', 'revenuecat')),
+            provider_customer_id TEXT,
+            provider_subscription_id TEXT,
+            entitlement_id TEXT,
+            product_id TEXT,
+            original_transaction_id TEXT,
+            billing_environment TEXT CHECK (billing_environment IN ('sandbox', 'production')),
+            auto_renews BOOLEAN,
+            current_period_start TEXT,
+            current_period_end TEXT,
+            entitlement_updated_at TEXT
+        )
+    `;
+    await sql`
+        CREATE TABLE IF NOT EXISTS billing_events (
+            id BIGSERIAL PRIMARY KEY,
+            provider TEXT NOT NULL CHECK (provider IN ('app_store', 'revenuecat')),
+            event_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            phone TEXT REFERENCES users(phone) ON DELETE SET NULL,
+            provider_customer_id TEXT,
+            provider_subscription_id TEXT,
+            idempotency_key TEXT,
+            occurred_at TEXT,
+            received_at BIGINT NOT NULL,
+            processing_state TEXT NOT NULL DEFAULT 'pending' CHECK (processing_state IN ('pending', 'processed', 'failed')),
+            processed_at BIGINT,
+            error_message TEXT,
+            payload_json JSONB NOT NULL
         )
     `;
     await sql`
@@ -192,6 +222,22 @@ export async function ensurePersistentSchema(): Promise<void> {
     await sql`CREATE INDEX IF NOT EXISTS idx_listing_text_runs_phone_created_at ON listing_text_runs(phone, created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_ai_tour_runs_phone_created_at ON ai_tour_runs(phone, created_at DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tool_runs_phone_created_at ON tool_runs(phone, created_at DESC)`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS entitlement_status TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS entitlement_source TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS provider_customer_id TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS provider_subscription_id TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS entitlement_id TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS product_id TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS original_transaction_id TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS billing_environment TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS auto_renews BOOLEAN`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS current_period_start TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS current_period_end TEXT`;
+    await sql`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS entitlement_updated_at TEXT`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_subscriptions_provider_subscription_id ON subscriptions(provider_subscription_id)`;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_provider_event ON billing_events(provider, event_id)`;
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_idempotency_key ON billing_events(idempotency_key) WHERE idempotency_key IS NOT NULL`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_billing_events_state_received ON billing_events(processing_state, received_at DESC)`;
 
     globalForDb.persistentSchemaReady = true;
 }

@@ -76,7 +76,36 @@ function initDb(db: Database.Database): void {
             start_date TEXT NOT NULL,
             next_billing_date TEXT NOT NULL,
             cancelled_at TEXT,
-            last_used_credits INTEGER
+            last_used_credits INTEGER,
+            entitlement_status TEXT CHECK(entitlement_status IN ('active', 'grace_period', 'billing_retry', 'paused', 'expired', 'revoked')),
+            entitlement_source TEXT CHECK(entitlement_source IN ('legacy', 'app_store', 'revenuecat')),
+            provider_customer_id TEXT,
+            provider_subscription_id TEXT,
+            entitlement_id TEXT,
+            product_id TEXT,
+            original_transaction_id TEXT,
+            billing_environment TEXT CHECK(billing_environment IN ('sandbox', 'production')),
+            auto_renews INTEGER CHECK(auto_renews IN (0, 1)),
+            current_period_start TEXT,
+            current_period_end TEXT,
+            entitlement_updated_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS billing_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            provider TEXT NOT NULL CHECK(provider IN ('app_store', 'revenuecat')),
+            event_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            phone TEXT REFERENCES users(phone) ON DELETE SET NULL,
+            provider_customer_id TEXT,
+            provider_subscription_id TEXT,
+            idempotency_key TEXT,
+            occurred_at TEXT,
+            received_at INTEGER NOT NULL,
+            processing_state TEXT NOT NULL DEFAULT 'pending' CHECK(processing_state IN ('pending', 'processed', 'failed')),
+            processed_at INTEGER,
+            error_message TEXT,
+            payload_json TEXT NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS otp_codes (
@@ -241,6 +270,9 @@ function initDb(db: Database.Database): void {
         CREATE INDEX IF NOT EXISTS idx_listing_text_runs_phone_created_at ON listing_text_runs(phone, created_at DESC);
         CREATE INDEX IF NOT EXISTS idx_listing_text_feedback_run_id ON listing_text_feedback(run_id);
         CREATE INDEX IF NOT EXISTS idx_tool_runs_phone_created_at ON tool_runs(phone, created_at DESC);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_provider_event ON billing_events(provider, event_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_idempotency_key ON billing_events(idempotency_key) WHERE idempotency_key IS NOT NULL;
+        CREATE INDEX IF NOT EXISTS idx_billing_events_state_received ON billing_events(processing_state, received_at DESC);
     `);
 
     // Lightweight migrations for existing local databases.
@@ -284,6 +316,70 @@ function initDb(db: Database.Database): void {
     } catch {
         // ignore (already exists)
     }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN entitlement_status TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN entitlement_source TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN provider_customer_id TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN provider_subscription_id TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN entitlement_id TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN product_id TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN original_transaction_id TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN billing_environment TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN auto_renews INTEGER`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN current_period_start TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN current_period_end TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    try {
+        db.exec(`ALTER TABLE subscriptions ADD COLUMN entitlement_updated_at TEXT`);
+    } catch {
+        // ignore (already exists)
+    }
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_subscriptions_provider_subscription_id ON subscriptions(provider_subscription_id)`);
+    db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_provider_event ON billing_events(provider, event_id)`);
+    db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_billing_events_idempotency_key ON billing_events(idempotency_key) WHERE idempotency_key IS NOT NULL`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_billing_events_state_received ON billing_events(processing_state, received_at DESC)`);
 }
 
 export function getDb(): Database.Database {
